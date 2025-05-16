@@ -52,10 +52,16 @@ void renderer::Renderer::Impl::poll_events()
 {
     glfwPollEvents();
 }
+
 void renderer::Renderer::Impl::render()
 {
+    // Simple clear color.
+    glViewport(0, 0, m_window_dims.width, m_window_dims.height);
+    glClearColor(0.063f, 0.129f, 0.063f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
     render_imgui();
-    
+
     glfwSwapBuffers(reinterpret_cast<GLFWwindow*>(m_window_handle));
 }
 
@@ -250,7 +256,6 @@ void renderer::Renderer::Impl::render_imgui()
     // @NOCHECKIN: @TEMP
     static bool show_demo_window = true;
     static ImGuiIO& io = ImGui::GetIO();
-    static ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     // Start the Dear ImGui frame
     ImGui_ImplOpenGL3_NewFrame();
@@ -270,7 +275,6 @@ void renderer::Renderer::Impl::render_imgui()
         ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
 
         ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-        ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
 
         if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
             counter++;
@@ -283,9 +287,6 @@ void renderer::Renderer::Impl::render_imgui()
 
     // Rendering.
     ImGui::Render();
-    glViewport(0, 0, m_window_dims.width, m_window_dims.height);
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     // Update and Render additional Platform Windows.
