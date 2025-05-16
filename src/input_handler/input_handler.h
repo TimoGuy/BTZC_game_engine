@@ -17,7 +17,6 @@ public:
     void clear_look_delta();
     void clear_ui_scroll_delta();
 
-
     struct State
     {
         struct Toggle { bool val{ false }; };
@@ -60,6 +59,8 @@ public:
         Toggle le_lshift_mod;
         Toggle le_lctrl_mod;
     };
+
+    inline State const& get_input_state() { return m_state; }
 
 private:
     State m_state;

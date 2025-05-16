@@ -31,10 +31,105 @@ using std::vector;
 namespace
 {
 
+// Helper pointers for GLFW callbacks.
 GLFWwindow* s_main_window{ nullptr };
 BT::Renderer::Impl* s_main_renderer{ nullptr };
 
+// GLFW window callbacks.
+static void key_callback(GLFWwindow* window,
+                         int32_t key,
+                         int32_t scancode,
+                         int32_t action,
+                         int32_t mods)
+{
+    assert(window == s_main_window);
+    switch (action)
+    {
+    case GLFW_PRESS:
+    case GLFW_RELEASE:
+        s_main_renderer->get_input_handler().report_keyboard_input_change(
+            key,
+            (action == GLFW_PRESS ? true : false));
+        break;
+    }
 }
+
+static void mouse_button_callback(GLFWwindow* window,
+                                  int32_t button,
+                                  int32_t action,
+                                  int32_t mods)
+{
+    assert(window == s_main_window);
+    switch (action)
+    {
+    case GLFW_PRESS:
+    case GLFW_RELEASE:
+        s_main_renderer->get_input_handler().report_mouse_button_input_change(
+            button,
+            (action == GLFW_PRESS ? true : false));
+        break;
+    }
+}
+
+static void cursor_position_callback(GLFWwindow* window,
+                                     double_t xpos,
+                                     double_t ypos)
+{
+    assert(window == s_main_window);
+    s_main_renderer->get_input_handler().report_mouse_position_change(xpos, ypos);
+}
+
+static void scroll_callback(GLFWwindow* window,
+                            double_t xoffset,
+                            double_t yoffset)
+{
+    assert(window == s_main_window);
+    s_main_renderer->get_input_handler().report_mouse_scroll_input_change(xoffset, yoffset);
+}
+
+static void window_focus_callback(GLFWwindow* window,
+                                  int32_t focused)
+{
+    assert(window == s_main_window);
+    if (focused == GLFW_TRUE || focused == GLFW_FALSE)
+    {
+        s_main_renderer->set_window_focused(focused == GLFW_TRUE);
+    }
+    else
+    {
+        // Invalid state.
+        assert(false);
+    }
+}
+
+static void window_iconify_callback(GLFWwindow* window,
+                                    int32_t iconified)
+{
+    assert(window == s_main_window);
+    if (iconified == GLFW_TRUE || iconified == GLFW_FALSE)
+    {
+        s_main_renderer->set_window_iconified(iconified == GLFW_TRUE);
+    }
+    else
+    {
+        // Invalid state.
+        assert(false);
+    }
+}
+
+static void window_resize_callback(GLFWwindow* window,
+                                   int32_t width,
+                                   int32_t height)
+{
+    assert(window == s_main_window);
+    if (width > 0 && height > 0)
+    {
+        s_main_renderer->set_window_dims(width, height);
+    }
+}
+
+}  // namespace
+
 
 BT::Renderer::Impl::Impl(Input_handler& input_handler, string const& title)
     : m_input_handler{ input_handler }
@@ -172,104 +267,6 @@ void BT::Renderer::Impl::calc_ideal_standard_window_dim_and_apply_center_hints()
     glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 }
 
-// GLFW window callbacks.
-namespace bt_glfw_window_callbacks
-{
-
-static void key_callback(GLFWwindow* window,
-                         int32_t key,
-                         int32_t scancode,
-                         int32_t action,
-                         int32_t mods)
-{
-    assert(window == s_main_window);
-    switch (action)
-    {
-    case GLFW_PRESS:
-    case GLFW_RELEASE:
-        s_main_renderer->get_input_handler().report_keyboard_input_change(
-            key,
-            (action == GLFW_PRESS ? true : false));
-        break;
-    }
-}
-
-static void mouse_button_callback(GLFWwindow* window,
-                                  int32_t button,
-                                  int32_t action,
-                                  int32_t mods)
-{
-    assert(window == s_main_window);
-    switch (action)
-    {
-    case GLFW_PRESS:
-    case GLFW_RELEASE:
-        s_main_renderer->get_input_handler().report_mouse_button_input_change(
-            button,
-            (action == GLFW_PRESS ? true : false));
-        break;
-    }
-}
-
-static void cursor_position_callback(GLFWwindow* window,
-                                     double_t xpos,
-                                     double_t ypos)
-{
-    assert(window == s_main_window);
-    s_main_renderer->get_input_handler().report_mouse_position_change(xpos, ypos);
-}
-
-static void scroll_callback(GLFWwindow* window,
-                            double_t xoffset,
-                            double_t yoffset)
-{
-    assert(window == s_main_window);
-    s_main_renderer->get_input_handler().report_mouse_scroll_input_change(xoffset, yoffset);
-}
-
-static void window_focus_callback(GLFWwindow* window,
-                                  int32_t focused)
-{
-    assert(window == s_main_window);
-    if (focused == GLFW_TRUE || focused == GLFW_FALSE)
-    {
-        s_main_renderer->set_window_focused(focused == GLFW_TRUE);
-    }
-    else
-    {
-        // Invalid state.
-        assert(false);
-    }
-}
-
-static void window_iconify_callback(GLFWwindow* window,
-                                    int32_t iconified)
-{
-    assert(window == s_main_window);
-    if (iconified == GLFW_TRUE || iconified == GLFW_FALSE)
-    {
-        s_main_renderer->set_window_iconified(iconified == GLFW_TRUE);
-    }
-    else
-    {
-        // Invalid state.
-        assert(false);
-    }
-}
-
-static void window_resize_callback(GLFWwindow* window,
-                                   int32_t width,
-                                   int32_t height)
-{
-    assert(window == s_main_window);
-    if (width > 0 && height > 0)
-    {
-        s_main_renderer->set_window_dims(width, height);
-    }
-}
-
-}  // namespace bt_glfw_window_callbacks
-
 void BT::Renderer::Impl::create_window_with_gfx_context(string const& title)
 {
     stringstream full_title_str;
@@ -291,13 +288,13 @@ void BT::Renderer::Impl::create_window_with_gfx_context(string const& title)
     // @NOTE: With key callbacks etc that's also used by Imgui, Imgui
     //   chains these callbacks so they don't get lost.
     auto win_handle{ reinterpret_cast<GLFWwindow*>(m_window_handle) };
-    glfwSetKeyCallback(win_handle, bt_glfw_window_callbacks::key_callback);
-    glfwSetMouseButtonCallback(win_handle, bt_glfw_window_callbacks::mouse_button_callback);
-    glfwSetCursorPosCallback(win_handle, bt_glfw_window_callbacks::cursor_position_callback);
-    glfwSetScrollCallback(win_handle, bt_glfw_window_callbacks::scroll_callback);
-    glfwSetWindowFocusCallback(win_handle, bt_glfw_window_callbacks::window_focus_callback);
-    glfwSetWindowIconifyCallback(win_handle, bt_glfw_window_callbacks::window_iconify_callback);
-    glfwSetWindowSizeCallback(win_handle, bt_glfw_window_callbacks::window_resize_callback);
+    glfwSetKeyCallback(win_handle, key_callback);
+    glfwSetMouseButtonCallback(win_handle, mouse_button_callback);
+    glfwSetCursorPosCallback(win_handle, cursor_position_callback);
+    glfwSetScrollCallback(win_handle, scroll_callback);
+    glfwSetWindowFocusCallback(win_handle, window_focus_callback);
+    glfwSetWindowIconifyCallback(win_handle, window_iconify_callback);
+    glfwSetWindowSizeCallback(win_handle, window_resize_callback);
 
     // Config and load OpenGL context.
     glfwMakeContextCurrent(win_handle);
