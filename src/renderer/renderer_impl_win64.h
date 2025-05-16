@@ -24,9 +24,9 @@ public:
 
     inline Input_handler& get_input_handler() { return m_input_handler; }
 
-    void set_window_focused(bool focused);
-    void set_window_iconified(bool iconified);
-    void set_window_dims(int32_t width, int32_t height);
+    void submit_window_focused(bool focused);
+    void submit_window_iconified(bool iconified);
+    void submit_window_dims(int32_t width, int32_t height);
 
 private:
     void setup_glfw_and_opengl46_hints();
@@ -36,6 +36,8 @@ private:
         int32_t width;
         int32_t height;
     } m_window_dims;
+    bool m_window_focused{ true };
+    bool m_window_iconified{ false };
 
     void calc_ideal_standard_window_dim_and_apply_center_hints();
 

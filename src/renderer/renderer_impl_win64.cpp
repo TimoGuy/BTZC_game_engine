@@ -93,7 +93,7 @@ static void window_focus_callback(GLFWwindow* window,
     assert(window == s_main_window);
     if (focused == GLFW_TRUE || focused == GLFW_FALSE)
     {
-        s_main_renderer->set_window_focused(focused == GLFW_TRUE);
+        s_main_renderer->submit_window_focused(focused == GLFW_TRUE);
     }
     else
     {
@@ -108,7 +108,7 @@ static void window_iconify_callback(GLFWwindow* window,
     assert(window == s_main_window);
     if (iconified == GLFW_TRUE || iconified == GLFW_FALSE)
     {
-        s_main_renderer->set_window_iconified(iconified == GLFW_TRUE);
+        s_main_renderer->submit_window_iconified(iconified == GLFW_TRUE);
     }
     else
     {
@@ -124,7 +124,7 @@ static void window_resize_callback(GLFWwindow* window,
     assert(window == s_main_window);
     if (width > 0 && height > 0)
     {
-        s_main_renderer->set_window_dims(width, height);
+        s_main_renderer->submit_window_dims(width, height);
     }
 }
 
@@ -187,7 +187,17 @@ void BT::Renderer::Impl::render()
     glfwSwapBuffers(reinterpret_cast<GLFWwindow*>(m_window_handle));
 }
 
-void BT::Renderer::Impl::set_window_dims(int32_t width, int32_t height)
+void BT::Renderer::Impl::submit_window_focused(bool focused)
+{
+    m_window_focused = focused;
+}
+
+void BT::Renderer::Impl::submit_window_iconified(bool iconified)
+{
+    m_window_iconified = iconified;
+}
+
+void BT::Renderer::Impl::submit_window_dims(int32_t width, int32_t height)
 {
     m_window_dims.width = width;
     m_window_dims.height = height;
@@ -250,7 +260,7 @@ void BT::Renderer::Impl::calc_ideal_standard_window_dim_and_apply_center_hints()
 
     assert(ideal_std_win_dim.width > 0 &&
            ideal_std_win_dim.height > 0);
-    set_window_dims(ideal_std_win_dim.width, ideal_std_win_dim.height);
+    submit_window_dims(ideal_std_win_dim.width, ideal_std_win_dim.height);
 
     // Apply centering hints.
     int32_t centered_window_pos[2]{
@@ -341,6 +351,23 @@ void BT::Renderer::Impl::render_imgui()
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
+
+    // Main menu bar.
+    if (ImGui::BeginMainMenuBar())
+    {
+        if (ImGui::BeginMenu("Menu"))
+        {
+            if (ImGui::MenuItem("New")) {}
+            ImGui::EndMenu();
+        }
+
+        ImGui::EndMainMenuBar();
+    }
+
+    // Main dockspace.
+    ImGui::DockSpaceOverViewport(0,
+                                 ImGui::GetMainViewport(),
+                                 ImGuiDockNodeFlags_PassthruCentralNode);
 
     // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
     if (show_demo_window)
