@@ -37,6 +37,9 @@ add_subdirectory(third_party/JoltPhysics/Build)
 
 # Executable build.
 add_executable(${PROJECT_NAME}
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/input_handler/input_codes.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/input_handler/input_handler.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/input_handler/input_handler.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/renderer_impl_win64.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/renderer_impl_win64.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/renderer.cpp

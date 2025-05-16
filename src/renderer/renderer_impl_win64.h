@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../input_handler/input_handler.h"
+#include "cglm/cglm.h"
 #include "renderer.h"
 #include <cstdint>
 #include <string>
@@ -7,22 +9,26 @@
 using std::string;
 
 
-namespace renderer
+namespace BT
 {
 
 class Renderer::Impl
 {
 public:
-    Impl(string const& title);
+    Impl(Input_handler& input_handler, string const& title);
     ~Impl();
 
     bool get_requesting_close();
     void poll_events();
     void render();
 
-private:
-    bool m_created;
+    inline Input_handler& get_input_handler() { return m_input_handler; }
 
+    void set_window_focused(bool focused);
+    void set_window_iconified(bool iconified);
+    void set_window_dims(int32_t width, int32_t height);
+
+private:
     void setup_glfw_and_opengl46_hints();
     
     struct Window_dimensions
@@ -33,13 +39,30 @@ private:
 
     void calc_ideal_standard_window_dim_and_apply_center_hints();
 
-    void* m_window_handle{ nullptr };
+    inline static void* m_window_handle{ nullptr };
+    Input_handler& m_input_handler;
 
     void create_window_with_gfx_context(string const& title);
 
     void setup_imgui();
     void render_imgui();
+
+    // 3D camera.
+    struct Camera
+    {
+        float_t fov;
+        float_t aspect_ratio;
+        float_t z_near;
+        float_t z_far;
+        vec3 position{ 0.0f, 0.0f, 0.0f };
+        vec3 view_direction{ 0.0f, 0.0f, 1.0f };
+    } m_camera;
+
+    void setup_3d_camera();
+    void calc_3d_aspect_ratio();
+
+    void calc_camera_matrices(mat4& out_projection, mat4& out_view, mat4& out_projection_view);
 };
 
-}  // namespace renderer
+}  // namespace BT
 

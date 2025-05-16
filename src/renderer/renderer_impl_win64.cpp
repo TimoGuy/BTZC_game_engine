@@ -11,29 +11,54 @@
 ////////////////////////////////////////
 
 #include "../btzc_game_engine.h"
+#include "../input_handler/input_handler.h"
+#include "cglm/cglm.h"
 #include "renderer.h"
 
 #include <cassert>
+#include <mutex>
 #include <sstream>
 #include <string>
 #include <vector>
 
+using std::mutex;
+using std::lock_guard;
 using std::string;
 using std::stringstream;
 using std::vector;
 
 
-renderer::Renderer::Impl::Impl(string const& title)
+namespace
 {
+
+GLFWwindow* s_main_window{ nullptr };
+BT::Renderer::Impl* s_main_renderer{ nullptr };
+
+}
+
+BT::Renderer::Impl::Impl(Input_handler& input_handler, string const& title)
+    : m_input_handler{ input_handler }
+{
+    static mutex s_renderer_creation_mutex;
+    lock_guard lock{ s_renderer_creation_mutex };
+
+    static bool s_created{ false };
+    assert(!s_created);
+
     setup_glfw_and_opengl46_hints();
 
     calc_ideal_standard_window_dim_and_apply_center_hints();
     create_window_with_gfx_context(title);
 
     setup_imgui();
+
+    s_main_window = reinterpret_cast<GLFWwindow*>(m_window_handle);
+    s_main_renderer = this;
+
+    s_created = true;
 }
 
-renderer::Renderer::Impl::~Impl()
+BT::Renderer::Impl::~Impl()
 {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
@@ -43,29 +68,38 @@ renderer::Renderer::Impl::~Impl()
     glfwTerminate();
 }
 
-bool renderer::Renderer::Impl::get_requesting_close()
+bool BT::Renderer::Impl::get_requesting_close()
 {
     return glfwWindowShouldClose(reinterpret_cast<GLFWwindow*>(m_window_handle));
 }
 
-void renderer::Renderer::Impl::poll_events()
+void BT::Renderer::Impl::poll_events()
 {
     glfwPollEvents();
 }
 
-void renderer::Renderer::Impl::render()
+void BT::Renderer::Impl::render()
 {
     // Simple clear color.
     glViewport(0, 0, m_window_dims.width, m_window_dims.height);
     glClearColor(0.063f, 0.129f, 0.063f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
+    // @TODO: Rendering stuff here.
+
     render_imgui();
 
     glfwSwapBuffers(reinterpret_cast<GLFWwindow*>(m_window_handle));
 }
 
-void renderer::Renderer::Impl::setup_glfw_and_opengl46_hints()
+void BT::Renderer::Impl::set_window_dims(int32_t width, int32_t height)
+{
+    m_window_dims.width = width;
+    m_window_dims.height = height;
+    calc_3d_aspect_ratio();
+}
+
+void BT::Renderer::Impl::setup_glfw_and_opengl46_hints()
 {
     // Init glfw and create main window.
     auto result = glfwInit();
@@ -81,7 +115,7 @@ void renderer::Renderer::Impl::setup_glfw_and_opengl46_hints()
 #endif
 }
 
-void renderer::Renderer::Impl::calc_ideal_standard_window_dim_and_apply_center_hints()
+void BT::Renderer::Impl::calc_ideal_standard_window_dim_and_apply_center_hints()
 {
     static vector<Window_dimensions> const k_standard_window_dims{
         { 3840, 2160 },
@@ -121,7 +155,7 @@ void renderer::Renderer::Impl::calc_ideal_standard_window_dim_and_apply_center_h
 
     assert(ideal_std_win_dim.width > 0 &&
            ideal_std_win_dim.height > 0);
-    m_window_dims = ideal_std_win_dim;
+    set_window_dims(ideal_std_win_dim.width, ideal_std_win_dim.height);
 
     // Apply centering hints.
     int32_t centered_window_pos[2]{
@@ -148,6 +182,16 @@ static void key_callback(GLFWwindow* window,
                          int32_t action,
                          int32_t mods)
 {
+    assert(window == s_main_window);
+    switch (action)
+    {
+    case GLFW_PRESS:
+    case GLFW_RELEASE:
+        s_main_renderer->get_input_handler().report_keyboard_input_change(
+            key,
+            (action == GLFW_PRESS ? true : false));
+        break;
+    }
 }
 
 static void mouse_button_callback(GLFWwindow* window,
@@ -155,39 +199,78 @@ static void mouse_button_callback(GLFWwindow* window,
                                   int32_t action,
                                   int32_t mods)
 {
+    assert(window == s_main_window);
+    switch (action)
+    {
+    case GLFW_PRESS:
+    case GLFW_RELEASE:
+        s_main_renderer->get_input_handler().report_mouse_button_input_change(
+            button,
+            (action == GLFW_PRESS ? true : false));
+        break;
+    }
 }
 
 static void cursor_position_callback(GLFWwindow* window,
                                      double_t xpos,
                                      double_t ypos)
 {
+    assert(window == s_main_window);
+    s_main_renderer->get_input_handler().report_mouse_position_change(xpos, ypos);
 }
 
 static void scroll_callback(GLFWwindow* window,
                             double_t xoffset,
                             double_t yoffset)
 {
+    assert(window == s_main_window);
+    s_main_renderer->get_input_handler().report_mouse_scroll_input_change(xoffset, yoffset);
 }
 
 static void window_focus_callback(GLFWwindow* window,
                                   int32_t focused)
 {
+    assert(window == s_main_window);
+    if (focused == GLFW_TRUE || focused == GLFW_FALSE)
+    {
+        s_main_renderer->set_window_focused(focused == GLFW_TRUE);
+    }
+    else
+    {
+        // Invalid state.
+        assert(false);
+    }
 }
 
 static void window_iconify_callback(GLFWwindow* window,
                                     int32_t iconified)
 {
+    assert(window == s_main_window);
+    if (iconified == GLFW_TRUE || iconified == GLFW_FALSE)
+    {
+        s_main_renderer->set_window_iconified(iconified == GLFW_TRUE);
+    }
+    else
+    {
+        // Invalid state.
+        assert(false);
+    }
 }
 
 static void window_resize_callback(GLFWwindow* window,
                                    int32_t width,
                                    int32_t height)
 {
+    assert(window == s_main_window);
+    if (width > 0 && height > 0)
+    {
+        s_main_renderer->set_window_dims(width, height);
+    }
 }
 
 }  // namespace bt_glfw_window_callbacks
 
-void renderer::Renderer::Impl::create_window_with_gfx_context(string const& title)
+void BT::Renderer::Impl::create_window_with_gfx_context(string const& title)
 {
     stringstream full_title_str;
     full_title_str
@@ -223,7 +306,7 @@ void renderer::Renderer::Impl::create_window_with_gfx_context(string const& titl
     gladLoadGL();
 }
 
-void renderer::Renderer::Impl::setup_imgui()
+void BT::Renderer::Impl::setup_imgui()
 {
     // Setup Dear ImGui context.
     IMGUI_CHECKVERSION();
@@ -251,7 +334,7 @@ void renderer::Renderer::Impl::setup_imgui()
     ImGui_ImplOpenGL3_Init("#version 130");
 }
 
-void renderer::Renderer::Impl::render_imgui()
+void BT::Renderer::Impl::render_imgui()
 {
     // @NOCHECKIN: @TEMP
     static bool show_demo_window = true;
@@ -300,4 +383,53 @@ void renderer::Renderer::Impl::render_imgui()
         ImGui::RenderPlatformWindowsDefault();
         glfwMakeContextCurrent(backup_current_context);
     }
+}
+
+// 3D camera.
+void BT::Renderer::Impl::setup_3d_camera()
+{
+    m_camera = {
+        glm_rad(90.0f),
+        static_cast<float_t>(0xCAFEBABE),  // Dummy value.
+        0.1f,
+        500.0f,
+    };
+    calc_3d_aspect_ratio();
+}
+
+void BT::Renderer::Impl::calc_3d_aspect_ratio()
+{
+    m_camera.aspect_ratio =
+        static_cast<float_t>(m_window_dims.width)
+            / static_cast<float_t>(m_window_dims.height);
+}
+
+void BT::Renderer::Impl::calc_camera_matrices(mat4& out_projection, mat4& out_view, mat4& out_projection_view)
+{
+    // Calculate projection matrix.
+    glm_perspective(m_camera.fov,
+                    m_camera.aspect_ratio,
+                    m_camera.z_near,
+                    m_camera.z_far,
+                    out_projection);
+    // out_projection[1][1] *= -1.0f;  // @NOTE: Vulkan only.
+
+    // Calculate view matrix.
+    using std::abs;
+    vec3 up{ 0.0f, 1.0f, 0.0f };
+    if (abs(m_camera.view_direction[0]) < 1e-6f &&
+        abs(m_camera.view_direction[1]) > 1e-6f &&
+        abs(m_camera.view_direction[2]) < 1e-6f)
+    {
+        glm_vec3_copy(vec3{ 0.0f, 0.0f, 1.0f }, up);
+    }
+
+    vec3 center;
+    glm_vec3_add(m_camera.position, m_camera.view_direction, center);
+    glm_lookat(m_camera.position, center, up, out_view);
+
+    // Calculate projection view matrix.
+    glm_mat4_mul(out_projection,
+                 out_view,
+                 out_projection_view);
 }

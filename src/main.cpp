@@ -1,3 +1,4 @@
+#include "input_handler/input_handler.h"
 #include "renderer/renderer.h"
 
 #include <cstdint>
@@ -8,7 +9,9 @@ int32_t main()
 {
     fmt::println("Hello, {}", "Bootiful Warld!");
 
-    renderer::Renderer main_renderer{ "Untitled Zelda-like Collectathon Game" };
+    BT::Input_handler main_input_handler;
+    BT::Renderer main_renderer{ main_input_handler,
+                                "Untitled Zelda-like Collectathon Game" };
 
     // Main loop.
     while (!main_renderer.get_requesting_close())

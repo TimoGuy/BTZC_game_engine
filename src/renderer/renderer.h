@@ -1,19 +1,20 @@
 #pragma once
 
+#include "../input_handler/input_handler.h"
 #include <memory>
 #include <string>
 
 using std::string;
 
 
-namespace renderer
+namespace BT
 {
 
 class Renderer
 {
 public:
     // Setup and teardown renderer.
-    Renderer(string const& title);
+    Renderer(Input_handler& input_handler, string const& title);
     ~Renderer();
 
     bool get_requesting_close();
@@ -34,10 +35,10 @@ public:
 
     // Create image texture.
 
+    class Impl;
 
 private:
-    class Impl;
     std::unique_ptr<Impl> m_pimpl;
 };
 
-}  // namespace renderer
+}  // namespace BT
