@@ -36,6 +36,7 @@ private:
         int32_t width;
         int32_t height;
     } m_window_dims;
+    bool m_window_dims_changed{ false };
     bool m_window_focused{ true };
     bool m_window_iconified{ false };
 
@@ -46,6 +47,7 @@ private:
 
     void create_window_with_gfx_context(string const& title);
 
+    // ImGui.
     void setup_imgui();
     void render_imgui();
 
@@ -64,6 +66,21 @@ private:
     void calc_3d_aspect_ratio();
 
     void calc_camera_matrices(mat4& out_projection, mat4& out_view, mat4& out_projection_view);
+
+    // Display rendering.
+    void begin_new_display_frame();
+    void render_hdr_color_to_display_frame();
+
+    // HDR rendering.
+    uint32_t m_hdr_fbo{ 0 };
+    uint32_t m_hdr_color_texture{ 0 };
+    uint32_t m_hdr_depth_rbo{ 0 };
+    void create_hdr_fbo();
+    void render_scene_to_hdr_framebuffer();
+
+    // Helper functions.
+    void render_ndc_cube();
+    void render_ndc_quad();
 };
 
 }  // namespace BT

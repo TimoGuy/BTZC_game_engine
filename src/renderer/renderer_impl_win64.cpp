@@ -1,5 +1,6 @@
 #include "renderer_impl_win64.h"
 
+#include "fmt/base.h"
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
@@ -146,6 +147,8 @@ BT::Renderer::Impl::Impl(Input_handler& input_handler, string const& title)
     create_window_with_gfx_context(title);
 
     setup_imgui();
+    calc_3d_aspect_ratio();
+    create_hdr_fbo();
 
     s_main_window = reinterpret_cast<GLFWwindow*>(m_window_handle);
     s_main_renderer = this;
@@ -175,13 +178,18 @@ void BT::Renderer::Impl::poll_events()
 
 void BT::Renderer::Impl::render()
 {
-    // Simple clear color.
-    glViewport(0, 0, m_window_dims.width, m_window_dims.height);
-    glClearColor(0.063f, 0.129f, 0.063f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    if (m_window_dims_changed)
+    {
+        // Recreate window dimension-dependent resources.
+        calc_3d_aspect_ratio();
+        create_hdr_fbo();
+        m_window_dims_changed = false;
+    }
 
-    // @TODO: Rendering stuff here.
-
+    // Render new frame.
+    begin_new_display_frame();
+    render_scene_to_hdr_framebuffer();
+    render_hdr_color_to_display_frame();
     render_imgui();
 
     glfwSwapBuffers(reinterpret_cast<GLFWwindow*>(m_window_handle));
@@ -201,7 +209,7 @@ void BT::Renderer::Impl::submit_window_dims(int32_t width, int32_t height)
 {
     m_window_dims.width = width;
     m_window_dims.height = height;
-    calc_3d_aspect_ratio();
+    m_window_dims_changed = true;
 }
 
 void BT::Renderer::Impl::setup_glfw_and_opengl46_hints()
@@ -311,8 +319,10 @@ void BT::Renderer::Impl::create_window_with_gfx_context(string const& title)
     glfwSwapInterval(1);  // Vsync on.
 
     gladLoadGL();
+    glEnable(GL_DEPTH_TEST);
 }
 
+// ImGui.
 void BT::Renderer::Impl::setup_imgui()
 {
     // Setup Dear ImGui context.
@@ -376,7 +386,7 @@ void BT::Renderer::Impl::render_imgui()
     // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
     ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
     {
-        static float f = 0.0f;
+        static float_t f = 0.0f;
         static int counter = 0;
 
         ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
@@ -456,4 +466,240 @@ void BT::Renderer::Impl::calc_camera_matrices(mat4& out_projection, mat4& out_vi
     glm_mat4_mul(out_projection,
                  out_view,
                  out_projection_view);
+}
+
+// Display rendering.
+void BT::Renderer::Impl::begin_new_display_frame()
+{
+    // Configure main render target.
+    glViewport(0, 0, m_window_dims.width, m_window_dims.height);
+    glClearColor(0.063f, 0.129f, 0.063f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void BT::Renderer::Impl::render_hdr_color_to_display_frame()
+{
+    // Render hdr framebuffer to main render target.
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // Use tonemapping shader.
+    // @TODO
+
+    render_ndc_quad();
+}
+
+// HDR rendering.
+void BT::Renderer::Impl::create_hdr_fbo()
+{
+    if (m_hdr_fbo != 0 || m_hdr_color_texture != 0 || m_hdr_depth_rbo != 0)
+    {
+        // Double check that everything is fully created prior to deleting to recreate.
+        assert(m_hdr_fbo != 0 && m_hdr_color_texture != 0 && m_hdr_depth_rbo != 0);
+
+        // Delete to recreate.
+        glDeleteFramebuffers(1, &m_hdr_fbo);
+        glDeleteTextures(1, &m_hdr_color_texture);
+        glDeleteRenderbuffers(1, &m_hdr_depth_rbo);
+    }
+
+    // Create color texture.
+    glGenTextures(1, &m_hdr_color_texture);
+    glBindTexture(GL_TEXTURE_2D, m_hdr_color_texture);
+    glTexImage2D(GL_TEXTURE_2D,
+                 0,
+                 GL_RGBA16F,
+                 m_window_dims.width,
+                 m_window_dims.height,
+                 0,
+                 GL_RGBA,
+                 GL_FLOAT,
+                 nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // Create depth renderbuffer.
+    glGenRenderbuffers(1, &m_hdr_depth_rbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, m_hdr_depth_rbo);
+    glRenderbufferStorage(GL_RENDERBUFFER,
+                          GL_DEPTH_COMPONENT,
+                          m_window_dims.width,
+                          m_window_dims.height);
+
+    // Create framebuffer.
+    glGenFramebuffers(1, &m_hdr_fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, m_hdr_fbo);
+    glFramebufferTexture2D(GL_FRAMEBUFFER,
+                           GL_COLOR_ATTACHMENT0,
+                           GL_TEXTURE_2D,
+                           m_hdr_color_texture,
+                           0);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER,
+                              GL_DEPTH_ATTACHMENT,
+                              GL_RENDERBUFFER,
+                              m_hdr_depth_rbo);
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+    {
+        fmt::println("ERROR: Framebuffer incomplete.");
+        assert(false);
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void BT::Renderer::Impl::render_scene_to_hdr_framebuffer()
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, m_hdr_fbo);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // Calc camera.
+    mat4 projection;
+    mat4 view;
+    mat4 projection_view;
+    calc_camera_matrices(projection, view, projection_view);
+
+    // Use rendering shader.
+    // @TODO.
+
+    // Render scene.
+    // @TODO.
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+// Helper functions.
+void BT::Renderer::Impl::render_ndc_cube()
+{
+    static uint32_t vao{ 0 };
+    static uint32_t vbo{ 0 };
+
+    if (vao == 0)
+    {
+        // Init mesh.
+        float_t vertices[]{
+            // back face
+            -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
+             1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // top-right
+             1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f, // bottom-right         
+             1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // top-right
+            -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
+            -1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f, // top-left
+            // front face
+            -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // bottom-left
+             1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f, // bottom-right
+             1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // top-right
+             1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // top-right
+            -1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f, // top-left
+            -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // bottom-left
+            // left face
+            -1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-right
+            -1.0f,  1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // top-left
+            -1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-left
+            -1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-left
+            -1.0f, -1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // bottom-right
+            -1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-right
+            // right face
+             1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-left
+             1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-right
+             1.0f,  1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // top-right         
+             1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-right
+             1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-left
+             1.0f, -1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // bottom-left     
+            // bottom face
+            -1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // top-right
+             1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 1.0f, // top-left
+             1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, // bottom-left
+             1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, // bottom-left
+            -1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f, // bottom-right
+            -1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // top-right
+            // top face
+            -1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f, // top-left
+             1.0f,  1.0f , 1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // bottom-right
+             1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f, // top-right     
+             1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // bottom-right
+            -1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f, // top-left
+            -1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f  // bottom-left        
+        };
+
+        glGenVertexArrays(1, &vao);
+        glGenBuffers(1, &vbo);
+
+        // Fill buffer.
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+        // Link vertex attributes.
+        glBindVertexArray(vao);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0,
+                              3,
+                              GL_FLOAT,
+                              GL_FALSE,
+                              8 * sizeof(float_t),
+                              reinterpret_cast<void*>(0));
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1,
+                              3,
+                              GL_FLOAT,
+                              GL_FALSE,
+                              8 * sizeof(float_t),
+                              reinterpret_cast<void*>(3 * sizeof(float_t)));
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(2,
+                              2,
+                              GL_FLOAT,
+                              GL_FALSE,
+                              8 * sizeof(float_t),
+                              reinterpret_cast<void*>(6 * sizeof(float_t)));
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+    }
+
+    // Render cube.
+    glBindVertexArray(vao);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+    glBindVertexArray(0);
+}
+
+void BT::Renderer::Impl::render_ndc_quad()
+{
+    static uint32_t vao{ 0 };
+    static uint32_t vbo{ 0 };
+
+    if (vao == 0)
+    {
+        // Init mesh.
+        float_t vertices[]{
+            // positions        // texture Coords
+            -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+            -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+             1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+             1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+        };
+
+        // Setup plane VAO.
+        glGenVertexArrays(1, &vao);
+        glGenBuffers(1, &vbo);
+        glBindVertexArray(vao);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0,
+                              3,
+                              GL_FLOAT,
+                              GL_FALSE,
+                              5 * sizeof(float_t),
+                              reinterpret_cast<void*>(0));
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1,
+                              2,
+                              GL_FLOAT,
+                              GL_FALSE,
+                              5 * sizeof(float_t),
+                              reinterpret_cast<void*>(3 * sizeof(float_t)));
+    }
+
+    // Render quad.
+    glBindVertexArray(vao);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glBindVertexArray(0);
 }

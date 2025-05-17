@@ -95,6 +95,7 @@ void BT::Input_handler::report_mouse_button_input_change(int32_t button_code, bo
 
 void BT::Input_handler::report_mouse_position_change(float_t x, float_t y)
 {
+    // @HARDCODE.
     // Use ui_cursor_pos as prev state.
     m_state.look_delta.x.val += (x - m_state.ui_cursor_pos.x.val);
     m_state.look_delta.y.val += (y - m_state.ui_cursor_pos.y.val);
@@ -105,6 +106,7 @@ void BT::Input_handler::report_mouse_position_change(float_t x, float_t y)
 
 void BT::Input_handler::report_mouse_scroll_input_change(float_t dx, float_t dy)
 {
+    // @HARDCODE.
     (void)dx;
     m_state.ui_scroll_delta.val += dy;
 }
