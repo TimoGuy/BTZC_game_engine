@@ -28,7 +28,8 @@ set(DEPENDENCY_INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glad/include
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glfw/include
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/imgui  # Header only.
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/JoltPhysics)
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/JoltPhysics
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/tinyobjloader)
 
 add_subdirectory(third_party/fastgltf)
 add_subdirectory(third_party/fmt)
@@ -70,7 +71,11 @@ add_executable(${PROJECT_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/imgui/imstb_textedit.h
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/imgui/imstb_truetype.h
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/imgui/misc/cpp/imgui_stdlib.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/imgui/misc/cpp/imgui_stdlib.h)
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/imgui/misc/cpp/imgui_stdlib.h
+    
+    # Tinyobjloader source files.
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/tinyobjloader/tiny_obj_loader.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/tinyobjloader/tiny_obj_loader.h)
 
 target_include_directories(${PROJECT_NAME}
     PRIVATE
