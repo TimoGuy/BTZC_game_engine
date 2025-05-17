@@ -70,6 +70,7 @@ private:
     // Display rendering.
     void begin_new_display_frame();
     void render_hdr_color_to_display_frame();
+    void present_display_frame();
 
     // HDR rendering.
     uint32_t m_hdr_fbo{ 0 };

@@ -192,7 +192,7 @@ void BT::Renderer::Impl::render()
     render_hdr_color_to_display_frame();
     render_imgui();
 
-    glfwSwapBuffers(reinterpret_cast<GLFWwindow*>(m_window_handle));
+    present_display_frame();
 }
 
 void BT::Renderer::Impl::submit_window_focused(bool focused)
@@ -486,6 +486,11 @@ void BT::Renderer::Impl::render_hdr_color_to_display_frame()
     // @TODO
 
     render_ndc_quad();
+}
+
+void BT::Renderer::Impl::present_display_frame()
+{
+    glfwSwapBuffers(reinterpret_cast<GLFWwindow*>(m_window_handle));
 }
 
 // HDR rendering.
