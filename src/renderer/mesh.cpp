@@ -57,6 +57,9 @@ void BT::Mesh::load_obj_as_mesh(string const& fname)
         assert(false);
     }
 
+    // Find AABB.
+    
+
     // @TODO: Continue this.
     assert(false);
 }
