@@ -1,5 +1,10 @@
 #include "mesh.h"
 
+// @NOTE: Must be imported in this order
+#include "glad/glad.h"
+#include "GLFW/glfw3.h"
+////////////////////////////////////////
+
 #include "cglm/vec3-ext.h"
 #include "cglm/vec3.h"
 #include "material.h"
@@ -28,17 +33,17 @@ void BT::AA_bounding_box::feed_position(vec3 position)
     glm_vec3_maxv(max, position, max);
 }
 
-BT::Mesh::Mesh(vector<Vertex>&& vertices, vector<uint32_t>&& indices, string const& material_name)
-    : m_vertices(std::move(vertices))
-    , m_indices(std::move(indices))
+BT::Mesh::Mesh(vector<uint32_t>&& indices, string const& material_name)
+    : m_indices(std::move(indices))
 {
     m_material = Material_bank::get_material(material_name);
     assert(m_material != nullptr);
 
-    // Calculate AABB.
-    m_mesh_aabb.reset();
-    for (auto& vertex : m_vertices)
-        m_mesh_aabb.feed_position(vertex.position);
+    // @UNUSED.
+    // // Calculate AABB.
+    // m_mesh_aabb.reset();
+    // for (auto& vertex : m_vertices)
+    //     m_mesh_aabb.feed_position(vertex.position);
 
     // @TODO: Put opengl here.
     assert(false);
@@ -52,8 +57,14 @@ BT::Mesh::~Mesh()
 
 void BT::Mesh::render_mesh(mat4 transform)
 {
-    // @TODO: Put Opengl here.
-    assert(false);
+    // @NOTE: All meshes share vertices, so they are stored and bound at the model level.
+    // @TODO: @CHECK: Perhaps this method will mess with driver stuff. We'll see.
+    // @TODO: @CHECK: I think that the element array buffer should be included here. idk.
+    m_material->bind_material(transform);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_mesh_index_ebo);
+    glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, reinterpret_cast<void*>(0));
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    m_material->unbind_material();
 }
 
 BT::Model::Model(string const& fname)
@@ -63,10 +74,15 @@ BT::Model::Model(string const& fname)
 
 void BT::Model::render_model(mat4 transform)
 {
+    // @NOTE: All meshes share the same vertices, just use different indices.
+    glBindVertexArray(m_model_vertex_vao);
+
     for (auto& mesh : m_meshes)
     {
         mesh.render_mesh(transform);
     }
+
+    glBindVertexArray(0);
 }
 
 void BT::Model::load_obj_as_meshes(string const& fname)

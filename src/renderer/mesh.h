@@ -31,17 +31,18 @@ struct AA_bounding_box
 class Mesh
 {
 public:
-    Mesh(vector<Vertex>&& vertices, vector<uint32_t>&& indices, string const& material_name);
+    Mesh(vector<uint32_t>&& indices, string const& material_name);
     ~Mesh();
 
     void render_mesh(mat4 transform);
 
 private:
     // Mesh data.
-    vector<Vertex>   m_vertices;
     vector<uint32_t> m_indices;
     Material_ifc*    m_material;
-    AA_bounding_box  m_mesh_aabb;
+    AA_bounding_box  m_mesh_aabb;  // @UNUSED: Unknown whether to get this used or not.
+
+    uint32_t m_mesh_index_ebo;  // @TODO
 };
 
 class Model
@@ -56,7 +57,10 @@ private:
     //   apply all the transforms of the meshes inside of the model during loading.
     //   So that the meshes are just identity from the model.
     vector<Mesh>    m_meshes;
+    vector<Vertex>  m_vertices;
     AA_bounding_box m_model_aabb;
+
+    uint32_t m_model_vertex_vao;  // @TODO
 
     void load_obj_as_meshes(string const& fname);
 };
