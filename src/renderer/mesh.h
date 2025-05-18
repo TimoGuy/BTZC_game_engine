@@ -23,6 +23,9 @@ struct AA_bounding_box
 {
     vec3 min;
     vec3 max;
+
+    void reset();
+    void feed_position(vec3 position);
 };
 
 class Mesh
@@ -45,7 +48,6 @@ class Model
 {
 public:
     Model(string const& fname);
-    ~Model();
 
     void render_model(mat4 transform);
 

@@ -1,25 +1,75 @@
 #include "mesh.h"
 
+#include "cglm/vec3-ext.h"
+#include "cglm/vec3.h"
+#include "material.h"
 #include "tiny_obj_loader.h"
+#include <cassert>
 #include <fmt/base.h>
 #include <filesystem>
+#include <limits>
 #include <string>
 #include <vector>
 
+using std::numeric_limits;
 using std::string;
 using std::vector;
 
 
-
-
-BT::Mesh::Mesh(string const& obj_fname)
+void BT::AA_bounding_box::reset()
 {
-    // float bmin[3], bmax[3];
-    // tinyobj::
-    load_obj_as_mesh(obj_fname);
+    min[0] = min[1] = min[2] = numeric_limits<float_t>::max();
+    max[0] = max[1] = max[2] = numeric_limits<float_t>::min();
 }
 
-void BT::Mesh::load_obj_as_mesh(string const& fname)
+void BT::AA_bounding_box::feed_position(vec3 position)
+{
+    glm_vec3_minv(min, position, min);
+    glm_vec3_maxv(max, position, max);
+}
+
+BT::Mesh::Mesh(vector<Vertex>&& vertices, vector<uint32_t>&& indices, string const& material_name)
+    : m_vertices(std::move(vertices))
+    , m_indices(std::move(indices))
+{
+    m_material = Material_bank::get_material(material_name);
+    assert(m_material != nullptr);
+
+    // Calculate AABB.
+    m_mesh_aabb.reset();
+    for (auto& vertex : m_vertices)
+        m_mesh_aabb.feed_position(vertex.position);
+
+    // @TODO: Put opengl here.
+    assert(false);
+}
+
+BT::Mesh::~Mesh()
+{
+    // @TODO: Delete the opengl mesh.
+    assert(false);
+}
+
+void BT::Mesh::render_mesh(mat4 transform)
+{
+    // @TODO: Put Opengl here.
+    assert(false);
+}
+
+BT::Model::Model(string const& fname)
+{
+    load_obj_as_meshes(fname);
+}
+
+void BT::Model::render_model(mat4 transform)
+{
+    for (auto& mesh : m_meshes)
+    {
+        mesh.render_mesh(transform);
+    }
+}
+
+void BT::Model::load_obj_as_meshes(string const& fname)
 {
     if (!std::filesystem::exists(fname) ||
         !std::filesystem::is_regular_file(fname))
@@ -30,11 +80,22 @@ void BT::Mesh::load_obj_as_mesh(string const& fname)
         return;
     }
 
+    auto fname_path{ std::filesystem::path(fname) };
+    if (!fname_path.has_extension() ||
+        fname_path.extension().string() != ".obj")
+    {
+        // Exit early if this isn't an obj file.
+        fmt::println("ERROR: \"%s\" is not a .obj file.", fname);
+        assert(false);
+        return;
+    }
+
+    // Load obj file.
     tinyobj::attrib_t attrib;
     vector<tinyobj::shape_t> shapes;
     vector<tinyobj::material_t> materials;
 
-    string base_dir{ std::filesystem::path(fname).parent_path().generic_string() };
+    string base_dir{ fname_path.parent_path().generic_string() };
 
     string warn;
     string err;
@@ -57,8 +118,14 @@ void BT::Mesh::load_obj_as_mesh(string const& fname)
         assert(false);
     }
 
-    // Find AABB.
-    
+    // Find whole AABB.
+    m_model_aabb.reset();
+    for (size_t i = 0; i < attrib.vertices.size(); i += 3)
+    {
+        m_model_aabb.feed_position(vec3{ attrib.vertices[i + 0],
+                                                   attrib.vertices[i + 1],
+                                                   attrib.vertices[i + 2] });
+    }
 
     // @TODO: Continue this.
     assert(false);

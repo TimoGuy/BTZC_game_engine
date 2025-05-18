@@ -4,6 +4,8 @@
 #include <fmt/base.h>
 
 
+BT::Material_ifc::~Material_ifc() = default;
+
 void BT::Material_bank::emplace_material(string const& name, unique_ptr<Material_ifc>&& material)
 {
     if (get_material(name) != nullptr)

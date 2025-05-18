@@ -82,6 +82,8 @@ private:
     // Helper functions.
     void render_ndc_cube();
     void render_ndc_quad();
+
+    // 3D
 };
 
 }  // namespace BT
