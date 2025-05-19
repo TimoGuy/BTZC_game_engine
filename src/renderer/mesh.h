@@ -65,4 +65,15 @@ private:
     void load_obj_as_meshes(string const& fname);
 };
 
+// @COPYPASTA: See "material.h"
+class Model_bank
+{
+public:
+    static void emplace_model(string const& name, Model&& model);
+    static Model const* get_model(string const& name);
+
+private:
+    inline static vector<pair<string, Model>> s_models;
+};
+
 }  // namespace BT

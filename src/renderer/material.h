@@ -25,6 +25,7 @@ public:
     virtual void unbind_material() = 0;
 };
 
+// @COPYPASTA. See "mesh.h"
 class Material_bank
 {
 public:

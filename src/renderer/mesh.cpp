@@ -146,3 +146,30 @@ void BT::Model::load_obj_as_meshes(string const& fname)
     // @TODO: Continue this.
     assert(false);
 }
+
+void BT::Model_bank::emplace_model(string const& name, Model&& model)
+{
+    if (get_model(name) != nullptr)
+    {
+        // Report model already exists.
+        fmt::println("ERROR: Model \"%s\" already exists.", name);
+        assert(false);
+        return;
+    }
+
+    s_models.emplace_back(name, std::move(model));
+}
+
+BT::Model const* BT::Model_bank::get_model(string const& name)
+{
+    Model* model_ptr{ nullptr };
+
+    for (auto& model : s_models)
+        if (model.first == name)
+        {
+            model_ptr = &model.second;
+            break;
+        }
+
+    return model_ptr;
+}
