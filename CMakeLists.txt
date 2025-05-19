@@ -45,6 +45,8 @@ add_executable(${PROJECT_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/material.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/mesh.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/mesh.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/render_object.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/render_object.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/renderer_impl_win64.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/renderer_impl_win64.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/renderer.cpp

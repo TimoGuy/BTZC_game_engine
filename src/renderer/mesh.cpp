@@ -55,7 +55,7 @@ BT::Mesh::~Mesh()
     assert(false);
 }
 
-void BT::Mesh::render_mesh(mat4 transform)
+void BT::Mesh::render_mesh(mat4 transform) const
 {
     // @NOTE: All meshes share vertices, so they are stored and bound at the model level.
     // @TODO: @CHECK: Perhaps this method will mess with driver stuff. We'll see.
@@ -72,7 +72,7 @@ BT::Model::Model(string const& fname)
     load_obj_as_meshes(fname);
 }
 
-void BT::Model::render_model(mat4 transform)
+void BT::Model::render_model(mat4 transform) const
 {
     // @NOTE: All meshes share the same vertices, just use different indices.
     glBindVertexArray(m_model_vertex_vao);

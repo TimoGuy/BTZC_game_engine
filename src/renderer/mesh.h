@@ -34,7 +34,7 @@ public:
     Mesh(vector<uint32_t>&& indices, string const& material_name);
     ~Mesh();
 
-    void render_mesh(mat4 transform);
+    void render_mesh(mat4 transform) const;
 
 private:
     // Mesh data.
@@ -50,7 +50,7 @@ class Model
 public:
     Model(string const& fname);
 
-    void render_model(mat4 transform);
+    void render_model(mat4 transform) const;
 
 private:
     // @NOTE: These meshes should have some kind of offset inside them, but just
