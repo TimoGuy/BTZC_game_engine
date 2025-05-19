@@ -1,6 +1,7 @@
 #include "mesh.h"
 
 // @NOTE: Must be imported in this order
+#include "cglm/vec2-ext.h"
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 ////////////////////////////////////////
@@ -10,14 +11,17 @@
 #include "material.h"
 #include "tiny_obj_loader.h"
 #include <cassert>
+#include <cmath>
 #include <fmt/base.h>
 #include <filesystem>
 #include <limits>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 using std::numeric_limits;
 using std::string;
+using std::unordered_map;
 using std::vector;
 
 
@@ -67,9 +71,9 @@ void BT::Mesh::render_mesh(mat4 transform) const
     m_material->unbind_material();
 }
 
-BT::Model::Model(string const& fname)
+BT::Model::Model(string const& fname, string const& material_name)
 {
-    load_obj_as_meshes(fname);
+    load_obj_as_meshes(fname, material_name);
 }
 
 void BT::Model::render_model(mat4 transform) const
@@ -85,7 +89,7 @@ void BT::Model::render_model(mat4 transform) const
     glBindVertexArray(0);
 }
 
-void BT::Model::load_obj_as_meshes(string const& fname)
+void BT::Model::load_obj_as_meshes(string const& fname, string const& material_name)
 {
     if (!std::filesystem::exists(fname) ||
         !std::filesystem::is_regular_file(fname))
@@ -109,13 +113,19 @@ void BT::Model::load_obj_as_meshes(string const& fname)
     // Load obj file.
     tinyobj::attrib_t attrib;
     vector<tinyobj::shape_t> shapes;
-    vector<tinyobj::material_t> materials;
+    vector<tinyobj::material_t> materials;  // @NOTE: Materials are simply ignored (for obj files).
 
     string base_dir{ fname_path.parent_path().generic_string() };
 
     string warn;
     string err;
-    if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, fname.c_str()))
+    if (!tinyobj::LoadObj(&attrib,
+                          &shapes,
+                          &materials,
+                          &warn,
+                          &err,
+                          fname.c_str(),
+                          base_dir.c_str()))
     {
         fmt::println("ERROR: OBJ file \"%s\" failed to load.", fname);
         assert(false);
@@ -139,9 +149,118 @@ void BT::Model::load_obj_as_meshes(string const& fname)
     for (size_t i = 0; i < attrib.vertices.size(); i += 3)
     {
         m_model_aabb.feed_position(vec3{ attrib.vertices[i + 0],
-                                                   attrib.vertices[i + 1],
-                                                   attrib.vertices[i + 2] });
+                                         attrib.vertices[i + 1],
+                                         attrib.vertices[i + 2] });
     }
+
+    // Get all unique combinations of attributes together.
+    assert(attrib.vertices.size() < std::pow(2, 21));
+    assert(attrib.normals.size() < std::pow(2, 21));
+    assert(attrib.texcoords.size() < std::pow(2, 21));
+    auto generate_key_fn = [](tinyobj::index_t const& index) {
+        assert(index.vertex_index >= 0);
+        assert(index.normal_index >= 0);
+        assert(index.texcoord_index >= 0);
+        uint64_t key{ (static_cast<uint64_t>(index.vertex_index) << 42) |
+                      (static_cast<uint64_t>(index.normal_index) << 21) |
+                      (static_cast<uint64_t>(index.texcoord_index) << 0) };
+        return key;
+    };
+
+    struct Vertex_with_index
+    {
+        uint32_t index;
+        Vertex vertex;
+    };
+
+    unordered_map<uint64_t, Vertex_with_index> key_to_vertex_map;
+    uint32_t current_index{ 0 };
+    for (auto& shape : shapes)
+    for (auto& index : shape.mesh.indices)
+    {
+        // Generate and emplace key if unique.
+        uint64_t key = generate_key_fn(index);
+        
+        if (key_to_vertex_map.find(key) == key_to_vertex_map.end())
+        {
+            // Add new vertex.
+            Vertex new_gpu_vertex;
+            glm_vec3_copy(vec3{ attrib.vertices[index.vertex_index + 0],
+                                attrib.vertices[index.vertex_index + 1],
+                                attrib.vertices[index.vertex_index + 2] }, new_gpu_vertex.position);
+            glm_vec3_copy(vec3{ attrib.normals[index.normal_index + 0],
+                                attrib.normals[index.normal_index + 1],
+                                attrib.normals[index.normal_index + 2] }, new_gpu_vertex.normal);
+            glm_vec2_copy(vec2{ attrib.texcoords[index.texcoord_index + 0],
+                                attrib.texcoords[index.texcoord_index + 1] }, new_gpu_vertex.tex_coord);
+
+            Vertex_with_index vwi{ current_index++, new_gpu_vertex };
+            key_to_vertex_map.emplace(key, vwi);
+        }
+    }
+
+    // Transform vertices into model structure.
+    m_vertices.clear();
+    m_vertices.resize(key_to_vertex_map.size());
+
+    for (auto it = key_to_vertex_map.begin(); it != key_to_vertex_map.end(); it++)
+    {
+        m_vertices[it->second.index] = it->second.vertex;
+    }
+
+    // Transform indices into mesh structures.
+    m_meshes.clear();
+    m_meshes.reserve(shapes.size());
+
+    for (auto& shape : shapes)
+    {
+        vector<uint32_t> indices;
+        indices.reserve(shape.mesh.indices.size());
+        for (auto& index : shape.mesh.indices)
+        {
+            uint64_t key = generate_key_fn(index);
+            indices.emplace_back(key_to_vertex_map.at(key).index);
+        }
+
+        // Create mesh.
+        m_meshes.emplace_back(std::move(indices), material_name);
+    }
+
+#if 0
+    // @DEBUG.
+    // Check that all vertices have unique normal and uv coords.
+    vector<Vertex> gpu_vertices(attrib.vertices.size());
+    for (auto& shape : shapes)
+    for (auto& index : shape.mesh.indices)
+    {
+        // Create new vertex.
+        Vertex new_gpu_vertex;
+        glm_vec3_copy(vec3{ attrib.vertices[index.vertex_index + 0],
+                            attrib.vertices[index.vertex_index + 1],
+                            attrib.vertices[index.vertex_index + 2] }, new_gpu_vertex.position);
+        glm_vec3_copy(vec3{ attrib.normals[index.normal_index + 0],
+                            attrib.normals[index.normal_index + 1],
+                            attrib.normals[index.normal_index + 2] }, new_gpu_vertex.normal);
+        glm_vec2_copy(vec2{ attrib.normals[index.texcoord_index + 0],
+                            attrib.normals[index.texcoord_index + 1] }, new_gpu_vertex.tex_coord);
+        new_gpu_vertex.asdfasdf = true;
+
+        // Compare to current.
+        auto& gpu_vertex{ gpu_vertices[index.vertex_index] };
+
+        if (gpu_vertex.asdfasdf &&
+            (!glm_vec3_eqv_eps(gpu_vertex.position, new_gpu_vertex.position) ||
+            !glm_vec3_eqv_eps(gpu_vertex.normal, new_gpu_vertex.normal) ||
+            !glm_vec2_eqv_eps(gpu_vertex.tex_coord, new_gpu_vertex.tex_coord)))
+        {
+            // Unidentical index.
+            assert(false);
+        }
+
+        // Add vertex to vertex list.
+        gpu_vertex = new_gpu_vertex;
+    }
+#endif  // 0
 
     // @TODO: Continue this.
     assert(false);

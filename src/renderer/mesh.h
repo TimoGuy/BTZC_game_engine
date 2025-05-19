@@ -48,7 +48,7 @@ private:
 class Model
 {
 public:
-    Model(string const& fname);
+    Model(string const& fname, string const& material_name);
 
     void render_model(mat4 transform) const;
 
@@ -62,7 +62,7 @@ private:
 
     uint32_t m_model_vertex_vao;  // @TODO
 
-    void load_obj_as_meshes(string const& fname);
+    void load_obj_as_meshes(string const& fname, string const& material_name);
 };
 
 // @COPYPASTA: See "material.h"
