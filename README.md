@@ -16,7 +16,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - [x] Get ifc and connect it with mesh renderer.
     - [ ] Create simple probuilder-like mesh
     - [ ] Create simple cylinder mesh (representing player character controller).
-    - [ ] Create render object structure.
+    - [x] Create render object structure.
     - [ ] Create gameobjects which can use the render object with the mesh.
 
 1. [ ] Get jolt physics working with renderer.
