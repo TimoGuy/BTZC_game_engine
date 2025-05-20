@@ -41,6 +41,8 @@ add_executable(${PROJECT_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/src/input_handler/input_codes.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/input_handler/input_handler.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/input_handler/input_handler.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/material_impl_opaque_shaded.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/material_impl_opaque_shaded.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/material.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/material.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/mesh.cpp
@@ -51,6 +53,8 @@ add_executable(${PROJECT_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/renderer_impl_win64.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/renderer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/renderer.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/shader.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/shader.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/btzc_game_engine.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
     

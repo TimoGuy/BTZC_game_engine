@@ -12,7 +12,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - [ ] Upload mesh data with OpenGL.
         - [x] Write render functions.
         - [ ] ~~Bonus points for obj writer as well.~~
-    - [ ] Write simple material system.
+    - [x] Write simple material system.
         - [x] Get ifc and connect it with mesh renderer.
     - [ ] Create simple probuilder-like mesh
     - [ ] Create simple cylinder mesh (representing player character controller).

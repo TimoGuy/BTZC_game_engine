@@ -1,13 +1,9 @@
 #include "mesh.h"
 
-// @NOTE: Must be imported in this order
 #include "cglm/vec2-ext.h"
-#include "glad/glad.h"
-#include "GLFW/glfw3.h"
-////////////////////////////////////////
-
 #include "cglm/vec3-ext.h"
 #include "cglm/vec3.h"
+#include "glad/glad.h"
 #include "material.h"
 #include "tiny_obj_loader.h"
 #include <cassert>

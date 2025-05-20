@@ -1,0 +1,48 @@
+#pragma once
+
+#include "cglm/cglm.h"
+#include <string>
+#include <utility>
+#include <vector>
+
+using std::pair;
+using std::string;
+using std::vector;
+
+
+namespace BT
+{
+
+class Shader
+{
+public:
+    Shader(string const& vert_fname, string const& frag_fname);
+    ~Shader();
+
+    void bind() const;
+    static void unbind();
+
+    void set_int(string const& param_name, int32_t value) const;
+    void set_float(string const& param_name, float_t value) const;
+    void set_vec3(string const& param_name, vec3 value) const;
+    void set_mat4(string const& param_name, mat4 value) const;
+
+private:
+    uint32_t m_shader_program;
+
+    string read_shader_file(string const& fname);
+};
+
+// @COPYPASTA. See "mesh.h", "material.h"
+// @TODO: @REFACTOR: This has been copied >2 times, so refactor this.
+class Shader_bank
+{
+public:
+    static void emplace_shader(string const& name, Shader&& shader);
+    static Shader const* get_shader(string const& name);
+
+private:
+    inline static vector<pair<string, Shader>> s_shaders;
+};
+
+}  // namespace BT
