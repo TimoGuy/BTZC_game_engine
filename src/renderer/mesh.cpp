@@ -222,42 +222,6 @@ void BT::Model::load_obj_as_meshes(string const& fname, string const& material_n
         m_meshes.emplace_back(std::move(indices), material_name);
     }
 
-#if 0
-    // @DEBUG.
-    // Check that all vertices have unique normal and uv coords.
-    vector<Vertex> gpu_vertices(attrib.vertices.size());
-    for (auto& shape : shapes)
-    for (auto& index : shape.mesh.indices)
-    {
-        // Create new vertex.
-        Vertex new_gpu_vertex;
-        glm_vec3_copy(vec3{ attrib.vertices[index.vertex_index + 0],
-                            attrib.vertices[index.vertex_index + 1],
-                            attrib.vertices[index.vertex_index + 2] }, new_gpu_vertex.position);
-        glm_vec3_copy(vec3{ attrib.normals[index.normal_index + 0],
-                            attrib.normals[index.normal_index + 1],
-                            attrib.normals[index.normal_index + 2] }, new_gpu_vertex.normal);
-        glm_vec2_copy(vec2{ attrib.normals[index.texcoord_index + 0],
-                            attrib.normals[index.texcoord_index + 1] }, new_gpu_vertex.tex_coord);
-        new_gpu_vertex.asdfasdf = true;
-
-        // Compare to current.
-        auto& gpu_vertex{ gpu_vertices[index.vertex_index] };
-
-        if (gpu_vertex.asdfasdf &&
-            (!glm_vec3_eqv_eps(gpu_vertex.position, new_gpu_vertex.position) ||
-            !glm_vec3_eqv_eps(gpu_vertex.normal, new_gpu_vertex.normal) ||
-            !glm_vec2_eqv_eps(gpu_vertex.tex_coord, new_gpu_vertex.tex_coord)))
-        {
-            // Unidentical index.
-            assert(false);
-        }
-
-        // Add vertex to vertex list.
-        gpu_vertex = new_gpu_vertex;
-    }
-#endif  // 0
-
     // @TODO: Continue this.
     assert(false);
 }
