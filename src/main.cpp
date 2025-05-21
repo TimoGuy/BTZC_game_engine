@@ -15,8 +15,6 @@
 
 int32_t main()
 {
-    fmt::println("Hello, {}", "Bootiful Warld!");
-
     BT::Input_handler main_input_handler;
     BT::Renderer main_renderer{ main_input_handler,
                                 "Untitled Zelda-like Collectathon Game" };

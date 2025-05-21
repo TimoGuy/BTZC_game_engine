@@ -62,11 +62,11 @@ void BT::Mesh::render_mesh(mat4 transform) const
     // @NOTE: All meshes share vertices, so they are stored and bound at the model level.
     // @TODO: @CHECK: Perhaps this method will mess with driver stuff. We'll see.
     // @TODO: @CHECK: I think that the element array buffer should be included here. idk.
-    m_material->bind_material(transform);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_mesh_index_ebo);
+    m_material->bind_material(transform);
     glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, reinterpret_cast<void*>(0));
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     m_material->unbind_material();
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 BT::Model::Model(string const& fname, string const& material_name)

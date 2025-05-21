@@ -26,6 +26,7 @@ public:
     void set_float(string const& param_name, float_t value) const;
     void set_vec3(string const& param_name, vec3 value) const;
     void set_mat4(string const& param_name, mat4 value) const;
+    void bind_texture(string const& param_name, int32_t texture_idx, uint32_t texture_buffer) const;
 
 private:
     uint32_t m_shader_program;

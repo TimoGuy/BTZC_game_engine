@@ -13,6 +13,7 @@ void BT::Material_impl_post_process::bind_material(mat4 transform)
 {
     static auto& s_shader{ *Shader_bank::get_shader("post_process") };
     s_shader.bind();
+    s_shader.bind_texture("hdr_buffer", 0, Material_bank::get_hdr_color_texture());
     s_shader.set_float("exposure", m_exposure);
 }
 

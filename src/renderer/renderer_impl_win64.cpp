@@ -657,6 +657,9 @@ void BT::Renderer::Impl::create_hdr_fbo()
         assert(false);
     }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    // @HACK: This just provides a connection to the hdr buffer so that the material system can access.
+    Material_bank::set_hdr_color_texture(m_hdr_color_texture);
 }
 
 void BT::Renderer::Impl::render_scene_to_hdr_framebuffer()

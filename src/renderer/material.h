@@ -33,11 +33,15 @@ public:
     static void set_camera_read_ifc(Camera_read_ifc* cam_read_ifc);
     static Camera_read_ifc* get_camera_read_ifc();
 
+    static void set_hdr_color_texture(uint32_t color_buffer);
+    static uint32_t get_hdr_color_texture();
+
     static void emplace_material(string const& name, unique_ptr<Material_ifc>&& material);
     static Material_ifc* get_material(string const& name);
 
 private:
     inline static Camera_read_ifc* s_cam_read_ifc{ nullptr };
+    inline static uint32_t s_hdr_color_buffer{ (uint32_t)-1 };
     inline static vector<pair<string, unique_ptr<Material_ifc>>> s_materials;
 };
 

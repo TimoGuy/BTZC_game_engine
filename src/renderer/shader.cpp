@@ -105,6 +105,14 @@ void BT::Shader::set_mat4(string const& param_name, mat4 value) const
                        &value[0][0]);
 }
 
+void BT::Shader::bind_texture(string const& param_name, int32_t texture_idx, uint32_t texture_buffer) const
+{
+    set_int(param_name, texture_idx);
+    glActiveTexture(GL_TEXTURE0 + texture_idx);
+    glBindTexture(GL_TEXTURE_2D, texture_buffer);
+
+}
+
 string BT::Shader::read_shader_file(string const& fname)
 {
     string code;
