@@ -3,6 +3,7 @@
 #include "glad/glad.h"
 #include <cassert>
 #include <fmt/base.h>
+#include <filesystem>
 #include <fstream>
 #include <sstream>
 
@@ -114,7 +115,8 @@ string BT::Shader::read_shader_file(string const& fname)
         shader_file.open(fname);
         if (!shader_file.is_open())
         {
-            fmt::println("ERROR: File could not be open \"%s\"", fname);
+            auto abs_path{ std::filesystem::absolute(fname).string() };
+            fmt::println("ERROR: File could not be open \"%s\"", abs_path);
             assert(false);
         }
 

@@ -20,6 +20,10 @@ if(MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
 endif()
 
+# Assets directory.
+set(ASSET_DIR
+    ${CMAKE_CURRENT_SOURCE_DIR}/assets)
+
 # Dependencies.
 set(DEPENDENCY_INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/cglm/include  # Header only.
@@ -41,6 +45,7 @@ add_executable(${PROJECT_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/src/input_handler/input_codes.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/input_handler/input_handler.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/input_handler/input_handler.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/camera_read_ifc.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/material_impl_opaque_shaded.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/material_impl_opaque_shaded.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/material.cpp
@@ -97,6 +102,29 @@ target_link_libraries(${PROJECT_NAME}
     glfw
     ${GLFW_LIBRARIES}
     Jolt)
+
+# Create symlink to assets folder.
+if(DEFINED ASSET_DIR)
+    set(dir_name ${ASSET_DIR})
+    set(target_dir_name ${CMAKE_BINARY_DIR}/assets)
+    if(WIN32)
+        string(REPLACE "/" "\\" win32_dir_name ${dir_name})
+        string(REPLACE "/" "\\" win32_target_dir_name ${target_dir_name})
+        if(EXISTS ${dir_name})
+            execute_process(
+                COMMAND cmd /C rmdir ${win32_target_dir_name}
+                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+        endif()
+        execute_process(
+            COMMAND cmd /C mklink /J ${win32_target_dir_name} ${win32_dir_name}
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+    else()
+        # @TODO: Probably add the delete symlink code right here?
+        file(CREATE_LINK ${dir_name} ${target_dir_name} SYMBOLIC)
+    endif()
+else()
+    message(FATAL_ERROR "Asset folder location must be defined in `ASSET_DIR`")
+endif()
 
 # Set this project as Visual Studio startup project.
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}

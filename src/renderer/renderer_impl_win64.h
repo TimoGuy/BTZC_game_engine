@@ -28,6 +28,8 @@ public:
     void submit_window_iconified(bool iconified);
     void submit_window_dims(int32_t width, int32_t height);
 
+    void fetch_cached_camera_matrices(mat4& out_projection, mat4& out_view, mat4& out_projection_view);
+
 private:
     void setup_glfw_and_opengl46_hints();
     
@@ -64,6 +66,13 @@ private:
 
     void setup_3d_camera();
     void calc_3d_aspect_ratio();
+
+    struct Camera_matrices
+    {
+        mat4 projection;
+        mat4 view;
+        mat4 projection_view;
+    } m_camera_matrices_cache;
 
     void calc_camera_matrices(mat4& out_projection, mat4& out_view, mat4& out_projection_view);
 

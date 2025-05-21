@@ -212,6 +212,15 @@ void BT::Renderer::Impl::submit_window_dims(int32_t width, int32_t height)
     m_window_dims_changed = true;
 }
 
+void BT::Renderer::Impl::fetch_cached_camera_matrices(mat4& out_projection,
+                                                      mat4& out_view,
+                                                      mat4& out_projection_view)
+{
+    glm_mat4_copy(m_camera_matrices_cache.projection, out_projection);
+    glm_mat4_copy(m_camera_matrices_cache.view, out_view);
+    glm_mat4_copy(m_camera_matrices_cache.projection_view, out_projection_view);
+}
+
 void BT::Renderer::Impl::setup_glfw_and_opengl46_hints()
 {
     // Init glfw and create main window.
@@ -445,8 +454,8 @@ void BT::Renderer::Impl::calc_camera_matrices(mat4& out_projection, mat4& out_vi
                     m_camera.aspect_ratio,
                     m_camera.z_near,
                     m_camera.z_far,
-                    out_projection);
-    // out_projection[1][1] *= -1.0f;  // @NOTE: Vulkan only.
+                    m_camera_matrices_cache.projection);
+    // m_camera_matrices_cache.projection[1][1] *= -1.0f;  // @NOTE: Vulkan only.
 
     // Calculate view matrix.
     using std::abs;
@@ -460,12 +469,15 @@ void BT::Renderer::Impl::calc_camera_matrices(mat4& out_projection, mat4& out_vi
 
     vec3 center;
     glm_vec3_add(m_camera.position, m_camera.view_direction, center);
-    glm_lookat(m_camera.position, center, up, out_view);
+    glm_lookat(m_camera.position, center, up, m_camera_matrices_cache.view);
 
     // Calculate projection view matrix.
-    glm_mat4_mul(out_projection,
-                 out_view,
-                 out_projection_view);
+    glm_mat4_mul(m_camera_matrices_cache.projection,
+                 m_camera_matrices_cache.view,
+                 m_camera_matrices_cache.projection_view);
+
+    // Write out camera matrices (from just written to cache).
+    fetch_cached_camera_matrices(out_projection, out_view, out_projection_view);
 }
 
 // Display rendering.

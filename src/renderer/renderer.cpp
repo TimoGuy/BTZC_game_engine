@@ -13,8 +13,7 @@ BT::Renderer::Renderer(Input_handler& input_handler, string const& title)
 {
 }
 
-// @NOTE: For smart pimpl.
-BT::Renderer::~Renderer() = default;
+BT::Renderer::~Renderer() = default;  // @NOTE: For smart pimpl.
 
 bool BT::Renderer::get_requesting_close()
 {
@@ -29,4 +28,12 @@ void BT::Renderer::poll_events()
 void BT::Renderer::render()
 {
     m_pimpl->render();
+}
+
+// Camera read.
+void BT::Renderer::fetch_camera_matrices(mat4& out_projection,
+                                         mat4& out_view,
+                                         mat4& out_projection_view)
+{
+    m_pimpl->fetch_cached_camera_matrices(out_projection, out_view, out_projection_view);
 }

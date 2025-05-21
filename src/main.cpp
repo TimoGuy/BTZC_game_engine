@@ -1,3 +1,4 @@
+#include "btzc_game_engine.h"
 #include "input_handler/input_handler.h"
 #include "renderer/material.h"  // @DEBUG
 #include "renderer/material_impl_opaque_shaded.h"  // @DEBUG
@@ -19,7 +20,8 @@ int32_t main()
 
     BT::Shader_bank::emplace_shader(
         "color_shaded",
-        BT::Shader{ "color_shaded.vert", "color_shaded.frag" });
+        BT::Shader{ BTZC_GAME_ENGINE_ASSET_SHADER_PATH "color_shaded.vert",
+                    BTZC_GAME_ENGINE_ASSET_SHADER_PATH "color_shaded.frag" });
 
     BT::Material_bank::emplace_material(
         "default_material",

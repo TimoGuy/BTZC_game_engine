@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../input_handler/input_handler.h"
+#include "camera_read_ifc.h"
 #include "render_object.h"
 #include <memory>
 #include <string>
@@ -11,7 +12,7 @@ using std::string;
 namespace BT
 {
 
-class Renderer
+class Renderer : public Camera_read_ifc
 {
 public:
     // Setup and teardown renderer.
@@ -21,6 +22,11 @@ public:
     bool get_requesting_close();
     void poll_events();
     void render();
+
+    // Camera read.
+    void fetch_camera_matrices(mat4& out_projection,
+                               mat4& out_view,
+                               mat4& out_projection_view) override;
 
     // Create render graph bits.
 

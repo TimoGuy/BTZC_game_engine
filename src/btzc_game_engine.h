@@ -10,3 +10,6 @@
 #else
 #error "Unknown, currently unsupported OS です"
 #endif
+
+// Paths.
+#define BTZC_GAME_ENGINE_ASSET_SHADER_PATH    "assets/shaders/"
