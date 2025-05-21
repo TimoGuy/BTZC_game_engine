@@ -48,6 +48,8 @@ add_executable(${PROJECT_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/camera_read_ifc.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/material_impl_opaque_shaded.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/material_impl_opaque_shaded.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/material_impl_post_process.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/material_impl_post_process.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/material.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/material.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/mesh.cpp

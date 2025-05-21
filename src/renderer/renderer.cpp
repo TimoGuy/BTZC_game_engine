@@ -37,3 +37,14 @@ void BT::Renderer::fetch_camera_matrices(mat4& out_projection,
 {
     m_pimpl->fetch_cached_camera_matrices(out_projection, out_view, out_projection_view);
 }
+
+// Create render objects.
+BT::Renderer::render_object_key_t BT::Renderer::emplace_render_object(Render_object&& rend_obj)
+{
+    return m_pimpl->emplace_render_object(std::move(rend_obj));
+}
+
+void BT::Renderer::remove_render_object(render_object_key_t key)
+{
+    m_pimpl->remove_render_object(key);
+}

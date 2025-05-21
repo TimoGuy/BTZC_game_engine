@@ -12,4 +12,5 @@
 #endif
 
 // Paths.
+#define BTZC_GAME_ENGINE_ASSET_MODEL_PATH     "assets/models/"
 #define BTZC_GAME_ENGINE_ASSET_SHADER_PATH    "assets/shaders/"

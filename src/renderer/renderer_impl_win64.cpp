@@ -1,6 +1,6 @@
 #include "renderer_impl_win64.h"
 
-#include "fmt/base.h"
+#include "cglm/mat4.h"
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
@@ -14,9 +14,12 @@
 #include "../btzc_game_engine.h"
 #include "../input_handler/input_handler.h"
 #include "cglm/cglm.h"
+#include "material.h"
+#include "render_object.h"
 #include "renderer.h"
-
 #include <cassert>
+#include <fmt/base.h>
+#include <gl/gl.h>
 #include <mutex>
 #include <sstream>
 #include <string>
@@ -186,10 +189,12 @@ void BT::Renderer::Impl::render()
         m_window_dims_changed = false;
     }
 
+    update_camera_matrices();
+
     // Render new frame.
     begin_new_display_frame();
     render_scene_to_hdr_framebuffer();
-    render_hdr_color_to_display_frame();
+    render_hdr_color_to_ldr_framebuffer(false);
     render_imgui();
 
     present_display_frame();
@@ -219,6 +224,19 @@ void BT::Renderer::Impl::fetch_cached_camera_matrices(mat4& out_projection,
     glm_mat4_copy(m_camera_matrices_cache.projection, out_projection);
     glm_mat4_copy(m_camera_matrices_cache.view, out_view);
     glm_mat4_copy(m_camera_matrices_cache.projection_view, out_projection_view);
+}
+
+BT::Renderer::render_object_key_t BT::Renderer::Impl::emplace_render_object(Render_object&& rend_obj)
+{
+    m_render_objects.emplace_back(std::move(rend_obj));
+    return (m_render_objects.size() - 1);
+}
+
+void BT::Renderer::Impl::remove_render_object(render_object_key_t key)
+{
+    // @TODO: Figure out how to remove render objects.
+    // @INCOMPLETE.
+    assert(false);
 }
 
 void BT::Renderer::Impl::setup_glfw_and_opengl46_hints()
@@ -363,6 +381,7 @@ void BT::Renderer::Impl::setup_imgui()
 void BT::Renderer::Impl::render_imgui()
 {
     // @NOCHECKIN: @TEMP
+    static bool s_show_game_view{ true };
     static bool show_demo_window = true;
     static ImGuiIO& io = ImGui::GetIO();
 
@@ -387,6 +406,16 @@ void BT::Renderer::Impl::render_imgui()
     ImGui::DockSpaceOverViewport(0,
                                  ImGui::GetMainViewport(),
                                  ImGuiDockNodeFlags_PassthruCentralNode);
+
+    // Game view.
+    if (s_show_game_view)
+    {
+        ImGui::Begin("Game view");
+        {
+            ImGui::ImageWithBg(m_ldr_color_texture, ImVec2{ 256, 256 });
+        }
+        ImGui::End();
+    }
 
     // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
     if (show_demo_window)
@@ -447,7 +476,7 @@ void BT::Renderer::Impl::calc_3d_aspect_ratio()
             / static_cast<float_t>(m_window_dims.height);
 }
 
-void BT::Renderer::Impl::calc_camera_matrices(mat4& out_projection, mat4& out_view, mat4& out_projection_view)
+void BT::Renderer::Impl::update_camera_matrices()
 {
     // Calculate projection matrix.
     glm_perspective(m_camera.fov,
@@ -475,12 +504,66 @@ void BT::Renderer::Impl::calc_camera_matrices(mat4& out_projection, mat4& out_vi
     glm_mat4_mul(m_camera_matrices_cache.projection,
                  m_camera_matrices_cache.view,
                  m_camera_matrices_cache.projection_view);
-
-    // Write out camera matrices (from just written to cache).
-    fetch_cached_camera_matrices(out_projection, out_view, out_projection_view);
 }
 
 // Display rendering.
+void BT::Renderer::Impl::create_ldr_fbo()  // @COPYPASTA: see `create_hdr_fbo()`.
+{
+    if (m_ldr_fbo != 0 || m_ldr_color_texture != 0 || m_ldr_depth_rbo != 0)
+    {
+        // Double check that everything is fully created prior to deleting to recreate.
+        assert(m_ldr_fbo != 0 && m_ldr_color_texture != 0 && m_ldr_depth_rbo != 0);
+
+        // Delete to recreate.
+        glDeleteFramebuffers(1, &m_ldr_fbo);
+        glDeleteTextures(1, &m_ldr_color_texture);
+        glDeleteRenderbuffers(1, &m_ldr_depth_rbo);
+    }
+
+    // Create color texture.
+    glGenTextures(1, &m_ldr_color_texture);
+    glBindTexture(GL_TEXTURE_2D, m_ldr_color_texture);
+    glTexImage2D(GL_TEXTURE_2D,
+                 0,
+                 GL_RGBA8,
+                 m_window_dims.width,
+                 m_window_dims.height,
+                 0,
+                 GL_RGBA,
+                 GL_FLOAT,
+                 nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // Create depth renderbuffer.
+    glGenRenderbuffers(1, &m_ldr_depth_rbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, m_ldr_depth_rbo);
+    glRenderbufferStorage(GL_RENDERBUFFER,
+                          GL_DEPTH_COMPONENT,
+                          m_window_dims.width,
+                          m_window_dims.height);
+
+    // Create framebuffer.
+    glGenFramebuffers(1, &m_ldr_fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, m_ldr_fbo);
+    glFramebufferTexture2D(GL_FRAMEBUFFER,
+                           GL_COLOR_ATTACHMENT0,
+                           GL_TEXTURE_2D,
+                           m_ldr_color_texture,
+                           0);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER,
+                              GL_DEPTH_ATTACHMENT,
+                              GL_RENDERBUFFER,
+                              m_ldr_depth_rbo);
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+    {
+        fmt::println("ERROR: Framebuffer incomplete.");
+        assert(false);
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
 void BT::Renderer::Impl::begin_new_display_frame()
 {
     // Configure main render target.
@@ -489,15 +572,28 @@ void BT::Renderer::Impl::begin_new_display_frame()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void BT::Renderer::Impl::render_hdr_color_to_display_frame()
+void BT::Renderer::Impl::render_hdr_color_to_ldr_framebuffer(bool to_display_frame)
 {
+    if (!to_display_frame)
+    {
+        // Assign ldr fbo.
+        glBindFramebuffer(GL_FRAMEBUFFER, m_ldr_fbo);
+    }
+
     // Render hdr framebuffer to main render target.
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Use tonemapping shader.
-    // @TODO
-
+    static Material_ifc* s_post_process_material{ Material_bank::get_material("post_process") };
+    s_post_process_material->bind_material(GLM_MAT4_ZERO);
     render_ndc_quad();
+    s_post_process_material->unbind_material();
+
+    if (!to_display_frame)
+    {
+        // Unassign ldr fbo.
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
 }
 
 void BT::Renderer::Impl::present_display_frame()
@@ -568,17 +664,11 @@ void BT::Renderer::Impl::render_scene_to_hdr_framebuffer()
     glBindFramebuffer(GL_FRAMEBUFFER, m_hdr_fbo);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // Calc camera.
-    mat4 projection;
-    mat4 view;
-    mat4 projection_view;
-    calc_camera_matrices(projection, view, projection_view);
-
-    // Use rendering shader.
-    // @TODO.
-
     // Render scene.
-    // @TODO.
+    for (auto& rend_obj : m_render_objects)
+    {
+        rend_obj.render(m_active_render_layers);
+    }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }

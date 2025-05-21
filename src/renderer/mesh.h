@@ -42,13 +42,14 @@ private:
     Material_ifc*    m_material;
     AA_bounding_box  m_mesh_aabb;  // @UNUSED: Unknown whether to get this used or not.
 
-    uint32_t m_mesh_index_ebo;  // @TODO
+    uint32_t m_mesh_index_ebo;
 };
 
 class Model
 {
 public:
     Model(string const& fname, string const& material_name);
+    ~Model();
 
     void render_model(mat4 transform) const;
 
@@ -61,6 +62,7 @@ private:
     AA_bounding_box m_model_aabb;
 
     uint32_t m_model_vertex_vao;  // @TODO
+    uint32_t m_model_vertex_vbo;  // @TODO
 
     void load_obj_as_meshes(string const& fname, string const& material_name);
 };

@@ -6,18 +6,22 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
 
 1. [ ] Get basic renderer assembled.
     - [x] Get everything stubbed out for simple hdr renderer.
-    - [ ] Create mesh importer (simple obj meshes for now).
+    - [x] Create mesh importer (simple obj meshes for now).
         - [x] Use tinyobjloader to load obj file.
         - [x] Import the mesh into the model-mesh data structre.
-        - [ ] Upload mesh data with OpenGL.
+        - [x] Upload mesh data with OpenGL.
         - [x] Write render functions.
         - [ ] ~~Bonus points for obj writer as well.~~
     - [x] Write simple material system.
         - [x] Get ifc and connect it with mesh renderer.
-    - [ ] Create simple probuilder-like mesh
-    - [ ] Create simple cylinder mesh (representing player character controller).
+    - [x] Create simple probuilder-like mesh
+    - [x] Create simple cylinder mesh (representing player character controller).
     - [x] Create render object structure.
-    - [ ] Create gameobjects which can use the render object with the mesh.
+    - [x] Create gameobjects which can use the render object with the mesh.
+    - [ ] Write shaders:
+        - [ ] Basic Geometry color shader.
+        - [ ] Postprocessing shader w/ ndc quad code.
+    - [ ] Rework imgui window drawing to make it control the size of the rendering viewport.
 
 1. [ ] Get jolt physics working with renderer.
     - [ ] Setup jolt physics world (simple singlethreaded job system for now).

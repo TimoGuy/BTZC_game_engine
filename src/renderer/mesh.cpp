@@ -45,14 +45,16 @@ BT::Mesh::Mesh(vector<uint32_t>&& indices, string const& material_name)
     // for (auto& vertex : m_vertices)
     //     m_mesh_aabb.feed_position(vertex.position);
 
-    // @TODO: Put opengl here.
-    assert(false);
+    // Create mesh in OpenGL.
+    glGenBuffers(1, &m_mesh_index_ebo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_mesh_index_ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_indices.size(), m_indices.data(), GL_STATIC_DRAW);
 }
 
 BT::Mesh::~Mesh()
 {
-    // @TODO: Delete the opengl mesh.
-    assert(false);
+    // Delete the opengl mesh.
+    glDeleteBuffers(1, &m_mesh_index_ebo);
 }
 
 void BT::Mesh::render_mesh(mat4 transform) const
@@ -70,6 +72,12 @@ void BT::Mesh::render_mesh(mat4 transform) const
 BT::Model::Model(string const& fname, string const& material_name)
 {
     load_obj_as_meshes(fname, material_name);
+}
+
+BT::Model::~Model()
+{
+    glDeleteBuffers(1, &m_model_vertex_vbo);
+    glDeleteVertexArrays(1, &m_model_vertex_vao);
 }
 
 void BT::Model::render_model(mat4 transform) const
@@ -204,6 +212,14 @@ void BT::Model::load_obj_as_meshes(string const& fname, string const& material_n
         m_vertices[it->second.index] = it->second.vertex;
     }
 
+    // Upload vertices to GPU.
+    glGenVertexArrays(1, &m_model_vertex_vao);
+    glGenBuffers(1, &m_model_vertex_vbo);
+
+    glBindVertexArray(m_model_vertex_vao);
+    glBindBuffer(GL_ARRAY_BUFFER, m_model_vertex_vbo);
+    glBufferData(GL_ARRAY_BUFFER, m_vertices.size() * sizeof(Vertex), m_vertices.data(), GL_STATIC_DRAW);
+
     // Transform indices into mesh structures.
     m_meshes.clear();
     m_meshes.reserve(shapes.size());
@@ -222,8 +238,16 @@ void BT::Model::load_obj_as_meshes(string const& fname, string const& material_n
         m_meshes.emplace_back(std::move(indices), material_name);
     }
 
-    // @TODO: Continue this.
-    assert(false);
+    // Register vertex attributes.
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
+                          sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, position)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
+                          sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, normal)));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE,
+                          sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, tex_coord)));
 }
 
 void BT::Model_bank::emplace_model(string const& name, Model&& model)
