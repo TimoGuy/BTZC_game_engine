@@ -54,7 +54,7 @@ BT::Mesh::Mesh(vector<uint32_t>&& indices, string const& material_name)
 BT::Mesh::~Mesh()
 {
     // Delete the opengl mesh.
-    glDeleteBuffers(1, &m_mesh_index_ebo);
+    // glDeleteBuffers(1, &m_mesh_index_ebo);  @NOCHECKIN
 }
 
 void BT::Mesh::render_mesh(mat4 transform) const
@@ -76,8 +76,8 @@ BT::Model::Model(string const& fname, string const& material_name)
 
 BT::Model::~Model()
 {
-    glDeleteBuffers(1, &m_model_vertex_vbo);
-    glDeleteVertexArrays(1, &m_model_vertex_vao);
+    // glDeleteBuffers(1, &m_model_vertex_vbo);  @NOCHECKIN
+    // glDeleteVertexArrays(1, &m_model_vertex_vao);
 }
 
 void BT::Model::render_model(mat4 transform) const
