@@ -213,7 +213,7 @@ void BT::Camera::render_imgui()
 
     ImGui::Begin("Camera properties");
     {
-        ImGui::Text("Modfffsse: %s", Data::Frontend::s_state_strs[m_data->frontend.state].c_str());
+        ImGui::Text("Mode: %s", Data::Frontend::s_state_strs[m_data->frontend.state].c_str());
         ImGui::Text("aspect_ratio: %.3f", camera.aspect_ratio);
 
         float_t fov_deg{ glm_deg(camera.fov) };
