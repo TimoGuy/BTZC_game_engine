@@ -189,14 +189,14 @@ void BT::Model::load_obj_as_meshes(string const& fname, string const& material_n
         {
             // Add new vertex.
             Vertex new_gpu_vertex;
-            glm_vec3_copy(vec3{ attrib.vertices[index.vertex_index + 0],
-                                attrib.vertices[index.vertex_index + 1],
-                                attrib.vertices[index.vertex_index + 2] }, new_gpu_vertex.position);
-            glm_vec3_copy(vec3{ attrib.normals[index.normal_index + 0],
-                                attrib.normals[index.normal_index + 1],
-                                attrib.normals[index.normal_index + 2] }, new_gpu_vertex.normal);
-            glm_vec2_copy(vec2{ attrib.texcoords[index.texcoord_index + 0],
-                                attrib.texcoords[index.texcoord_index + 1] }, new_gpu_vertex.tex_coord);
+            glm_vec3_copy(vec3{ attrib.vertices[3 * index.vertex_index + 0],
+                                attrib.vertices[3 * index.vertex_index + 1],
+                                attrib.vertices[3 * index.vertex_index + 2] }, new_gpu_vertex.position);
+            glm_vec3_copy(vec3{ attrib.normals[3 * index.normal_index + 0],
+                                attrib.normals[3 * index.normal_index + 1],
+                                attrib.normals[3 * index.normal_index + 2] }, new_gpu_vertex.normal);
+            glm_vec2_copy(vec2{ attrib.texcoords[2 * index.texcoord_index + 0],
+                                attrib.texcoords[2 * index.texcoord_index + 1] }, new_gpu_vertex.tex_coord);
 
             Vertex_with_index vwi{ current_index++, new_gpu_vertex };
             key_to_vertex_map.emplace(key, vwi);
