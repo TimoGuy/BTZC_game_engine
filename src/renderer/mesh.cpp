@@ -148,15 +148,6 @@ void BT::Model::load_obj_as_meshes(string const& fname, string const& material_n
         assert(false);
     }
 
-    // Find whole AABB.
-    m_model_aabb.reset();
-    for (size_t i = 0; i < attrib.vertices.size(); i += 3)
-    {
-        m_model_aabb.feed_position(vec3{ attrib.vertices[i + 0],
-                                         attrib.vertices[i + 1],
-                                         attrib.vertices[i + 2] });
-    }
-
     // Get all unique combinations of attributes together.
     assert(attrib.vertices.size() < std::pow(2, 21));
     assert(attrib.normals.size() < std::pow(2, 21));
@@ -210,6 +201,13 @@ void BT::Model::load_obj_as_meshes(string const& fname, string const& material_n
     for (auto it = key_to_vertex_map.begin(); it != key_to_vertex_map.end(); it++)
     {
         m_vertices[it->second.index] = it->second.vertex;
+    }
+
+    // Find whole AABB.
+    m_model_aabb.reset();
+    for (auto& vertex : m_vertices)
+    {
+        m_model_aabb.feed_position(vertex.position);
     }
 
     // Upload vertices to GPU.
