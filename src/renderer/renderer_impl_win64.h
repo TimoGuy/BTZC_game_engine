@@ -42,7 +42,6 @@ private:
         int32_t width;
         int32_t height;
     } m_window_dims;
-    bool m_window_dims_changed{ false };
     bool m_window_focused{ true };
     bool m_window_iconified{ false };
 
@@ -91,8 +90,12 @@ private:
     uint32_t m_ldr_depth_rbo{ 0 };
     void create_ldr_fbo();
 
+    Window_dimensions m_main_viewport_dims{ 256, 256 };
+    Window_dimensions m_main_viewport_wanted_dims{ 256, 256 };
+    bool m_render_to_ldr{ true };
+
     void begin_new_display_frame();
-    void render_hdr_color_to_ldr_framebuffer(bool to_display_frame);
+    void render_hdr_color_to_ldr_framebuffer();
     void present_display_frame();
 
     // HDR rendering.

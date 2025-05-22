@@ -183,12 +183,14 @@ void BT::Renderer::Impl::poll_events()
 
 void BT::Renderer::Impl::render()
 {
-    if (m_window_dims_changed)
+    if (m_main_viewport_wanted_dims.width != m_main_viewport_dims.width ||
+        m_main_viewport_wanted_dims.height != m_main_viewport_dims.height)
     {
         // Recreate window dimension-dependent resources.
-        calc_3d_aspect_ratio();
+        m_main_viewport_dims = m_main_viewport_wanted_dims;
+        create_ldr_fbo();
         create_hdr_fbo();
-        m_window_dims_changed = false;
+        calc_3d_aspect_ratio();
     }
 
     update_camera_matrices();
@@ -196,7 +198,7 @@ void BT::Renderer::Impl::render()
     // Render new frame.
     begin_new_display_frame();
     render_scene_to_hdr_framebuffer();
-    render_hdr_color_to_ldr_framebuffer(false);
+    render_hdr_color_to_ldr_framebuffer();
     render_imgui();
 
     present_display_frame();
@@ -216,7 +218,11 @@ void BT::Renderer::Impl::submit_window_dims(int32_t width, int32_t height)
 {
     m_window_dims.width = width;
     m_window_dims.height = height;
-    m_window_dims_changed = true;
+
+    if (!m_render_to_ldr)
+    {
+        m_main_viewport_wanted_dims = m_window_dims;
+    }
 }
 
 void BT::Renderer::Impl::fetch_cached_camera_matrices(mat4& out_projection,
@@ -312,6 +318,12 @@ void BT::Renderer::Impl::calc_ideal_standard_window_dim_and_apply_center_hints()
     glfwWindowHint(GLFW_POSITION_X, centered_window_pos[0]);
     glfwWindowHint(GLFW_POSITION_Y, centered_window_pos[1]);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+
+    // Apply wanted viewport dimensions.
+    if (!m_render_to_ldr)
+    {
+        m_main_viewport_wanted_dims = m_window_dims;
+    }
 }
 
 void BT::Renderer::Impl::create_window_with_gfx_context(string const& title)
@@ -387,7 +399,7 @@ void BT::Renderer::Impl::render_imgui()
     static bool show_demo_window = true;
     static ImGuiIO& io = ImGui::GetIO();
 
-    // Start the Dear ImGui frame
+    // Start the Dear ImGui frame.
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
@@ -412,11 +424,20 @@ void BT::Renderer::Impl::render_imgui()
     // Game view.
     if (s_show_game_view)
     {
-        ImGui::Begin("Game view");
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
+        ImGui::Begin("Main viewport");
         {
-            ImGui::ImageWithBg(m_ldr_color_texture, ImVec2{ 256, 256 });
+            ImVec2 content_size{ ImGui::GetContentRegionAvail() };
+            ImGui::ImageWithBg(m_ldr_color_texture, content_size);
+
+            if (m_render_to_ldr)
+            {
+                m_main_viewport_wanted_dims.width = content_size.x;
+                m_main_viewport_wanted_dims.height = content_size.y;
+            }
         }
         ImGui::End();
+        ImGui::PopStyleVar();
     }
 
     // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
@@ -474,8 +495,8 @@ void BT::Renderer::Impl::setup_3d_camera()
 void BT::Renderer::Impl::calc_3d_aspect_ratio()
 {
     m_camera.aspect_ratio =
-        static_cast<float_t>(m_window_dims.width)
-            / static_cast<float_t>(m_window_dims.height);
+        static_cast<float_t>(m_main_viewport_dims.width)
+            / static_cast<float_t>(m_main_viewport_dims.height);
 }
 
 void BT::Renderer::Impl::update_camera_matrices()
@@ -528,8 +549,8 @@ void BT::Renderer::Impl::create_ldr_fbo()  // @COPYPASTA: see `create_hdr_fbo()`
     glTexImage2D(GL_TEXTURE_2D,
                  0,
                  GL_RGBA8,
-                 m_window_dims.width,
-                 m_window_dims.height,
+                 m_main_viewport_dims.width,
+                 m_main_viewport_dims.height,
                  0,
                  GL_RGBA,
                  GL_FLOAT,
@@ -542,8 +563,8 @@ void BT::Renderer::Impl::create_ldr_fbo()  // @COPYPASTA: see `create_hdr_fbo()`
     glBindRenderbuffer(GL_RENDERBUFFER, m_ldr_depth_rbo);
     glRenderbufferStorage(GL_RENDERBUFFER,
                           GL_DEPTH_COMPONENT,
-                          m_window_dims.width,
-                          m_window_dims.height);
+                          m_main_viewport_dims.width,
+                          m_main_viewport_dims.height);
 
     // Create framebuffer.
     glGenFramebuffers(1, &m_ldr_fbo);
@@ -574,9 +595,9 @@ void BT::Renderer::Impl::begin_new_display_frame()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void BT::Renderer::Impl::render_hdr_color_to_ldr_framebuffer(bool to_display_frame)
+void BT::Renderer::Impl::render_hdr_color_to_ldr_framebuffer()
 {
-    if (!to_display_frame)
+    if (m_render_to_ldr)
     {
         // Assign ldr fbo.
         glBindFramebuffer(GL_FRAMEBUFFER, m_ldr_fbo);
@@ -591,7 +612,7 @@ void BT::Renderer::Impl::render_hdr_color_to_ldr_framebuffer(bool to_display_fra
     render_ndc_quad();
     s_post_process_material->unbind_material();
 
-    if (!to_display_frame)
+    if (m_render_to_ldr)
     {
         // Unassign ldr fbo.
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -623,8 +644,8 @@ void BT::Renderer::Impl::create_hdr_fbo()  // @COPYPASTA.
     glTexImage2D(GL_TEXTURE_2D,
                  0,
                  GL_RGBA16F,
-                 m_window_dims.width,
-                 m_window_dims.height,
+                 m_main_viewport_dims.width,
+                 m_main_viewport_dims.height,
                  0,
                  GL_RGBA,
                  GL_FLOAT,
@@ -637,8 +658,8 @@ void BT::Renderer::Impl::create_hdr_fbo()  // @COPYPASTA.
     glBindRenderbuffer(GL_RENDERBUFFER, m_hdr_depth_rbo);
     glRenderbufferStorage(GL_RENDERBUFFER,
                           GL_DEPTH_COMPONENT,
-                          m_window_dims.width,
-                          m_window_dims.height);
+                          m_main_viewport_dims.width,
+                          m_main_viewport_dims.height);
 
     // Create framebuffer.
     glGenFramebuffers(1, &m_hdr_fbo);
@@ -667,6 +688,7 @@ void BT::Renderer::Impl::create_hdr_fbo()  // @COPYPASTA.
 void BT::Renderer::Impl::render_scene_to_hdr_framebuffer()
 {
     glBindFramebuffer(GL_FRAMEBUFFER, m_hdr_fbo);
+    glViewport(0, 0, m_main_viewport_dims.width, m_main_viewport_dims.height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Render scene.
