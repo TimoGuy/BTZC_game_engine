@@ -4,7 +4,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
 
 ## Notes.
 
-1. [ ] Get basic renderer assembled.
+1. [x] Get basic renderer assembled.
     - [x] Get everything stubbed out for simple hdr renderer.
     - [x] Create mesh importer (simple obj meshes for now).
         - [x] Use tinyobjloader to load obj file.
@@ -18,10 +18,10 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
     - [x] Create simple cylinder mesh (representing player character controller).
     - [x] Create render object structure.
     - [x] Create gameobjects which can use the render object with the mesh.
-    - [ ] Write shaders:
-        - [ ] Basic Geometry color shader.
-        - [ ] Postprocessing shader w/ ndc quad code.
-    - [ ] Rework imgui window drawing to make it control the size of the rendering viewport.
+    - [x] Write shaders:
+        - [x] Basic Geometry color shader.
+        - [x] Postprocessing shader w/ ndc quad code.
+    - [x] Rework imgui window drawing to make it control the size of the rendering viewport.
 
 1. [ ] Get jolt physics working with renderer.
     - [ ] Setup jolt physics world (simple singlethreaded job system for now).

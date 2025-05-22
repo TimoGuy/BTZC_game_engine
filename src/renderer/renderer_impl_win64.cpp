@@ -1,6 +1,7 @@
 #include "renderer_impl_win64.h"
 
 #include "cglm/mat4.h"
+#include "cglm/vec3.h"
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
@@ -396,6 +397,7 @@ void BT::Renderer::Impl::render_imgui()
 {
     // @NOCHECKIN: @TEMP
     static bool s_show_game_view{ true };
+    static bool s_show_camera_props{ true };
     static bool show_demo_window = true;
     static ImGuiIO& io = ImGui::GetIO();
 
@@ -430,6 +432,12 @@ void BT::Renderer::Impl::render_imgui()
             ImVec2 content_size{ ImGui::GetContentRegionAvail() };
             ImGui::ImageWithBg(m_ldr_color_texture, content_size);
 
+            if (ImGui::IsItemHovered())
+            {
+                // Communicate that no capture mouse wanted when hovering over this viewport.
+                ImGui::SetNextFrameWantCaptureMouse(false);
+            }
+
             if (m_render_to_ldr)
             {
                 m_main_viewport_wanted_dims.width = content_size.x;
@@ -438,6 +446,42 @@ void BT::Renderer::Impl::render_imgui()
         }
         ImGui::End();
         ImGui::PopStyleVar();
+    }
+
+    // Camera properties.
+    if (s_show_camera_props)
+    {
+        ImGui::Begin("Camera properties");
+        {
+            ImGui::Text("Mode: Static");
+            ImGui::Text("aspect_ratio: %.3f", m_camera.aspect_ratio);
+
+            float_t fov_deg{ glm_deg(m_camera.fov) };
+            if (ImGui::DragFloat("fov (degrees)", &fov_deg, 1.0f, 1.0f, 179.0f))
+            {
+                m_camera.fov = glm_rad(fov_deg);
+            }
+
+            ImGui::DragFloat("z_near", &m_camera.z_near, 0.1f, 1e-6f);
+            ImGui::DragFloat("z_far", &m_camera.z_far, 1.0f, 1e-6f);
+
+            vec3 neg_x_cam_pos{ -m_camera.position[0], m_camera.position[1], m_camera.position[2] };
+            if (ImGui::DragFloat3("position", neg_x_cam_pos, 0.1f))
+            {
+                // @NOTE: X is negated due to projection bug so this makes the editor seem okayer.
+                glm_vec3_copy(neg_x_cam_pos, m_camera.position);
+                m_camera.position[0] *= -1.0f;
+            }
+
+            vec3 neg_x_view_dir{ -m_camera.view_direction[0], m_camera.view_direction[1], m_camera.view_direction[2] };
+            if (ImGui::DragFloat3("view_direction", neg_x_view_dir, 0.1f))
+            {
+                // @NOTE: X is negated due to projection bug so this makes the editor seem okayer.
+                glm_vec3_copy(neg_x_view_dir, m_camera.view_direction);
+                m_camera.view_direction[0] *= -1.0f;
+            }
+        }
+        ImGui::End();
     }
 
     // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
@@ -507,7 +551,7 @@ void BT::Renderer::Impl::update_camera_matrices()
                     m_camera.z_near,
                     m_camera.z_far,
                     m_camera_matrices_cache.projection);
-    // m_camera_matrices_cache.projection[1][1] *= -1.0f;  // @NOTE: Vulkan only.
+    m_camera_matrices_cache.projection[1][1] *= -1.0f;
 
     // Calculate view matrix.
     using std::abs;
