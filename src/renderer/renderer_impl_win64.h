@@ -1,9 +1,11 @@
 #pragma once
 
 #include "../input_handler/input_handler.h"
+#include "camera.h"
 #include "cglm/cglm.h"
 #include "render_object.h"
 #include "renderer.h"
+#include <chrono>
 #include <cstdint>
 #include <string>
 
@@ -52,32 +54,16 @@ private:
 
     void create_window_with_gfx_context(string const& title);
 
+    Camera m_camera;
+
+    // Timing.
+    using high_res_time_t = std::chrono::high_resolution_clock::time_point;
+    using high_res_duration_t = std::chrono::high_resolution_clock::duration;
+    high_res_time_t m_prev_time{ high_res_time_t::min() };
+
     // ImGui.
     void setup_imgui();
     void render_imgui();
-
-    // 3D camera.
-    struct Camera
-    {
-        float_t fov;
-        float_t aspect_ratio;
-        float_t z_near;
-        float_t z_far;
-        vec3 position{ 0.0f, 0.0f, 0.0f };
-        vec3 view_direction{ 0.0f, 0.0f, 1.0f };
-    } m_camera;
-
-    void setup_3d_camera();
-    void calc_3d_aspect_ratio();
-
-    struct Camera_matrices
-    {
-        mat4 projection;
-        mat4 view;
-        mat4 projection_view;
-    } m_camera_matrices_cache;
-
-    void update_camera_matrices();
 
     // Scene.
     vector<Render_object> m_render_objects;

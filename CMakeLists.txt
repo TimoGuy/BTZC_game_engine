@@ -46,6 +46,8 @@ add_executable(${PROJECT_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/src/input_handler/input_handler.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/input_handler/input_handler.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/camera_read_ifc.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/camera.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/camera.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/material_impl_opaque_shaded.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/material_impl_opaque_shaded.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/material_impl_post_process.cpp

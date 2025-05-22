@@ -19,9 +19,11 @@
 #include "render_object.h"
 #include "renderer.h"
 #include <cassert>
+#include <chrono>
 #include <fmt/base.h>
 #include <gl/gl.h>
 #include <mutex>
+#include <ratio>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -154,7 +156,14 @@ BT::Renderer::Impl::Impl(Input_handler& input_handler, string const& title)
     create_ldr_fbo();
     create_hdr_fbo();
 
-    setup_3d_camera();
+    m_camera.set_callbacks(
+        [&](bool lock) {
+            glfwSetInputMode(reinterpret_cast<GLFWwindow*>(m_window_handle),
+                             GLFW_CURSOR,
+                             (lock ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL));
+        });
+    m_camera.set_aspect_ratio(m_main_viewport_dims.width,
+                              m_main_viewport_dims.height);
 
     s_main_window = reinterpret_cast<GLFWwindow*>(m_window_handle);
     s_main_renderer = this;
@@ -191,10 +200,24 @@ void BT::Renderer::Impl::render()
         m_main_viewport_dims = m_main_viewport_wanted_dims;
         create_ldr_fbo();
         create_hdr_fbo();
-        calc_3d_aspect_ratio();
+        m_camera.set_aspect_ratio(m_main_viewport_dims.width,
+                                  m_main_viewport_dims.height);
     }
 
-    update_camera_matrices();
+    // Calc delta time.
+    float_t delta_time{ 0.0f };
+    high_res_time_t time_now{ std::chrono::high_resolution_clock::now() };
+    if (m_prev_time != high_res_time_t::min())
+    {
+        delta_time =
+            std::chrono::duration<float_t>(time_now - m_prev_time)
+                .count();
+    }
+    m_prev_time = time_now;
+
+    // Update camera.
+    m_camera.update_frontend(m_input_handler.get_input_state(), delta_time);
+    m_camera.update_camera_matrices();
 
     // Render new frame.
     begin_new_display_frame();
@@ -203,6 +226,9 @@ void BT::Renderer::Impl::render()
     render_imgui();
 
     present_display_frame();
+
+    m_input_handler.clear_look_delta();
+    // m_input_handler.clear_ui_scroll_delta();  @UNSURE
 }
 
 void BT::Renderer::Impl::submit_window_focused(bool focused)
@@ -230,9 +256,7 @@ void BT::Renderer::Impl::fetch_cached_camera_matrices(mat4& out_projection,
                                                       mat4& out_view,
                                                       mat4& out_projection_view)
 {
-    glm_mat4_copy(m_camera_matrices_cache.projection, out_projection);
-    glm_mat4_copy(m_camera_matrices_cache.view, out_view);
-    glm_mat4_copy(m_camera_matrices_cache.projection_view, out_projection_view);
+    m_camera.fetch_calculated_camera_matrices(out_projection, out_view, out_projection_view);
 }
 
 BT::Renderer::render_object_key_t BT::Renderer::Impl::emplace_render_object(Render_object&& rend_obj)
@@ -432,7 +456,7 @@ void BT::Renderer::Impl::render_imgui()
             ImVec2 content_size{ ImGui::GetContentRegionAvail() };
             ImGui::ImageWithBg(m_ldr_color_texture, content_size);
 
-            if (ImGui::IsItemHovered())
+            if (ImGui::IsItemHovered() || m_camera.is_mouse_captured())
             {
                 // Communicate that no capture mouse wanted when hovering over this viewport.
                 ImGui::SetNextFrameWantCaptureMouse(false);
@@ -451,37 +475,7 @@ void BT::Renderer::Impl::render_imgui()
     // Camera properties.
     if (s_show_camera_props)
     {
-        ImGui::Begin("Camera properties");
-        {
-            ImGui::Text("Mode: Static");
-            ImGui::Text("aspect_ratio: %.3f", m_camera.aspect_ratio);
-
-            float_t fov_deg{ glm_deg(m_camera.fov) };
-            if (ImGui::DragFloat("fov (degrees)", &fov_deg, 1.0f, 1.0f, 179.0f))
-            {
-                m_camera.fov = glm_rad(fov_deg);
-            }
-
-            ImGui::DragFloat("z_near", &m_camera.z_near, 0.1f, 1e-6f);
-            ImGui::DragFloat("z_far", &m_camera.z_far, 1.0f, 1e-6f);
-
-            vec3 neg_x_cam_pos{ -m_camera.position[0], m_camera.position[1], m_camera.position[2] };
-            if (ImGui::DragFloat3("position", neg_x_cam_pos, 0.1f))
-            {
-                // @NOTE: X is negated due to projection bug so this makes the editor seem okayer.
-                glm_vec3_copy(neg_x_cam_pos, m_camera.position);
-                m_camera.position[0] *= -1.0f;
-            }
-
-            vec3 neg_x_view_dir{ -m_camera.view_direction[0], m_camera.view_direction[1], m_camera.view_direction[2] };
-            if (ImGui::DragFloat3("view_direction", neg_x_view_dir, 0.1f))
-            {
-                // @NOTE: X is negated due to projection bug so this makes the editor seem okayer.
-                glm_vec3_copy(neg_x_view_dir, m_camera.view_direction);
-                m_camera.view_direction[0] *= -1.0f;
-            }
-        }
-        ImGui::End();
+        m_camera.render_imgui();
     }
 
     // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
@@ -522,55 +516,6 @@ void BT::Renderer::Impl::render_imgui()
         ImGui::RenderPlatformWindowsDefault();
         glfwMakeContextCurrent(backup_current_context);
     }
-}
-
-// 3D camera.
-void BT::Renderer::Impl::setup_3d_camera()
-{
-    m_camera = {
-        glm_rad(90.0f),
-        static_cast<float_t>(0xCAFEBABE),  // Dummy value.
-        0.1f,
-        500.0f,
-    };
-    calc_3d_aspect_ratio();
-}
-
-void BT::Renderer::Impl::calc_3d_aspect_ratio()
-{
-    m_camera.aspect_ratio =
-        static_cast<float_t>(m_main_viewport_dims.width)
-            / static_cast<float_t>(m_main_viewport_dims.height);
-}
-
-void BT::Renderer::Impl::update_camera_matrices()
-{
-    // Calculate projection matrix.
-    glm_perspective(m_camera.fov,
-                    m_camera.aspect_ratio,
-                    m_camera.z_near,
-                    m_camera.z_far,
-                    m_camera_matrices_cache.projection);
-    m_camera_matrices_cache.projection[1][1] *= -1.0f;
-
-    // Calculate view matrix.
-    using std::abs;
-    vec3 up{ 0.0f, 1.0f, 0.0f };
-    if (abs(m_camera.view_direction[0]) < 1e-6f &&
-        abs(m_camera.view_direction[1]) > 0.5f &&
-        abs(m_camera.view_direction[2]) < 1e-6f)
-    {
-        glm_vec3_copy(vec3{ 0.0f, 0.0f, 1.0f }, up);
-    }
-
-    vec3 center;
-    glm_vec3_add(m_camera.position, m_camera.view_direction, center);
-    glm_lookat(m_camera.position, center, up, m_camera_matrices_cache.view);
-
-    // Calculate projection view matrix.
-    glm_mat4_mul(m_camera_matrices_cache.projection,
-                 m_camera_matrices_cache.view,
-                 m_camera_matrices_cache.projection_view);
 }
 
 // Display rendering.

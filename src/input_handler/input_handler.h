@@ -60,7 +60,7 @@ public:
         Toggle le_lctrl_mod;
     };
 
-    inline State const& get_input_state() { return m_state; }
+    inline State const& get_input_state() const { return m_state; }
 
 private:
     State m_state;
