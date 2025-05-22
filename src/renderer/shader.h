@@ -2,11 +2,13 @@
 
 #include "cglm/cglm.h"
 #include <string>
+#include <memory>
 #include <utility>
 #include <vector>
 
 using std::pair;
 using std::string;
+using std::unique_ptr;
 using std::vector;
 
 
@@ -39,11 +41,11 @@ private:
 class Shader_bank
 {
 public:
-    static void emplace_shader(string const& name, Shader&& shader);
+    static void emplace_shader(string const& name, unique_ptr<Shader>&& shader);
     static Shader const* get_shader(string const& name);
 
 private:
-    inline static vector<pair<string, Shader>> s_shaders;
+    inline static vector<pair<string, unique_ptr<Shader>>> s_shaders;
 };
 
 }  // namespace BT

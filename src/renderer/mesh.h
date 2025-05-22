@@ -61,8 +61,8 @@ private:
     vector<Vertex>  m_vertices;
     AA_bounding_box m_model_aabb;
 
-    uint32_t m_model_vertex_vao;  // @TODO
-    uint32_t m_model_vertex_vbo;  // @TODO
+    uint32_t m_model_vertex_vao;
+    uint32_t m_model_vertex_vbo;
 
     void load_obj_as_meshes(string const& fname, string const& material_name);
 };
@@ -71,11 +71,11 @@ private:
 class Model_bank
 {
 public:
-    static void emplace_model(string const& name, Model&& model);
+    static void emplace_model(string const& name, unique_ptr<Model>&& model);
     static Model const* get_model(string const& name);
 
 private:
-    inline static vector<pair<string, Model>> s_models;
+    inline static vector<pair<string, unique_ptr<Model>>> s_models;
 };
 
 }  // namespace BT

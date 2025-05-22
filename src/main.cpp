@@ -11,6 +11,9 @@
 #include "renderer/shader.h"  // @DEBUG
 #include <cstdint>
 #include <fmt/base.h>
+#include <memory>
+
+using std::make_unique;
 
 
 int32_t main()
@@ -24,12 +27,12 @@ int32_t main()
     // Shaders.
     BT::Shader_bank::emplace_shader(
         "color_shaded",
-        BT::Shader{ BTZC_GAME_ENGINE_ASSET_SHADER_PATH "color_shaded.vert",
-                    BTZC_GAME_ENGINE_ASSET_SHADER_PATH "color_shaded.frag" });
+        make_unique<BT::Shader>(BTZC_GAME_ENGINE_ASSET_SHADER_PATH "color_shaded.vert",
+                                BTZC_GAME_ENGINE_ASSET_SHADER_PATH "color_shaded.frag"));
     BT::Shader_bank::emplace_shader(
         "post_process",
-        BT::Shader{ BTZC_GAME_ENGINE_ASSET_SHADER_PATH "post_process.vert",
-                    BTZC_GAME_ENGINE_ASSET_SHADER_PATH "post_process.frag" });
+        make_unique<BT::Shader>(BTZC_GAME_ENGINE_ASSET_SHADER_PATH "post_process.vert",
+                                BTZC_GAME_ENGINE_ASSET_SHADER_PATH "post_process.frag"));
 
     // Materials.
     BT::Material_bank::emplace_material(
@@ -44,14 +47,12 @@ int32_t main()
     // Models.
     BT::Model_bank::emplace_model(
         "cylinder_0.5_2",
-        BT::Model{
-            BTZC_GAME_ENGINE_ASSET_MODEL_PATH "cylinder_0.5_2.obj",
-            "default_material" });
+        make_unique<BT::Model>(BTZC_GAME_ENGINE_ASSET_MODEL_PATH "cylinder_0.5_2.obj",
+                               "default_material"));
     BT::Model_bank::emplace_model(
         "probuilder_example",
-        BT::Model{
-            BTZC_GAME_ENGINE_ASSET_MODEL_PATH "probuilder_example.obj",
-            "default_material" });
+        make_unique<BT::Model>(BTZC_GAME_ENGINE_ASSET_MODEL_PATH "probuilder_example.obj",
+                               "default_material"));
 
     // Render objects.
     main_renderer.emplace_render_object(BT::Render_object{

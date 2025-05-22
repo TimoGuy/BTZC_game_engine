@@ -142,7 +142,7 @@ string BT::Shader::read_shader_file(string const& fname)
     return code;
 }
 
-void BT::Shader_bank::emplace_shader(string const& name, Shader&& shader)
+void BT::Shader_bank::emplace_shader(string const& name, unique_ptr<Shader>&& shader)
 {
     if (get_shader(name) != nullptr)
     {
@@ -162,7 +162,7 @@ BT::Shader const* BT::Shader_bank::get_shader(string const& name)
     for (auto& shader : s_shaders)
         if (shader.first == name)
         {
-            shader_ptr = &shader.second;
+            shader_ptr = shader.second.get();
             break;
         }
 

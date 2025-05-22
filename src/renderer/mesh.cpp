@@ -48,13 +48,13 @@ BT::Mesh::Mesh(vector<uint32_t>&& indices, string const& material_name)
     // Create mesh in OpenGL.
     glGenBuffers(1, &m_mesh_index_ebo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_mesh_index_ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_indices.size(), m_indices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_indices.size() * sizeof(uint32_t), m_indices.data(), GL_STATIC_DRAW);
 }
 
 BT::Mesh::~Mesh()
 {
     // Delete the opengl mesh.
-    // glDeleteBuffers(1, &m_mesh_index_ebo);  @NOCHECKIN
+    glDeleteBuffers(1, &m_mesh_index_ebo);
 }
 
 void BT::Mesh::render_mesh(mat4 transform) const
@@ -76,8 +76,8 @@ BT::Model::Model(string const& fname, string const& material_name)
 
 BT::Model::~Model()
 {
-    // glDeleteBuffers(1, &m_model_vertex_vbo);  @NOCHECKIN
-    // glDeleteVertexArrays(1, &m_model_vertex_vao);
+    glDeleteBuffers(1, &m_model_vertex_vbo);
+    glDeleteVertexArrays(1, &m_model_vertex_vao);
 }
 
 void BT::Model::render_model(mat4 transform) const
@@ -250,7 +250,7 @@ void BT::Model::load_obj_as_meshes(string const& fname, string const& material_n
                           sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, tex_coord)));
 }
 
-void BT::Model_bank::emplace_model(string const& name, Model&& model)
+void BT::Model_bank::emplace_model(string const& name, unique_ptr<Model>&& model)
 {
     if (get_model(name) != nullptr)
     {
@@ -270,7 +270,7 @@ BT::Model const* BT::Model_bank::get_model(string const& name)
     for (auto& model : s_models)
         if (model.first == name)
         {
-            model_ptr = &model.second;
+            model_ptr = model.second.get();
             break;
         }
 
