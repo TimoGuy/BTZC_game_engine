@@ -557,7 +557,7 @@ void BT::Renderer::Impl::update_camera_matrices()
     using std::abs;
     vec3 up{ 0.0f, 1.0f, 0.0f };
     if (abs(m_camera.view_direction[0]) < 1e-6f &&
-        abs(m_camera.view_direction[1]) > 1e-6f &&
+        abs(m_camera.view_direction[1]) > 0.5f &&
         abs(m_camera.view_direction[2]) < 1e-6f)
     {
         glm_vec3_copy(vec3{ 0.0f, 0.0f, 1.0f }, up);
