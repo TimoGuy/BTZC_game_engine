@@ -22,6 +22,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - [x] Basic Geometry color shader.
         - [x] Postprocessing shader w/ ndc quad code.
     - [x] Rework imgui window drawing to make it control the size of the rendering viewport.
+    - [x] Create fly cam.
 
 1. [ ] Get jolt physics working with renderer.
     - [ ] Setup jolt physics world (simple singlethreaded job system for now).
