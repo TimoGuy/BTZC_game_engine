@@ -604,7 +604,7 @@ void BT::Renderer::Impl::present_display_frame()
 }
 
 // HDR rendering.
-void BT::Renderer::Impl::create_hdr_fbo()
+void BT::Renderer::Impl::create_hdr_fbo()  // @COPYPASTA.
 {
     if (m_hdr_fbo != 0 || m_hdr_color_texture != 0 || m_hdr_depth_rbo != 0)
     {
