@@ -150,9 +150,10 @@ BT::Renderer::Impl::Impl(Input_handler& input_handler, string const& title)
     create_window_with_gfx_context(title);
 
     setup_imgui();
-    calc_3d_aspect_ratio();
     create_ldr_fbo();
     create_hdr_fbo();
+
+    setup_3d_camera();
 
     s_main_window = reinterpret_cast<GLFWwindow*>(m_window_handle);
     s_main_renderer = this;
