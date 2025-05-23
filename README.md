@@ -37,6 +37,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - [ ] Have power to slow down renderer if physics sim is too slow.
     - [ ] Create CharacterVirtual cylinder (exactly like tuned jolt physics example).
     - [ ] Create gameobjects which create both render objects and physics objects.
+        - [x] Create script system (can add script entry into the `LIST_OF_SCRIPTS` macro and then define it somewhere else in the application).
         - [ ] Has these properties.
             - [ ] Random GUID.
             - [ ] String name.
@@ -44,6 +45,8 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
             - [ ] (Optional) a script to execute before every render tick.
             - [ ] (Optional) a physics object. (@NOTE: Compound colliders will be supported)
             - [ ] (Optional) a script to execute before every physics tick.
+        - [ ] If both physics and render object are selected, sync the transform of the render object to the physics object.
+            - Perhaps have the render object keep a pointer to the physics object so that it's available during the pre-render script execution?
     - [ ] Add physics component to gameobjects.
 
 1. Orbit camera for player character.

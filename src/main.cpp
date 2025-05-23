@@ -69,7 +69,11 @@ int32_t main()
     {
         main_renderer.poll_events();
 
-        // Logic here.
+        // @TODO: @HERE: Physics fixed timestep logic
+            // @TODO: @HERE: All game objects pre-physics scripts execution.
+
+        // @TODO: @HERE: If gameobjects have both a physics and render object, then calc interpolated (decomposed) transform and make available to render object.
+        // @TODO: @HERE: All game objects pre-render scripts execution.
 
         main_renderer.render();
     }
