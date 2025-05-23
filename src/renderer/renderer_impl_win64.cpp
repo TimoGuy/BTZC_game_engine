@@ -158,6 +158,10 @@ BT::Renderer::Impl::Impl(Input_handler& input_handler, string const& title)
 
     m_camera.set_callbacks(
         [&](bool lock) {
+            // Enable/disable ImGui reading mouse and keyboard interactions.
+            if (lock)  ImGui::GetIO().ConfigFlags |= (ImGuiConfigFlags_NoMouse | ImGuiConfigFlags_NoKeyboard);
+            else       ImGui::GetIO().ConfigFlags &= ~(ImGuiConfigFlags_NoMouse | ImGuiConfigFlags_NoKeyboard);
+
             glfwSetInputMode(reinterpret_cast<GLFWwindow*>(m_window_handle),
                              GLFW_CURSOR,
                              (lock ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL));
