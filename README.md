@@ -2,7 +2,13 @@
 Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
 
 
-## Notes.
+## Gallery.
+
+![Screenshot](gallery/Screenshot%202025-05-22%20214844.png)
+*Simple OBJ loader with hacky lighting and a flying camera. (2025/05/22)*
+
+
+## Todo List.
 
 1. Get basic renderer assembled.
     - [x] Get everything stubbed out for simple hdr renderer.
@@ -33,9 +39,11 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
 
 1. Get jolt physics working with renderer.
     - [ ] Setup jolt physics world (simple singlethreaded job system for now).
+    - [ ] Create CharacterVirtual cylinder (exactly like tuned jolt physics example).
+    - [ ] Create Triangle mesh.
+        - Will probs have to extend the obj model loader to include vertex and normal information for the physics world.
     - [ ] Create bridge between fixed physics timestep and renderer.
         - [ ] Have power to slow down renderer if physics sim is too slow.
-    - [ ] Create CharacterVirtual cylinder (exactly like tuned jolt physics example).
     - [ ] Create gameobjects which create both render objects and physics objects.
         - [x] Create script system (can add script entry into the `LIST_OF_SCRIPTS` macro and then define it somewhere else in the application).
         - [ ] Has these properties.
