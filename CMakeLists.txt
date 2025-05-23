@@ -51,6 +51,8 @@ add_executable(${PROJECT_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/src/input_handler/input_codes.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/input_handler/input_handler.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/input_handler/input_handler.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_engine.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_engine.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/camera_read_ifc.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/camera.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/camera.h
@@ -70,6 +72,8 @@ add_executable(${PROJECT_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/renderer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/shader.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/shader.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/timer/timer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/timer/timer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/btzc_game_engine.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
     

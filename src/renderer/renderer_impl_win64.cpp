@@ -19,7 +19,6 @@
 #include "render_object.h"
 #include "renderer.h"
 #include <cassert>
-#include <chrono>
 #include <fmt/base.h>
 #include <gl/gl.h>
 #include <mutex>
@@ -195,7 +194,7 @@ void BT::Renderer::Impl::poll_events()
     glfwPollEvents();
 }
 
-void BT::Renderer::Impl::render()
+void BT::Renderer::Impl::render(float_t delta_time)
 {
     if (m_main_viewport_wanted_dims.width != m_main_viewport_dims.width ||
         m_main_viewport_wanted_dims.height != m_main_viewport_dims.height)
@@ -207,17 +206,6 @@ void BT::Renderer::Impl::render()
         m_camera.set_aspect_ratio(m_main_viewport_dims.width,
                                   m_main_viewport_dims.height);
     }
-
-    // Calc delta time.
-    float_t delta_time{ 0.0f };
-    high_res_time_t time_now{ std::chrono::high_resolution_clock::now() };
-    if (m_prev_time != high_res_time_t::min())
-    {
-        delta_time =
-            std::chrono::duration<float_t>(time_now - m_prev_time)
-                .count();
-    }
-    m_prev_time = time_now;
 
     // Update camera.
     m_camera.update_frontend(m_input_handler.get_input_state(), delta_time);

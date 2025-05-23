@@ -5,7 +5,6 @@
 #include "cglm/cglm.h"
 #include "render_object.h"
 #include "renderer.h"
-#include <chrono>
 #include <cstdint>
 #include <string>
 
@@ -23,7 +22,7 @@ public:
 
     bool get_requesting_close();
     void poll_events();
-    void render();
+    void render(float_t delta_time);
 
     inline Input_handler& get_input_handler() { return m_input_handler; }
 
@@ -55,11 +54,6 @@ private:
     void create_window_with_gfx_context(string const& title);
 
     Camera m_camera;
-
-    // Timing.
-    using high_res_time_t = std::chrono::high_resolution_clock::time_point;
-    using high_res_duration_t = std::chrono::high_resolution_clock::duration;
-    high_res_time_t m_prev_time{ high_res_time_t::min() };
 
     // ImGui.
     void setup_imgui();

@@ -43,7 +43,10 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
     - [ ] Create Triangle mesh.
         - Will probs have to extend the obj model loader to include vertex and normal information for the physics world.
     - [ ] Create bridge between fixed physics timestep and renderer.
-        - [ ] Have power to slow down renderer if physics sim is too slow.
+        - [x] Have power to slow down renderer if physics sim is too slow.
+            - Also will completely freeze the game for the physics to catch up.
+        - [x] Get physics interpolation over to render object via physics engine thing.
+        - [ ] Get renderobject to pull in physics object.
     - [ ] Create gameobjects which create both render objects and physics objects.
         - [x] Create script system (can add script entry into the `LIST_OF_SCRIPTS` macro and then define it somewhere else in the application).
         - [ ] Has these properties.

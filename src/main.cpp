@@ -3,6 +3,7 @@
 #include "cglm/mat4.h"
 #include "game_object/game_object.h"
 #include "input_handler/input_handler.h"
+#include "physics_engine/physics_engine.h"
 #include "renderer/material.h"  // @DEBUG
 #include "renderer/material_impl_opaque_shaded.h"  // @DEBUG
 #include "renderer/material_impl_post_process.h"  // @DEBUG
@@ -10,6 +11,7 @@
 #include "renderer/render_object.h"  // @DEBUG
 #include "renderer/renderer.h"
 #include "renderer/shader.h"  // @DEBUG
+#include "timer/timer.h"
 #include <cstdint>
 #include <fmt/base.h>
 #include <memory>
@@ -22,6 +24,7 @@ int32_t main()
     BT::Input_handler main_input_handler;
     BT::Renderer main_renderer{ main_input_handler,
                                 "Untitled Zelda-like Collectathon Game" };
+    BT::Physics_engine main_physics_engine;
 
     BT::Material_bank::set_camera_read_ifc(&main_renderer);
 
@@ -69,20 +72,44 @@ int32_t main()
     BT::Game_object_pool game_object_pool;
     // game_object_pool.emplace(unique_ptr<Game_object> &&game_object);  @INCOMPLETE @TODO
 
+    // Timer.
+    BT::Timer main_timer;
+    main_timer.start_timer();
+
     // Main loop.
     while (!main_renderer.get_requesting_close())
     {
         main_renderer.poll_events();
 
+        float_t delta_time =
+            main_physics_engine.limit_delta_time(
+                main_timer.calc_delta_time());
+
         auto const all_game_objs{ game_object_pool.checkout_all_as_list() };
 
-        // @TODO: @HERE: Physics fixed timestep logic
-            // @TODO: @HERE: All game objects pre-physics scripts execution.
+        main_physics_engine.accumulate_delta_time(delta_time);
+        while (main_physics_engine.calc_wants_to_tick())
+        {
+            // Run all pre-physics scripts.
+            for (auto game_obj : all_game_objs)
+            {
+                game_obj->run_pre_physics_scripts(main_physics_engine.k_simulation_delta_time);
+            }
 
-        // @TODO: @HERE: If gameobjects have both a physics and render object, then calc interpolated (decomposed) transform and make available to render object.
-        // @TODO: @HERE: All game objects pre-render scripts execution.
+            main_physics_engine.update_physics();
+        }
 
-        main_renderer.render();
+        main_physics_engine.update_interpolation_alpha();
+
+        {
+            // Run all pre-render scripts.
+            for (auto game_obj : all_game_objs)
+            {
+                game_obj->run_pre_physics_scripts(main_physics_engine.k_simulation_delta_time);
+            }
+
+            main_renderer.render(delta_time);
+        }
 
         game_object_pool.return_all_as_list(std::move(all_game_objs));
 
