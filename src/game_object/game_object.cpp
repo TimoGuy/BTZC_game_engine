@@ -51,7 +51,7 @@ void BT::Game_object_pool::return_all_as_list(vector<Game_object*> const&& all_a
 {
     // Assumed that this is the end of using the gameobject list.
     // @TODO: Prevent misuse of this function.
-    // (@IDEA: Make it so that instead of a vector use a struct that has a release function or a dtor)
+    // (@IDEA: Make it so that instead of a vector use a class that has a release function or a dtor)
     (void)all_as_list;
     unblock();
 }
