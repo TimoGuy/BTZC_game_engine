@@ -1,6 +1,7 @@
 #include "btzc_game_engine.h"
 #include "cglm/cglm.h"
 #include "cglm/mat4.h"
+#include "game_object/game_object.h"
 #include "input_handler/input_handler.h"
 #include "renderer/material.h"  // @DEBUG
 #include "renderer/material_impl_opaque_shaded.h"  // @DEBUG
@@ -64,10 +65,16 @@ int32_t main()
         BT::Render_layer::RENDER_LAYER_DEFAULT,
         GLM_MAT4_IDENTITY });
 
+    // Game objects.
+    BT::Game_object_pool game_object_pool;
+    // game_object_pool.emplace(unique_ptr<Game_object> &&game_object);  @INCOMPLETE @TODO
+
     // Main loop.
     while (!main_renderer.get_requesting_close())
     {
         main_renderer.poll_events();
+
+        auto const all_game_objs{ game_object_pool.checkout_all_as_list() };
 
         // @TODO: @HERE: Physics fixed timestep logic
             // @TODO: @HERE: All game objects pre-physics scripts execution.
@@ -76,6 +83,10 @@ int32_t main()
         // @TODO: @HERE: All game objects pre-render scripts execution.
 
         main_renderer.render();
+
+        game_object_pool.return_all_as_list(std::move(all_game_objs));
+
+        // @TODO: @HERE: Tick level loading.
     }
 
     return 0;

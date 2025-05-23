@@ -47,23 +47,27 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
             - [ ] (Optional) a script to execute before every physics tick.
         - [ ] If both physics and render object are selected, sync the transform of the render object to the physics object.
             - Perhaps have the render object keep a pointer to the physics object so that it's available during the pre-render script execution?
+        - [x] Create managing pool.
     - [ ] Add physics component to gameobjects.
 
 1. Orbit camera for player character.
     - [ ] Get the camera to orbit around player character with `update_frontend_follow_orbit()`
 
-1. Level editor.
+1. Code review.
+    - [ ] Fix `@COPYPASTA` tags where there are banks.
+        - Do we want to do a pool? A different system?
+        - There isn't a way to delete render objects. That needs to get written before implementing the level loading/saving system.
+    - [ ] Is the gameobject architecture wanted?
+    - [ ] Should refactor to put data together in better ways?
+        - [ ] Is this important to think about this early and would it create friction at the expense of performance?
+
+1. Level saving/loading.
     - [ ] Game object serialization to json.
     - [ ] Json to Game object generator.
     - [ ] Load level inside a level as a prefab.
     - [ ] Level hierarchy and sorting.
 
 1. Level authoring tools.
-
-1. Code review.
-    - [ ] Is the gameobject architecture wanted?
-    - [ ] Should refactor to put data together in better ways?
-        - [ ] Is this important to think about this early and would it create friction at the expense of performance?
 
 1. Add cascaded shadow maps to renderer.
     - @TODO.

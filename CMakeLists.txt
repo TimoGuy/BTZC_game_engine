@@ -42,6 +42,12 @@ add_subdirectory(third_party/JoltPhysics/Build)
 
 # Executable build.
 add_executable(${PROJECT_NAME}
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/pre_physics_scripts.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/pre_physics_scripts.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/pre_render_scripts.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/pre_render_scripts.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/game_object.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/game_object.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/input_handler/input_codes.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/input_handler/input_handler.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/input_handler/input_handler.h
@@ -64,10 +70,6 @@ add_executable(${PROJECT_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/renderer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/shader.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/shader.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/scripts/pre_physics_scripts.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/scripts/pre_physics_scripts.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/scripts/pre_render_scripts.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/scripts/pre_render_scripts.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/btzc_game_engine.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
     
