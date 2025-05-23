@@ -17,6 +17,7 @@ namespace BT
 
 struct Camera::Data
 {
+    bool is_hovering_over_game_viewport{ false };
     function<void(bool)> cursor_lock_fn;
 
     struct Camera_3D
@@ -170,7 +171,7 @@ void BT::Camera::update_frontend(Input_handler::State const& input_state, float_
         {
             case Data::Frontend::FRONTEND_CAMERA_STATE_STATIC:
                 update_frontend_static();
-                if (!ImGui::GetIO().WantCaptureMouse && on_press_le_rclick_cam)
+                if (m_data->is_hovering_over_game_viewport && on_press_le_rclick_cam)
                 {
                     // Enter capture fly mode.
                     frontend.state = Data::Frontend::FRONTEND_CAMERA_STATE_CAPTURE_FLY;
@@ -207,6 +208,11 @@ bool BT::Camera::is_mouse_captured()
 }
 
 // ImGui.
+void BT::Camera::set_hovering_over_game_viewport(bool hovering)
+{
+    m_data->is_hovering_over_game_viewport = hovering;
+}
+
 void BT::Camera::render_imgui()
 {
     auto& camera{ m_data->camera };

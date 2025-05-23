@@ -454,11 +454,14 @@ void BT::Renderer::Impl::render_imgui()
     // Game view.
     if (s_show_game_view)
     {
+        ImGui::SetNextWindowViewport(ImGui::GetMainViewport()->ID);  // Force game view to stay in main window.
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
         ImGui::Begin("Main viewport");
         {
             ImVec2 content_size{ ImGui::GetContentRegionAvail() };
             ImGui::ImageWithBg(m_ldr_color_texture, content_size);
+
+            m_camera.set_hovering_over_game_viewport(ImGui::IsItemHovered());
 
             if (ImGui::IsItemHovered() || m_camera.is_mouse_captured())
             {
