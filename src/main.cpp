@@ -3,6 +3,7 @@
 #include "cglm/mat4.h"
 #include "game_object/game_object.h"
 #include "input_handler/input_handler.h"
+#include "logger/logger.h"
 #include "physics_engine/physics_engine.h"
 #include "renderer/material.h"  // @DEBUG
 #include "renderer/material_impl_opaque_shaded.h"  // @DEBUG
@@ -13,7 +14,6 @@
 #include "renderer/shader.h"  // @DEBUG
 #include "timer/timer.h"
 #include <cstdint>
-#include <fmt/base.h>
 #include <memory>
 
 using std::make_unique;
@@ -79,6 +79,7 @@ int32_t main()
     // Main loop.
     while (!main_renderer.get_requesting_close())
     {
+        BT::logger::notify_start_new_mainloop_iteration();
         main_renderer.poll_events();
 
         float_t delta_time =

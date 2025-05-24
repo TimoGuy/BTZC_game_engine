@@ -1,8 +1,16 @@
 #pragma once
 
+#include "cglm/cglm.h"
+#include "Jolt/Jolt.h"
+#include "Jolt/Math/Real.h"
+
+using JPH::Real;
+
 
 namespace BT
 {
+
+using rvec3 = JPH::Real[3];
 
 enum Physics_object_type
 {
@@ -14,7 +22,7 @@ enum Physics_object_type
 class Physics_object
 {
 public:
-    void 
+    void get_transform_for_rendering(bool as_interpolated, rvec3& position, versor rotation);
 };
 
 }  // namespace BT

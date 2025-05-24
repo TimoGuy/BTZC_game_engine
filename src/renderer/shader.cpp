@@ -1,8 +1,8 @@
 #include "shader.h"
 
 #include "glad/glad.h"
+#include "logger.h"
 #include <cassert>
-#include <fmt/base.h>
 #include <filesystem>
 #include <fstream>
 #include <sstream>
@@ -31,7 +31,7 @@ BT::Shader::Shader(string const& vert_fname, string const& frag_fname)
     if (!success)
     {
         glGetShaderInfoLog(vert_shader, 512, nullptr, info_log);
-        fmt::println("ERROR: Vertex: Compilation failed: %s", info_log);
+        logger::printef(logger::ERROR, "Vertex: Compilation failed: %s", info_log);
     }
 
     // Fragment shader.
@@ -44,7 +44,7 @@ BT::Shader::Shader(string const& vert_fname, string const& frag_fname)
     if (!success)
     {
         glGetShaderInfoLog(frag_shader, 512, nullptr, info_log);
-        fmt::println("ERROR: Fragment: Compilation failed: %s", info_log);
+        logger::printef(logger::ERROR, "Fragment: Compilation failed: %s", info_log);
     }
 
     // Link into shader program.
@@ -57,7 +57,7 @@ BT::Shader::Shader(string const& vert_fname, string const& frag_fname)
     if (!success)
     {
         glGetShaderInfoLog(m_shader_program, 512, nullptr, info_log);
-        fmt::println("ERROR: Program: Link failed: %s", info_log);
+        logger::printef(logger::ERROR, "Program: Link failed: %s", info_log);
     }
 
     // Cleanup.
@@ -124,7 +124,7 @@ string BT::Shader::read_shader_file(string const& fname)
         if (!shader_file.is_open())
         {
             auto abs_path{ std::filesystem::absolute(fname).string() };
-            fmt::println("ERROR: File could not be open \"%s\"", abs_path);
+            logger::printef(logger::ERROR, "File could not be open \"%s\"", abs_path);
             assert(false);
         }
 
@@ -135,7 +135,7 @@ string BT::Shader::read_shader_file(string const& fname)
     }
     catch (ifstream::failure e)
     {
-        fmt::println("ERROR: File read failed \"%s\"", fname);
+        logger::printef(logger::ERROR, "File read failed \"%s\"", fname);
         assert(false);
     }
 
@@ -147,7 +147,7 @@ void BT::Shader_bank::emplace_shader(string const& name, unique_ptr<Shader>&& sh
     if (get_shader(name) != nullptr)
     {
         // Report shader already exists.
-        fmt::println("ERROR: Shader \"%s\" already exists.", name);
+        logger::printef(logger::ERROR, "Shader \"%s\" already exists.", name);
         assert(false);
         return;
     }

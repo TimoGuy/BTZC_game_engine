@@ -51,6 +51,8 @@ add_executable(${PROJECT_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/src/input_handler/input_codes.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/input_handler/input_handler.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/input_handler/input_handler.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/logger/logger.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/logger/logger.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_engine.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_engine.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/camera_read_ifc.h
@@ -108,6 +110,7 @@ add_executable(${PROJECT_NAME}
 
 target_include_directories(${PROJECT_NAME}
     PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/logger
         ${DEPENDENCY_INCLUDE_DIRS})
 
 target_link_libraries(${PROJECT_NAME}

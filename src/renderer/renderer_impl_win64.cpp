@@ -2,6 +2,7 @@
 
 #include "cglm/mat4.h"
 #include "cglm/vec3.h"
+#include "cglm/cglm.h"
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
@@ -14,15 +15,13 @@
 
 #include "../btzc_game_engine.h"
 #include "../input_handler/input_handler.h"
-#include "cglm/cglm.h"
+#include "logger.h"
 #include "material.h"
 #include "render_object.h"
 #include "renderer.h"
 #include <cassert>
-#include <fmt/base.h>
 #include <gl/gl.h>
 #include <mutex>
-#include <ratio>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -565,7 +564,7 @@ void BT::Renderer::Impl::create_ldr_fbo()  // @COPYPASTA: see `create_hdr_fbo()`
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
     {
-        fmt::println("ERROR: Framebuffer incomplete.");
+        logger::printef(logger::ERROR, "Framebuffer incomplete.");
         assert(false);
     }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -660,7 +659,7 @@ void BT::Renderer::Impl::create_hdr_fbo()  // @COPYPASTA.
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
     {
-        fmt::println("ERROR: Framebuffer incomplete.");
+        logger::printef(logger::ERROR, "Framebuffer incomplete.");
         assert(false);
     }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);

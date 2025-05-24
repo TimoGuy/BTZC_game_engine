@@ -22,7 +22,6 @@ namespace BT
 class Game_object
 {
 public:
-    // @TODO: Iterate thru script enum list and 
     void run_pre_physics_scripts(float_t physics_delta_time);
     void run_pre_render_scripts(float_t delta_time);
 };

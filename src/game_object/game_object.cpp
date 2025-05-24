@@ -7,6 +7,18 @@ using std::atomic_uint8_t;
 using std::atomic_uint64_t;
 
 
+void BT::Game_object::run_pre_physics_scripts(float_t physics_delta_time)
+{
+    // @TODO: Iterate thru script enum list and execute scripts.
+    assert(false);
+}
+
+void BT::Game_object::run_pre_render_scripts(float_t delta_time)
+{
+    // @TODO
+    assert(false);
+}
+
 BT::Game_object_pool::gob_key_t BT::Game_object_pool::emplace(unique_ptr<Game_object>&& game_object)
 {
     gob_key_t key{ m_next_key++ };

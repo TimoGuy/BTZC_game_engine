@@ -1,7 +1,7 @@
 #include "material.h"
 
+#include "logger.h"
 #include <cassert>
-#include <fmt/base.h>
 
 
 BT::Material_ifc::~Material_ifc() = default;
@@ -31,7 +31,7 @@ void BT::Material_bank::emplace_material(string const& name, unique_ptr<Material
     if (get_material(name) != nullptr)
     {
         // Report material already exists.
-        fmt::println("ERROR: Material \"%s\" already exists.", name);
+        logger::printef(logger::ERROR, "Material \"%s\" already exists.", name);
         assert(false);
         return;
     }

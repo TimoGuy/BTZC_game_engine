@@ -1,8 +1,8 @@
 #include "render_object.h"
 
 #include "cglm/cglm.h"
+#include "logger.h"
 #include "mesh.h"
-#include <fmt/base.h>
 
 
 BT::Render_object::Render_object(Model const& model, Render_layer layer, mat4 init_transform)
@@ -26,12 +26,12 @@ BT::Render_object::Render_object(Model const& model, Render_layer layer, mat4 in
 
     if (num_matches == 0)
     {
-        fmt::println("ERROR: No render layer assigned to render object.");
+        logger::printe(logger::ERROR, "No render layer assigned to render object.");
         assert(false);
     }
     else if (num_matches > 1)
     {
-        fmt::println("ERROR: Multiple render layers assigned to render object.");
+        logger::printe(logger::ERROR, "Multiple render layers assigned to render object.");
         assert(false);
     }
 }

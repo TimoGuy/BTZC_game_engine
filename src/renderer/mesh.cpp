@@ -4,11 +4,11 @@
 #include "cglm/vec3-ext.h"
 #include "cglm/vec3.h"
 #include "glad/glad.h"
+#include "logger.h"
 #include "material.h"
 #include "tiny_obj_loader.h"
 #include <cassert>
 #include <cmath>
-#include <fmt/base.h>
 #include <filesystem>
 #include <limits>
 #include <string>
@@ -99,7 +99,7 @@ void BT::Model::load_obj_as_meshes(string const& fname, string const& material_n
         !std::filesystem::is_regular_file(fname))
     {
         // Exit early if this isn't a good fname.
-        fmt::println("ERROR: \"%s\" does not exist or is not a file.", fname);
+        logger::printef(logger::ERROR, "\"%s\" does not exist or is not a file.", fname);
         assert(false);
         return;
     }
@@ -109,7 +109,7 @@ void BT::Model::load_obj_as_meshes(string const& fname, string const& material_n
         fname_path.extension().string() != ".obj")
     {
         // Exit early if this isn't an obj file.
-        fmt::println("ERROR: \"%s\" is not a .obj file.", fname);
+        logger::printef(logger::ERROR, "\"%s\" is not a .obj file.", fname);
         assert(false);
         return;
     }
@@ -131,20 +131,20 @@ void BT::Model::load_obj_as_meshes(string const& fname, string const& material_n
                           fname.c_str(),
                           base_dir.c_str()))
     {
-        fmt::println("ERROR: OBJ file \"%s\" failed to load.", fname);
+        logger::printef(logger::ERROR, "OBJ file \"%s\" failed to load.", fname);
         assert(false);
         return;
     }
 
     if (!warn.empty())
     {
-        fmt::println("WARNING: %s", warn);
+        logger::printe(logger::WARN, warn);
         assert(false);
     }
 
     if (!err.empty())
     {
-        fmt::println("ERROR: %s", err);
+        logger::printe(logger::ERROR, err);
         assert(false);
     }
 
@@ -253,7 +253,7 @@ void BT::Model_bank::emplace_model(string const& name, unique_ptr<Model>&& model
     if (get_model(name) != nullptr)
     {
         // Report model already exists.
-        fmt::println("ERROR: Model \"%s\" already exists.", name);
+        logger::printef(logger::ERROR, "Model \"%s\" already exists.", name);
         assert(false);
         return;
     }

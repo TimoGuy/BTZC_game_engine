@@ -51,3 +51,9 @@ void BT::Physics_engine::update_interpolation_alpha()
     m_interpolation_alpha = (m_accumulated_delta_time / k_simulation_delta_time);
     assert(m_interpolation_alpha >= 0.0f && m_interpolation_alpha < 1.0f);  // Should always be [0, 1).
 }
+
+void BT::Physics_engine::update_physics()
+{
+    // @TODO: Implement.
+    assert(false);
+}
