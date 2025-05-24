@@ -38,7 +38,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
             - Add flag for whether mouse is hovering over the game viewport specifically.
 
 1. Get jolt physics working with renderer.
-    - [ ] Setup jolt physics world (simple singlethreaded job system for now).
+    - [x] Setup jolt physics world (simple singlethreaded job system for now).
     - [ ] Create CharacterVirtual cylinder (exactly like tuned jolt physics example).
     - [ ] Create Triangle mesh.
         - Will probs have to extend the obj model loader to include vertex and normal information for the physics world.
@@ -47,6 +47,10 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
             - Also will completely freeze the game for the physics to catch up.
         - [x] Get physics interpolation over to render object via physics engine thing.
         - [ ] Get renderobject to pull in physics object.
+            - @WAIT!!!! @PROBLEM: In order for the physics object to calculate the interpolated transform, it needs the interpolation value from the engine, which the phys object doesn't have a reference to!
+            - Could have it be inserted into the pre-render functions?
+            - [x] Get the overall function structure.
+            - [ ] Write the script that actually does the tethering.
     - [ ] Create gameobjects which create both render objects and physics objects.
         - [x] Create script system (can add script entry into the `LIST_OF_SCRIPTS` macro and then define it somewhere else in the application).
         - [ ] Has these properties.

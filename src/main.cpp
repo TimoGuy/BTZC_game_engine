@@ -100,13 +100,12 @@ int32_t main()
             main_physics_engine.update_physics();
         }
 
-        main_physics_engine.update_interpolation_alpha();
-
+        main_physics_engine.calc_interpolation_alpha();
         {
             // Run all pre-render scripts.
             for (auto game_obj : all_game_objs)
             {
-                game_obj->run_pre_physics_scripts(main_physics_engine.k_simulation_delta_time);
+                game_obj->run_pre_render_scripts(delta_time);
             }
 
             main_renderer.render(delta_time);

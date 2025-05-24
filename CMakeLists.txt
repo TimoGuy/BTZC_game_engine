@@ -53,8 +53,15 @@ add_executable(${PROJECT_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/src/input_handler/input_handler.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/logger/logger.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/logger/logger.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_engine_impl_custom_listeners.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_engine_impl_error_callbacks.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_engine_impl_layers.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_engine_impl_obj_vs_broad_phase_filter.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_engine_impl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_engine_impl.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_engine.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_engine.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_object.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/camera_read_ifc.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/camera.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/camera.h

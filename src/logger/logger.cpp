@@ -7,6 +7,7 @@
 #include <cinttypes>
 #include <cstring>
 #include <iostream>  // @NOTE: @TEMP: See `printe()`
+#include <mutex>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -14,7 +15,9 @@
 using std::array;
 using std::atomic_uint32_t;
 using std::atomic_uint64_t;
+using std::lock_guard;
 using std::min;
+using std::mutex;
 using std::stringstream;
 using std::strncpy;
 using std::to_string;
@@ -27,9 +30,10 @@ namespace BT::logger
 static atomic_uint64_t s_mainloop_iteration{ 0 };
 
 constexpr uint32_t k_num_columns{ 120 };
+constexpr uint32_t k_num_columns_w_encoding{ k_num_columns + sizeof("\e[9;99x") * 4 };
 constexpr uint32_t k_num_rows{ 16384 };  // @NOTE: Must be a power of 2.
 static atomic_uint32_t s_next_entry{ 0 };
-static array<char[k_num_columns + sizeof("\e[9;99x") * 4], k_num_rows> s_all_entry_data;
+static array<char[k_num_columns_w_encoding], k_num_rows> s_all_entry_data;
 
 static atomic_uint32_t s_print_mask{ ALL };
 
@@ -145,7 +149,8 @@ void BT::logger::printe(Log_type type, string entry)
         i += insert_amount;
 
         // Assert that somehow we didn't accidentally make too long of a string.
-        assert(row.str().size() <= k_num_columns);
+        // @NOTE: Use the length w/ encoding since we're comparing the string length w/ encoding.
+        assert(row.str().size() <= k_num_columns_w_encoding);
 
         rows.emplace_back(row.str());
     } while (i < entry.size());
@@ -160,6 +165,9 @@ void BT::logger::printe(Log_type type, string entry)
     if (check_show_type(type))
     {
         // Print out to stdout.
+        static mutex s_print_mutex;
+        lock_guard<mutex> lock{ s_print_mutex };
+
         for (auto& row : rows)
         {
             // @NOTE: Idk why but fmt::println just doesn't really work when I'm compiling

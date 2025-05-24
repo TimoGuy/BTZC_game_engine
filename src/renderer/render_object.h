@@ -20,6 +20,8 @@ enum Render_layer : uint8_t
     RENDER_LAYER_LEVEL_EDITOR = 0b00000100,
 };
 
+class Physics_object;
+
 class Render_object
 {
 public:
@@ -31,6 +33,9 @@ private:
     Model const& m_model;
     Render_layer m_layer;
     mat4 m_transform;
+
+    // (Optional) Tethered physics object.
+    Physics_object* m_tethered_phys_obj{ nullptr };
 };
 
 }  // namespace BT

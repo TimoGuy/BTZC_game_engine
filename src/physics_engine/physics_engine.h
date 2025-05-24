@@ -1,6 +1,10 @@
 #pragma once
 
+#include "physics_object.h"
 #include <cmath>
+#include <memory>
+
+using std::unique_ptr;
 
 
 namespace BT
@@ -9,8 +13,8 @@ namespace BT
 class Physics_engine
 {
 public:
-    // Physics_engine();
-    // ~Physics_engine();
+    Physics_engine();
+    ~Physics_engine();
 
     static constexpr uint32_t k_simulation_hz{ 50 };
     static constexpr float_t k_simulation_delta_time{ 1.0f / k_simulation_hz };
@@ -18,13 +22,15 @@ public:
     float_t limit_delta_time(float_t delta_time);
     void accumulate_delta_time(float_t delta_time);
     bool calc_wants_to_tick();
-    void update_interpolation_alpha();
+
+    void calc_interpolation_alpha();
+    float_t get_interpolation_alpha() { return m_interpolation_alpha; }
 
     void update_physics();
 
     // Add/remove physics objects.
     using physics_object_key_t = uint64_t;
-    // physics_object_key_t emplace_physics_object(Physics_object&& phys_obj);  static_assert(false, "@TODO: Figure out if this needs to be a unique ptr or not");
+    physics_object_key_t emplace_physics_object(Physics_object&& phys_obj);  // static_assert(false, "@TODO: Figure out if this needs to be a unique ptr or not");
     void remove_physics_object(physics_object_key_t key);
 
 private:
@@ -37,6 +43,13 @@ private:
     bool m_accumulation_hard_stop{ false };
 
     float_t m_interpolation_alpha;
+
+    // Physics object pool.
+    // @TODO: @HERE.
+
+    // Jolt physics implementation.
+    class Phys_impl;
+    unique_ptr<Phys_impl> m_pimpl;
 };
 
 }  // namespace BT
