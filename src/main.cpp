@@ -2,6 +2,7 @@
 #include "cglm/cglm.h"
 #include "cglm/mat4.h"
 #include "game_object/game_object.h"
+#include "game_object/scripts/pre_render_scripts.h"
 #include "input_handler/input_handler.h"
 #include "Jolt/Jolt.h"  // @DEBUG
 #include "Jolt/Math/Real.h"  // @DEBUG
@@ -21,6 +22,7 @@
 #include <memory>
 
 using std::make_unique;
+using std::unique_ptr;
 
 
 int32_t main()
@@ -45,11 +47,11 @@ int32_t main()
     // Materials.
     BT::Material_bank::emplace_material(
         "default_material",
-        std::unique_ptr<BT::Material_ifc>(
+        unique_ptr<BT::Material_ifc>(
             new BT::Material_opaque_shaded(vec3{ 0.5f, 0.225f, 0.3f })));
     BT::Material_bank::emplace_material(
         "post_process",
-        std::unique_ptr<BT::Material_ifc>(
+        unique_ptr<BT::Material_ifc>(
             new BT::Material_impl_post_process(1.0f)));
 
     // Models.
@@ -74,7 +76,7 @@ int32_t main()
                                                           JPH::Quat::sIdentity() }));
 
     // Render objects.
-    main_renderer.emplace_render_object(BT::Render_object{
+    auto player_char_rend_obj_key = main_renderer.emplace_render_object(BT::Render_object{
         *BT::Model_bank::get_model("cylinder_0.5_2"),
         BT::Render_layer::RENDER_LAYER_DEFAULT,
         GLM_MAT4_IDENTITY,
@@ -86,7 +88,11 @@ int32_t main()
 
     // Game objects.
     BT::Game_object_pool game_object_pool;
-    // game_object_pool.emplace(unique_ptr<Game_object> &&game_object);  @INCOMPLETE @TODO
+    game_object_pool.emplace(unique_ptr<BT::Game_object>(
+        new BT::Game_object(main_renderer,
+                            {},
+                            { BT::Pre_render_script::SCRIPT_TYPE_apply_physics_transform_to_render_object },
+                            { player_char_rend_obj_key, reinterpret_cast<uint64_t>(&main_physics_engine) } )));
 
     // Timer.
     BT::Timer main_timer;

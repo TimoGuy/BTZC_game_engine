@@ -34,6 +34,7 @@ public:
 
     render_object_key_t emplace_render_object(Render_object&& rend_obj);
     void remove_render_object(render_object_key_t key);  // @INCOMPLETE.
+    Render_object* get_render_object(render_object_key_t key);
 
 private:
     void setup_glfw_and_opengl46_hints();

@@ -263,6 +263,12 @@ void BT::Renderer::Impl::remove_render_object(render_object_key_t key)
     assert(false);
 }
 
+BT::Render_object* BT::Renderer::Impl::get_render_object(render_object_key_t key)
+{
+    // @INCOMPLETE: Change this once remove render object is implemented.
+    return &m_render_objects[key];
+}
+
 void BT::Renderer::Impl::setup_glfw_and_opengl46_hints()
 {
     // Init glfw and create main window.

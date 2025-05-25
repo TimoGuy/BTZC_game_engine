@@ -70,8 +70,13 @@ void BT::Physics_engine::calc_interpolation_alpha()
 void BT::Physics_engine::update_physics()
 {
     phys_obj_pool_wait_until_free_then_block();
+
     m_pimpl->update(k_simulation_delta_time);
-    // @TODO: @HERE: Deposit all transforms into the physics objects.
+
+    // Notify all physics objects to read transforms.
+    for (auto& phys_obj : m_physics_objects)
+        phys_obj.second->notify_read_new_transform();
+
     phys_obj_pool_unblock();
 }
 
@@ -82,7 +87,7 @@ physics_object_key_t BT::Physics_engine::emplace_physics_object(
     physics_object_key_t key{ m_next_key++ };
 
     phys_obj_pool_wait_until_free_then_block();
-    m_game_objects.emplace(key, std::move(phys_obj));
+    m_physics_objects.emplace(key, std::move(phys_obj));
     phys_obj_pool_unblock();
 
     return key;
@@ -91,14 +96,26 @@ physics_object_key_t BT::Physics_engine::emplace_physics_object(
 void BT::Physics_engine::remove_physics_object(physics_object_key_t key)
 {
     phys_obj_pool_wait_until_free_then_block();
-    if (m_game_objects.find(key) == m_game_objects.end())
+    if (m_physics_objects.find(key) == m_physics_objects.end())
     {
         // Fail bc key was invalid.
         assert(false);
         return;
     }
 
-    m_game_objects.erase(key);
+    m_physics_objects.erase(key);
+    phys_obj_pool_unblock();
+}
+
+BT::Physics_object* BT::Physics_engine::checkout_physics_object(physics_object_key_t key)
+{
+    phys_obj_pool_wait_until_free_then_block();
+    return m_physics_objects.at(key).get();
+}
+
+void BT::Physics_engine::return_physics_object(Physics_object* phys_obj)
+{
+    (void)phys_obj;
     phys_obj_pool_unblock();
 }
 

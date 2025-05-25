@@ -1,5 +1,9 @@
 #include "game_object.h"
 
+#include "../renderer/renderer.h"
+#include "../renderer/render_object.h"
+#include "scripts/pre_physics_scripts.h"
+#include "scripts/pre_render_scripts.h"
 #include <atomic>
 #include <cassert>
 
@@ -7,16 +11,39 @@ using std::atomic_uint8_t;
 using std::atomic_uint64_t;
 
 
+BT::Game_object::Game_object(Renderer& renderer,
+                             vector<Pre_physics_script::Script_type>&& pre_physics_scripts,
+                             vector<Pre_render_script::Script_type>&& pre_render_scripts,
+                             vector<uint64_t>&& user_datas)
+    : m_renderer(renderer)
+    , m_pre_physics_scripts(std::move(pre_physics_scripts))
+    , m_pre_render_scripts(std::move(pre_render_scripts))
+    , m_user_datas(std::move(user_datas))
+{
+}
+
 void BT::Game_object::run_pre_physics_scripts(float_t physics_delta_time)
 {
-    // @TODO: Iterate thru script enum list and execute scripts.
-    assert(false);
+    for (auto pre_phys_script : m_pre_physics_scripts)
+    {
+        // @TODO: Iterate thru script enum list and execute scripts.
+        assert(false);
+    }
 }
 
 void BT::Game_object::run_pre_render_scripts(float_t delta_time)
 {
-    // @TODO
-    assert(false);
+    // @NOTE: `read_data_idx` is a @TEMP and an experiment.
+    size_t read_data_idx{ 0 };
+    BT::Render_object* rend_obj{ m_renderer.get_render_object(m_user_datas[read_data_idx++]) };
+
+    for (auto pre_rend_script : m_pre_render_scripts)
+    {
+        BT::Pre_render_script::execute_pre_render_script(rend_obj,
+                                                         pre_rend_script,
+                                                         m_user_datas,
+                                                         read_data_idx);
+    }
 }
 
 BT::Game_object_pool::gob_key_t BT::Game_object_pool::emplace(unique_ptr<Game_object>&& game_object)

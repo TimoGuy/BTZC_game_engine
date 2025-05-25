@@ -48,6 +48,9 @@ BT::Phys_obj_impl_char_controller::Phys_obj_impl_char_controller(Physics_engine&
 
     // Install contact listener.
     m_character->SetListener(this);
+
+    // @TEMP: @NOCHECKIN.
+    m_character->SetLinearVelocity(JPH::Vec3(1.0f, 0.0f, 0.0f));
 }
 
 BT::Phys_obj_impl_char_controller::~Phys_obj_impl_char_controller()

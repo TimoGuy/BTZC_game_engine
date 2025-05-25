@@ -47,3 +47,8 @@ void BT::Render_object::render(Render_layer active_layers)
         m_model.render_model(m_transform);
     }
 }
+
+void BT::Render_object::set_transform(mat4 transform)
+{
+    glm_mat4_copy(transform, m_transform);
+}

@@ -40,6 +40,8 @@ public:
     // Add/remove physics objects.
     physics_object_key_t emplace_physics_object(unique_ptr<Physics_object>&& phys_obj);
     void remove_physics_object(physics_object_key_t key);
+    Physics_object* checkout_physics_object(physics_object_key_t key);
+    void return_physics_object(Physics_object* phys_obj);
 
 private:
     static constexpr float_t k_accumulate_delta_time_limit{ k_simulation_delta_time * 3 };
@@ -55,7 +57,7 @@ private:
     // Physics object pool.
     // @COPYPASTA: see "game_object.h"
     atomic_uint64_t m_next_key{ 0 };
-    unordered_map<physics_object_key_t, unique_ptr<Physics_object>> m_game_objects;
+    unordered_map<physics_object_key_t, unique_ptr<Physics_object>> m_physics_objects;
 
     atomic_bool m_blocked{ false };
 

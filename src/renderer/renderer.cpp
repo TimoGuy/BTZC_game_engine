@@ -48,3 +48,8 @@ void BT::Renderer::remove_render_object(render_object_key_t key)
 {
     m_pimpl->remove_render_object(key);
 }
+
+BT::Render_object* BT::Renderer::get_render_object(render_object_key_t key)
+{
+    return m_pimpl->get_render_object(key);
+}

@@ -34,6 +34,7 @@ public:
     using render_object_key_t = uint64_t;
     render_object_key_t emplace_render_object(Render_object&& rend_obj);
     void remove_render_object(render_object_key_t key);
+    Render_object* get_render_object(render_object_key_t key);
 
     // Create render object render job for main view z-prepass.
 

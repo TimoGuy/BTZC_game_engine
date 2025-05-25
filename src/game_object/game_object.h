@@ -1,5 +1,8 @@
 #pragma once
 
+#include "../renderer/renderer.h"
+#include "scripts/pre_physics_scripts.h"
+#include "scripts/pre_render_scripts.h"
 #include <atomic>
 #include <memory>
 #include <string>
@@ -22,8 +25,21 @@ namespace BT
 class Game_object
 {
 public:
+    Game_object(Renderer& renderer,
+                vector<Pre_physics_script::Script_type>&& pre_physics_scripts,
+                vector<Pre_render_script::Script_type>&& pre_render_scripts,
+                vector<uint64_t>&& user_datas);
     void run_pre_physics_scripts(float_t physics_delta_time);
     void run_pre_render_scripts(float_t delta_time);
+
+private:
+    Renderer& m_renderer;
+
+    vector<Pre_physics_script::Script_type> m_pre_physics_scripts;
+    vector<Pre_render_script::Script_type> m_pre_render_scripts;
+
+    // @TEMP: @INCOMPLETE: Temporary implementation of the data game objects contain (without constructing stuff inside it).
+    vector<uint64_t> m_user_datas;
 };
 
 // vv See below ~~@COPYPASTA. See "mesh.h" "material.h" "shader.h"~~

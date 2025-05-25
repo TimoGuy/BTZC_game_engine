@@ -38,12 +38,14 @@ BT::Physics_object::Physics_object(Physics_engine const* phys_engine,
 {
 }
 
-void BT::Physics_object::deposit_new_transform(JPH::RVec3Arg position, JPH::QuatArg rotation)
+void BT::Physics_object::notify_read_new_transform()
 {
+    auto phys_transform{ m_type_pimpl->read_transform() };
+
     // Write to triple buffer then increment offset.
     size_t trip_buf_offset{ m_trip_buf_offset.load() };
-    m_transform_triple_buffer[(trip_buf_offset + k_trip_buf_write) % 3] = { position,
-                                                                            rotation };
+    m_transform_triple_buffer[(trip_buf_offset + k_trip_buf_write) % 3] = { phys_transform.position,
+                                                                            phys_transform.rotation };
     m_trip_buf_offset.store(trip_buf_offset + 1);
 }
 

@@ -67,7 +67,7 @@ public:
     Physics_object& operator=(const Physics_object&) = delete;
     Physics_object& operator=(Physics_object&&)      = delete;
 
-    void deposit_new_transform(JPH::RVec3Arg position, JPH::QuatArg rotation);
+    void notify_read_new_transform();
 
     void get_transform_for_rendering(rvec3& out_position, versor& out_rotation);
 

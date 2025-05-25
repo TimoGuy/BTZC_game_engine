@@ -3,18 +3,23 @@
 #include <array>
 #include <cassert>
 #include <string>
+#include <vector>
 
 using std::array;
 using std::string;
+using std::vector;
 
 
 #define LIST_OF_SCRIPTS \
     X(none) \
-    X(example_pre_render_procedure)
+    X(apply_physics_transform_to_render_object)
 
 
 namespace BT
 {
+
+class Render_object;
+
 namespace Pre_render_script
 {
 
@@ -39,13 +44,14 @@ inline string get_script_name_from_type(Script_type script_type)
 }
 
 // All script func prototypes.
-class Render_object;
-
-#define X(name)  void script_ ## name(Render_object const& rend_obj);
+#define X(name)  void script_ ## name(Render_object* rend_obj, vector<uint64_t> const& datas, size_t& in_out_read_data_idx);
 LIST_OF_SCRIPTS
 #undef X
 
-inline void execute_pre_physics_script(Render_object const& rend_obj, Script_type script_type)
+inline void execute_pre_render_script(Render_object* rend_obj,
+                                      Script_type script_type,
+                                      vector<uint64_t> const& datas,
+                                      size_t& in_out_read_data_idx)
 {
     if (script_type == SCRIPT_TYPE_none)
     {   // Exit early for none function.
@@ -54,7 +60,7 @@ inline void execute_pre_physics_script(Render_object const& rend_obj, Script_typ
 
     switch (script_type)
     {
-        #define X(name)  case SCRIPT_TYPE_ ## name: script_ ## name(rend_obj); break;
+        #define X(name)  case SCRIPT_TYPE_ ## name: script_ ## name(rend_obj, datas, in_out_read_data_idx); break;
         LIST_OF_SCRIPTS
         #undef X
 
