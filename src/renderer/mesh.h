@@ -49,6 +49,10 @@ class Model
 {
 public:
     Model(string const& fname, string const& material_name);
+    Model(const Model&)            = delete;
+    Model(Model&&)                 = delete;
+    Model& operator=(const Model&) = delete;
+    Model& operator=(Model&&)      = delete;
     ~Model();
 
     void render_model(mat4 transform) const;

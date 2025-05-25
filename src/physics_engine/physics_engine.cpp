@@ -70,9 +70,10 @@ void BT::Physics_engine::update_physics()
 }
 
 // Add/remove physics objects.
-BT::Physics_engine::physics_object_key_t BT::Physics_engine::emplace_physics_object(Physics_object&& phys_obj)
+BT::Physics_engine::physics_object_key_t BT::Physics_engine::emplace_physics_object(
+    unique_ptr<Physics_object>&& phys_obj)
 {
-    phys_obj.set_physics_engine_reference(this);
+    phys_obj->set_physics_engine_reference(this);
 
     // @TODO: Do emplacing code.
     assert(false);

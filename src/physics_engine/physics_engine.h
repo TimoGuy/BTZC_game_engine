@@ -24,13 +24,13 @@ public:
     bool calc_wants_to_tick();
 
     void calc_interpolation_alpha();
-    float_t get_interpolation_alpha() { return m_interpolation_alpha; }
+    float_t get_interpolation_alpha() const { return m_interpolation_alpha; }
 
     void update_physics();
 
     // Add/remove physics objects.
     using physics_object_key_t = uint64_t;
-    physics_object_key_t emplace_physics_object(Physics_object&& phys_obj);  // static_assert(false, "@TODO: Figure out if this needs to be a unique ptr or not");
+    physics_object_key_t emplace_physics_object(unique_ptr<Physics_object>&& phys_obj);
     void remove_physics_object(physics_object_key_t key);
 
 private:

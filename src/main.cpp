@@ -58,6 +58,7 @@ int32_t main()
         make_unique<BT::Model>(BTZC_GAME_ENGINE_ASSET_MODEL_PATH "probuilder_example.obj",
                                "default_material"));
 
+    // POPULATE TEST LEVEL (@TODO: Once level loading is implemented, replace this with it)
     // Render objects.
     main_renderer.emplace_render_object(BT::Render_object{
         *BT::Model_bank::get_model("cylinder_0.5_2"),
@@ -67,6 +68,9 @@ int32_t main()
         *BT::Model_bank::get_model("probuilder_example"),
         BT::Render_layer::RENDER_LAYER_DEFAULT,
         GLM_MAT4_IDENTITY });
+
+    // Physics objects.
+    main_physics_engine.emplace_physics_object()
 
     // Game objects.
     BT::Game_object_pool game_object_pool;
