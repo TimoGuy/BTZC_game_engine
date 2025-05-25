@@ -39,7 +39,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
 
 1. Get jolt physics working with renderer.
     - [x] Setup jolt physics world (simple singlethreaded job system for now).
-    - [ ] Create CharacterVirtual cylinder (exactly like tuned jolt physics example).
+    - [x] Create CharacterVirtual cylinder (exactly like tuned jolt physics example).
     - [ ] Create Triangle mesh.
         - Will probs have to extend the obj model loader to include vertex and normal information for the physics world.
     - [ ] Create bridge between fixed physics timestep and renderer.
