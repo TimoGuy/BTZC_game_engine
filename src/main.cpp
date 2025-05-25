@@ -3,8 +3,12 @@
 #include "cglm/mat4.h"
 #include "game_object/game_object.h"
 #include "input_handler/input_handler.h"
+#include "Jolt/Jolt.h"  // @DEBUG
+#include "Jolt/Math/Real.h"  // @DEBUG
+#include "Jolt/Math/Quat.h"
 #include "logger/logger.h"
 #include "physics_engine/physics_engine.h"
+#include "physics_engine/physics_object.h"
 #include "renderer/material.h"  // @DEBUG
 #include "renderer/material_impl_opaque_shaded.h"  // @DEBUG
 #include "renderer/material_impl_post_process.h"  // @DEBUG
@@ -59,18 +63,26 @@ int32_t main()
                                "default_material"));
 
     // POPULATE TEST LEVEL (@TODO: Once level loading is implemented, replace this with it)
+    // Physics objects.
+    auto player_char_phys_obj_key = main_physics_engine.emplace_physics_object(
+        BT::Physics_object::create_character_controller(main_physics_engine,
+                                                        true,
+                                                        0.5f,
+                                                        2.0f,
+                                                        1.0f,
+                                                        { JPH::RVec3(0.0f, 1.0f, 0.0f),
+                                                          JPH::Quat::sIdentity() }));
+
     // Render objects.
     main_renderer.emplace_render_object(BT::Render_object{
         *BT::Model_bank::get_model("cylinder_0.5_2"),
         BT::Render_layer::RENDER_LAYER_DEFAULT,
-        GLM_MAT4_IDENTITY });
+        GLM_MAT4_IDENTITY,
+        player_char_phys_obj_key });
     main_renderer.emplace_render_object(BT::Render_object{
         *BT::Model_bank::get_model("probuilder_example"),
         BT::Render_layer::RENDER_LAYER_DEFAULT,
         GLM_MAT4_IDENTITY });
-
-    // Physics objects.
-    main_physics_engine.emplace_physics_object()
 
     // Game objects.
     BT::Game_object_pool game_object_pool;

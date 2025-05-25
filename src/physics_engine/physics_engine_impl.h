@@ -23,6 +23,8 @@ public:
     Phys_impl();
     ~Phys_impl();
 
+    JPH::PhysicsSystem* get_physics_system_ptr();
+
     void update(float_t physics_delta_time);
 
 private:

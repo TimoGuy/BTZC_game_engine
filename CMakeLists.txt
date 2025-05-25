@@ -61,6 +61,8 @@ add_executable(${PROJECT_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_engine_impl.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_engine.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_engine.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_object_impl_char_controller.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_object_impl_char_controller.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_object_impl_kinematic_tri_mesh.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_object_impl_kinematic_tri_mesh.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_object.cpp

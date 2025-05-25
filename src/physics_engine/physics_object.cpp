@@ -5,11 +5,36 @@
 #include "Jolt/Math/Real.h"
 #include "cglm/quat.h"
 #include "physics_engine.h"
+#include "physics_object_impl_char_controller.h"
+#include "physics_object_impl_kinematic_tri_mesh.h"
+#include <memory>
+
+using std::make_unique;
 
 
-BT::Physics_object::Physics_object(Physics_object_type type, bool interpolate_transform)
-    : m_type{ type }
+unique_ptr<BT::Physics_object> BT::Physics_object::create_character_controller(Physics_engine& phys_engine,
+                                                                               bool interpolate_transform,
+                                                                               float_t radius,
+                                                                               float_t height,
+                                                                               float_t crouch_height,
+                                                                               Physics_transform&& init_transform)
+{
+    auto cc =
+        make_unique<Phys_obj_impl_char_controller>(phys_engine,
+                                                   radius,
+                                                   height,
+                                                   crouch_height,
+                                                   std::move(init_transform));
+    return unique_ptr<Physics_object>(
+        new Physics_object(&phys_engine, interpolate_transform, std::move(cc)));
+}
+
+BT::Physics_object::Physics_object(Physics_engine const* phys_engine,
+                                   bool interpolate_transform,
+                                   unique_ptr<Physics_object_type_impl_ifc>&& impl_type)
+    : m_phys_engine{ phys_engine }
     , m_interpolate{ interpolate_transform }
+    , m_type_pimpl{ std::move(impl_type) }
 {
 }
 

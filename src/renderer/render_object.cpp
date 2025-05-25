@@ -5,9 +5,13 @@
 #include "mesh.h"
 
 
-BT::Render_object::Render_object(Model const& model, Render_layer layer, mat4 init_transform)
+BT::Render_object::Render_object(Model const& model,
+                                 Render_layer layer,
+                                 mat4 init_transform,
+                                 physics_object_key_t tethered_phys_obj /*= (physics_object_key_t)-1*/)
     : m_model(model)
     , m_layer(layer)
+    , m_tethered_phys_obj(tethered_phys_obj)
 {
     glm_mat4_copy(init_transform, m_transform);
 

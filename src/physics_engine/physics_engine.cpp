@@ -26,6 +26,11 @@ float_t BT::Physics_engine::limit_delta_time(float_t delta_time)
     return min(delta_time, k_simulation_delta_time);
 }
 
+void* BT::Physics_engine::get_physics_system_ptr()
+{
+    return m_pimpl->get_physics_system_ptr();
+}
+
 void BT::Physics_engine::accumulate_delta_time(float_t delta_time)
 {
     m_accumulated_delta_time += delta_time;
@@ -64,23 +69,54 @@ void BT::Physics_engine::calc_interpolation_alpha()
 
 void BT::Physics_engine::update_physics()
 {
+    phys_obj_pool_wait_until_free_then_block();
     m_pimpl->update(k_simulation_delta_time);
-
     // @TODO: @HERE: Deposit all transforms into the physics objects.
+    phys_obj_pool_unblock();
 }
 
 // Add/remove physics objects.
-BT::Physics_engine::physics_object_key_t BT::Physics_engine::emplace_physics_object(
+physics_object_key_t BT::Physics_engine::emplace_physics_object(
     unique_ptr<Physics_object>&& phys_obj)
 {
-    phys_obj->set_physics_engine_reference(this);
+    physics_object_key_t key{ m_next_key++ };
 
-    // @TODO: Do emplacing code.
-    assert(false);
+    phys_obj_pool_wait_until_free_then_block();
+    m_game_objects.emplace(key, std::move(phys_obj));
+    phys_obj_pool_unblock();
+
+    return key;
 }
 
 void BT::Physics_engine::remove_physics_object(physics_object_key_t key)
 {
-    // @TODO: Do remove code.
-    assert(false);
+    phys_obj_pool_wait_until_free_then_block();
+    if (m_game_objects.find(key) == m_game_objects.end())
+    {
+        // Fail bc key was invalid.
+        assert(false);
+        return;
+    }
+
+    m_game_objects.erase(key);
+    phys_obj_pool_unblock();
+}
+
+// Physics object pool.
+// @COPYPASTA: see "game_object.cpp"
+void BT::Physics_engine::phys_obj_pool_wait_until_free_then_block()
+{
+    while (true)
+    {
+        bool unblocked{ false };
+        if (m_blocked.compare_exchange_weak(unblocked, true))
+        {   // Exchange succeeded and is now in blocking state.
+            break;
+        }
+    }
+}
+
+void BT::Physics_engine::phys_obj_pool_unblock()
+{
+    m_blocked.store(false);
 }

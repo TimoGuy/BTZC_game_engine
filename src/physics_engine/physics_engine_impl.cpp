@@ -68,6 +68,11 @@ BT::Physics_engine::Phys_impl::~Phys_impl()
     JPH::UnregisterTypes();
 }
 
+JPH::PhysicsSystem* BT::Physics_engine::Phys_impl::get_physics_system_ptr()
+{
+    return m_physics_system.get();
+}
+
 void BT::Physics_engine::Phys_impl::update(float_t physics_delta_time)
 {
     JPH::EPhysicsUpdateError error =

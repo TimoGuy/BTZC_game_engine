@@ -27,20 +27,20 @@ enum Physics_object_type
     NUM_PHYSICS_OBJECT_TYPES
 };
 
+struct Physics_transform
+{
+    JPH::RVec3 position = JPH::RVec3::sZero();
+    JPH::Quat rotation = JPH::Quat::sIdentity();
+};
+
 class Physics_object_type_impl_ifc
 {
 public:
     virtual ~Physics_object_type_impl_ifc() = default;
     virtual Physics_object_type get_type() = 0;
-    virtual void move_kinematic() = 0;  // @TODO
-    virtual void set_velocity() = 0;  // @TODO
-    virtual pair<JPH::RVec3Arg, JPH::QuatArg> read_transform() = 0;
-};
-
-struct Physics_transform
-{
-    JPH::RVec3 position = JPH::RVec3::sZero();
-    JPH::Quat rotation = JPH::Quat::sIdentity();
+    virtual void move_kinematic(Physics_transform&& new_transform) = 0;
+    virtual void set_linear_velocity(JPH::Vec3Arg velocity) = 0;
+    virtual Physics_transform read_transform() = 0;
 };
 
 class Physics_engine;
@@ -48,13 +48,25 @@ class Physics_engine;
 class Physics_object
 {
 public:
-    Physics_object(Physics_object_type type, bool interpolate_transform);
+    static unique_ptr<Physics_object> create_kinematic_triangle_mesh(/* @TODO: Create what this needs! */);
+    static unique_ptr<Physics_object> create_character_controller(Physics_engine& phys_engine,
+                                                                  bool interpolate_transform,
+                                                                  float_t radius,
+                                                                  float_t height,
+                                                                  float_t crouch_height,
+                                                                  Physics_transform&& init_transform);
+
+private:
+    // Required to use a factory function to init.
+    Physics_object(Physics_engine const* phys_engine,
+                   bool interpolate_transform,
+                   unique_ptr<Physics_object_type_impl_ifc>&& impl_type);
+public:
     Physics_object(const Physics_object&)            = delete;
     Physics_object(Physics_object&&)                 = delete;
     Physics_object& operator=(const Physics_object&) = delete;
     Physics_object& operator=(Physics_object&&)      = delete;
-    
-    void set_physics_engine_reference(Physics_engine const* phys_engine) { m_phys_engine = phys_engine; }
+
     void deposit_new_transform(JPH::RVec3Arg position, JPH::QuatArg rotation);
 
     void get_transform_for_rendering(rvec3& out_position, versor& out_rotation);

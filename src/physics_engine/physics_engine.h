@@ -1,10 +1,17 @@
 #pragma once
 
 #include "physics_object.h"
+#include <atomic>
 #include <cmath>
 #include <memory>
+#include <unordered_map>
 
+using std::atomic_bool;
+using std::atomic_uint64_t;
 using std::unique_ptr;
+using std::unordered_map;
+
+using physics_object_key_t = uint64_t;
 
 
 namespace BT
@@ -15,6 +22,8 @@ class Physics_engine
 public:
     Physics_engine();
     ~Physics_engine();
+
+    void* get_physics_system_ptr();
 
     static constexpr uint32_t k_simulation_hz{ 50 };
     static constexpr float_t k_simulation_delta_time{ 1.0f / k_simulation_hz };
@@ -29,7 +38,6 @@ public:
     void update_physics();
 
     // Add/remove physics objects.
-    using physics_object_key_t = uint64_t;
     physics_object_key_t emplace_physics_object(unique_ptr<Physics_object>&& phys_obj);
     void remove_physics_object(physics_object_key_t key);
 
@@ -45,7 +53,14 @@ private:
     float_t m_interpolation_alpha;
 
     // Physics object pool.
-    // @TODO: @HERE.
+    // @COPYPASTA: see "game_object.h"
+    atomic_uint64_t m_next_key{ 0 };
+    unordered_map<physics_object_key_t, unique_ptr<Physics_object>> m_game_objects;
+
+    atomic_bool m_blocked{ false };
+
+    void phys_obj_pool_wait_until_free_then_block();
+    void phys_obj_pool_unblock();
 
     // Jolt physics implementation.
     class Phys_impl;
