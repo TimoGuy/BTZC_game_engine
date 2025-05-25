@@ -42,6 +42,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
     - [x] Create CharacterVirtual cylinder (exactly like tuned jolt physics example).
     - [ ] MISSING!!!! Add Pre physics update pass (or use as the pre physics scripts) that runs the ExtendedUpdate() that all the CharacterVirtual objects need to run.
         - [ ] Writing scripts is kiiiinda a bit hard, to maybe having a `datas` builder using another set of static functions for each of the scripts could be good?
+            - @NOTE: I actually like the `datas` system. It's a small nifty serialization system which is nice.
             - Maybe it can build both the script order and the datas!
             - [ ] I think having a separate physics datas and render datas is needed.
     - [ ] Create Triangle mesh.
