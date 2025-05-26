@@ -73,7 +73,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
     - [ ] ~~Add physics component to gameobjects.~~
 
 1. Orbit camera for player character.
-    - [ ] Get the camera to orbit around player character with `update_frontend_follow_orbit()`
+    - [ ] <u>Get the camera to orbit around player character with `update_frontend_follow_orbit()`</u>
 
 1. Code review.
     - [ ] Fix `@COPYPASTA` tags where there are banks.
