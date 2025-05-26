@@ -449,8 +449,49 @@ void BT::Renderer::Impl::render_imgui()
     {
         ImGui::SetNextWindowViewport(ImGui::GetMainViewport()->ID);  // Force game view to stay in main window.
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
-        ImGui::Begin("Main viewport");
+        ImGui::Begin("Main viewport", nullptr, ImGuiWindowFlags_NoScrollbar);
         {
+            static bool s_on_play_switch_to_player_camera{ true };
+
+            // Force padding.
+            ImGui::NewLine();  // @TODO: Doesn't work for vert padding.
+            ImGui::SameLine();
+
+            // Game controls.
+            ImGui::BeginDisabled();
+                ImGui::Button("Play");
+
+                ImGui::SameLine();
+                ImGui::Button("Stop");
+            ImGui::EndDisabled();
+
+            ImGui::SameLine();
+            ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 0.5f), "Playing");
+
+            ImGui::SameLine();
+            ImGui::Text("%.1f FPS (%.3f ms)", io.Framerate, (1000.0f / io.Framerate));
+
+            ImGui::SameLine();
+            if (ImGui::Button((!m_camera.is_follow_orbit() ?
+                                   "Switch to player cam" :
+                                   "Press F1 to exit player cam")))
+            {
+                m_camera.request_follow_orbit();
+            }
+
+            ImGui::SameLine(0.0f, 2.0f);
+            if (ImGui::ArrowButton("Arrow_btn_for_switch_to_player_cam", ImGuiDir_Down))
+                ImGui::OpenPopup("Popup_menu_for_switch_to_player_cam");
+
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 4, 4 });
+                if (ImGui::BeginPopup("Popup_menu_for_switch_to_player_cam"))
+                {
+                    ImGui::Checkbox("Auto switch to player cam on play.", &s_on_play_switch_to_player_camera);
+                    ImGui::EndPopup();
+                }
+            ImGui::PopStyleVar();
+
+            // Image of game view.
             ImVec2 content_size{ ImGui::GetContentRegionAvail() };
             ImGui::ImageWithBg(m_ldr_color_texture, content_size);
 

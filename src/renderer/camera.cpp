@@ -60,6 +60,8 @@ struct Camera::Data
             float_t sensitivity{ 0.1f };
             float_t speed{ 20.0f };
         } capture_fly;
+
+        bool request_follow_orbit{ false };
     } frontend;
 };
 
@@ -152,6 +154,16 @@ void BT::Camera::set_follow_object(Render_object const* render_object)
     assert(false);
 }
 
+void BT::Camera::request_follow_orbit()
+{
+    m_data->frontend.request_follow_orbit = true;
+}
+
+bool BT::Camera::is_follow_orbit()
+{
+    return (m_data->frontend.state == Data::Frontend::FRONTEND_CAMERA_STATE_FOLLOW_ORBIT);
+}
+
 void BT::Camera::update_frontend(Input_handler::State const& input_state, float_t delta_time)
 {
     auto& frontend{ m_data->frontend };
@@ -170,23 +182,11 @@ void BT::Camera::update_frontend(Input_handler::State const& input_state, float_
         switch (frontend.state)
         {
             case Data::Frontend::FRONTEND_CAMERA_STATE_STATIC:
-                update_frontend_static();
-                if (m_data->is_hovering_over_game_viewport && on_press_le_rclick_cam)
-                {
-                    // Enter capture fly mode.
-                    frontend.state = Data::Frontend::FRONTEND_CAMERA_STATE_CAPTURE_FLY;
-                    m_data->cursor_lock_fn(true);
-                }
+                update_frontend_static(on_press_le_rclick_cam);
                 break;
 
             case Data::Frontend::FRONTEND_CAMERA_STATE_CAPTURE_FLY:
-                update_frontend_capture_fly(input_state, delta_time);
-                if (on_release_le_rclick_cam)
-                {
-                    // Enter static mode.
-                    frontend.state = Data::Frontend::FRONTEND_CAMERA_STATE_STATIC;
-                    m_data->cursor_lock_fn(false);
-                }
+                update_frontend_capture_fly(input_state, delta_time, on_release_le_rclick_cam);
                 break;
 
             case Data::Frontend::FRONTEND_CAMERA_STATE_FOLLOW_ORBIT:
@@ -251,12 +251,51 @@ void BT::Camera::render_imgui()
 }
 
 // Frontend functions.
-void BT::Camera::update_frontend_static()
+void BT::Camera::change_frontend_state(uint32_t to_state)
 {
-    // Do nothing.
+    // Exit state.
+    switch (m_data->frontend.state)
+    {
+        case Data::Frontend::FRONTEND_CAMERA_STATE_CAPTURE_FLY:
+            // Release cursor.
+            m_data->cursor_lock_fn(false);
+            break;
+
+        default: break;
+    }
+
+    m_data->frontend.state = static_cast<Data::Frontend::Frontend_state>(to_state);
+
+    // Enter state.
+    switch (m_data->frontend.state)
+    {
+        case Data::Frontend::FRONTEND_CAMERA_STATE_CAPTURE_FLY:
+            // Lock cursor.
+            m_data->cursor_lock_fn(true);
+            break;
+
+        default: break;
+    }
 }
 
-void BT::Camera::update_frontend_capture_fly(Input_handler::State const& input_state, float_t delta_time)
+void BT::Camera::update_frontend_static(bool on_press_le_rclick_cam)
+{
+    // Interstate checks.
+    if (m_data->frontend.request_follow_orbit)
+    {
+        change_frontend_state(Data::Frontend::FRONTEND_CAMERA_STATE_FOLLOW_ORBIT);
+        m_data->frontend.request_follow_orbit = false;
+    }
+
+    if (m_data->is_hovering_over_game_viewport && on_press_le_rclick_cam)
+    {
+        change_frontend_state(Data::Frontend::FRONTEND_CAMERA_STATE_CAPTURE_FLY);
+    }
+}
+
+void BT::Camera::update_frontend_capture_fly(Input_handler::State const& input_state,
+                                             float_t delta_time,
+                                             bool on_release_le_rclick_cam)
 {
     auto& camera{ m_data->camera };
     auto& capture_fly{ m_data->frontend.capture_fly };
@@ -317,6 +356,16 @@ void BT::Camera::update_frontend_capture_fly(Input_handler::State const& input_s
     // Update camera position with input.
     camera.position[1] +=
         input_state.le_move_world_y_axis.val * capture_fly.speed * delta_time;
+
+    // Interstate checks.
+    if (m_data->frontend.request_follow_orbit)
+    {
+        m_data->frontend.request_follow_orbit = false;
+    }
+    if (on_release_le_rclick_cam)
+    {
+        change_frontend_state(Data::Frontend::FRONTEND_CAMERA_STATE_STATIC);
+    }
 }
 
 void BT::Camera::update_frontend_follow_orbit()
