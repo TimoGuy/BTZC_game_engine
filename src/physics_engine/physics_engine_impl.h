@@ -24,6 +24,7 @@ public:
     ~Phys_impl();
 
     JPH::PhysicsSystem* get_physics_system_ptr();
+    JPH::TempAllocator* get_physics_temp_allocator_ptr();
 
     void update(float_t physics_delta_time);
 

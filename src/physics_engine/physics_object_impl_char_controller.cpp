@@ -1,9 +1,11 @@
 #include "physics_object_impl_char_controller.h"
 
 #include "Jolt/Jolt.h"
+#include "Jolt/Core/TempAllocator.h"
 #include "Jolt/Physics/Character/CharacterVirtual.h"
 #include "Jolt/Physics/Collision/Shape/CylinderShape.h"
 #include "Jolt/Physics/Collision/Shape/RotatedTranslatedShape.h"
+#include "Jolt/Physics/PhysicsSystem.h"
 #include "physics_engine_impl_layers.h"
 
 
@@ -70,6 +72,42 @@ void BT::Phys_obj_impl_char_controller::set_linear_velocity(JPH::Vec3Arg velocit
     m_character->SetLinearVelocity(velocity);
 }
 
+void BT::Phys_obj_impl_char_controller::on_pre_update(float_t physics_delta_time)
+{
+    // Settings for our update function.
+    JPH::CharacterVirtual::ExtendedUpdateSettings update_settings;
+    if (!s_enable_stick_to_floor)
+    {
+        update_settings.mStickToFloorStepDown = JPH::Vec3::sZero();
+    }
+    else
+    {
+        update_settings.mStickToFloorStepDown = -m_character->GetUp() * update_settings.mStickToFloorStepDown.Length();
+    }
+
+    if (!s_enable_walk_stairs)
+    {
+        update_settings.mWalkStairsStepUp = JPH::Vec3::sZero();
+    }
+    else
+    {
+        update_settings.mWalkStairsStepUp = m_character->GetUp() * update_settings.mWalkStairsStepUp.Length();
+        update_settings.mWalkStairsMinStepForward = 0.1f;
+    }
+
+    // Update the character position.
+    auto physics_system{ reinterpret_cast<JPH::PhysicsSystem*>(m_phys_engine.get_physics_system_ptr()) };
+    auto temp_allocator{ reinterpret_cast<JPH::TempAllocator*>(m_phys_engine.get_physics_temp_allocator_ptr()) };
+    m_character->ExtendedUpdate(physics_delta_time,
+                                -m_character->GetUp() * physics_system->GetGravity().Length(),
+                                update_settings,
+                                physics_system->GetDefaultBroadPhaseLayerFilter(Layers::MOVING),
+                                physics_system->GetDefaultLayerFilter(Layers::MOVING),
+                                { },
+                                { },
+                                *temp_allocator);
+}
+
 BT::Physics_transform BT::Phys_obj_impl_char_controller::read_transform()
 {
     return { m_character->GetPosition(), m_character->GetRotation() };
@@ -112,7 +150,7 @@ void BT::Phys_obj_impl_char_controller::OnContactAdded(JPH::CharacterVirtual con
     // // If we encounter an object that can push the player, enable sliding
     // if (inCharacter == mCharacter
     //     && ioSettings.mCanPushCharacter
-    //     && mPhysicsSystem->GetBodyInterface().GetMotionType(inBodyID2) != EMotionType::Static)
+    //     && physics_system->GetBodyInterface().GetMotionType(inBodyID2) != EMotionType::Static)
     //     mAllowSliding = true;
 }
 

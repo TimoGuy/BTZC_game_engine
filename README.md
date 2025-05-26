@@ -40,18 +40,19 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
 1. Get jolt physics working with renderer.
     - [x] Setup jolt physics world (simple singlethreaded job system for now).
     - [x] Create CharacterVirtual cylinder (exactly like tuned jolt physics example).
-    - [ ] MISSING!!!! Add Pre physics update pass (or use as the pre physics scripts) that runs the ExtendedUpdate() that all the CharacterVirtual objects need to run.
-        - [ ] Writing scripts is kiiiinda a bit hard, to maybe having a `datas` builder using another set of static functions for each of the scripts could be good?
-            - @NOTE: I actually like the `datas` system. It's a small nifty serialization system which is nice.
-            - Maybe it can build both the script order and the datas!
-            - [ ] I think having a separate physics datas and render datas is needed.
+    - [x] MISSING!!!! Add Pre physics update pass (or use as the pre physics scripts) that runs the ExtendedUpdate() that all the CharacterVirtual objects need to run.
+        - I chose to add an `on_pre_physics_update()` 
     - [ ] Create Triangle mesh.
         - Will probs have to extend the obj model loader to include vertex and normal information for the physics world.
+    - [ ] Writing scripts is kiiiinda a bit hard, to maybe having a `datas` builder using another set of static functions for each of the scripts could be good?
+        - @NOTE: I actually like the `datas` system. It's a small nifty serialization system which is nice.
+        - Maybe it can build both the script order and the datas!
+        - [ ] I think having a separate physics datas and render datas is needed.
     - [x] Create bridge between fixed physics timestep and renderer.
         - [x] Have power to slow down renderer if physics sim is too slow.
             - Also will completely freeze the game for the physics to catch up.
         - [x] Get physics interpolation over to render object via physics engine thing.
-        - [ ] Get renderobject to pull in physics object.
+        - [x] Get renderobject to pull in physics object.
             - @WAIT!!!! @PROBLEM: In order for the physics object to calculate the interpolated transform, it needs the interpolation value from the engine, which the phys object doesn't have a reference to!
             - Could have it be inserted into the pre-render functions?
             - [x] Get the overall function structure.

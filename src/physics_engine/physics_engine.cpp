@@ -31,6 +31,11 @@ void* BT::Physics_engine::get_physics_system_ptr()
     return m_pimpl->get_physics_system_ptr();
 }
 
+void* BT::Physics_engine::get_physics_temp_allocator_ptr()
+{
+    return m_pimpl->get_physics_temp_allocator_ptr();
+}
+
 void BT::Physics_engine::accumulate_delta_time(float_t delta_time)
 {
     m_accumulated_delta_time += delta_time;
@@ -70,6 +75,10 @@ void BT::Physics_engine::calc_interpolation_alpha()
 void BT::Physics_engine::update_physics()
 {
     phys_obj_pool_wait_until_free_then_block();
+
+    // Run all physics objects' pre update.
+    for (auto& phys_obj : m_physics_objects)
+        phys_obj.second->run_pre_update_event(k_simulation_delta_time);
 
     m_pimpl->update(k_simulation_delta_time);
 

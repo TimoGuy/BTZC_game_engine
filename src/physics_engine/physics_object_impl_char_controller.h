@@ -27,6 +27,7 @@ public:
     Physics_object_type get_type() override { return PHYSICS_OBJECT_TYPE_CHARACTER_CONTROLLER; }
     void move_kinematic(Physics_transform&& new_transform) override;
     void set_linear_velocity(JPH::Vec3Arg velocity) override;
+    void on_pre_update(float_t physics_delta_time) override;
     Physics_transform read_transform() override;
 
     // Character contact listener.

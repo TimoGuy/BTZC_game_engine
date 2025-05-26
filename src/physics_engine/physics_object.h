@@ -40,6 +40,7 @@ public:
     virtual Physics_object_type get_type() = 0;
     virtual void move_kinematic(Physics_transform&& new_transform) = 0;
     virtual void set_linear_velocity(JPH::Vec3Arg velocity) = 0;
+    virtual void on_pre_update(float_t physics_delta_time) { }
     virtual Physics_transform read_transform() = 0;
 };
 
@@ -67,6 +68,7 @@ public:
     Physics_object& operator=(const Physics_object&) = delete;
     Physics_object& operator=(Physics_object&&)      = delete;
 
+    void run_pre_update_event(float_t physics_delta_time);
     void notify_read_new_transform();
 
     void get_transform_for_rendering(rvec3& out_position, versor& out_rotation);

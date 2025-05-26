@@ -24,6 +24,7 @@ public:
     ~Physics_engine();
 
     void* get_physics_system_ptr();
+    void* get_physics_temp_allocator_ptr();
 
     static constexpr uint32_t k_simulation_hz{ 50 };
     static constexpr float_t k_simulation_delta_time{ 1.0f / k_simulation_hz };
