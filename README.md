@@ -45,10 +45,10 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
     - [x] Create Triangle mesh.
         - Will probs have to extend the obj model loader to include vertex and normal information for the physics world.
         - [x] Update impl name to just `tri_mesh`.
-    - [ ] Writing scripts is kiiiinda a bit hard, to maybe having a `datas` builder using another set of static functions for each of the scripts could be good?
-        - @NOTE: I actually like the `datas` system. It's a small nifty serialization system which is nice.
-        - Maybe it can build both the script order and the datas!
-        - [ ] I think having a separate physics datas and render datas is needed.
+    - [ ] @FUTURE idea: ~~Writing scripts is kiiiinda a bit hard, to maybe having a `datas` builder using another set of static functions for each of the scripts could be good?~~
+        - ~~@NOTE: I actually like the `datas` system. It's a small nifty serialization system which is nice.~~
+        - ~~Maybe it can build both the script order and the datas!~~
+        - [ ] ~~I think having a separate physics datas and render datas is needed.~~
     - [x] Create bridge between fixed physics timestep and renderer.
         - [x] Have power to slow down renderer if physics sim is too slow.
             - Also will completely freeze the game for the physics to catch up.
@@ -58,19 +58,19 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
             - Could have it be inserted into the pre-render functions?
             - [x] Get the overall function structure.
             - [x] Write the script that actually does the tethering.
-    - [k] Create gameobjects which create both render objects and physics objects.
+    - [x] Create gameobjects which create both render objects and physics objects.
         - [x] Create script system (can add script entry into the `LIST_OF_SCRIPTS` macro and then define it somewhere else in the application).
-        - [ ] Has these properties.
-            - [ ] Random GUID.
-            - [ ] String name.
-            - [ ] (Optional) a render object.
-            - [ ] (Optional) a script to execute before every render tick.
-            - [ ] (Optional) a physics object. (@NOTE: Compound colliders will be supported)
-            - [ ] (Optional) a script to execute before every physics tick.
-        - [ ] If both physics and render object are selected, sync the transform of the render object to the physics object.
+        - [ ] May implement these in the @FUTURE, but atm just ideas: ~~Has these properties.~~
+            - [ ] ~~Random GUID.~~
+            - [ ] ~~String name.~~
+            - [ ] ~~(Optional) a render object.~~
+            - [ ] ~~(Optional) a script to execute before every render tick.~~
+            - [ ] ~~(Optional) a physics object. (@NOTE: Compound colliders will be supported)~~
+            - [ ] ~~(Optional) a script to execute before every physics tick.~~
+        - [x] If both physics and render object are selected, sync the transform of the render object to the physics object.
             - Perhaps have the render object keep a pointer to the physics object so that it's available during the pre-render script execution?
         - [x] Create managing pool.
-    - [ ] Add physics component to gameobjects.
+    - [ ] ~~Add physics component to gameobjects.~~
 
 1. Orbit camera for player character.
     - [ ] Get the camera to orbit around player character with `update_frontend_follow_orbit()`
