@@ -1,4 +1,4 @@
-#include "physics_object_impl_kinematic_tri_mesh.h"
+#include "physics_object_impl_tri_mesh.h"
 
 #include "../renderer/mesh.h"
 #include "Jolt/Geometry/IndexedTriangle.h"
@@ -15,10 +15,10 @@
 #include <cassert>
 
 
-BT::Phys_obj_impl_kine_tri_mesh::Phys_obj_impl_kine_tri_mesh(Physics_engine& phys_engine,
-                                                             Model const* model,
-                                                             JPH::EMotionType motion_type,
-                                                             Physics_transform&& init_transform)
+BT::Phys_obj_impl_tri_mesh::Phys_obj_impl_tri_mesh(Physics_engine& phys_engine,
+                                                   Model const* model,
+                                                   JPH::EMotionType motion_type,
+                                                   Physics_transform&& init_transform)
     : m_phys_body_ifc{ *reinterpret_cast<JPH::BodyInterface*>(phys_engine.get_physics_body_ifc()) }
     , m_can_move{ motion_type == JPH::EMotionType::Kinematic }
 {
@@ -59,12 +59,12 @@ BT::Phys_obj_impl_kine_tri_mesh::Phys_obj_impl_kine_tri_mesh(Physics_engine& phy
     m_body_id = m_phys_body_ifc.CreateAndAddBody(mesh_body_settings, JPH::EActivation::DontActivate);
 }
 
-BT::Phys_obj_impl_kine_tri_mesh::~Phys_obj_impl_kine_tri_mesh()
+BT::Phys_obj_impl_tri_mesh::~Phys_obj_impl_tri_mesh()
 {
     m_phys_body_ifc.RemoveBody(m_body_id);
 }
 
-void BT::Phys_obj_impl_kine_tri_mesh::move_kinematic(Physics_transform&& new_transform)
+void BT::Phys_obj_impl_tri_mesh::move_kinematic(Physics_transform&& new_transform)
 {
     if (!m_can_move)
     {
@@ -77,14 +77,14 @@ void BT::Phys_obj_impl_kine_tri_mesh::move_kinematic(Physics_transform&& new_tra
                                   Physics_engine::k_simulation_delta_time);
 }
 
-void BT::Phys_obj_impl_kine_tri_mesh::set_linear_velocity(JPH::Vec3Arg velocity)
+void BT::Phys_obj_impl_tri_mesh::set_linear_velocity(JPH::Vec3Arg velocity)
 {
     (void)velocity;
     logger::printe(logger::ERROR, "Cannot set linear velocity for tri mesh.");
     assert(false);
 }
 
-BT::Physics_transform BT::Phys_obj_impl_kine_tri_mesh::read_transform()
+BT::Physics_transform BT::Phys_obj_impl_tri_mesh::read_transform()
 {
     return { m_phys_body_ifc.GetCenterOfMassPosition(m_body_id),
              m_phys_body_ifc.GetRotation(m_body_id) };

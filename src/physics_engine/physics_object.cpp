@@ -6,20 +6,20 @@
 #include "cglm/quat.h"
 #include "physics_engine.h"
 #include "physics_object_impl_char_controller.h"
-#include "physics_object_impl_kinematic_tri_mesh.h"
+#include "physics_object_impl_tri_mesh.h"
 #include <memory>
 
 using std::make_unique;
 
 
-unique_ptr<BT::Physics_object> BT::Physics_object::create_kinematic_triangle_mesh(Physics_engine& phys_engine,
+unique_ptr<BT::Physics_object> BT::Physics_object::create_triangle_mesh(Physics_engine& phys_engine,
                                                                                   bool interpolate_transform,
                                                                                   Model const* model,
                                                                                   JPH::EMotionType motion_type,
                                                                                   Physics_transform&& init_transform)
 {
     auto tri_mesh =
-        make_unique<Phys_obj_impl_kine_tri_mesh>(phys_engine,
+        make_unique<Phys_obj_impl_tri_mesh>(phys_engine,
                                                  model,
                                                  motion_type,
                                                  std::move(init_transform));

@@ -51,7 +51,7 @@ class Model;
 class Physics_object
 {
 public:
-    static unique_ptr<Physics_object> create_kinematic_triangle_mesh(Physics_engine& phys_engine,
+    static unique_ptr<Physics_object> create_triangle_mesh(Physics_engine& phys_engine,
                                                                      bool interpolate_transform,
                                                                      Model const* model,
                                                                      JPH::EMotionType motion_type,

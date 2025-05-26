@@ -75,7 +75,7 @@ int32_t main()
                                                         { JPH::RVec3(0.0f, 1.0f, 0.0f),
                                                           JPH::Quat::sIdentity() }));
     main_physics_engine.emplace_physics_object(
-        BT::Physics_object::create_kinematic_triangle_mesh(main_physics_engine,
+        BT::Physics_object::create_triangle_mesh(main_physics_engine,
                                                            false,
                                                            BT::Model_bank::get_model("probuilder_example"),
                                                            JPH::EMotionType::Static,
