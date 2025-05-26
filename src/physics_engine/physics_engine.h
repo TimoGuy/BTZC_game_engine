@@ -24,6 +24,7 @@ public:
     ~Physics_engine();
 
     void* get_physics_system_ptr();
+    void* get_physics_body_ifc();
     void* get_physics_temp_allocator_ptr();
 
     static constexpr uint32_t k_simulation_hz{ 50 };

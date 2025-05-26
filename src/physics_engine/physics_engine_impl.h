@@ -4,6 +4,7 @@
 #include "Jolt/Core/JobSystemSingleThreaded.h"
 #include "Jolt/Core/TempAllocator.h"
 #include "Jolt/Core/Factory.h"
+#include "Jolt/Physics/Body/BodyInterface.h"
 #include "Jolt/Physics/PhysicsSystem.h"
 #include "physics_engine.h"
 #include "physics_engine_impl_custom_listeners.h"
@@ -24,6 +25,7 @@ public:
     ~Phys_impl();
 
     JPH::PhysicsSystem* get_physics_system_ptr();
+    JPH::BodyInterface* get_physics_body_ifc();
     JPH::TempAllocator* get_physics_temp_allocator_ptr();
 
     void update(float_t physics_delta_time);

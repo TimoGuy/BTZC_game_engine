@@ -31,6 +31,11 @@ void* BT::Physics_engine::get_physics_system_ptr()
     return m_pimpl->get_physics_system_ptr();
 }
 
+void* BT::Physics_engine::get_physics_body_ifc()
+{
+    return m_pimpl->get_physics_body_ifc();
+}
+
 void* BT::Physics_engine::get_physics_temp_allocator_ptr()
 {
     return m_pimpl->get_physics_temp_allocator_ptr();

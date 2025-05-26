@@ -6,6 +6,7 @@
 #include "Jolt/Core/IssueReporting.h"
 #include "Jolt/Core/Memory.h"
 #include "Jolt/Core/JobSystemSingleThreaded.h"  // @FUTURE: Replace this with custom job system version in the future.
+#include "Jolt/Physics/Body/BodyInterface.h"
 #include "Jolt/Physics/PhysicsSystem.h"
 #include "Jolt/RegisterTypes.h"
 #include "logger.h"
@@ -71,6 +72,11 @@ BT::Physics_engine::Phys_impl::~Phys_impl()
 JPH::PhysicsSystem* BT::Physics_engine::Phys_impl::get_physics_system_ptr()
 {
     return m_physics_system.get();
+}
+
+JPH::BodyInterface* BT::Physics_engine::Phys_impl::get_physics_body_ifc()
+{
+    return &m_physics_system->GetBodyInterface();
 }
 
 JPH::TempAllocator* BT::Physics_engine::Phys_impl::get_physics_temp_allocator_ptr()
