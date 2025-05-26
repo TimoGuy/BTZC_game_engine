@@ -2,6 +2,11 @@
 
 #include "../input_handler/input_handler.h"
 #include "cglm/cglm.h"
+#include "cglm/euler.h"
+#include "cglm/mat3.h"
+#include "cglm/mat4.h"
+#include "cglm/util.h"
+#include "cglm/vec3.h"
 #include "imgui.h"
 #include <array>
 #include <memory>
@@ -62,6 +67,22 @@ struct Camera::Data
         } capture_fly;
 
         bool request_follow_orbit{ false };
+
+        struct Follow_orbit
+        {
+            // Settings.
+            float_t sensitivity_x{ 0.01875f * 0.25f * 0.25f };
+            float_t sensitivity_y{ 0.0125f * 0.25f * 0.25f };
+            float_t cam_distance{ 10.0f };
+            float_t cam_return_to_distance_speed{ 10.0f };
+            float_t follow_offset_y{ 1.0f };
+
+            // Internal state.
+            vec2 orbits{ 0.0f, 0.0f };
+            float_t current_cam_distance;
+            float_t max_orbit_y{ glm_rad(89.0f) };
+            vec3 current_follow_pos{ 0.0f, 3.0f, 0.0f };
+        } follow_orbit;
     } frontend;
 };
 
@@ -190,7 +211,7 @@ void BT::Camera::update_frontend(Input_handler::State const& input_state, float_
                 break;
 
             case Data::Frontend::FRONTEND_CAMERA_STATE_FOLLOW_ORBIT:
-                update_frontend_follow_orbit();
+                update_frontend_follow_orbit(input_state);
                 break;
 
             default:
@@ -261,6 +282,11 @@ void BT::Camera::change_frontend_state(uint32_t to_state)
             m_data->cursor_lock_fn(false);
             break;
 
+        case Data::Frontend::FRONTEND_CAMERA_STATE_FOLLOW_ORBIT:
+            // Release cursor.
+            m_data->cursor_lock_fn(false);
+            break;
+
         default: break;
     }
 
@@ -272,6 +298,15 @@ void BT::Camera::change_frontend_state(uint32_t to_state)
         case Data::Frontend::FRONTEND_CAMERA_STATE_CAPTURE_FLY:
             // Lock cursor.
             m_data->cursor_lock_fn(true);
+            break;
+
+        case Data::Frontend::FRONTEND_CAMERA_STATE_FOLLOW_ORBIT:
+            // Lock cursor.
+            m_data->cursor_lock_fn(true);
+
+            // Init current cam distance.
+            m_data->frontend.follow_orbit.current_cam_distance =
+                m_data->frontend.follow_orbit.cam_distance;
             break;
 
         default: break;
@@ -368,8 +403,33 @@ void BT::Camera::update_frontend_capture_fly(Input_handler::State const& input_s
     }
 }
 
-void BT::Camera::update_frontend_follow_orbit()
+void BT::Camera::update_frontend_follow_orbit(Input_handler::State const& input_state)
 {
-    // @TODO
-    assert(false);
+    auto& camera{ m_data->camera };
+    auto& fo{ m_data->frontend.follow_orbit };
+
+    float_t look_delta_x{ input_state.look_delta.x.val * fo.sensitivity_x };
+    float_t look_delta_y{ input_state.look_delta.y.val * fo.sensitivity_y };
+
+    fo.orbits[0] -= look_delta_x;
+    while (fo.orbits[0] >= glm_rad(360.0f))
+        fo.orbits[0] -= glm_rad(360.0f);
+    while (fo.orbits[0] < 0.0f)
+        fo.orbits[0] += glm_rad(360.0f);
+
+    fo.orbits[1] += look_delta_y;
+    fo.orbits[1] = glm_clamp(fo.orbits[1], -fo.max_orbit_y, fo.max_orbit_y);
+
+    // Calculate look offset.
+    vec3 offset_from_follow_obj{ 0.0f, 0.0f, -fo.current_cam_distance };
+    mat4 look_rotation;
+    glm_euler_zyx(vec3{ fo.orbits[1], fo.orbits[0], 0.0f }, look_rotation);
+    glm_mat4_mulv3(look_rotation, offset_from_follow_obj, 0.0f, offset_from_follow_obj);
+
+    // Position camera transform.
+    glm_vec3_add(fo.current_follow_pos, vec3{ 0.0f, fo.follow_offset_y, 0.0f}, camera.position);
+    glm_vec3_add(camera.position, offset_from_follow_obj, camera.position);
+
+    glm_vec3_negate_to(offset_from_follow_obj, camera.view_direction);
+    glm_vec3_normalize(camera.view_direction);
 }

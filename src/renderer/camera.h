@@ -54,7 +54,7 @@ private:
     void update_frontend_capture_fly(Input_handler::State const& input_state,
                                      float_t delta_time,
                                      bool on_release_le_rclick_cam);
-    void update_frontend_follow_orbit();
+    void update_frontend_follow_orbit(Input_handler::State const& input_state);
 };
 
 }  // namespace BT
