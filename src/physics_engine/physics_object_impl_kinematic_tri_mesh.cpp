@@ -32,10 +32,25 @@ BT::Phys_obj_impl_kine_tri_mesh::Phys_obj_impl_kine_tri_mesh(Physics_engine& phy
     auto verts_indices{ model->get_all_vertices_and_indices() };
 
     JPH::VertexList vertex_list;
+    vertex_list.reserve(verts_indices.first.size());
+    for (auto& vertex : verts_indices.first)
+    {
+        vertex_list.emplace_back(vertex.position[0], vertex.position[1], vertex.position[2]);
+    }
+
+    assert(verts_indices.second.size() % 3 == 0);
     JPH::IndexedTriangleList indexed_tris_list;
-    assert(false);  // @TODO: Populate these lists.
+    indexed_tris_list.reserve(verts_indices.second.size() / 3);
+    for (size_t i = 0 ; i < verts_indices.second.size(); i += 3)
+    {
+        indexed_tris_list.emplace_back(verts_indices.second[i + 0],
+                                       verts_indices.second[i + 1],
+                                       verts_indices.second[i + 2],
+                                       0);
+    }
 
     JPH::MeshShapeSettings mesh_settings(vertex_list, indexed_tris_list);
+    mesh_settings.SetEmbedded();
     JPH::BodyCreationSettings mesh_body_settings(&mesh_settings,
                                                  init_transform.position,
                                                  init_transform.rotation,

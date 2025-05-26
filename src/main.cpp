@@ -74,6 +74,13 @@ int32_t main()
                                                         1.0f,
                                                         { JPH::RVec3(0.0f, 1.0f, 0.0f),
                                                           JPH::Quat::sIdentity() }));
+    main_physics_engine.emplace_physics_object(
+        BT::Physics_object::create_kinematic_triangle_mesh(main_physics_engine,
+                                                           false,
+                                                           BT::Model_bank::get_model("probuilder_example"),
+                                                           JPH::EMotionType::Static,
+                                                           { JPH::RVec3(0.0f, 1.0f, 0.0f),
+                                                             JPH::Quat::sIdentity() }));
 
     // Render objects.
     auto player_char_rend_obj_key = main_renderer.emplace_render_object(BT::Render_object{

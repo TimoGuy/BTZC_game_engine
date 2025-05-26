@@ -69,6 +69,11 @@ void BT::Mesh::render_mesh(mat4 transform) const
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
+vector<uint32_t> const& BT::Mesh::get_indices() const
+{
+    return m_indices;
+}
+
 BT::Model::Model(string const& fname, string const& material_name)
 {
     load_obj_as_meshes(fname, material_name);
@@ -91,6 +96,24 @@ void BT::Model::render_model(mat4 transform) const
     }
 
     glBindVertexArray(0);
+}
+
+pair<vector<BT::Vertex> const&, vector<uint32_t>> BT::Model::get_all_vertices_and_indices() const
+{
+    vector<uint32_t> all_indices;
+    for (auto& mesh : m_meshes)
+    {
+        auto const& indices{ mesh.get_indices() };
+        size_t start_idx{ all_indices.size() };
+        all_indices.resize(start_idx + indices.size());
+
+        for (size_t i = 0; i < indices.size(); i++)
+        {
+            all_indices[start_idx + i] = indices[i];
+        }
+    }
+    all_indices.shrink_to_fit();
+    return { m_vertices, all_indices };
 }
 
 void BT::Model::load_obj_as_meshes(string const& fname, string const& material_name)

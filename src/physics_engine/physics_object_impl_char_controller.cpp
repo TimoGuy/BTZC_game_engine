@@ -19,8 +19,14 @@ BT::Phys_obj_impl_char_controller::Phys_obj_impl_char_controller(Physics_engine&
     , m_height{ height }
     , m_crouch_height{ crouch_height }
 {
-    m_standing_shape = JPH::RotatedTranslatedShapeSettings(JPH::Vec3(0, 0.5f * m_height + m_radius, 0), JPH::Quat::sIdentity(), new JPH::CylinderShape(0.5f * m_height + m_radius, m_radius)).Create().Get();
-    m_crouching_shape = JPH::RotatedTranslatedShapeSettings(JPH::Vec3(0, 0.5f * m_crouch_height + m_radius, 0), JPH::Quat::sIdentity(), new JPH::CylinderShape(0.5f * m_crouch_height + m_radius, m_radius)).Create().Get();
+    m_standing_shape = JPH::RotatedTranslatedShapeSettings(
+        JPH::Vec3(0, 0.5f * m_height + m_radius, 0),
+        JPH::Quat::sIdentity(),
+        new JPH::CylinderShape(0.5f * m_height + m_radius, m_radius)).Create().Get();
+    m_crouching_shape = JPH::RotatedTranslatedShapeSettings(
+        JPH::Vec3(0, 0.5f * m_crouch_height + m_radius, 0),
+        JPH::Quat::sIdentity(),
+        new JPH::CylinderShape(0.5f * m_crouch_height + m_radius, m_radius)).Create().Get();
 
     JPH::Ref<JPH::CharacterVirtualSettings> settings = new JPH::CharacterVirtualSettings();
     settings->mMaxSlopeAngle = s_max_slope_angle;
@@ -52,7 +58,7 @@ BT::Phys_obj_impl_char_controller::Phys_obj_impl_char_controller(Physics_engine&
     m_character->SetListener(this);
 
     // @TEMP: @NOCHECKIN.
-    m_character->SetLinearVelocity(JPH::Vec3(1.0f, 0.0f, 0.0f));
+    m_character->SetLinearVelocity(JPH::Vec3(0.1f, 0.0f, -1.0f));
 }
 
 BT::Phys_obj_impl_char_controller::~Phys_obj_impl_char_controller()

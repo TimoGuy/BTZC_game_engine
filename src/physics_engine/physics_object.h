@@ -5,6 +5,7 @@
 #include "Jolt/Math/MathTypes.h"
 #include "Jolt/Math/Quat.h"
 #include "Jolt/Math/Real.h"
+#include "Jolt/Physics/Body/MotionType.h"
 #include <atomic>
 #include <memory>
 #include <utility>
@@ -45,11 +46,16 @@ public:
 };
 
 class Physics_engine;
+class Model;
 
 class Physics_object
 {
 public:
-    static unique_ptr<Physics_object> create_kinematic_triangle_mesh(/* @TODO: Create what this needs! */);
+    static unique_ptr<Physics_object> create_kinematic_triangle_mesh(Physics_engine& phys_engine,
+                                                                     bool interpolate_transform,
+                                                                     Model const* model,
+                                                                     JPH::EMotionType motion_type,
+                                                                     Physics_transform&& init_transform);
     static unique_ptr<Physics_object> create_character_controller(Physics_engine& phys_engine,
                                                                   bool interpolate_transform,
                                                                   float_t radius,

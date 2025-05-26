@@ -44,6 +44,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - I chose to add an `on_pre_physics_update()` 
     - [ ] Create Triangle mesh.
         - Will probs have to extend the obj model loader to include vertex and normal information for the physics world.
+        - [ ] Update impl name to just `tri_mesh`.
     - [ ] Writing scripts is kiiiinda a bit hard, to maybe having a `datas` builder using another set of static functions for each of the scripts could be good?
         - @NOTE: I actually like the `datas` system. It's a small nifty serialization system which is nice.
         - Maybe it can build both the script order and the datas!
