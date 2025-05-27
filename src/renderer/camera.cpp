@@ -11,6 +11,7 @@
 #include "logger.h"
 #include "renderer.h"
 #include <array>
+#include <cmath>
 #include <memory>
 #include <string>
 
@@ -454,24 +455,29 @@ void BT::Camera::update_frontend_follow_orbit(Renderer& renderer,
         cam_view_flat_normal[1] = 0.0f;
         glm_vec3_normalize(cam_view_flat_normal);
 
-        float_t mvt_cam_dot{
-            glm_vec3_dot(mvt_velo_flat_normal, cam_view_flat_normal) };
+        float_t mvt_cam_dot{ glm_vec3_dot(mvt_velo_flat_normal, cam_view_flat_normal) };
+        float_t auto_turn_dot_influence{ 1.0f - abs(mvt_cam_dot) };
 
-        float_t auto_turn_dot_influence{
-            (1.0f - abs(glm_vec3_dot(mvt_velo_flat_normal, cam_view_flat_normal)))
-                * glm_signf(mvt_cam_dot) };
+        // Calc target orbit angle.
+        float_t target_orbit_x{
+            atan2f(mvt_velo_flat_normal[0], mvt_velo_flat_normal[2])
+                + (mvt_cam_dot < 0.0f ? glm_rad(0.0f) : glm_rad(180.0f)) };
 
         // Calc auto turn value.
-        vec3 cam_view_right_flat_normal;
-        glm_vec3_cross(cam_view_flat_normal, vec3{ 0.0f, 1.0f, 0.0f }, cam_view_right_flat_normal);
-        glm_vec3_normalize(cam_view_right_flat_normal);  // For float error.
+        static auto angle_diff_fn = [](float_t current, float_t target) {
+            float_t diff{ target - current };
+            while (diff < -glm_rad(180.0f))
+                diff += glm_rad(360.0f);
+            while (diff > glm_rad(180.0f))
+                diff -= glm_rad(360.0f);
+            return diff;
+        };
+        auto_turn_delta = fo.orbit_x_auto_turn_speed
+                              * glm_signf(angle_diff_fn(fo.orbits[0], target_orbit_x))
+                              * auto_turn_mag_influence
+                              * auto_turn_dot_influence
+                              * delta_time;
 
-        auto_turn_delta = fo.orbit_x_auto_turn_speed;
-        if (glm_vec3_dot(cam_view_flat_normal, mvt_velo_flat_normal) < 0.0f)
-            auto_turn_delta *= -1.0f;
-
-        // Combine influence.
-        auto_turn_delta *= auto_turn_mag_influence * auto_turn_dot_influence;
         logger::printe(
             logger::TRACE,
             "atd=" + std::to_string(auto_turn_delta) +

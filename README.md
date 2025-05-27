@@ -78,7 +78,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - [x] Get player render object reference and track it.
         - [ ] Add automatic turning from follow obj velocity.
             - [x] Tries it once, but it's not right. One direction is biased to be the main direction.
-            - [ ] Do it.
+            - [x] Do it correctly!
             - [ ] Add override timer for the controls (0.5 secs like AHIT).
 
 1. Code review.
