@@ -1,7 +1,7 @@
 #include "game_object.h"
 
+#include "../physics_engine/physics_engine.h"
 #include "../renderer/renderer.h"
-#include "../renderer/render_object.h"
 #include "scripts/pre_physics_scripts.h"
 #include "scripts/pre_render_scripts.h"
 #include <atomic>
@@ -11,37 +11,41 @@ using std::atomic_uint8_t;
 using std::atomic_uint64_t;
 
 
-BT::Game_object::Game_object(Renderer& renderer,
+BT::Game_object::Game_object(Physics_engine& phys_engine,
+                             Renderer& renderer,
                              vector<Pre_physics_script::Script_type>&& pre_physics_scripts,
+                             vector<uint64_t>&& pre_physics_user_datas,
                              vector<Pre_render_script::Script_type>&& pre_render_scripts,
-                             vector<uint64_t>&& user_datas)
-    : m_renderer(renderer)
+                             vector<uint64_t>&& pre_render_user_datas)
+    : m_phys_engine(phys_engine)
+    , m_renderer(renderer)
     , m_pre_physics_scripts(std::move(pre_physics_scripts))
+    , m_pre_physics_user_datas(std::move(pre_physics_user_datas))
     , m_pre_render_scripts(std::move(pre_render_scripts))
-    , m_user_datas(std::move(user_datas))
+    , m_pre_render_user_datas(std::move(pre_render_user_datas))
 {
 }
 
 void BT::Game_object::run_pre_physics_scripts(float_t physics_delta_time)
 {
+    size_t read_data_idx{ 0 };
     for (auto pre_phys_script : m_pre_physics_scripts)
     {
-        // @TODO: Iterate thru script enum list and execute scripts.
-        assert(false);
+        BT::Pre_physics_script::execute_pre_physics_script(&m_phys_engine,
+                                                           pre_phys_script,
+                                                           m_pre_physics_user_datas,
+                                                           read_data_idx);
     }
 }
 
 void BT::Game_object::run_pre_render_scripts(float_t delta_time)
 {
-    // @NOTE: `read_data_idx` is a @TEMP and an experiment.
     size_t read_data_idx{ 0 };
-    BT::Render_object* rend_obj{ m_renderer.get_render_object(m_user_datas[read_data_idx++]) };
-
     for (auto pre_rend_script : m_pre_render_scripts)
     {
-        BT::Pre_render_script::execute_pre_render_script(rend_obj,
+        BT::Pre_render_script::execute_pre_render_script(&m_renderer,
                                                          pre_rend_script,
-                                                         m_user_datas,
+                                                         m_pre_render_user_datas,
                                                          read_data_idx);
     }
 }

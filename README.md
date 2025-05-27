@@ -72,14 +72,20 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - [x] Create managing pool.
     - [ ] ~~Add physics component to gameobjects.~~
 
-1. Orbit camera for player character.
-    - [ ] <u>Get the camera to orbit around player character with `update_frontend_follow_orbit()`</u>
+1. Orbit camera and movement for player character.
+    - [x] Get the camera to orbit around player character with `update_frontend_follow_orbit()`
         - [x] Get camera to orbit around a point.
         - [x] Get player render object reference and track it.
-        - [ ] Add automatic turning from follow obj velocity.
+        - [x] Add automatic turning from follow obj velocity.
             - [x] Tries it once, but it's not right. One direction is biased to be the main direction.
             - [x] Do it correctly!
             - [x] Add override timer for the controls (0.5 secs like AHIT).
+    - [ ] ~~Create script for input powered player character movement.~~ This isn't working right. I think that I need to program a few movement systems built into the character controller and then have the player insert their inputs like `flat_velocity`, `jump`, etc.
+        - [ ] Inside the player character movement script:
+            - [ ] Read input and plug in wanted velocity in `move_character()` function.
+            - [ ] Set up group of variables that control the stats of the player character.
+            - [ ] BONUS: Get group of variables into an imgui window.
+        - [ ] Change the charcontroller `set_linear_velocity()` to run this character controller monolithic movement thing.
 
 1. Code review.
     - [ ] Fix `@COPYPASTA` tags where there are banks.

@@ -2,23 +2,26 @@
 
 #include "../physics_engine/physics_engine.h"
 #include "../physics_engine/physics_object.h"
-#include "../renderer/render_object.h"
+#include "../renderer/renderer.h"
 #include "cglm/affine.h"
 #include "cglm/quat.h"
 
 
 void BT::Pre_render_script::script_apply_physics_transform_to_render_object(
-    Render_object* rend_obj,
+    Renderer* renderer,
     vector<uint64_t> const& datas,
     size_t& in_out_read_data_idx)
 {
-    auto key{ rend_obj->get_tethered_phys_obj_key() };
+    auto rend_obj_key{ datas[in_out_read_data_idx++] };
     auto phys_engine{ reinterpret_cast<Physics_engine*>(datas[in_out_read_data_idx++]) };
+
+    Render_object* rend_obj{ renderer->get_render_object(rend_obj_key) };
+    auto tethered_phys_key{ rend_obj->get_tethered_phys_obj_key() };
 
     // Get transform for rendering.
     rvec3 position;
     versor rotation;
-    auto phys_obj{ phys_engine->checkout_physics_object(key) };
+    auto phys_obj{ phys_engine->checkout_physics_object(tethered_phys_key) };
     phys_obj->get_transform_for_rendering(position, rotation);
     phys_engine->return_physics_object(phys_obj);
 

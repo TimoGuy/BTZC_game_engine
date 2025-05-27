@@ -18,7 +18,7 @@ using std::vector;
 namespace BT
 {
 
-class Render_object;
+class Renderer;
 
 namespace Pre_render_script
 {
@@ -44,11 +44,11 @@ inline string get_script_name_from_type(Script_type script_type)
 }
 
 // All script func prototypes.
-#define X(name)  void script_ ## name(Render_object* rend_obj, vector<uint64_t> const& datas, size_t& in_out_read_data_idx);
+#define X(name)  void script_ ## name(Renderer* renderer, vector<uint64_t> const& datas, size_t& in_out_read_data_idx);
 LIST_OF_SCRIPTS
 #undef X
 
-inline void execute_pre_render_script(Render_object* rend_obj,
+inline void execute_pre_render_script(Renderer* renderer,
                                       Script_type script_type,
                                       vector<uint64_t> const& datas,
                                       size_t& in_out_read_data_idx)
@@ -60,7 +60,7 @@ inline void execute_pre_render_script(Render_object* rend_obj,
 
     switch (script_type)
     {
-        #define X(name)  case SCRIPT_TYPE_ ## name: script_ ## name(rend_obj, datas, in_out_read_data_idx); break;
+        #define X(name)  case SCRIPT_TYPE_ ## name: script_ ## name(renderer, datas, in_out_read_data_idx); break;
         LIST_OF_SCRIPTS
         #undef X
 

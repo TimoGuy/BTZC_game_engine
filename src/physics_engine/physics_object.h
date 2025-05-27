@@ -79,6 +79,8 @@ public:
 
     void get_transform_for_rendering(rvec3& out_position, versor& out_rotation);
 
+    void set_linear_velocity(JPH::Vec3Arg velocity) { m_type_pimpl->set_linear_velocity(velocity); }
+
 private:
     bool m_interpolate;
     Physics_engine const* m_phys_engine;

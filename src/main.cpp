@@ -1,4 +1,5 @@
 #include "btzc_game_engine.h"
+#include "game_object/scripts/pre_physics_scripts.h"
 #include "renderer/camera.h"
 #include "cglm/cglm.h"
 #include "cglm/mat4.h"
@@ -96,9 +97,11 @@ int32_t main()
 
     // Game objects.
     BT::Game_object_pool game_object_pool;
+
     game_object_pool.emplace(unique_ptr<BT::Game_object>(
         new BT::Game_object(main_renderer,
-                            {},
+                            { BT::Pre_physics_script::SCRIPT_TYPE_player_character_movement },
+                            {  },
                             { BT::Pre_render_script::SCRIPT_TYPE_apply_physics_transform_to_render_object },
                             { player_char_rend_obj_key, reinterpret_cast<uint64_t>(&main_physics_engine) } )));
 

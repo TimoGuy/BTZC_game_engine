@@ -42,6 +42,7 @@ add_subdirectory(third_party/JoltPhysics/Build)
 
 # Executable build.
 add_executable(${PROJECT_NAME}
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/pps_player_character_movement.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/pre_physics_scripts.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/pre_physics_scripts.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/pre_render_scripts.cpp

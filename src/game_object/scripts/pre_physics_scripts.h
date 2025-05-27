@@ -3,18 +3,23 @@
 #include <array>
 #include <cassert>
 #include <string>
+#include <vector>
 
 using std::array;
 using std::string;
+using std::vector;
 
 
 #define LIST_OF_SCRIPTS \
     X(none) \
-    X(example_pre_physics_procedure)
+    X(player_character_movement)
 
 
 namespace BT
 {
+
+class Physics_engine;
+
 namespace Pre_physics_script
 {
 
@@ -39,11 +44,14 @@ inline string get_script_name_from_type(Script_type script_type)
 }
 
 // All script func prototypes.
-#define X(name)  void script_ ## name();
+#define X(name)  void script_ ## name(Physics_engine* phys_engine, vector<uint64_t> const& datas, size_t& in_out_read_data_idx);
 LIST_OF_SCRIPTS
 #undef X
 
-inline void execute_pre_physics_script(Script_type script_type)
+inline void execute_pre_physics_script(Physics_engine* phys_engine,
+                                       Script_type script_type,
+                                       vector<uint64_t> const& datas,
+                                       size_t& in_out_read_data_idx)
 {
     if (script_type == SCRIPT_TYPE_none)
     {   // Exit early for none function.
@@ -52,7 +60,7 @@ inline void execute_pre_physics_script(Script_type script_type)
 
     switch (script_type)
     {
-        #define X(name)  case SCRIPT_TYPE_ ## name: script_ ## name(); break;
+        #define X(name)  case SCRIPT_TYPE_ ## name: script_ ## name(phys_engine, datas, in_out_read_data_idx); break;
         LIST_OF_SCRIPTS
         #undef X
 
