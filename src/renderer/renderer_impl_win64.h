@@ -17,7 +17,7 @@ namespace BT
 class Renderer::Impl
 {
 public:
-    Impl(Input_handler& input_handler, string const& title);
+    Impl(Renderer& renderer, Input_handler& input_handler, string const& title);
     ~Impl();
 
     bool get_requesting_close();
@@ -31,12 +31,15 @@ public:
     void submit_window_dims(int32_t width, int32_t height);
 
     void fetch_cached_camera_matrices(mat4& out_projection, mat4& out_view, mat4& out_projection_view);
+    Camera* get_camera_obj();
 
     render_object_key_t emplace_render_object(Render_object&& rend_obj);
     void remove_render_object(render_object_key_t key);  // @INCOMPLETE.
     Render_object* get_render_object(render_object_key_t key);
 
 private:
+    Renderer& m_renderer;
+
     void setup_glfw_and_opengl46_hints();
     
     struct Window_dimensions

@@ -8,6 +8,8 @@
 #include "cglm/util.h"
 #include "cglm/vec3.h"
 #include "imgui.h"
+#include "logger.h"
+#include "renderer.h"
 #include <array>
 #include <memory>
 #include <string>
@@ -73,15 +75,20 @@ struct Camera::Data
             // Settings.
             float_t sensitivity_x{ 0.01875f * 0.25f * 0.25f };
             float_t sensitivity_y{ 0.0125f * 0.25f * 0.25f };
+            float_t orbit_x_auto_turn_disable_time{ 0.5f };
+            float_t orbit_x_auto_turn_speed{ 1.0f };
+            float_t orbit_x_auto_turn_max_influence_magnitude{ 5.0f }; // @THOUGHT: Should this be based off the input instead of the effective velocity?
             float_t cam_distance{ 10.0f };
             float_t cam_return_to_distance_speed{ 10.0f };
             float_t follow_offset_y{ 1.0f };
 
             // Internal state.
-            vec2 orbits{ 0.0f, 0.0f };
-            float_t current_cam_distance;
-            float_t max_orbit_y{ glm_rad(89.0f) };
+            render_object_key_t render_object_ref{ (render_object_key_t)-1 };
             vec3 current_follow_pos{ 0.0f, 3.0f, 0.0f };
+            vec2 orbits{ 0.0f, 0.0f };
+            float_t max_orbit_y{ glm_rad(89.0f) };
+            float_t auto_turn_disable_timer{ 0.0f };
+            float_t current_cam_distance;
         } follow_orbit;
     } frontend;
 };
@@ -169,10 +176,9 @@ void BT::Camera::fetch_calculated_camera_matrices(mat4& out_projection,
 }
 
 // Camera frontend.
-void BT::Camera::set_follow_object(Render_object const* render_object)
+void BT::Camera::set_follow_object(render_object_key_t render_object_ref)
 {
-    // @TODO
-    assert(false);
+    m_data->frontend.follow_orbit.render_object_ref = render_object_ref;
 }
 
 void BT::Camera::request_follow_orbit()
@@ -185,7 +191,7 @@ bool BT::Camera::is_follow_orbit()
     return (m_data->frontend.state == Data::Frontend::FRONTEND_CAMERA_STATE_FOLLOW_ORBIT);
 }
 
-void BT::Camera::update_frontend(Input_handler::State const& input_state, float_t delta_time)
+void BT::Camera::update_frontend(Renderer& renderer, Input_handler::State const& input_state, float_t delta_time)
 {
     auto& frontend{ m_data->frontend };
 
@@ -211,7 +217,7 @@ void BT::Camera::update_frontend(Input_handler::State const& input_state, float_
                 break;
 
             case Data::Frontend::FRONTEND_CAMERA_STATE_FOLLOW_ORBIT:
-                update_frontend_follow_orbit(input_state);
+                update_frontend_follow_orbit(renderer, input_state, delta_time);
                 break;
 
             default:
@@ -403,12 +409,79 @@ void BT::Camera::update_frontend_capture_fly(Input_handler::State const& input_s
     }
 }
 
-void BT::Camera::update_frontend_follow_orbit(Input_handler::State const& input_state)
+void BT::Camera::update_frontend_follow_orbit(Renderer& renderer,
+                                              Input_handler::State const& input_state,
+                                              float_t delta_time)
 {
     auto& camera{ m_data->camera };
     auto& fo{ m_data->frontend.follow_orbit };
 
-    float_t look_delta_x{ input_state.look_delta.x.val * fo.sensitivity_x };
+    vec3 mvt_velocity{ 0.0f, 0.0f, 0.0f };
+
+    auto rend_obj{ renderer.get_render_object(fo.render_object_ref) };
+    if (rend_obj != nullptr)
+    {
+        // Copy prev follow position.
+        vec3 from_follow_pos;
+        glm_vec3_copy(fo.current_follow_pos, from_follow_pos);
+
+        // Update follow position.
+        rend_obj->get_position(fo.current_follow_pos);
+
+        // Calc mvt velocity (@NOTE: deltatime independant).
+        glm_vec3_sub(fo.current_follow_pos, from_follow_pos, mvt_velocity);
+        glm_vec3_scale(mvt_velocity, 1.0f / delta_time, mvt_velocity);
+    }
+
+    float_t auto_turn_delta{ 0.0f };
+    mvt_velocity[1] = 0.0f;
+    if (fo.auto_turn_disable_timer > 0.0f)
+    {
+        // Work to expire auto turn disable timer.
+        fo.auto_turn_disable_timer -= delta_time;
+    }
+    else if (float_t mvt_velo_flat_mag{ glm_vec3_norm2(mvt_velocity) }; mvt_velo_flat_mag > 1e-6)
+    {
+        // Calc auto turn influence.
+        float_t auto_turn_mag_influence{
+            glm_clamp_zo(sqrtf(mvt_velo_flat_mag) / fo.orbit_x_auto_turn_max_influence_magnitude) };
+
+        vec3 mvt_velo_flat_normal;
+        glm_vec3_normalize_to(mvt_velocity, mvt_velo_flat_normal);
+
+        vec3 cam_view_flat_normal;
+        glm_vec3_copy(camera.view_direction, cam_view_flat_normal);
+        cam_view_flat_normal[1] = 0.0f;
+        glm_vec3_normalize(cam_view_flat_normal);
+
+        float_t mvt_cam_dot{
+            glm_vec3_dot(mvt_velo_flat_normal, cam_view_flat_normal) };
+
+        float_t auto_turn_dot_influence{
+            (1.0f - abs(glm_vec3_dot(mvt_velo_flat_normal, cam_view_flat_normal)))
+                * glm_signf(mvt_cam_dot) };
+
+        // Calc auto turn value.
+        vec3 cam_view_right_flat_normal;
+        glm_vec3_cross(cam_view_flat_normal, vec3{ 0.0f, 1.0f, 0.0f }, cam_view_right_flat_normal);
+        glm_vec3_normalize(cam_view_right_flat_normal);  // For float error.
+
+        auto_turn_delta = fo.orbit_x_auto_turn_speed;
+        if (glm_vec3_dot(cam_view_flat_normal, mvt_velo_flat_normal) < 0.0f)
+            auto_turn_delta *= -1.0f;
+
+        // Combine influence.
+        auto_turn_delta *= auto_turn_mag_influence * auto_turn_dot_influence;
+        logger::printe(
+            logger::TRACE,
+            "atd=" + std::to_string(auto_turn_delta) +
+                "\tatmi=" + std::to_string(auto_turn_mag_influence) +
+                "\tatdi=" + std::to_string(auto_turn_dot_influence));
+    }
+
+
+    // Set new orbit values.
+    float_t look_delta_x{ input_state.look_delta.x.val * fo.sensitivity_x + auto_turn_delta };
     float_t look_delta_y{ input_state.look_delta.y.val * fo.sensitivity_y };
 
     fo.orbits[0] -= look_delta_x;

@@ -12,6 +12,10 @@ using std::string;
 namespace BT
 {
 
+class Camera;
+
+using render_object_key_t = uint64_t;
+
 class Renderer : public Camera_read_ifc
 {
 public:
@@ -27,11 +31,11 @@ public:
     void fetch_camera_matrices(mat4& out_projection,
                                mat4& out_view,
                                mat4& out_projection_view) override;
+    Camera* get_camera_obj();
 
     // Create render graph bits.
 
     // Create render objects.
-    using render_object_key_t = uint64_t;
     render_object_key_t emplace_render_object(Render_object&& rend_obj);
     void remove_render_object(render_object_key_t key);
     Render_object* get_render_object(render_object_key_t key);

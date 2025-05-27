@@ -1,4 +1,5 @@
 #include "btzc_game_engine.h"
+#include "renderer/camera.h"
 #include "cglm/cglm.h"
 #include "cglm/mat4.h"
 #include "game_object/game_object.h"
@@ -100,6 +101,9 @@ int32_t main()
                             {},
                             { BT::Pre_render_script::SCRIPT_TYPE_apply_physics_transform_to_render_object },
                             { player_char_rend_obj_key, reinterpret_cast<uint64_t>(&main_physics_engine) } )));
+
+    // Camera follow ref.
+    main_renderer.get_camera_obj()->set_follow_object(player_char_phys_obj_key);
 
     // Timer.
     BT::Timer main_timer;

@@ -1,5 +1,6 @@
 #include "render_object.h"
 
+#include "cglm/affine.h"
 #include "cglm/cglm.h"
 #include "logger.h"
 #include "mesh.h"
@@ -51,4 +52,11 @@ void BT::Render_object::render(Render_layer active_layers)
 void BT::Render_object::set_transform(mat4 transform)
 {
     glm_mat4_copy(transform, m_transform);
+}
+
+void BT::Render_object::get_position(vec3& position)
+{
+    vec4 pos4;
+    glm_vec4_copy(m_transform[3], pos4);  // Copied from `glm_decompose()`.
+    glm_vec3(pos4, position);
 }

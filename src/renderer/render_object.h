@@ -34,6 +34,7 @@ public:
     void render(Render_layer active_layers);
 
     void set_transform(mat4 transform);
+    void get_position(vec3& position);
     inline physics_object_key_t get_tethered_phys_obj_key() const { return m_tethered_phys_obj; }
 
 private:

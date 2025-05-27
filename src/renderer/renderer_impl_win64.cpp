@@ -136,8 +136,9 @@ static void window_resize_callback(GLFWwindow* window,
 }  // namespace
 
 
-BT::Renderer::Impl::Impl(Input_handler& input_handler, string const& title)
-    : m_input_handler{ input_handler }
+BT::Renderer::Impl::Impl(Renderer& renderer, Input_handler& input_handler, string const& title)
+    : m_renderer{ renderer }
+    , m_input_handler{ input_handler }
 {
     static mutex s_renderer_creation_mutex;
     lock_guard lock{ s_renderer_creation_mutex };
@@ -207,7 +208,7 @@ void BT::Renderer::Impl::render(float_t delta_time)
     }
 
     // Update camera.
-    m_camera.update_frontend(m_input_handler.get_input_state(), delta_time);
+    m_camera.update_frontend(m_renderer, m_input_handler.get_input_state(), delta_time);
     m_camera.update_camera_matrices();
 
     // Render new frame.
@@ -250,7 +251,12 @@ void BT::Renderer::Impl::fetch_cached_camera_matrices(mat4& out_projection,
     m_camera.fetch_calculated_camera_matrices(out_projection, out_view, out_projection_view);
 }
 
-BT::Renderer::render_object_key_t BT::Renderer::Impl::emplace_render_object(Render_object&& rend_obj)
+BT::Camera* BT::Renderer::Impl::get_camera_obj()
+{
+    return &m_camera;
+}
+
+BT::render_object_key_t BT::Renderer::Impl::emplace_render_object(Render_object&& rend_obj)
 {
     m_render_objects.emplace_back(std::move(rend_obj));
     return (m_render_objects.size() - 1);

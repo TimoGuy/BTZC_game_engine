@@ -9,7 +9,7 @@ using std::string;
 
 
 BT::Renderer::Renderer(Input_handler& input_handler, string const& title)
-    : m_pimpl{ std::make_unique<Impl>(input_handler, title) }
+    : m_pimpl{ std::make_unique<Impl>(*this, input_handler, title) }
 {
 }
 
@@ -38,8 +38,13 @@ void BT::Renderer::fetch_camera_matrices(mat4& out_projection,
     m_pimpl->fetch_cached_camera_matrices(out_projection, out_view, out_projection_view);
 }
 
+BT::Camera* BT::Renderer::get_camera_obj()
+{
+    return m_pimpl->get_camera_obj();
+}
+
 // Create render objects.
-BT::Renderer::render_object_key_t BT::Renderer::emplace_render_object(Render_object&& rend_obj)
+BT::render_object_key_t BT::Renderer::emplace_render_object(Render_object&& rend_obj)
 {
     return m_pimpl->emplace_render_object(std::move(rend_obj));
 }

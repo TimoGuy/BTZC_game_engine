@@ -2,7 +2,7 @@
 
 #include "../input_handler/input_handler.h"
 #include "cglm/cglm.h"
-#include "render_object.h"
+#include "renderer.h"
 #include <cmath>
 #include <functional>
 #include <memory>
@@ -34,10 +34,10 @@ public:
                                           mat4& out_projection_view);
 
     // Camera frontend.
-    void set_follow_object(Render_object const* render_object);
+    void set_follow_object(render_object_key_t render_object_ref);
     void request_follow_orbit();
     bool is_follow_orbit();
-    void update_frontend(Input_handler::State const& input_state, float_t delta_time);
+    void update_frontend(Renderer& renderer, Input_handler::State const& input_state, float_t delta_time);
     bool is_mouse_captured();
 
     // ImGui.
@@ -54,7 +54,9 @@ private:
     void update_frontend_capture_fly(Input_handler::State const& input_state,
                                      float_t delta_time,
                                      bool on_release_le_rclick_cam);
-    void update_frontend_follow_orbit(Input_handler::State const& input_state);
+    void update_frontend_follow_orbit(Renderer& renderer,
+                                      Input_handler::State const& input_state,
+                                      float_t delta_time);
 };
 
 }  // namespace BT
