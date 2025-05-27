@@ -477,14 +477,14 @@ void BT::Camera::update_frontend_follow_orbit(Renderer& renderer,
                               * auto_turn_mag_influence
                               * auto_turn_dot_influence
                               * delta_time;
-
-        logger::printe(
-            logger::TRACE,
-            "atd=" + std::to_string(auto_turn_delta) +
-                "\tatmi=" + std::to_string(auto_turn_mag_influence) +
-                "\tatdi=" + std::to_string(auto_turn_dot_influence));
     }
 
+    if (abs(input_state.look_delta.x.val) > 1e-6f)
+    {
+        // Disable orbiting for some time for look delta to override.
+        auto_turn_delta = 0.0f;
+        fo.auto_turn_disable_timer = fo.orbit_x_auto_turn_disable_time;
+    }
 
     // Set new orbit values.
     float_t look_delta_x{ input_state.look_delta.x.val * fo.sensitivity_x + auto_turn_delta };
