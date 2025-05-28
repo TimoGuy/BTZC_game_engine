@@ -15,9 +15,12 @@ BT::Phys_obj_impl_char_controller::Phys_obj_impl_char_controller(Physics_engine&
                                                                  float_t crouch_height,
                                                                  Physics_transform&& init_transform)
     : m_phys_engine{ phys_engine }
+    , m_phys_system{ *reinterpret_cast<JPH::PhysicsSystem*>(m_phys_engine.get_physics_system_ptr()) }
+    , m_phys_temp_allocator{ *reinterpret_cast<JPH::TempAllocator*>(m_phys_engine.get_physics_temp_allocator_ptr()) }
     , m_radius{ radius }
     , m_height{ height }
     , m_crouch_height{ crouch_height }
+    , m_is_crouched{ false }
 {
     m_standing_shape = JPH::RotatedTranslatedShapeSettings(
         JPH::Vec3(0, 0.5f * m_height + m_radius, 0),
@@ -31,7 +34,7 @@ BT::Phys_obj_impl_char_controller::Phys_obj_impl_char_controller(Physics_engine&
     JPH::Ref<JPH::CharacterVirtualSettings> settings = new JPH::CharacterVirtualSettings();
     settings->mMaxSlopeAngle = s_max_slope_angle;
     settings->mMaxStrength = s_max_strength;
-    settings->mShape = m_standing_shape;
+    settings->mShape = (m_is_crouched ? m_crouching_shape : m_standing_shape);
     settings->mBackFaceMode = s_back_face_mode;
     settings->mCharacterPadding = s_character_padding;
     settings->mPenetrationRecoverySpeed = s_penetration_recovery_speed;
@@ -47,12 +50,11 @@ BT::Phys_obj_impl_char_controller::Phys_obj_impl_char_controller(Physics_engine&
                                             init_transform.position,
                                             init_transform.rotation,
                                             0,
-                                            reinterpret_cast<JPH::PhysicsSystem*>(
-                                                m_phys_engine.get_physics_system_ptr()));
+                                            &m_phys_system);
 
     // @TODO: Add handling for char vs char collision!
-    // m_character->SetCharacterVsCharacterCollision(&mCharacterVsCharacterCollision);
-    // mCharacterVsCharacterCollision.Add(m_character);
+    // m_character->SetCharacterVsCharacterCollision(&m_characterVsCharacterCollision);
+    // m_characterVsCharacterCollision.Add(m_character);
 
     // Install contact listener.
     m_character->SetListener(this);
@@ -73,9 +75,57 @@ void BT::Phys_obj_impl_char_controller::move_kinematic(Physics_transform&& new_t
     assert(false);
 }
 
-void BT::Phys_obj_impl_char_controller::set_linear_velocity(JPH::Vec3Arg velocity)
+void BT::Phys_obj_impl_char_controller::tick_fetch_cc_status(JPH::Vec3& out_ground_velocity,
+                                                             JPH::Vec3& out_linear_velocity,
+                                                             JPH::Vec3& out_up_direction,
+                                                             bool& out_is_supported,
+                                                             JPH::CharacterVirtual::EGroundState& out_ground_state,
+                                                             JPH::Vec3& out_ground_normal,
+                                                             bool& out_is_crouched)
 {
-    m_character->SetLinearVelocity(velocity);
+    // Tick the ground velocity.
+    m_character->UpdateGroundVelocity();
+
+    // Fetch all wanted values.
+    out_ground_velocity = m_character->GetGroundVelocity();
+    out_linear_velocity = m_character->GetLinearVelocity();
+    out_up_direction = m_character->GetUp();
+    out_is_supported = m_character->IsSupported();
+    out_ground_state = m_character->GetGroundState();
+    out_ground_normal = m_character->GetGroundNormal();
+    out_is_crouched = m_is_crouched;
+}
+
+bool BT::Phys_obj_impl_char_controller::is_cc_slope_too_steep(JPH::Vec3 normal)
+{
+    return m_character->IsSlopeTooSteep(normal);
+}
+
+void BT::Phys_obj_impl_char_controller::set_cc_velocity(JPH::Vec3Arg velocity, float_t delta_time)
+{
+    // Gravity.
+    JPH::Vec3 velocity_w_gravity =
+        velocity + (m_character->GetRotation() * m_phys_system.GetGravity() * delta_time);
+    m_character->SetLinearVelocity(velocity_w_gravity);
+}
+
+bool BT::Phys_obj_impl_char_controller::set_cc_stance(bool is_crouching)
+{
+    JPH::Shape const* shape{ is_crouching ? m_crouching_shape : m_standing_shape };
+    bool success{ m_character->SetShape(shape,
+                                        1.5f * m_phys_system.GetPhysicsSettings().mPenetrationSlop,
+                                        m_phys_system.GetDefaultBroadPhaseLayerFilter(Layers::MOVING),
+                                        m_phys_system.GetDefaultLayerFilter(Layers::MOVING),
+                                        { },
+                                        { },
+                                        m_phys_temp_allocator) };
+    if (success)
+    {
+        // Update stance if switch succeeded.
+        m_is_crouched = is_crouching;
+    }
+
+    return success;
 }
 
 void BT::Phys_obj_impl_char_controller::on_pre_update(float_t physics_delta_time)
@@ -102,16 +152,14 @@ void BT::Phys_obj_impl_char_controller::on_pre_update(float_t physics_delta_time
     }
 
     // Update the character position.
-    auto physics_system{ reinterpret_cast<JPH::PhysicsSystem*>(m_phys_engine.get_physics_system_ptr()) };
-    auto temp_allocator{ reinterpret_cast<JPH::TempAllocator*>(m_phys_engine.get_physics_temp_allocator_ptr()) };
     m_character->ExtendedUpdate(physics_delta_time,
-                                -m_character->GetUp() * physics_system->GetGravity().Length(),
+                                -m_character->GetUp() * m_phys_system.GetGravity().Length(),
                                 update_settings,
-                                physics_system->GetDefaultBroadPhaseLayerFilter(Layers::MOVING),
-                                physics_system->GetDefaultLayerFilter(Layers::MOVING),
+                                m_phys_system.GetDefaultBroadPhaseLayerFilter(Layers::MOVING),
+                                m_phys_system.GetDefaultLayerFilter(Layers::MOVING),
                                 { },
                                 { },
-                                *temp_allocator);
+                                m_phys_temp_allocator);
 }
 
 BT::Physics_transform BT::Phys_obj_impl_char_controller::read_transform()
@@ -154,9 +202,9 @@ void BT::Phys_obj_impl_char_controller::OnContactAdded(JPH::CharacterVirtual con
     // }
 
     // // If we encounter an object that can push the player, enable sliding
-    // if (inCharacter == mCharacter
+    // if (inCharacter == m_character
     //     && ioSettings.mCanPushCharacter
-    //     && physics_system->GetBodyInterface().GetMotionType(inBodyID2) != EMotionType::Static)
+    //     && m_phys_system.GetBodyInterface().GetMotionType(inBodyID2) != EMotionType::Static)
     //     mAllowSliding = true;
 }
 
@@ -169,14 +217,14 @@ void BT::Phys_obj_impl_char_controller::OnCharacterContactAdded(JPH::CharacterVi
 {
     // // Characters can only be pushed in their own update
     // if (sPlayerCanPushOtherCharacters)
-    //     ioSettings.mCanPushCharacter = sOtherCharactersCanPushPlayer || inOtherCharacter == mCharacter;
+    //     ioSettings.mCanPushCharacter = sOtherCharactersCanPushPlayer || inOtherCharacter == m_character;
     // else if (sOtherCharactersCanPushPlayer)
-    //     ioSettings.mCanPushCharacter = inCharacter == mCharacter;
+    //     ioSettings.mCanPushCharacter = inCharacter == m_character;
     // else
     //     ioSettings.mCanPushCharacter = false;
 
     // // If the player can be pushed by the other virtual character, we allow sliding
-    // if (inCharacter == mCharacter && ioSettings.mCanPushCharacter)
+    // if (inCharacter == m_character && ioSettings.mCanPushCharacter)
     //     mAllowSliding = true;
 }
 

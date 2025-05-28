@@ -31,7 +31,6 @@ public:
 
     Physics_object_type get_type() override { return PHYSICS_OBJECT_TYPE_KINEMATIC_TRIANGLE_MESH; }
     void move_kinematic(Physics_transform&& new_transform) override;
-    void set_linear_velocity(JPH::Vec3Arg velocity) override;
     Physics_transform read_transform() override;
 
 private:

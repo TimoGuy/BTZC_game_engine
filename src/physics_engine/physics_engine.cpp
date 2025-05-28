@@ -83,13 +83,13 @@ void BT::Physics_engine::update_physics()
 
     // Run all physics objects' pre update.
     for (auto& phys_obj : m_physics_objects)
-        phys_obj.second->run_pre_update_event(k_simulation_delta_time);
+        phys_obj.second->get_impl()->on_pre_update(k_simulation_delta_time);
 
     m_pimpl->update(k_simulation_delta_time);
 
     // Notify all physics objects to read transforms.
     for (auto& phys_obj : m_physics_objects)
-        phys_obj.second->notify_read_new_transform();
+        phys_obj.second->read_and_store_new_transform();
 
     phys_obj_pool_unblock();
 }

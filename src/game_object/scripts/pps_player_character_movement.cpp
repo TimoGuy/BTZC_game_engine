@@ -10,6 +10,30 @@ void BT::Pre_physics_script::script_player_character_movement(
 {
     auto phys_obj_key{ datas[in_out_read_data_idx++] };
 
+    Physics_object* phys_obj{ phys_engine->checkout_physics_object(phys_obj_key) };
+    auto character_impl{ phys_obj->get_impl() };
+
+    // Tick and get character status.
+    JPH::Vec3 ground_velocity;
+    JPH::Vec3 linear_velocity;
+    JPH::Vec3 up_direction;
+    bool is_supported;
+    JPH::CharacterVirtual::EGroundState ground_state;
+    JPH::Vec3 ground_normal;
+    bool is_crouched;
+    character_impl->tick_fetch_cc_status(ground_velocity,
+                                         linear_velocity,
+                                         up_direction,
+                                         is_supported,
+                                         ground_state,
+                                         ground_normal,
+                                         is_crouched);
+
+    // USER STUFF @HERE.
+    JPH::Vec3 new_velocity;
+
+    // Set input velocity.
+    character_impl->set_cc_velocity(new_velocity, Physics_engine::k_simulation_delta_time);
 
 
 
@@ -17,6 +41,10 @@ void BT::Pre_physics_script::script_player_character_movement(
 
 
 
+
+
+
+#if 0
     bool player_controls_horizontal_velocity = sControlMovementDuringJump || mCharacter->IsSupported();
     if (player_controls_horizontal_velocity)
     {
@@ -90,13 +118,5 @@ void BT::Pre_physics_script::script_player_character_movement(
             mCharacter->SetInnerBodyShape(inner_shape);
         }
     }
-
-
-
-
-
-
-
-    Physics_object* phys_obj{ phys_engine->checkout_physics_object(phys_obj_key) };
-    phys_obj->set_linear_velocity(JPH::Vec3Arg velocity)
+#endif // 0
 }

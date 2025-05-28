@@ -77,13 +77,6 @@ void BT::Phys_obj_impl_tri_mesh::move_kinematic(Physics_transform&& new_transfor
                                   Physics_engine::k_simulation_delta_time);
 }
 
-void BT::Phys_obj_impl_tri_mesh::set_linear_velocity(JPH::Vec3Arg velocity)
-{
-    (void)velocity;
-    logger::printe(logger::ERROR, "Cannot set linear velocity for tri mesh.");
-    assert(false);
-}
-
 BT::Physics_transform BT::Phys_obj_impl_tri_mesh::read_transform()
 {
     return { m_phys_body_ifc.GetCenterOfMassPosition(m_body_id),

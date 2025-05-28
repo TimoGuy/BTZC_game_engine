@@ -6,7 +6,9 @@
 #include "Jolt/Math/Quat.h"
 #include "Jolt/Math/Real.h"
 #include "Jolt/Physics/Body/MotionType.h"
+#include "Jolt/Physics/Character/CharacterVirtual.h"
 #include <atomic>
+#include <cassert>
 #include <memory>
 #include <utility>
 
@@ -39,8 +41,17 @@ class Physics_object_type_impl_ifc
 public:
     virtual ~Physics_object_type_impl_ifc() = default;
     virtual Physics_object_type get_type() = 0;
-    virtual void move_kinematic(Physics_transform&& new_transform) = 0;
-    virtual void set_linear_velocity(JPH::Vec3Arg velocity) = 0;
+    virtual void move_kinematic(Physics_transform&& new_transform) { assert(false); }
+    virtual void tick_fetch_cc_status(JPH::Vec3& out_ground_velocity,
+                                      JPH::Vec3& out_linear_velocity,
+                                      JPH::Vec3& out_up_direction,
+                                      bool& out_is_supported,
+                                      JPH::CharacterVirtual::EGroundState& out_ground_state,
+                                      JPH::Vec3& out_ground_normal,
+                                      bool& out_is_crouched) { assert(false); }
+    virtual bool is_cc_slope_too_steep(JPH::Vec3 normal) { assert(false); return false; }
+    virtual void set_cc_velocity(JPH::Vec3Arg velocity, float_t delta_time) { assert(false); }
+    virtual bool set_cc_stance(bool is_crouching) { assert(false); }
     virtual void on_pre_update(float_t physics_delta_time) { }
     virtual Physics_transform read_transform() = 0;
 };
@@ -74,12 +85,10 @@ public:
     Physics_object& operator=(const Physics_object&) = delete;
     Physics_object& operator=(Physics_object&&)      = delete;
 
-    void run_pre_update_event(float_t physics_delta_time);
-    void notify_read_new_transform();
+    Physics_object_type_impl_ifc* get_impl() { return m_type_pimpl.get(); }
+    void read_and_store_new_transform();
 
     void get_transform_for_rendering(rvec3& out_position, versor& out_rotation);
-
-    void set_linear_velocity(JPH::Vec3Arg velocity) { m_type_pimpl->set_linear_velocity(velocity); }
 
 private:
     bool m_interpolate;

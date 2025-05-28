@@ -1,8 +1,10 @@
 #pragma once
 
 #include "Jolt/Jolt.h"
+#include "Jolt/Core/TempAllocator.h"
 #include "Jolt/Math/Real.h"
 #include "Jolt/Physics/Character/CharacterVirtual.h"
+#include "Jolt/Physics/PhysicsSystem.h"
 #include "physics_engine.h"
 #include "physics_object.h"
 #include <vector>
@@ -26,7 +28,16 @@ public:
     // Phys obj impl ifc.
     Physics_object_type get_type() override { return PHYSICS_OBJECT_TYPE_CHARACTER_CONTROLLER; }
     void move_kinematic(Physics_transform&& new_transform) override;
-    void set_linear_velocity(JPH::Vec3Arg velocity) override;
+    void tick_fetch_cc_status(JPH::Vec3& out_ground_velocity,
+                              JPH::Vec3& out_linear_velocity,
+                              JPH::Vec3& out_up_direction,
+                              bool& out_is_supported,
+                              JPH::CharacterVirtual::EGroundState& out_ground_state,
+                              JPH::Vec3& out_ground_normal,
+                              bool& out_is_crouched) override;
+    bool is_cc_slope_too_steep(JPH::Vec3 normal) override;
+    void set_cc_velocity(JPH::Vec3Arg velocity, float_t delta_time) override;
+    bool set_cc_stance(bool is_crouching) override;
     void on_pre_update(float_t physics_delta_time) override;
     Physics_transform read_transform() override;
 
@@ -60,6 +71,8 @@ public:
 
 private:
     Physics_engine& m_phys_engine;
+    JPH::PhysicsSystem& m_phys_system;
+    JPH::TempAllocator& m_phys_temp_allocator;
     float_t m_radius;
     float_t m_height;
     float_t m_crouch_height;
@@ -84,6 +97,7 @@ private:
     JPH::RefConst<JPH::Shape>        m_crouching_shape;
 
     JPH::Ref<JPH::CharacterVirtual>  m_character;
+    bool m_is_crouched;
     bool m_allow_sliding{ false };  // True when want to move.
 };
 
