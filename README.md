@@ -82,8 +82,8 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
             - [x] Add override timer for the controls (0.5 secs like AHIT).
     - [ ] ~~Create script for input powered player character movement.~~ This isn't working right. I think that I need to program a few movement systems built into the character controller and then have the player insert their inputs like `flat_velocity`, `jump`, etc.
         - [ ] Inside the player character movement script:
-            - [ ] Read input and plug in wanted velocity in `move_character()` function.
-            - [ ] Set up group of variables that control the stats of the player character.
+            - [x] Read input and plug in wanted velocity in `move_character()` function.
+            - [x] Set up group of variables that control the stats of the player character.
             - [ ] BONUS: Get group of variables into an imgui window.
         - [ ] Change the charcontroller `set_linear_velocity()` to run this character controller monolithic movement thing.
 
