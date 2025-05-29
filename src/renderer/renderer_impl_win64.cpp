@@ -477,17 +477,25 @@ void BT::Renderer::Impl::render_imgui()
             ImGui::SameLine();
             ImGui::Text("%.1f FPS (%.3f ms)", io.Framerate, (1000.0f / io.Framerate));
 
-            ImGui::SameLine();
+            static float_t s_toggle_player_cam_btn_width{ 0 };
+            static float_t s_player_cam_options_btn_width{ 0 };
+
+            ImGui::SameLine(ImGui::GetWindowWidth()
+                                - s_toggle_player_cam_btn_width - 2.0f
+                                - s_player_cam_options_btn_width - 8.0f);
             if (ImGui::Button((!m_camera.is_follow_orbit() ?
                                    "Switch to player cam" :
                                    "Press F1 to exit player cam")))
             {
                 m_camera.request_follow_orbit();
             }
+            s_toggle_player_cam_btn_width = ImGui::GetItemRectSize().x;
 
-            ImGui::SameLine(0.0f, 2.0f);
+            ImGui::SameLine(ImGui::GetWindowWidth()
+                                - s_player_cam_options_btn_width - 8.0f);
             if (ImGui::ArrowButton("Arrow_btn_for_switch_to_player_cam", ImGuiDir_Down))
                 ImGui::OpenPopup("Popup_menu_for_switch_to_player_cam");
+            s_player_cam_options_btn_width = ImGui::GetItemRectSize().x;
 
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 4, 4 });
                 if (ImGui::BeginPopup("Popup_menu_for_switch_to_player_cam"))

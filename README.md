@@ -90,6 +90,8 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
     - [x] Implement F1 releasing the camera lock when doing orbit.
     - [ ] ~~Align orbit camera to actual camera.~~
         - This isn't necessary, since orbit camera is the "game camera"
+    - [x] Set imgui "switch to player cam" button in game view to right aligned.
+        - Ok ok I knooooow this wasn't the most important thing to do.
     - [ ] BUG FIXES
         - [x] Cylinder erratic movement when sliding along walls.
             - Changed to box shape.
