@@ -88,6 +88,8 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - [ ] ~~Change the charcontroller `set_linear_velocity()` to run this character controller monolithic movement thing.~~
             - There ended up being too much that needed to be taken care of with frontend movement, so a tick-get-set method is being used now!
     - [x] Implement F1 releasing the camera lock when doing orbit.
+    - [ ] ~~Align orbit camera to actual camera.~~
+        - This isn't necessary, since orbit camera is the "game camera"
     - [ ] BUG FIXES
         - [x] Cylinder erratic movement when sliding along walls.
             - Changed to box shape.

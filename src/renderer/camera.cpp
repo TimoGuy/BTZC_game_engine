@@ -86,7 +86,7 @@ struct Camera::Data
             // Internal state.
             render_object_key_t render_object_ref{ (render_object_key_t)-1 };
             vec3 current_follow_pos{ 0.0f, 3.0f, 0.0f };
-            vec2 orbits{ 0.0f, 0.0f };
+            vec2 orbits{ glm_rad(0.0f), glm_rad(30.0f) };
             float_t max_orbit_y{ glm_rad(89.0f) };
             float_t auto_turn_disable_timer{ 0.0f };
             float_t current_cam_distance;
