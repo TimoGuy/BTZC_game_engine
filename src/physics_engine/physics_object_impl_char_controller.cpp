@@ -18,10 +18,12 @@ BT::Phys_obj_impl_char_controller::Phys_obj_impl_char_controller(Physics_engine&
     , m_phys_system{ *reinterpret_cast<JPH::PhysicsSystem*>(m_phys_engine.get_physics_system_ptr()) }
     , m_phys_temp_allocator{ *reinterpret_cast<JPH::TempAllocator*>(m_phys_engine.get_physics_temp_allocator_ptr()) }
     , m_radius{ radius }
-    , m_height{ height }
+    , m_height{ height - 2.0f * radius }
     , m_crouch_height{ crouch_height }
     , m_is_crouched{ false }
 {
+    assert(m_height >= 0.0f);
+
     // @NOTE: Before the cylinder collider was used to get round sides and a flat
     //   bottom, however, the side collisions of the cylinder became so erratic that
     //   I had to switch to a box collider. It's a bit sad but the collision looks
