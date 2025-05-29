@@ -45,7 +45,7 @@ static bool assert_failed_impl(char const* in_expression,
     // Breakpoint.
     assert(false);
     return true;
-};
+}
 #endif  // JPH_ENABLE_ASSERTS
 
 }  // namespace phys_engine

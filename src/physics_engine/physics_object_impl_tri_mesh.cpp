@@ -2,6 +2,7 @@
 
 #include "../renderer/mesh.h"
 #include "Jolt/Geometry/IndexedTriangle.h"
+#include "Jolt/Geometry/Triangle.h"
 #include "Jolt/Jolt.h"
 #include "Jolt/Math/Float3.h"
 #include "Jolt/Physics/Body/BodyCreationSettings.h"
@@ -13,6 +14,7 @@
 #include "physics_engine.h"
 #include "physics_engine_impl_layers.h"
 #include <cassert>
+#include <iostream> // @NOCHECKIN!!!
 
 
 BT::Phys_obj_impl_tri_mesh::Phys_obj_impl_tri_mesh(Physics_engine& phys_engine,
@@ -31,6 +33,12 @@ BT::Phys_obj_impl_tri_mesh::Phys_obj_impl_tri_mesh(Physics_engine& phys_engine,
 
     auto verts_indices{ model->get_all_vertices_and_indices() };
 
+    // @NOTE: I think there might be some extra stuff Jolt is doing in the behind
+    //   that makes the triangle list better than using the inefficient-for-physics
+    //   indexed triangle list from the obj file (or placebo hehe), so I'm gonna
+    //   stick to the triangle list below for now.  -Thea 2025/05/29
+#define INDEXED_TRIANGLE_LIST 0
+#if INDEXED_TRIANGLE_LIST
     JPH::VertexList vertex_list;
     vertex_list.reserve(verts_indices.first.size());
     for (auto& vertex : verts_indices.first)
@@ -48,8 +56,25 @@ BT::Phys_obj_impl_tri_mesh::Phys_obj_impl_tri_mesh(Physics_engine& phys_engine,
                                        verts_indices.second[i + 2],
                                        0);
     }
-
     JPH::MeshShapeSettings mesh_settings(vertex_list, indexed_tris_list);
+#else
+    JPH::TriangleList tri_list;
+    for (size_t i = 0; i < verts_indices.second.size(); i += 3)
+    {
+        JPH::Float3 p0{ verts_indices.first[verts_indices.second[i + 0]].position[0],
+                        verts_indices.first[verts_indices.second[i + 0]].position[1],
+                        verts_indices.first[verts_indices.second[i + 0]].position[2] };
+        JPH::Float3 p1{ verts_indices.first[verts_indices.second[i + 1]].position[0],
+                        verts_indices.first[verts_indices.second[i + 1]].position[1],
+                        verts_indices.first[verts_indices.second[i + 1]].position[2] };
+        JPH::Float3 p2{ verts_indices.first[verts_indices.second[i + 2]].position[0],
+                        verts_indices.first[verts_indices.second[i + 2]].position[1],
+                        verts_indices.first[verts_indices.second[i + 2]].position[2] };
+        tri_list.emplace_back(p0, p1, p2);
+    }
+    JPH::MeshShapeSettings mesh_settings(tri_list);
+#endif  // INDEXED_TRIANGLE_LIST
+
     mesh_settings.SetEmbedded();
     JPH::BodyCreationSettings mesh_body_settings(&mesh_settings,
                                                  init_transform.position,

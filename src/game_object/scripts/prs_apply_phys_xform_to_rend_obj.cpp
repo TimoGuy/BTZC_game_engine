@@ -5,6 +5,7 @@
 #include "../renderer/renderer.h"
 #include "cglm/affine.h"
 #include "cglm/quat.h"
+#include "serialization.h"
 
 
 void BT::Pre_render_script::script_apply_physics_transform_to_render_object(
@@ -12,8 +13,9 @@ void BT::Pre_render_script::script_apply_physics_transform_to_render_object(
     vector<uint64_t> const& datas,
     size_t& in_out_read_data_idx)
 {
-    auto rend_obj_key{ datas[in_out_read_data_idx++] };
-    auto phys_engine{ reinterpret_cast<Physics_engine*>(datas[in_out_read_data_idx++]) };
+    auto rend_obj_key{ Serial::pop_u64(datas, in_out_read_data_idx) };
+    auto phys_engine{
+        reinterpret_cast<Physics_engine*>(Serial::pop_void_ptr(datas, in_out_read_data_idx)) };
 
     Render_object* rend_obj{ renderer->get_render_object(rend_obj_key) };
     auto tethered_phys_key{ rend_obj->get_tethered_phys_obj_key() };

@@ -3,7 +3,7 @@
 #include "Jolt/Jolt.h"
 #include "Jolt/Core/TempAllocator.h"
 #include "Jolt/Physics/Character/CharacterVirtual.h"
-#include "Jolt/Physics/Collision/Shape/CylinderShape.h"
+#include "Jolt/Physics/Collision/Shape/BoxShape.h"
 #include "Jolt/Physics/Collision/Shape/RotatedTranslatedShape.h"
 #include "Jolt/Physics/PhysicsSystem.h"
 #include "physics_engine_impl_layers.h"
@@ -22,14 +22,18 @@ BT::Phys_obj_impl_char_controller::Phys_obj_impl_char_controller(Physics_engine&
     , m_crouch_height{ crouch_height }
     , m_is_crouched{ false }
 {
+    // @NOTE: Before the cylinder collider was used to get round sides and a flat
+    //   bottom, however, the side collisions of the cylinder became so erratic that
+    //   I had to switch to a box collider. It's a bit sad but the collision looks
+    //   and feels great now!  -Thea 2025/05/29
     m_standing_shape = JPH::RotatedTranslatedShapeSettings(
         JPH::Vec3(0, 0.5f * m_height + m_radius, 0),
         JPH::Quat::sIdentity(),
-        new JPH::CylinderShape(0.5f * m_height + m_radius, m_radius)).Create().Get();
+        new JPH::BoxShape(JPH::Vec3(m_radius, 0.5f * m_height + m_radius, m_radius))).Create().Get();
     m_crouching_shape = JPH::RotatedTranslatedShapeSettings(
         JPH::Vec3(0, 0.5f * m_crouch_height + m_radius, 0),
         JPH::Quat::sIdentity(),
-        new JPH::CylinderShape(0.5f * m_crouch_height + m_radius, m_radius)).Create().Get();
+        new JPH::BoxShape(JPH::Vec3(m_radius, 0.5f * m_crouch_height + m_radius, m_radius))).Create().Get();
 
     JPH::Ref<JPH::CharacterVirtualSettings> settings = new JPH::CharacterVirtualSettings();
     settings->mMaxSlopeAngle = s_max_slope_angle;
@@ -58,9 +62,6 @@ BT::Phys_obj_impl_char_controller::Phys_obj_impl_char_controller(Physics_engine&
 
     // Install contact listener.
     m_character->SetListener(this);
-
-    // @TEMP: @NOCHECKIN.
-    m_character->SetLinearVelocity(JPH::Vec3(0.1f, 0.0f, -1.0f));
 }
 
 BT::Phys_obj_impl_char_controller::~Phys_obj_impl_char_controller()
@@ -78,6 +79,7 @@ void BT::Phys_obj_impl_char_controller::move_kinematic(Physics_transform&& new_t
 void BT::Phys_obj_impl_char_controller::tick_fetch_cc_status(JPH::Vec3& out_ground_velocity,
                                                              JPH::Vec3& out_linear_velocity,
                                                              JPH::Vec3& out_up_direction,
+                                                             JPH::Quat& out_up_rotation,
                                                              bool& out_is_supported,
                                                              JPH::CharacterVirtual::EGroundState& out_ground_state,
                                                              JPH::Vec3& out_ground_normal,
@@ -101,12 +103,14 @@ bool BT::Phys_obj_impl_char_controller::is_cc_slope_too_steep(JPH::Vec3 normal)
     return m_character->IsSlopeTooSteep(normal);
 }
 
-void BT::Phys_obj_impl_char_controller::set_cc_velocity(JPH::Vec3Arg velocity, float_t delta_time)
+void BT::Phys_obj_impl_char_controller::set_cc_allow_sliding(bool allow)
 {
-    // Gravity.
-    JPH::Vec3 velocity_w_gravity =
-        velocity + (m_character->GetRotation() * m_phys_system.GetGravity() * delta_time);
-    m_character->SetLinearVelocity(velocity_w_gravity);
+    m_allow_sliding = allow;
+}
+
+void BT::Phys_obj_impl_char_controller::set_cc_velocity(JPH::Vec3Arg velocity)
+{
+    m_character->SetLinearVelocity(velocity);
 }
 
 bool BT::Phys_obj_impl_char_controller::set_cc_stance(bool is_crouching)
@@ -160,6 +164,13 @@ void BT::Phys_obj_impl_char_controller::on_pre_update(float_t physics_delta_time
                                 { },
                                 { },
                                 m_phys_temp_allocator);
+    // m_character->Update(physics_delta_time,
+    //                     -m_character->GetUp() * m_phys_system.GetGravity().Length(),
+    //                     m_phys_system.GetDefaultBroadPhaseLayerFilter(Layers::MOVING),
+    //                     m_phys_system.GetDefaultLayerFilter(Layers::MOVING),
+    //                     { },
+    //                     { },
+    //                     m_phys_temp_allocator);
 }
 
 BT::Physics_transform BT::Phys_obj_impl_char_controller::read_transform()

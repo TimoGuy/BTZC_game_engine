@@ -48,6 +48,7 @@ add_executable(${PROJECT_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/pre_render_scripts.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/pre_render_scripts.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/prs_apply_phys_xform_to_rend_obj.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/serialization.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/game_object.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/game_object.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/input_handler/input_codes.h

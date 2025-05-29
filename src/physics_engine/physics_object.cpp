@@ -53,11 +53,6 @@ BT::Physics_object::Physics_object(Physics_engine const* phys_engine,
 {
 }
 
-void BT::Physics_object::run_pre_update_event(float_t physics_delta_time)
-{
-    m_type_pimpl->on_pre_update(physics_delta_time);
-}
-
 void BT::Physics_object::read_and_store_new_transform()
 {
     auto phys_transform{ m_type_pimpl->read_transform() };

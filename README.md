@@ -80,17 +80,27 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
             - [x] Tries it once, but it's not right. One direction is biased to be the main direction.
             - [x] Do it correctly!
             - [x] Add override timer for the controls (0.5 secs like AHIT).
-    - [ ] ~~Create script for input powered player character movement.~~ This isn't working right. I think that I need to program a few movement systems built into the character controller and then have the player insert their inputs like `flat_velocity`, `jump`, etc.
-        - [ ] Inside the player character movement script:
+    - [x] ~~Create script for input powered player character movement.~~ This isn't working right. I think that I need to program a few movement systems built into the character controller and then have the player insert their inputs like `flat_velocity`, `jump`, etc.
+        - [x] Inside the player character movement script:
             - [x] Read input and plug in wanted velocity in `move_character()` function.
             - [x] Set up group of variables that control the stats of the player character.
-            - [ ] BONUS: Get group of variables into an imgui window.
-        - [ ] Change the charcontroller `set_linear_velocity()` to run this character controller monolithic movement thing.
+            - [ ] @FUTURE: ~~BONUS: Get group of variables into an imgui window.~~
+        - [ ] ~~Change the charcontroller `set_linear_velocity()` to run this character controller monolithic movement thing.~~
+            - There ended up being too much that needed to be taken care of with frontend movement, so a tick-get-set method is being used now!
+    - [ ] Implement F1 releasing the camera lock when doing orbit.
+    - [ ] BUG FIXES
+        - [x] Cylinder erratic movement when sliding along walls.
+            - Changed to box shape.
+        - [x] Rounding 90 degree angles causes stickiness.
+            - Disable back faces fixes this.
+        - [x] Player getting stuck when on the ground.
+            - Forgot to enable `m_allow_sliding`. Enabling fixed it!
+        - [ ] Camera orbit following is annoying.
 
 1. Code review.
     - [ ] Fix `@COPYPASTA` tags where there are banks.
         - Do we want to do a pool? A different system?
-        - There isn't a way to delete render objects. That needs to get written before implementing the level loading/saving system.
+        - There isn't a way to delete render objects. **That needs to get written before implementing the level loading/saving system.**
     - [ ] Is the gameobject architecture wanted?
     - [ ] Should refactor to put data together in better ways?
         - [ ] Is this important to think about this early and would it create friction at the expense of performance?

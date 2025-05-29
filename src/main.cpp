@@ -1,10 +1,11 @@
 #include "btzc_game_engine.h"
-#include "game_object/scripts/pre_physics_scripts.h"
-#include "renderer/camera.h"
 #include "cglm/cglm.h"
 #include "cglm/mat4.h"
+#include "renderer/camera.h"
 #include "game_object/game_object.h"
+#include "game_object/scripts/pre_physics_scripts.h"
 #include "game_object/scripts/pre_render_scripts.h"
+#include "game_object/scripts/serialization.h"
 #include "input_handler/input_handler.h"
 #include "Jolt/Jolt.h"  // @DEBUG
 #include "Jolt/Math/Real.h"  // @DEBUG
@@ -58,8 +59,8 @@ int32_t main()
 
     // Models.
     BT::Model_bank::emplace_model(
-        "cylinder_0.5_2",
-        make_unique<BT::Model>(BTZC_GAME_ENGINE_ASSET_MODEL_PATH "cylinder_0.5_2.obj",
+        "box_0.5_2",
+        make_unique<BT::Model>(BTZC_GAME_ENGINE_ASSET_MODEL_PATH "box_0.5_2.obj",
                                "default_material"));
     BT::Model_bank::emplace_model(
         "probuilder_example",
@@ -74,7 +75,7 @@ int32_t main()
                                                         0.5f,
                                                         2.0f,
                                                         1.0f,
-                                                        { JPH::RVec3(0.0f, 1.0f, 0.0f),
+                                                        { JPH::RVec3(0.0f, 5.1f, 0.0f),
                                                           JPH::Quat::sIdentity() }));
     main_physics_engine.emplace_physics_object(
         BT::Physics_object::create_triangle_mesh(main_physics_engine,
@@ -86,7 +87,7 @@ int32_t main()
 
     // Render objects.
     auto player_char_rend_obj_key = main_renderer.emplace_render_object(BT::Render_object{
-        *BT::Model_bank::get_model("cylinder_0.5_2"),
+        *BT::Model_bank::get_model("box_0.5_2"),
         BT::Render_layer::RENDER_LAYER_DEFAULT,
         GLM_MAT4_IDENTITY,
         player_char_phys_obj_key });
@@ -98,10 +99,19 @@ int32_t main()
     // Game objects.
     BT::Game_object_pool game_object_pool;
 
+    vector<BT::Pre_physics_script::Script_type> phys_scripts;
+    vector<uint64_t> phys_scripts_datas;
+
+    phys_scripts.emplace_back(BT::Pre_physics_script::SCRIPT_TYPE_player_character_movement);
+    BT::Serial::push_u64(phys_scripts_datas, player_char_phys_obj_key);
+    BT::Serial::push_void_ptr(phys_scripts_datas, &main_input_handler);
+    BT::Serial::push_void_ptr(phys_scripts_datas, main_renderer.get_camera_obj());
+
     game_object_pool.emplace(unique_ptr<BT::Game_object>(
-        new BT::Game_object(main_renderer,
-                            { BT::Pre_physics_script::SCRIPT_TYPE_player_character_movement },
-                            {  },
+        new BT::Game_object(main_physics_engine,
+                            main_renderer,
+                            std::move(phys_scripts),
+                            std::move(phys_scripts_datas),
                             { BT::Pre_render_script::SCRIPT_TYPE_apply_physics_transform_to_render_object },
                             { player_char_rend_obj_key, reinterpret_cast<uint64_t>(&main_physics_engine) } )));
 

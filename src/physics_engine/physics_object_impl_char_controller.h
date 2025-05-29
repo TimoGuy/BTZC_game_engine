@@ -31,12 +31,14 @@ public:
     void tick_fetch_cc_status(JPH::Vec3& out_ground_velocity,
                               JPH::Vec3& out_linear_velocity,
                               JPH::Vec3& out_up_direction,
+                              JPH::Quat& out_up_rotation,
                               bool& out_is_supported,
                               JPH::CharacterVirtual::EGroundState& out_ground_state,
                               JPH::Vec3& out_ground_normal,
                               bool& out_is_crouched) override;
     bool is_cc_slope_too_steep(JPH::Vec3 normal) override;
-    void set_cc_velocity(JPH::Vec3Arg velocity, float_t delta_time) override;
+    void set_cc_allow_sliding(bool allow) override;
+    void set_cc_velocity(JPH::Vec3Arg velocity) override;
     bool set_cc_stance(bool is_crouching) override;
     void on_pre_update(float_t physics_delta_time) override;
     Physics_transform read_transform() override;
@@ -78,7 +80,11 @@ private:
     float_t m_crouch_height;
 
     // Config values.
-    static inline JPH::EBackFaceMode s_back_face_mode                   = JPH::EBackFaceMode::CollideWithBackFaces;
+    // @NOTE: I set the back face mode to ignore because there were times when
+    //   rounding over a 90 degree angle will cause a contact on the back face edge
+    //   of the 90 degree wall. This causes the solver to not know what to do, and
+    //   ignoring back faces solves this issue.  -Thea 2025/05/29
+    static inline JPH::EBackFaceMode s_back_face_mode                   = JPH::EBackFaceMode::IgnoreBackFaces;
     static inline float_t            s_up_rotation_x                    = 0;
     static inline float_t            s_up_rotation_z                    = 0;
     static inline float_t            s_max_slope_angle                  = JPH::DegreesToRadians(46.0f);

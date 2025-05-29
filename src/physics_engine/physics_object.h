@@ -45,13 +45,15 @@ public:
     virtual void tick_fetch_cc_status(JPH::Vec3& out_ground_velocity,
                                       JPH::Vec3& out_linear_velocity,
                                       JPH::Vec3& out_up_direction,
+                                      JPH::Quat& out_up_rotation,
                                       bool& out_is_supported,
                                       JPH::CharacterVirtual::EGroundState& out_ground_state,
                                       JPH::Vec3& out_ground_normal,
                                       bool& out_is_crouched) { assert(false); }
     virtual bool is_cc_slope_too_steep(JPH::Vec3 normal) { assert(false); return false; }
-    virtual void set_cc_velocity(JPH::Vec3Arg velocity, float_t delta_time) { assert(false); }
-    virtual bool set_cc_stance(bool is_crouching) { assert(false); }
+    virtual void set_cc_allow_sliding(bool allow) { assert(false); }
+    virtual void set_cc_velocity(JPH::Vec3Arg velocity) { assert(false); }
+    virtual bool set_cc_stance(bool is_crouching) { assert(false); return false; }
     virtual void on_pre_update(float_t physics_delta_time) { }
     virtual Physics_transform read_transform() = 0;
 };

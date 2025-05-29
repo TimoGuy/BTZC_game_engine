@@ -32,6 +32,7 @@ public:
     void fetch_calculated_camera_matrices(mat4& out_projection,
                                           mat4& out_view,
                                           mat4& out_projection_view);
+    void get_view_direction(vec3& out_view_direction);
 
     // Camera frontend.
     void set_follow_object(render_object_key_t render_object_ref);

@@ -176,6 +176,11 @@ void BT::Camera::fetch_calculated_camera_matrices(mat4& out_projection,
     glm_mat4_copy(cache.projection_view, out_projection_view);
 }
 
+void BT::Camera::get_view_direction(vec3& out_view_direction)
+{
+    glm_vec3_copy(m_data->camera.view_direction, out_view_direction);
+}
+
 // Camera frontend.
 void BT::Camera::set_follow_object(render_object_key_t render_object_ref)
 {
@@ -477,6 +482,8 @@ void BT::Camera::update_frontend_follow_orbit(Renderer& renderer,
                               * auto_turn_mag_influence
                               * auto_turn_dot_influence
                               * delta_time;
+        // @DEBUG: @NOCHECKIN: @TEMP
+        auto_turn_delta = 0.0f;
     }
 
     if (abs(input_state.look_delta.x.val) > 1e-6f)
