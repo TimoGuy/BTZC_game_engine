@@ -106,9 +106,10 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
             - Also adds a small assert to make sure that the height is enough to encompass both radii.
 
 1. Some misc pleasing things.
-    - [ ] Add prototype default texture for probuilder shapes.
+    - [x] Add prototype default texture for probuilder shapes.
         - [x] Get textures working.
-        - [ ] Make and add the grid texture.
+        - [x] Make and add the grid texture.
+            - I found a random one off twitter.
     - [ ] Camera orbit following is annoying.
 
 1. Code review.
