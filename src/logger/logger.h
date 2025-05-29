@@ -1,11 +1,8 @@
 #pragma once
 
-#include <format>
 #include <string>
 #include <utility>
 
-using std::format;
-using std::format_string;
 using std::forward;
 using std::string;
 
@@ -27,14 +24,8 @@ enum Log_type : uint32_t
 
 void notify_start_new_mainloop_iteration();
 void set_logging_print_mask(Log_type types);
+void printef(Log_type type, string format_str, ...);
 void printe(Log_type type, string entry);
-
-template<typename... T>
-void printef(Log_type type, format_string<T...> const format_str, T&&... args)
-{
-    string entry = format(format_str, forward<T>(args)...);
-    printe(type, entry);
-}
 
 }  // namespace logger
 }  // namespace BT

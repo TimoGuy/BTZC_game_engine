@@ -124,7 +124,7 @@ string BT::Shader::read_shader_file(string const& fname)
         if (!shader_file.is_open())
         {
             auto abs_path{ std::filesystem::absolute(fname).string() };
-            logger::printef(logger::ERROR, "File could not be open \"%s\"", abs_path);
+            logger::printef(logger::ERROR, "File could not be open \"%s\"", abs_path.c_str());
             assert(false);
         }
 
@@ -135,7 +135,7 @@ string BT::Shader::read_shader_file(string const& fname)
     }
     catch (ifstream::failure e)
     {
-        logger::printef(logger::ERROR, "File read failed \"%s\"", fname);
+        logger::printef(logger::ERROR, "File read failed \"%s\"", fname.c_str());
         assert(false);
     }
 
@@ -147,7 +147,7 @@ void BT::Shader_bank::emplace_shader(string const& name, unique_ptr<Shader>&& sh
     if (get_shader(name) != nullptr)
     {
         // Report shader already exists.
-        logger::printef(logger::ERROR, "Shader \"%s\" already exists.", name);
+        logger::printef(logger::ERROR, "Shader \"%s\" already exists.", name.c_str());
         assert(false);
         return;
     }

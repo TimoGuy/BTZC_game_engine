@@ -4,7 +4,8 @@
 #include <array>
 #include <atomic>
 #include <cassert>
-#include <cinttypes>
+#include <cstdarg>
+#include <cstdio>
 #include <cstring>
 #include <iostream>  // @NOTE: @TEMP: See `printe()`
 #include <mutex>
@@ -113,6 +114,19 @@ void BT::logger::notify_start_new_mainloop_iteration()
 void BT::logger::set_logging_print_mask(Log_type types)
 {
     s_print_mask = types;
+}
+
+void BT::logger::printef(Log_type type, string format_str, ...)
+{
+    constexpr size_t k_str_max_length{ 1024 };
+    char complete_str[k_str_max_length];
+
+    va_list vag;
+    va_start(vag, format_str);
+    vsnprintf(complete_str, k_str_max_length, format_str.c_str(), vag);
+    va_end(vag);
+
+    printe(type, complete_str);
 }
 
 void BT::logger::printe(Log_type type, string entry)

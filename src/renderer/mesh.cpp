@@ -122,7 +122,7 @@ void BT::Model::load_obj_as_meshes(string const& fname, string const& material_n
         !std::filesystem::is_regular_file(fname))
     {
         // Exit early if this isn't a good fname.
-        logger::printef(logger::ERROR, "\"%s\" does not exist or is not a file.", fname);
+        logger::printef(logger::ERROR, "\"%s\" does not exist or is not a file.", fname.c_str());
         assert(false);
         return;
     }
@@ -132,7 +132,7 @@ void BT::Model::load_obj_as_meshes(string const& fname, string const& material_n
         fname_path.extension().string() != ".obj")
     {
         // Exit early if this isn't an obj file.
-        logger::printef(logger::ERROR, "\"%s\" is not a .obj file.", fname);
+        logger::printef(logger::ERROR, "\"%s\" is not a .obj file.", fname.c_str());
         assert(false);
         return;
     }
@@ -154,7 +154,7 @@ void BT::Model::load_obj_as_meshes(string const& fname, string const& material_n
                           fname.c_str(),
                           base_dir.c_str()))
     {
-        logger::printef(logger::ERROR, "OBJ file \"%s\" failed to load.", fname);
+        logger::printef(logger::ERROR, "OBJ file \"%s\" failed to load.", fname.c_str());
         assert(false);
         return;
     }
@@ -276,7 +276,7 @@ void BT::Model_bank::emplace_model(string const& name, unique_ptr<Model>&& model
     if (get_model(name) != nullptr)
     {
         // Report model already exists.
-        logger::printef(logger::ERROR, "Model \"%s\" already exists.", name);
+        logger::printef(logger::ERROR, "Model \"%s\" already exists.", name.c_str());
         assert(false);
         return;
     }

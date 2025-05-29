@@ -15,7 +15,12 @@ uint32_t BT::Texture_bank::load_texture_2d_from_file(string const& fname, uint32
     int32_t num_channels;
     stbi_set_flip_vertically_on_load_thread(true);
     uint8_t* data{ stbi_load(fname.c_str(), &width, &height, &num_channels, STBI_default) };
-    assert(data);  // Should pass if file loaded successfully.
+    if (!data)
+    {
+        logger::printef(logger::ERROR, "Image loading failed: \"%s\"", fname.c_str());
+        assert(false);
+        return -1;
+    }
     assert(num_channels == channels);  // I think this should pass unless there's an error in the channel num?
 
     // Create RGB texture.
@@ -49,7 +54,7 @@ void BT::Texture_bank::emplace_texture_2d(string const& name, uint32_t texture_i
             else
             {
                 // Report texture already exists.
-                logger::printef(logger::ERROR, "Texture \"%s\" already exists.", name);
+                logger::printef(logger::ERROR, "Texture \"%s\" already exists.", name.c_str());
                 assert(false);
                 return;
             }

@@ -21,7 +21,7 @@ void BT::Material_bank::emplace_material(string const& name, unique_ptr<Material
     if (get_material(name) != nullptr)
     {
         // Report material already exists.
-        logger::printef(logger::ERROR, "Material \"%s\" already exists.", name);
+        logger::printef(logger::ERROR, "Material \"%s\" already exists.", name.c_str());
         assert(false);
         return;
     }
