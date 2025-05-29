@@ -15,11 +15,13 @@
 #include "physics_engine/physics_object.h"
 #include "renderer/material.h"  // @DEBUG
 #include "renderer/material_impl_opaque_shaded.h"  // @DEBUG
+#include "renderer/material_impl_opaque_texture_shaded.h"  // @DEBUG
 #include "renderer/material_impl_post_process.h"  // @DEBUG
 #include "renderer/mesh.h"  // @DEBUG
 #include "renderer/render_object.h"  // @DEBUG
 #include "renderer/renderer.h"
 #include "renderer/shader.h"  // @DEBUG
+#include "renderer/texture.h"  // @DEBUG
 #include "timer/timer.h"
 #include <cstdint>
 #include <memory>
@@ -43,15 +45,30 @@ int32_t main()
         make_unique<BT::Shader>(BTZC_GAME_ENGINE_ASSET_SHADER_PATH "color_shaded.vert",
                                 BTZC_GAME_ENGINE_ASSET_SHADER_PATH "color_shaded.frag"));
     BT::Shader_bank::emplace_shader(
+        "textured_shaded",
+        make_unique<BT::Shader>(BTZC_GAME_ENGINE_ASSET_SHADER_PATH "textured_shaded.vert",
+                                BTZC_GAME_ENGINE_ASSET_SHADER_PATH "textured_shaded.frag"));
+    BT::Shader_bank::emplace_shader(
         "post_process",
         make_unique<BT::Shader>(BTZC_GAME_ENGINE_ASSET_SHADER_PATH "post_process.vert",
                                 BTZC_GAME_ENGINE_ASSET_SHADER_PATH "post_process.frag"));
 
+    // Textures.
+    BT::Texture_bank::emplace_texture_2d(
+        "default_texture",
+        BT::Texture_bank::load_texture_2d_from_file(BTZC_GAME_ENGINE_ASSET_TEXTURE_PATH "grids_1m.jpg",
+                                                    3));
+
     // Materials.
     BT::Material_bank::emplace_material(
-        "default_material",
+        "color_material",
         unique_ptr<BT::Material_ifc>(
             new BT::Material_opaque_shaded(vec3{ 0.5f, 0.225f, 0.3f })));
+    BT::Material_bank::emplace_material(
+        "textured_material",
+        unique_ptr<BT::Material_ifc>(
+            new BT::Material_opaque_texture_shaded(BT::Texture_bank::get_texture_2d("default_texture"),
+                                                   vec3{ 0.0f, 0.2f, 0.5f })));
     BT::Material_bank::emplace_material(
         "post_process",
         unique_ptr<BT::Material_ifc>(
@@ -61,11 +78,11 @@ int32_t main()
     BT::Model_bank::emplace_model(
         "box_0.5_2",
         make_unique<BT::Model>(BTZC_GAME_ENGINE_ASSET_MODEL_PATH "box_0.5_2.obj",
-                               "default_material"));
+                               "color_material"));
     BT::Model_bank::emplace_model(
         "probuilder_example",
         make_unique<BT::Model>(BTZC_GAME_ENGINE_ASSET_MODEL_PATH "probuilder_example.obj",
-                               "default_material"));
+                               "textured_material"));
 
     // POPULATE TEST LEVEL (@TODO: Once level loading is implemented, replace this with it)
     // Physics objects.

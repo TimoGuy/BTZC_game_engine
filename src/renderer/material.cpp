@@ -16,16 +16,6 @@ BT::Camera_read_ifc* BT::Material_bank::get_camera_read_ifc()
     return s_cam_read_ifc;
 }
 
-void BT::Material_bank::set_hdr_color_texture(uint32_t color_buffer)
-{
-    s_hdr_color_buffer = color_buffer;
-}
-
-uint32_t BT::Material_bank::get_hdr_color_texture()
-{
-    return s_hdr_color_buffer;
-}
-
 void BT::Material_bank::emplace_material(string const& name, unique_ptr<Material_ifc>&& material)
 {
     if (get_material(name) != nullptr)

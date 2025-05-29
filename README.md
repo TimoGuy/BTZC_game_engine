@@ -92,16 +92,24 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - This isn't necessary, since orbit camera is the "game camera"
     - [x] Set imgui "switch to player cam" button in game view to right aligned.
         - Ok ok I knooooow this wasn't the most important thing to do.
-    - [ ] BUG FIXES
+    - [x] BUG FIXES
         - [x] Cylinder erratic movement when sliding along walls.
             - Changed to box shape.
         - [x] Rounding 90 degree angles causes stickiness.
             - Disable back faces fixes this.
         - [x] Player getting stuck when on the ground.
             - Forgot to enable `m_allow_sliding`. Enabling fixed it!
-        - [ ] Camera orbit following is annoying.
         - [x] Player moves during wasd with flycam.
             - Disable if flycam in pre-physics script.
+        - [x] Fix player not being the right height for the character controller.
+            - Height is understood to include the radii, so when creating the character, I edit the height so that it is the Jolt definition.
+            - Also adds a small assert to make sure that the height is enough to encompass both radii.
+
+1. Some misc pleasing things.
+    - [ ] Add prototype default texture for probuilder shapes.
+        - [x] Get textures working.
+        - [ ] Make and add the grid texture.
+    - [ ] Camera orbit following is annoying.
 
 1. Code review.
     - [ ] Fix `@COPYPASTA` tags where there are banks.

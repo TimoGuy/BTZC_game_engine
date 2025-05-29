@@ -19,6 +19,7 @@
 #include "material.h"
 #include "render_object.h"
 #include "renderer.h"
+#include "texture.h"
 #include <cassert>
 #include <gl/gl.h>
 #include <mutex>
@@ -725,8 +726,7 @@ void BT::Renderer::Impl::create_hdr_fbo()  // @COPYPASTA.
     }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    // @HACK: This just provides a connection to the hdr buffer so that the material system can access.
-    Material_bank::set_hdr_color_texture(m_hdr_color_texture);
+    Texture_bank::emplace_texture_2d("hdr_color_texture", m_hdr_color_texture, true);
 }
 
 void BT::Renderer::Impl::render_scene_to_hdr_framebuffer()

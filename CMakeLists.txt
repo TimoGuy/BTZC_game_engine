@@ -33,6 +33,7 @@ set(DEPENDENCY_INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glfw/include
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/imgui  # Header only.
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/JoltPhysics
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/stb  # Header only (essentially).
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/tinyobjloader)
 
 add_subdirectory(third_party/fastgltf)
@@ -75,6 +76,8 @@ add_executable(${PROJECT_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/camera.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/material_impl_opaque_shaded.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/material_impl_opaque_shaded.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/material_impl_opaque_texture_shaded.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/material_impl_opaque_texture_shaded.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/material_impl_post_process.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/material_impl_post_process.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/material.cpp
@@ -89,6 +92,8 @@ add_executable(${PROJECT_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/renderer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/shader.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/shader.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/texture.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/texture.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/timer/timer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/timer/timer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/btzc_game_engine.h
@@ -118,6 +123,9 @@ add_executable(${PROJECT_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/imgui/imstb_truetype.h
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/imgui/misc/cpp/imgui_stdlib.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/imgui/misc/cpp/imgui_stdlib.h
+
+    # stb header files.
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/stb/stb_image.h
     
     # Tinyobjloader source files.
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/tinyobjloader/tiny_obj_loader.cc
