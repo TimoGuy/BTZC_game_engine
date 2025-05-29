@@ -37,6 +37,7 @@ public:
     // Camera frontend.
     void set_follow_object(render_object_key_t render_object_ref);
     void request_follow_orbit();
+    bool is_capture_fly();
     bool is_follow_orbit();
     void update_frontend(Renderer& renderer, Input_handler::State const& input_state, float_t delta_time);
     bool is_mouse_captured();

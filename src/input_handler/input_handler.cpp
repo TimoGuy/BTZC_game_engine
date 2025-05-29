@@ -65,6 +65,10 @@ void BT::Input_handler::report_keyboard_input_change(int32_t key_code, bool pres
             m_state.ui_cancel.val = pressed;
             m_state.le_move_world_y_axis.val += (pressed ? k_neg_mod : -k_neg_mod);
             break;
+
+        case BT_KEY_F1:
+            m_state.le_f1.val = pressed;
+            break;
     }
 
     if (update_move_wasd)

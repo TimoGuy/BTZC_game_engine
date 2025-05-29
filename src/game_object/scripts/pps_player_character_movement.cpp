@@ -58,7 +58,9 @@ void BT::Pre_physics_script::script_player_character_movement(
     vec3 move_input_world = GLM_VEC3_ZERO_INIT;
     glm_vec3_muladds(cam_right, input_state.move.x.val, move_input_world);
     glm_vec3_muladds(cam_forward, input_state.move.y.val, move_input_world);
-    if (glm_vec3_norm2(move_input_world) > 1.0f)
+    if (camera->is_capture_fly())
+        glm_vec3_zero(move_input_world);
+    else if (glm_vec3_norm2(move_input_world) > 1.0f)
         glm_vec3_normalize(move_input_world);
 
     character_impl->set_cc_allow_sliding(glm_vec3_norm2(move_input_world) > 1e-6f * 1e-6f);
@@ -76,7 +78,7 @@ void BT::Pre_physics_script::script_player_character_movement(
 
         // Jump
         if (input_state.jump.val && moving_towards_ground)
-            new_velocity += 10.0f * up_direction;
+            new_velocity += 50.0f * up_direction;
     }
     else
         // Keep previous frame velocity.

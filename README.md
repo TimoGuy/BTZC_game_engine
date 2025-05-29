@@ -87,7 +87,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
             - [ ] @FUTURE: ~~BONUS: Get group of variables into an imgui window.~~
         - [ ] ~~Change the charcontroller `set_linear_velocity()` to run this character controller monolithic movement thing.~~
             - There ended up being too much that needed to be taken care of with frontend movement, so a tick-get-set method is being used now!
-    - [ ] Implement F1 releasing the camera lock when doing orbit.
+    - [x] Implement F1 releasing the camera lock when doing orbit.
     - [ ] BUG FIXES
         - [x] Cylinder erratic movement when sliding along walls.
             - Changed to box shape.
@@ -96,6 +96,8 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - [x] Player getting stuck when on the ground.
             - Forgot to enable `m_allow_sliding`. Enabling fixed it!
         - [ ] Camera orbit following is annoying.
+        - [x] Player moves during wasd with flycam.
+            - Disable if flycam in pre-physics script.
 
 1. Code review.
     - [ ] Fix `@COPYPASTA` tags where there are banks.

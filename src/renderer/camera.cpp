@@ -34,8 +34,8 @@ struct Camera::Data
         float_t aspect_ratio;
         float_t z_near;
         float_t z_far;
-        vec3 position{ 0.0f, 0.0f, 0.0f };
-        vec3 view_direction{ 0.0f, 0.0f, 1.0f };
+        vec3 position;
+        vec3 view_direction;
     } camera;
 
     struct Camera_matrices_cache
@@ -106,6 +106,8 @@ BT::Camera::Camera()
         0.1f,
         500.0f,
     };
+    glm_vec3_copy(vec3{ 27.448f, 16.669f, 31.33f }, m_data->camera.position);
+    glm_vec3_copy(vec3{ -0.566f, -0.53f, -0.632f }, m_data->camera.view_direction);
 }
 
 BT::Camera::~Camera() = default;  // For smart pimpl.
@@ -190,6 +192,11 @@ void BT::Camera::set_follow_object(render_object_key_t render_object_ref)
 void BT::Camera::request_follow_orbit()
 {
     m_data->frontend.request_follow_orbit = true;
+}
+
+bool BT::Camera::is_capture_fly()
+{
+    return (m_data->frontend.state == Data::Frontend::FRONTEND_CAMERA_STATE_CAPTURE_FLY);
 }
 
 bool BT::Camera::is_follow_orbit()
@@ -518,4 +525,10 @@ void BT::Camera::update_frontend_follow_orbit(Renderer& renderer,
 
     glm_vec3_negate_to(offset_from_follow_obj, camera.view_direction);
     glm_vec3_normalize(camera.view_direction);
+
+    // Interstate checks.
+    if (input_state.le_f1.val)
+    {
+        change_frontend_state(Data::Frontend::FRONTEND_CAMERA_STATE_STATIC);
+    }
 }

@@ -58,6 +58,7 @@ public:
         Toggle le_rclick_cam;
         Toggle le_lshift_mod;
         Toggle le_lctrl_mod;
+        Toggle le_f1;
     };
 
     inline State const& get_input_state() const { return m_state; }
