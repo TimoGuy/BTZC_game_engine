@@ -730,7 +730,11 @@ void BT::Renderer::Impl::create_hdr_fbo()  // @COPYPASTA.
 }
 
 void BT::Renderer::Impl::render_scene_to_hdr_framebuffer()
-{
+{    
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CW);
+
     glBindFramebuffer(GL_FRAMEBUFFER, m_hdr_fbo);
     glViewport(0, 0, m_main_viewport_dims.width, m_main_viewport_dims.height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -742,6 +746,7 @@ void BT::Renderer::Impl::render_scene_to_hdr_framebuffer()
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glDisable(GL_CULL_FACE);
 }
 
 // Helper functions.
