@@ -257,23 +257,9 @@ BT::Camera* BT::Renderer::Impl::get_camera_obj()
     return &m_camera;
 }
 
-BT::render_object_key_t BT::Renderer::Impl::emplace_render_object(Render_object&& rend_obj)
+BT::Render_object_pool& BT::Renderer::Impl::get_render_object_pool()
 {
-    m_render_objects.emplace_back(std::move(rend_obj));
-    return (m_render_objects.size() - 1);
-}
-
-void BT::Renderer::Impl::remove_render_object(render_object_key_t key)
-{
-    // @TODO: Figure out how to remove render objects.
-    // @INCOMPLETE.
-    assert(false);
-}
-
-BT::Render_object* BT::Renderer::Impl::get_render_object(render_object_key_t key)
-{
-    // @INCOMPLETE: Change this once remove render object is implemented.
-    return &m_render_objects[key];
+    return m_rend_obj_pool;
 }
 
 void BT::Renderer::Impl::setup_glfw_and_opengl46_hints()
@@ -740,10 +726,12 @@ void BT::Renderer::Impl::render_scene_to_hdr_framebuffer()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Render scene.
-    for (auto& rend_obj : m_render_objects)
+    auto rend_objs{ m_rend_obj_pool.checkout_all_render_objs() };
+    for (auto rend_obj : rend_objs)
     {
-        rend_obj.render(m_active_render_layers);
+        rend_obj->render(m_active_render_layers);
     }
+    m_rend_obj_pool.return_render_objs(std::move(rend_objs));
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glDisable(GL_CULL_FACE);

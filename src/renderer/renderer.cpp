@@ -44,17 +44,7 @@ BT::Camera* BT::Renderer::get_camera_obj()
 }
 
 // Create render objects.
-BT::render_object_key_t BT::Renderer::emplace_render_object(Render_object&& rend_obj)
+BT::Render_object_pool& BT::Renderer::get_render_object_pool()
 {
-    return m_pimpl->emplace_render_object(std::move(rend_obj));
-}
-
-void BT::Renderer::remove_render_object(render_object_key_t key)
-{
-    m_pimpl->remove_render_object(key);
-}
-
-BT::Render_object* BT::Renderer::get_render_object(render_object_key_t key)
-{
-    return m_pimpl->get_render_object(key);
+    return m_pimpl->get_render_object_pool();
 }

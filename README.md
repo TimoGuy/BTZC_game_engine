@@ -8,6 +8,21 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
 *Simple OBJ loader with hacky lighting and a flying camera. (2025/05/22)*
 
 
+## 0.1.0-develop.1 (NEXT VERSION, WIP)
+
+### Adds
+
+- Backface culling.
+
+### Changes
+
+- Grid shader now displays standable and non-standable surfaces.
+
+### Fixes
+
+- Logger failing format string.
+
+
 ## Todo List.
 
 1. Get basic renderer assembled.
@@ -112,12 +127,16 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
             - I found a random one off twitter.
 
 1. Code review.
-    - [ ] Fix `@COPYPASTA` tags where there are banks.
+    - [ ] ~~Fix `@COPYPASTA` tags where there are banks.~~
         - Do we want to do a pool? A different system?
         - There isn't a way to delete render objects. **That needs to get written before implementing the level loading/saving system.**
-    - [ ] Is the gameobject architecture wanted?
-    - [ ] Should refactor to put data together in better ways?
-        - [ ] Is this important to think about this early and would it create friction at the expense of performance?
+    - [x] Rewrite render object pool to allow deleting and uses the same atomic access that physics objects and game objects use.
+        - Adds some tech debt with 3 copies of this pool system tho hahahahaha!
+    - [x] Is the gameobject architecture wanted?
+        - Answer: I think that for now the architecture with the scripting system is fairly good. I think that it works for now and being flexible for any new changes in the future should be the goal, so no rewrite atm.
+    - [x] Should refactor to put data together in better ways?
+        - [x] Is this important to think about this early and would it create friction at the expense of performance?
+            - Answer: It's not important at this stage. We need to be flexible for any changes.
 
 1. Some misc pleasing things (cont.).
     - [ ] Add crouching.

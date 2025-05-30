@@ -33,9 +33,7 @@ public:
     void fetch_cached_camera_matrices(mat4& out_projection, mat4& out_view, mat4& out_projection_view);
     Camera* get_camera_obj();
 
-    render_object_key_t emplace_render_object(Render_object&& rend_obj);
-    void remove_render_object(render_object_key_t key);  // @INCOMPLETE.
-    Render_object* get_render_object(render_object_key_t key);
+    Render_object_pool& get_render_object_pool();
 
 private:
     Renderer& m_renderer;
@@ -64,7 +62,7 @@ private:
     void render_imgui();
 
     // Scene.
-    vector<Render_object> m_render_objects;
+    Render_object_pool m_rend_obj_pool;
     Render_layer m_active_render_layers{ Render_layer::RENDER_LAYER_DEFAULT |
                                          Render_layer::RENDER_LAYER_LEVEL_EDITOR };
 

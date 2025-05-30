@@ -17,8 +17,9 @@ void BT::Pre_render_script::script_apply_physics_transform_to_render_object(
     auto phys_engine{
         reinterpret_cast<Physics_engine*>(Serial::pop_void_ptr(datas, in_out_read_data_idx)) };
 
-    Render_object* rend_obj{ renderer->get_render_object(rend_obj_key) };
-    auto tethered_phys_key{ rend_obj->get_tethered_phys_obj_key() };
+    auto& rend_obj_pool{ renderer->get_render_object_pool() };
+    auto rend_objs{ rend_obj_pool.checkout_render_obj_by_key({ rend_obj_key }) };
+    auto tethered_phys_key{ rend_objs[0]->get_tethered_phys_obj_key() };
 
     // Get transform for rendering.
     rvec3 position;
@@ -31,5 +32,6 @@ void BT::Pre_render_script::script_apply_physics_transform_to_render_object(
     mat4 transform;
     glm_translate_make(transform, vec3{ position[0], position[1], position[2] });
     glm_quat_rotate(transform, rotation, transform);
-    rend_obj->set_transform(transform);
+    rend_objs[0]->set_transform(transform);
+    rend_obj_pool.return_render_objs(std::move(rend_objs));
 }

@@ -105,12 +105,13 @@ int32_t main()
                                                              JPH::Quat::sIdentity() }));
 
     // Render objects.
-    auto player_char_rend_obj_key = main_renderer.emplace_render_object(BT::Render_object{
+    auto& render_object_pool{ main_renderer.get_render_object_pool() };
+    auto player_char_rend_obj_key = render_object_pool.emplace(BT::Render_object{
         *BT::Model_bank::get_model("box_0.5_2"),
         BT::Render_layer::RENDER_LAYER_DEFAULT,
         GLM_MAT4_IDENTITY,
         player_char_phys_obj_key });
-    main_renderer.emplace_render_object(BT::Render_object{
+    render_object_pool.emplace(BT::Render_object{
         *BT::Model_bank::get_model("probuilder_example"),
         BT::Render_layer::RENDER_LAYER_DEFAULT,
         GLM_MAT4_IDENTITY });

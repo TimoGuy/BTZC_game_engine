@@ -431,20 +431,22 @@ void BT::Camera::update_frontend_follow_orbit(Renderer& renderer,
 
     vec3 mvt_velocity{ 0.0f, 0.0f, 0.0f };
 
-    auto rend_obj{ renderer.get_render_object(fo.render_object_ref) };
-    if (rend_obj != nullptr)
+    auto rend_objs{
+        renderer.get_render_object_pool().checkout_render_obj_by_key({ fo.render_object_ref }) };
+    if (!rend_objs.empty())
     {
         // Copy prev follow position.
         vec3 from_follow_pos;
         glm_vec3_copy(fo.current_follow_pos, from_follow_pos);
 
         // Update follow position.
-        rend_obj->get_position(fo.current_follow_pos);
+        rend_objs[0]->get_position(fo.current_follow_pos);
 
         // Calc mvt velocity (@NOTE: deltatime independant).
         glm_vec3_sub(fo.current_follow_pos, from_follow_pos, mvt_velocity);
         glm_vec3_scale(mvt_velocity, 1.0f / delta_time, mvt_velocity);
     }
+    renderer.get_render_object_pool().return_render_objs(std::move(rend_objs));
 
     float_t auto_turn_delta{ 0.0f };
     mvt_velocity[1] = 0.0f;

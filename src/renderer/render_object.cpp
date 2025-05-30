@@ -60,3 +60,97 @@ void BT::Render_object::get_position(vec3& position)
     glm_vec4_copy(m_transform[3], pos4);  // Copied from `glm_decompose()`.
     glm_vec3(pos4, position);
 }
+
+BT::render_object_key_t BT::Render_object_pool::emplace(Render_object&& rend_obj)
+{
+    render_object_key_t key{ m_next_key++ };
+
+    wait_until_free_then_block();
+    m_render_objects.emplace(key, std::move(rend_obj));
+    unblock();
+
+    return key;
+}
+
+void BT::Render_object_pool::remove(render_object_key_t key)
+{
+    wait_until_free_then_block();
+    if (m_render_objects.find(key) == m_render_objects.end())
+    {
+        // Fail bc key was invalid.
+        logger::printef(logger::ERROR, "Render object key %llu does not exist", key);
+        assert(false);
+        return;
+    }
+
+    m_render_objects.erase(key);
+    unblock();
+}
+
+vector<BT::Render_object*> BT::Render_object_pool::checkout_all_render_objs()
+{
+    wait_until_free_then_block();
+
+    vector<Render_object*> all_rend_objs;
+    all_rend_objs.reserve(m_render_objects.size());
+
+    for (auto it = m_render_objects.begin(); it != m_render_objects.end(); it++)
+    {
+        all_rend_objs.emplace_back(&it->second);
+    }
+
+    return all_rend_objs;
+}
+
+vector<BT::Render_object*> BT::Render_object_pool::checkout_render_obj_by_key(vector<render_object_key_t>&& keys)
+{
+    wait_until_free_then_block();
+
+    vector<Render_object*> some_rend_objs;
+    some_rend_objs.reserve(keys.size());
+
+    for (auto key : keys)
+    {
+        if (m_render_objects.find(key) == m_render_objects.end())
+        {
+            // Fail bc key was invalid.
+            logger::printef(logger::WARN, "Render object key %llu does not exist", key);
+            assert(false);
+        }
+        else
+        {
+            // Checkout render object.
+            some_rend_objs.emplace_back(&m_render_objects.at(key));
+        }
+    }
+
+    return some_rend_objs;
+}
+
+void BT::Render_object_pool::return_render_objs(vector<Render_object*>&& render_objs)
+{
+    // Assumed that this is the end of using the renderobject list.
+    // @TODO: Prevent misuse of this function.
+    // (@IDEA: Make it so that instead of a vector use a class that has a release function or a dtor)
+    // @COPYPASTA: See `game_object.cpp`
+    (void)render_objs;
+    unblock();
+}
+
+// Synchronization. (@COPYPASTA: See `game_object.cpp`)
+void BT::Render_object_pool::wait_until_free_then_block()
+{
+    while (true)
+    {
+        bool unblocked{ false };
+        if (m_blocked.compare_exchange_weak(unblocked, true))
+        {   // Exchange succeeded and is now in blocking state.
+            break;
+        }
+    }
+}
+
+void BT::Render_object_pool::unblock()
+{
+    m_blocked.store(false);
+}

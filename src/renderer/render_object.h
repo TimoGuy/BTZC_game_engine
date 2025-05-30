@@ -3,9 +3,14 @@
 #include "../physics_engine/physics_engine.h"
 #include "cglm/cglm.h"
 #include "mesh.h"
+#include <atomic>
 #include <string>
+#include <vector>
 
+using std::atomic_bool;
+using std::atomic_uint64_t;
 using std::string;
+using std::vector;
 
 
 namespace BT
@@ -44,6 +49,28 @@ private:
 
     // (Optional) Tethered physics object.
     physics_object_key_t m_tethered_phys_obj;
+};
+
+// @COPYPASTA: Not quite copypasta. It's a little bit different.
+using render_object_key_t = uint64_t;
+class Render_object_pool
+{
+public:
+    render_object_key_t emplace(Render_object&& rend_obj);
+    void remove(render_object_key_t key);
+    vector<Render_object*> checkout_all_render_objs();
+    vector<Render_object*> checkout_render_obj_by_key(vector<render_object_key_t>&& keys);
+    void return_render_objs(vector<Render_object*>&& render_objs);
+
+private:
+    atomic_uint64_t m_next_key{ 0 };
+    unordered_map<render_object_key_t, Render_object> m_render_objects;
+
+    // Synchronization.
+    atomic_bool m_blocked{ false };
+
+    void wait_until_free_then_block();
+    void unblock();
 };
 
 }  // namespace BT
