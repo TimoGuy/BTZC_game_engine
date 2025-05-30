@@ -21,6 +21,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
 ### Fixes
 
 - Logger failing format string.
+- Not being able to delete render objects.
 
 
 ## Todo List.
