@@ -22,6 +22,7 @@
 #include "renderer/renderer.h"
 #include "renderer/shader.h"  // @DEBUG
 #include "renderer/texture.h"  // @DEBUG
+#include "scene/scene_serialization_ifc.h"
 #include "timer/timer.h"
 #include "timer/watchdog_timer.h"
 #include <cstdint>
@@ -133,12 +134,26 @@ int32_t main()
     BT::Serial::push_u64_persistent_state(phys_scripts_datas);
 
     game_object_pool.emplace(unique_ptr<BT::Game_object>(
-        new BT::Game_object(main_physics_engine,
+        new BT::Game_object("My Gay object",
+                            main_physics_engine,
                             main_renderer,
+                            player_char_phys_obj_key,
+                            player_char_rend_obj_key,
                             std::move(phys_scripts),
                             std::move(phys_scripts_datas),
                             { BT::Pre_render_script::SCRIPT_TYPE_apply_physics_transform_to_render_object },
                             { player_char_rend_obj_key, reinterpret_cast<uint64_t>(&main_physics_engine) } )));
+
+    {
+        // @DEBUG: @NOCHECKIN.
+        json root;
+        auto const game_objs{ game_object_pool.checkout_all_as_list() };
+        for (auto game_obj : game_objs)
+        {
+            game_obj->scene_serialize(BT::SCENE_SERIAL_MODE_SERIALIZE, root);
+        }
+        game_object_pool.return_all_as_list(std::move(game_objs));
+    }
 
     // Camera follow ref.
     main_renderer.get_camera_obj()->set_follow_object(player_char_phys_obj_key);

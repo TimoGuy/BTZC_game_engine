@@ -33,6 +33,7 @@ set(DEPENDENCY_INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glfw/include
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/imgui  # Header only.
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/JoltPhysics
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/json/include
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/stb  # Header only (essentially).
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/tinyobjloader)
 
@@ -40,6 +41,7 @@ add_subdirectory(third_party/fastgltf)
 add_subdirectory(third_party/fmt)
 add_subdirectory(third_party/glfw)
 add_subdirectory(third_party/JoltPhysics/Build)
+add_subdirectory(third_party/json)
 
 # Executable build.
 add_executable(${PROJECT_NAME}
@@ -94,6 +96,7 @@ add_executable(${PROJECT_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/shader.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/texture.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/texture.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/scene/scene_serialization_ifc.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/timer/timer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/timer/timer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/timer/watchdog_timer.cpp
@@ -143,7 +146,8 @@ target_link_libraries(${PROJECT_NAME}
     fmt::fmt
     glfw
     ${GLFW_LIBRARIES}
-    Jolt)
+    Jolt
+    nlohmann_json::nlohmann_json)
 
 # Create symlink to assets folder.
 if(DEFINED ASSET_DIR)

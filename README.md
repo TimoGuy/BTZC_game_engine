@@ -151,8 +151,21 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - Skip for now and try again later. If it's annoying then ig I'll have to rethink how it works.
 
 1. Level saving/loading.
-    - [ ] Game object serialization to json.
-    - [ ] Json to Game object generator.
+    - [ ] ~~Actually, there is a modern yaml parser/emitter for C++ so let's use that. (https://github.com/biojppm/rapidyaml)~~
+        - Tried it and it was hard to use. I think I will just use nlohmann's json lib again, since it's just super duper easy to use.
+    - [x] Remove RapidYAML and insert nlohmann json.
+        - I think I just didn't have the patience for getting yaml in there. Perhaps the speed and the readability of the files may have been worth it. Idk.
+    - [ ] Game object serialization to JSON.
+        - I think there needs to be some kind of gameobject building block or something to get it all together with???
+        - Game object could be serialized to:
+            - Name
+            - Guid
+            - List of Guids that are children.
+            - List of render scripts w/ accompanying data.
+            - List of physics scripts w/ accompanying data.
+            - Render object (and defer here).
+            - Physics object (and defer here).
+    - [ ] JSON to Game object generator.
     - [ ] Load level inside a level as a prefab.
     - [ ] Level hierarchy and sorting.
 

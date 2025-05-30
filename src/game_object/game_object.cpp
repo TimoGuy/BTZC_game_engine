@@ -11,13 +11,17 @@ using std::atomic_uint8_t;
 using std::atomic_uint64_t;
 
 
-BT::Game_object::Game_object(Physics_engine& phys_engine,
+BT::Game_object::Game_object(string const& name,
+                             Physics_engine& phys_engine,
                              Renderer& renderer,
+                             physics_object_key_t phys_obj_key,
+                             render_object_key_t rend_obj_key,
                              vector<Pre_physics_script::Script_type>&& pre_physics_scripts,
                              vector<uint64_t>&& pre_physics_user_datas,
                              vector<Pre_render_script::Script_type>&& pre_render_scripts,
                              vector<uint64_t>&& pre_render_user_datas)
-    : m_phys_engine(phys_engine)
+    : m_name(name)
+    , m_phys_engine(phys_engine)
     , m_renderer(renderer)
     , m_pre_physics_scripts(std::move(pre_physics_scripts))
     , m_pre_physics_user_datas(std::move(pre_physics_user_datas))
@@ -49,6 +53,42 @@ void BT::Game_object::run_pre_render_scripts(float_t delta_time)
                                                          read_data_idx);
     }
 }
+
+// Scene_serialization_ifc.
+void BT::Game_object::scene_serialize(Scene_serialization_mode mode, json& node_ref)
+{
+    if (mode == SCENE_SERIAL_MODE_SERIALIZE)
+    {
+        node_ref["name"] = m_name;
+        node_ref["guid"] = "1234khhlkh-jlkhlkh-i32i32k-nnnnknknknk";
+        node_ref["children"][0] = "isodesperately-wantajeff-bezosasmy-lovelydovely";
+        node_ref["children"][1] = "santaclauseis-cumming-mytown-andbytownwellletsjustsay";
+
+        size_t scripts_idx{ 0 };
+        for (auto pre_phys_script : m_pre_physics_scripts)
+        {
+            node_ref["pre_physics_scripts"][scripts_idx++] =
+                Pre_physics_script::get_script_name_from_type(pre_phys_script).c_str();  // Might fail.
+
+            // @TODO: Add script datas.
+        }
+
+        scripts_idx = 0;
+        for (auto pre_rend_script : m_pre_render_scripts)
+        {
+            node_ref["pre_render_scripts"][scripts_idx++] =
+                Pre_render_script::get_script_name_from_type(pre_rend_script).c_str();  // Might fail.
+
+            // @TODO: Add script datas.
+        }
+    }
+    else if (mode == SCENE_SERIAL_MODE_DESERIALIZE)
+    {
+        // @TODO.
+        assert(false);
+    }
+}
+
 
 BT::Game_object_pool::gob_key_t BT::Game_object_pool::emplace(unique_ptr<Game_object>&& game_object)
 {

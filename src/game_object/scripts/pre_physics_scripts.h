@@ -1,5 +1,6 @@
 #pragma once
 
+#include "logger.h"
 #include <array>
 #include <cassert>
 #include <string>
@@ -41,6 +42,23 @@ array<string const, NUM_SCRIPT_TYPES> const k_script_names{
 inline string get_script_name_from_type(Script_type script_type)
 {
     return k_script_names[script_type];
+}
+
+inline Script_type get_script_type_from_name(string const& name)
+{
+    for (size_t i = 0; i < k_script_names.size(); i++)
+    {
+        if (k_script_names[i] == name)
+        {
+            // Return found script type.
+            return Script_type(i);
+        }
+    }
+
+    // No type found.
+    logger::printef(logger::ERROR, "Script type not found with name: %s", name.c_str());
+    assert(false);
+    return NUM_SCRIPT_TYPES;
 }
 
 // All script func prototypes.

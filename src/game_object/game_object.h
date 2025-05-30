@@ -1,7 +1,10 @@
 #pragma once
 
 #include "../physics_engine/physics_engine.h"
+#include "../physics_engine/physics_object.h"
 #include "../renderer/renderer.h"
+#include "../renderer/render_object.h"
+#include "../scene/scene_serialization_ifc.h"
 #include "scripts/pre_physics_scripts.h"
 #include "scripts/pre_render_scripts.h"
 #include <atomic>
@@ -23,19 +26,27 @@ using std::vector;
 namespace BT
 {
 
-class Game_object
+class Game_object : public Scene_serialization_ifc
 {
 public:
-    Game_object(Physics_engine& phys_engine,
+    Game_object(string const& name,
+                Physics_engine& phys_engine,
                 Renderer& renderer,
+                physics_object_key_t phys_obj_key,
+                render_object_key_t rend_obj_key,
                 vector<Pre_physics_script::Script_type>&& pre_physics_scripts,
                 vector<uint64_t>&& pre_physics_user_datas,
                 vector<Pre_render_script::Script_type>&& pre_render_scripts,
                 vector<uint64_t>&& pre_render_user_datas);
+
     void run_pre_physics_scripts(float_t physics_delta_time);
     void run_pre_render_scripts(float_t delta_time);
 
+    // Scene_serialization_ifc.
+    void scene_serialize(Scene_serialization_mode mode, json& node_ref) override;
+
 private:
+    string m_name;
     Physics_engine& m_phys_engine;
     Renderer& m_renderer;
 
