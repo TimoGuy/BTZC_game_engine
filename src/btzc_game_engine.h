@@ -1,6 +1,6 @@
 #pragma once
 
-#define BTZC_GAME_ENGINE_VERSION        "v0.1.0-develop.0"
+#define BTZC_GAME_ENGINE_VERSION        "v0.1.0-develop.1 WIP"
 #define BTZC_GAME_ENGINE_DEV_STAGE      "PRE-ALPHA"
 
 #if _WIN64
