@@ -110,7 +110,6 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - [x] Get textures working.
         - [x] Make and add the grid texture.
             - I found a random one off twitter.
-    - [ ] Camera orbit following is annoying.
 
 1. Code review.
     - [ ] Fix `@COPYPASTA` tags where there are banks.
@@ -120,6 +119,12 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
     - [ ] Should refactor to put data together in better ways?
         - [ ] Is this important to think about this early and would it create friction at the expense of performance?
 
+1. Some misc pleasing things (cont.).
+    - [ ] Add crouching.
+        - [ ] Ctrl to crouch.
+        - [ ] Jump or Ctrl to uncrouch (w/o jumping).
+    - [ ] Camera orbit following is annoying.
+
 1. Level saving/loading.
     - [ ] Game object serialization to json.
     - [ ] Json to Game object generator.
@@ -127,6 +132,12 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
     - [ ] Level hierarchy and sorting.
 
 1. Level authoring tools.
+    - [ ] Orthographic view.
+        - [ ] 
 
 1. Add cascaded shadow maps to renderer.
+    - @TODO.
+
+1. Skeletal animations using compute shaders.
+    - [ ] IK legs.
     - @TODO.

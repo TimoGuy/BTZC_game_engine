@@ -13,5 +13,5 @@ uniform mat4 model_transform;
 void main()
 {
     gl_Position = camera_projection_view * model_transform * vec4(in_position, 1.0);
-    out_normal = in_normal;
+    out_normal = mat3(transpose(inverse(model_transform))) * in_normal;
 }

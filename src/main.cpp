@@ -68,7 +68,9 @@ int32_t main()
         "textured_material",
         unique_ptr<BT::Material_ifc>(
             new BT::Material_opaque_texture_shaded(BT::Texture_bank::get_texture_2d("default_texture"),
-                                                   vec3{ 0.0f, 0.2f, 0.5f })));
+                                                   vec3{ 0.0f, 0.2f, 0.5f },
+                                                   vec3{ 0.5f, 0.2f, 0.1f },
+                                                   45.0f)));
     BT::Material_bank::emplace_material(
         "post_process",
         unique_ptr<BT::Material_ifc>(
