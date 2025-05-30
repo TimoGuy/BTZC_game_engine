@@ -13,6 +13,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
 ### Adds
 
 - Backface culling.
+- 10 second async watchdog (for crashing the program if it falls into an infinite loop).
 
 ### Changes
 
@@ -140,16 +141,23 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
             - Answer: It's not important at this stage. We need to be flexible for any changes.
 
 1. Some misc pleasing things (cont.).
-    - [ ] Add crouching.
-        - [ ] Ctrl to crouch.
-        - [ ] Jump or Ctrl to uncrouch (w/o jumping).
-    - [ ] Camera orbit following is annoying.
+    - [x] Add crouching.
+        - [x] Ctrl to crouch.
+        - [x] Jump or Ctrl to uncrouch (w/o jumping).
+        - [x] Undo crouching when fall off (or go midair in some way)
+    - [x] Make F1 allow to enter into the orbit cam as well.
+    - [x] Create stalling watchdog (set to 10s as default).
+    - [ ] ~~Camera orbit following is annoying.~~
+        - Skip for now and try again later. If it's annoying then ig I'll have to rethink how it works.
 
 1. Level saving/loading.
     - [ ] Game object serialization to json.
     - [ ] Json to Game object generator.
     - [ ] Load level inside a level as a prefab.
     - [ ] Level hierarchy and sorting.
+
+1. Good pause point.
+    - [ ] Release v0.1.0-develop.1
 
 1. Level authoring tools.
     - [ ] Orthographic view.
@@ -159,5 +167,21 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
     - @TODO.
 
 1. Skeletal animations using compute shaders.
+    - [ ] Add support for GLTF2 filetype for models.
     - [ ] IK legs.
     - @TODO.
+
+1. Good pause point.
+    - [ ] Release v0.1.0-develop.2
+
+1. Graphics library procedure abstraction.
+    - [ ] FIRST: Check inside the `renderer_impl_win64.h/.cpp` to see what different things OpenGL uses and pull those out.
+        - GOAL: Have a gfx abstraction layer so that `renderer.h/.cpp` can just define the renderer using this kinda code:
+            ```
+            unique_ptr<Gfx_abstraction> gfx_implementation{ new gfx_impl_opengl46 };
+            Renderer main_renderer{ std::move(gfx_implementation) };
+            ```
+        - GOAL cont: And then work on the renderer for vulkan!
+    - [ ] Create/delete framebuffers.
+    - [ ] Create/delete images, views, and samplers.
+    - [ ] Run mipmapping.

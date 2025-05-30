@@ -20,6 +20,8 @@ void BT::Pre_physics_script::script_player_character_movement(
         reinterpret_cast<Input_handler*>(Serial::pop_void_ptr(datas, in_out_read_data_idx))
             ->get_input_state() };
     auto camera{ reinterpret_cast<Camera*>(Serial::pop_void_ptr(datas, in_out_read_data_idx)) };
+    auto& pers_state1{ Serial::pop_u64_persistent_state(datas, in_out_read_data_idx) };
+    auto& pers_state2{ Serial::pop_u64_persistent_state(datas, in_out_read_data_idx) };
 
     Physics_object* phys_obj{ phys_engine->checkout_physics_object(phys_obj_key) };
     auto character_impl{ phys_obj->get_impl() };
@@ -65,32 +67,64 @@ void BT::Pre_physics_script::script_player_character_movement(
 
     character_impl->set_cc_allow_sliding(glm_vec3_norm2(move_input_world) > 1e-6f * 1e-6f);
 
-    // asdfasdfasdf.
-    // Determine new basic velocity
+    // Change input into desired velocity.
+    constexpr float_t k_standing_speed{ 15.0f };
+    constexpr float_t k_crouched_speed{ 5.0f };
+    JPH::Vec3 desired_velocity{ move_input_world[0],
+                                move_input_world[1],
+                                move_input_world[2] };
+    desired_velocity *= (character_impl->get_cc_stance() ?
+                             k_crouched_speed :
+                             k_standing_speed);
+
+    // Extra input checks.
+    bool prev_jump_pressed{ static_cast<bool>(pers_state1) };
+    bool on_jump_press{ input_state.jump.val && !prev_jump_pressed };
+    pers_state1 = input_state.jump.val;
+
+    bool prev_crouch_pressed{ static_cast<bool>(pers_state2) };
+    bool on_crouch_press{ input_state.crouch.val && !prev_crouch_pressed };
+    pers_state2 = input_state.crouch.val;
+
+    // Determine new basic velocity.
     JPH::Vec3 current_vertical_velocity = linear_velocity.Dot(up_direction) * up_direction;
     JPH::Vec3 new_velocity;
-    bool moving_towards_ground = (current_vertical_velocity.GetY() - ground_velocity.GetY()) < 0.1f;
-    if (ground_state == JPH::CharacterVirtual::EGroundState::OnGround    // If on ground
-        && !character_impl->is_cc_slope_too_steep(ground_normal))            // Inertia disabled: And not on a slope that is too steep
+    bool is_grounded{ ground_state == JPH::CharacterVirtual::EGroundState::OnGround &&
+                      (current_vertical_velocity.GetY() - ground_velocity.GetY()) < 0.1f &&
+                      !character_impl->is_cc_slope_too_steep(ground_normal) };
+    if (is_grounded)
     {
-        // Assume velocity of ground when on ground
+        // Assume velocity of ground.
         new_velocity = ground_velocity;
 
-        // Jump
-        if (input_state.jump.val && moving_towards_ground)
-            new_velocity += 50.0f * up_direction;
+        if (on_crouch_press || (character_impl->get_cc_stance() && on_jump_press))
+        {
+            // Toggle crouching.
+            character_impl->set_cc_stance(!character_impl->get_cc_stance());
+        }
+        else if (!character_impl->get_cc_stance() && on_jump_press)
+        {
+            // Jump.
+            new_velocity += 35.0f * up_direction;
+        }
     }
     else
-        // Keep previous frame velocity.
+    {
+        if (character_impl->get_cc_stance())
+        {
+            // Leave crouching stance.
+            character_impl->set_cc_stance(false);
+        }
+
+        // Keep previous tick velocity.
         new_velocity = current_vertical_velocity;
+    }
 
     // Gravity.
     new_velocity += (up_rotation * phys_system->GetGravity()) * Physics_engine::k_simulation_delta_time;
 
-    // Player input.
-    new_velocity += up_rotation * JPH::Vec3{ move_input_world[0] * 20.0f,
-                                             move_input_world[1] * 20.0f,
-                                             move_input_world[2] * 20.0f };
+    // Input velocity.
+    new_velocity += desired_velocity;
 
     // Set input velocity.
     character_impl->set_cc_velocity(new_velocity);

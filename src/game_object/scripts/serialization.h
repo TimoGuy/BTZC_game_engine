@@ -23,6 +23,18 @@ inline uint64_t pop_u64(vector<uint64_t> const& datas, size_t& in_out_read_data_
     return datas[in_out_read_data_idx++];
 }
 
+inline void push_u64_persistent_state(vector<uint64_t>& in_out_datas)
+{
+    push_u64(in_out_datas, 0);
+}
+
+inline uint64_t& pop_u64_persistent_state(vector<uint64_t> const& datas, size_t& in_out_read_data_idx)
+{
+    // I like the const nature, but this is an exception. Martyr me.  -Thea 2025/05/30
+    auto& datas_unconstified{ const_cast<vector<uint64_t>&>(datas) };
+    return datas_unconstified[in_out_read_data_idx++];
+}
+
 inline void push_u32(vector<uint64_t>& in_out_datas, uint32_t new_data)
 {
     push_u64(in_out_datas, static_cast<uint64_t>(new_data));

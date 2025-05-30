@@ -134,6 +134,12 @@ bool BT::Phys_obj_impl_char_controller::set_cc_stance(bool is_crouching)
     return success;
 }
 
+bool BT::Phys_obj_impl_char_controller::get_cc_stance()
+{
+    bool is_crouching{ m_character->GetShape() == m_crouching_shape };
+    return is_crouching;
+}
+
 void BT::Phys_obj_impl_char_controller::on_pre_update(float_t physics_delta_time)
 {
     // Settings for our update function.

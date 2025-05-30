@@ -40,6 +40,7 @@ public:
     void set_cc_allow_sliding(bool allow) override;
     void set_cc_velocity(JPH::Vec3Arg velocity) override;
     bool set_cc_stance(bool is_crouching) override;
+    bool get_cc_stance() override;
     void on_pre_update(float_t physics_delta_time) override;
     Physics_transform read_transform() override;
 

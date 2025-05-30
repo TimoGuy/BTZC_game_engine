@@ -54,6 +54,7 @@ public:
     virtual void set_cc_allow_sliding(bool allow) { assert(false); }
     virtual void set_cc_velocity(JPH::Vec3Arg velocity) { assert(false); }
     virtual bool set_cc_stance(bool is_crouching) { assert(false); return false; }
+    virtual bool get_cc_stance() { assert(false); return false; }
     virtual void on_pre_update(float_t physics_delta_time) { }
     virtual Physics_transform read_transform() = 0;
 };

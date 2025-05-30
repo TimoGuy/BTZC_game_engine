@@ -61,6 +61,7 @@ struct Camera::Data
             "ORBIT",
         };
 
+        bool prev_f1_pressed{ false };
         bool prev_rclick_cam{ false };
 
         struct Capture_fly
@@ -213,7 +214,11 @@ void BT::Camera::update_frontend(Renderer& renderer, Input_handler::State const&
     bool on_release_le_rclick_cam{ frontend.prev_rclick_cam && !input_state.le_rclick_cam.val };
     frontend.prev_rclick_cam = input_state.le_rclick_cam.val;
 
+    bool on_press_le_f1{ !frontend.prev_f1_pressed && input_state.le_f1.val };
+    frontend.prev_f1_pressed = input_state.le_f1.val;
+
     // Process state.
+    bool first{ true };
     Data::Frontend::Frontend_state prev_state;
     do
     {
@@ -222,7 +227,7 @@ void BT::Camera::update_frontend(Renderer& renderer, Input_handler::State const&
         switch (frontend.state)
         {
             case Data::Frontend::FRONTEND_CAMERA_STATE_STATIC:
-                update_frontend_static(on_press_le_rclick_cam);
+                update_frontend_static(input_state, on_press_le_rclick_cam, on_press_le_f1, first);
                 break;
 
             case Data::Frontend::FRONTEND_CAMERA_STATE_CAPTURE_FLY:
@@ -230,7 +235,7 @@ void BT::Camera::update_frontend(Renderer& renderer, Input_handler::State const&
                 break;
 
             case Data::Frontend::FRONTEND_CAMERA_STATE_FOLLOW_ORBIT:
-                update_frontend_follow_orbit(renderer, input_state, delta_time);
+                update_frontend_follow_orbit(renderer, input_state, delta_time, on_press_le_f1, first);
                 break;
 
             default:
@@ -238,6 +243,8 @@ void BT::Camera::update_frontend(Renderer& renderer, Input_handler::State const&
                 assert(false);
                 break;
         }
+
+        first = false;
     } while (prev_state != frontend.state);
 }
 
@@ -332,10 +339,13 @@ void BT::Camera::change_frontend_state(uint32_t to_state)
     }
 }
 
-void BT::Camera::update_frontend_static(bool on_press_le_rclick_cam)
+void BT::Camera::update_frontend_static(Input_handler::State const& input_state,
+                                        bool on_press_le_rclick_cam,
+                                        bool on_press_le_f1,
+                                        bool first)
 {
     // Interstate checks.
-    if (m_data->frontend.request_follow_orbit)
+    if (m_data->frontend.request_follow_orbit || (first && on_press_le_f1))
     {
         change_frontend_state(Data::Frontend::FRONTEND_CAMERA_STATE_FOLLOW_ORBIT);
         m_data->frontend.request_follow_orbit = false;
@@ -424,7 +434,9 @@ void BT::Camera::update_frontend_capture_fly(Input_handler::State const& input_s
 
 void BT::Camera::update_frontend_follow_orbit(Renderer& renderer,
                                               Input_handler::State const& input_state,
-                                              float_t delta_time)
+                                              float_t delta_time,
+                                              bool on_press_le_f1,
+                                              bool first)
 {
     auto& camera{ m_data->camera };
     auto& fo{ m_data->frontend.follow_orbit };
@@ -529,7 +541,7 @@ void BT::Camera::update_frontend_follow_orbit(Renderer& renderer,
     glm_vec3_normalize(camera.view_direction);
 
     // Interstate checks.
-    if (input_state.le_f1.val)
+    if (first && on_press_le_f1)
     {
         change_frontend_state(Data::Frontend::FRONTEND_CAMERA_STATE_STATIC);
     }

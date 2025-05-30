@@ -52,13 +52,18 @@ private:
 
     // Frontend functions.
     void change_frontend_state(uint32_t to_state);
-    void update_frontend_static(bool on_press_le_rclick_cam);
+    void update_frontend_static(Input_handler::State const& input_state,
+                                bool on_press_le_rclick_cam,
+                                bool on_press_le_f1,
+                                bool first);
     void update_frontend_capture_fly(Input_handler::State const& input_state,
                                      float_t delta_time,
                                      bool on_release_le_rclick_cam);
     void update_frontend_follow_orbit(Renderer& renderer,
                                       Input_handler::State const& input_state,
-                                      float_t delta_time);
+                                      float_t delta_time,
+                                      bool on_press_le_f1,
+                                      bool first);
 };
 
 }  // namespace BT

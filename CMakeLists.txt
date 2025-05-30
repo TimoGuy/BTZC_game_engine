@@ -96,6 +96,8 @@ add_executable(${PROJECT_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/texture.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/timer/timer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/timer/timer.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/timer/watchdog_timer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/timer/watchdog_timer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/btzc_game_engine.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
     

@@ -471,8 +471,8 @@ void BT::Renderer::Impl::render_imgui()
                                 - s_toggle_player_cam_btn_width - 2.0f
                                 - s_player_cam_options_btn_width - 8.0f);
             if (ImGui::Button((!m_camera.is_follow_orbit() ?
-                                   "Switch to player cam" :
-                                   "Press F1 to exit player cam")))
+                                   "Switch to player cam (F1)" :
+                                   "Exit player cam (F1)")))
             {
                 m_camera.request_follow_orbit();
             }

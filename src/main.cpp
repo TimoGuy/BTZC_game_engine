@@ -23,6 +23,7 @@
 #include "renderer/shader.h"  // @DEBUG
 #include "renderer/texture.h"  // @DEBUG
 #include "timer/timer.h"
+#include "timer/watchdog_timer.h"
 #include <cstdint>
 #include <memory>
 
@@ -32,6 +33,8 @@ using std::unique_ptr;
 
 int32_t main()
 {
+    BT::Watchdog_timer main_watchdog;
+
     BT::Input_handler main_input_handler;
     BT::Renderer main_renderer{ main_input_handler,
                                 "Untitled Zelda-like Collectathon Game" };
@@ -126,6 +129,8 @@ int32_t main()
     BT::Serial::push_u64(phys_scripts_datas, player_char_phys_obj_key);
     BT::Serial::push_void_ptr(phys_scripts_datas, &main_input_handler);
     BT::Serial::push_void_ptr(phys_scripts_datas, main_renderer.get_camera_obj());
+    BT::Serial::push_u64_persistent_state(phys_scripts_datas);
+    BT::Serial::push_u64_persistent_state(phys_scripts_datas);
 
     game_object_pool.emplace(unique_ptr<BT::Game_object>(
         new BT::Game_object(main_physics_engine,
@@ -146,6 +151,7 @@ int32_t main()
     while (!main_renderer.get_requesting_close())
     {
         BT::logger::notify_start_new_mainloop_iteration();
+        main_watchdog.pet();
         main_renderer.poll_events();
 
         float_t delta_time =
