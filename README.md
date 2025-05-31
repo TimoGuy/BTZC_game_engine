@@ -155,6 +155,8 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - Tried it and it was hard to use. I think I will just use nlohmann's json lib again, since it's just super duper easy to use.
     - [x] Remove RapidYAML and insert nlohmann json.
         - I think I just didn't have the patience for getting yaml in there. Perhaps the speed and the readability of the files may have been worth it. Idk.
+    - [x] Remove `crashoz/uuid_v4` uuid implementation.
+        - The SIMD was causing too many issues so I opted for a (probably slower) implementation, `mariusbancila/stduuid`.
     - [ ] Game object serialization to JSON.
         - I think there needs to be some kind of gameobject building block or something to get it all together with???
         - Game object could be serialized to:

@@ -25,9 +25,6 @@
 [submodule "third_party/json"]
 	path = third_party/json
 	url = https://github.com/nlohmann/json.git
-[submodule "third_party/uuid_v4"]
-	path = third_party/uuid_v4
-	url = https://github.com/crashoz/uuid_v4.git
 [submodule "third_party/stduuid"]
 	path = third_party/stduuid
 	url = https://github.com/mariusbancila/stduuid.git
