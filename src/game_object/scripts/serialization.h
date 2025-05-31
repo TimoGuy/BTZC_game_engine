@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../../uuid/uuid_ifc.h"
 #include "cglm/cglm.h"
 #include "logger.h"
 #include <cassert>
@@ -43,6 +44,58 @@ inline void push_u32(vector<uint64_t>& in_out_datas, uint32_t new_data)
 inline uint32_t pop_u32(vector<uint64_t> const& datas, size_t& in_out_read_data_idx)
 {
     return static_cast<uint32_t>(pop_u64(datas, in_out_read_data_idx));
+}
+
+inline void push_uuid(vector<uint64_t>& in_out_datas, UUID new_data)
+{
+    static_assert(sizeof(UUID) <= sizeof(uint64_t) * 17);
+    uint64_t parts[17]{ 0, 0, 0 };
+    UUID* parts_as_uuid{ reinterpret_cast<UUID*>(parts) };
+    *parts_as_uuid = new_data;
+
+    push_u64(in_out_datas, parts[0]);
+    push_u64(in_out_datas, parts[1]);
+    push_u64(in_out_datas, parts[2]);
+    push_u64(in_out_datas, parts[3]);
+    push_u64(in_out_datas, parts[4]);
+    push_u64(in_out_datas, parts[5]);
+    push_u64(in_out_datas, parts[6]);
+    push_u64(in_out_datas, parts[7]);
+    push_u64(in_out_datas, parts[8]);
+    push_u64(in_out_datas, parts[9]);
+    push_u64(in_out_datas, parts[10]);
+    push_u64(in_out_datas, parts[11]);
+    push_u64(in_out_datas, parts[12]);
+    push_u64(in_out_datas, parts[13]);
+    push_u64(in_out_datas, parts[14]);
+    push_u64(in_out_datas, parts[15]);
+    push_u64(in_out_datas, parts[16]);
+}
+
+inline UUID pop_uuid(vector<uint64_t> const& datas, size_t& in_out_read_data_idx)
+{
+    static_assert(sizeof(UUID) <= sizeof(uint64_t) * 17);
+    uint64_t parts[17]{
+        pop_u64(datas, in_out_read_data_idx),
+        pop_u64(datas, in_out_read_data_idx),
+        pop_u64(datas, in_out_read_data_idx),
+        pop_u64(datas, in_out_read_data_idx),
+        pop_u64(datas, in_out_read_data_idx),
+        pop_u64(datas, in_out_read_data_idx),
+        pop_u64(datas, in_out_read_data_idx),
+        pop_u64(datas, in_out_read_data_idx),
+        pop_u64(datas, in_out_read_data_idx),
+        pop_u64(datas, in_out_read_data_idx),
+        pop_u64(datas, in_out_read_data_idx),
+        pop_u64(datas, in_out_read_data_idx),
+        pop_u64(datas, in_out_read_data_idx),
+        pop_u64(datas, in_out_read_data_idx),
+        pop_u64(datas, in_out_read_data_idx),
+        pop_u64(datas, in_out_read_data_idx),
+        pop_u64(datas, in_out_read_data_idx), };
+
+    UUID* parts_as_uuid{ reinterpret_cast<UUID*>(parts) };
+    return *parts_as_uuid;
 }
 
 inline void push_void_ptr(vector<uint64_t>& in_out_datas, void* new_data)

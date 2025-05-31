@@ -13,12 +13,13 @@ void BT::Pre_render_script::script_apply_physics_transform_to_render_object(
     vector<uint64_t> const& datas,
     size_t& in_out_read_data_idx)
 {
-    auto rend_obj_key{ Serial::pop_u64(datas, in_out_read_data_idx) };
+    auto rend_obj_key{ Serial::pop_uuid(datas, in_out_read_data_idx) };
     auto phys_engine{
         reinterpret_cast<Physics_engine*>(Serial::pop_void_ptr(datas, in_out_read_data_idx)) };
 
     auto& rend_obj_pool{ renderer->get_render_object_pool() };
-    auto rend_objs{ rend_obj_pool.checkout_render_obj_by_key({ rend_obj_key }) };
+    vector<UUID> rend_obj_keys{ rend_obj_key };
+    auto rend_objs{ rend_obj_pool.checkout_render_obj_by_key(std::move(rend_obj_keys)) };
     auto tethered_phys_key{ rend_objs[0]->get_tethered_phys_obj_key() };
 
     // Get transform for rendering.

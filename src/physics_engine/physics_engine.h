@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../uuid/uuid_ifc.h"
 #include "physics_object.h"
 #include <atomic>
 #include <cmath>
@@ -10,8 +11,6 @@ using std::atomic_bool;
 using std::atomic_uint64_t;
 using std::unique_ptr;
 using std::unordered_map;
-
-using physics_object_key_t = uint64_t;
 
 
 namespace BT
@@ -40,9 +39,9 @@ public:
     void update_physics();
 
     // Add/remove physics objects.
-    physics_object_key_t emplace_physics_object(unique_ptr<Physics_object>&& phys_obj);
-    void remove_physics_object(physics_object_key_t key);
-    Physics_object* checkout_physics_object(physics_object_key_t key);
+    UUID emplace_physics_object(unique_ptr<Physics_object>&& phys_obj);
+    void remove_physics_object(UUID key);
+    Physics_object* checkout_physics_object(UUID key);
     void return_physics_object(Physics_object* phys_obj);
 
 private:
@@ -58,8 +57,7 @@ private:
 
     // Physics object pool.
     // @COPYPASTA: see "game_object.h"
-    atomic_uint64_t m_next_key{ 0 };
-    unordered_map<physics_object_key_t, unique_ptr<Physics_object>> m_physics_objects;
+    unordered_map<UUID, unique_ptr<Physics_object>> m_physics_objects;
 
     atomic_bool m_blocked{ false };
 

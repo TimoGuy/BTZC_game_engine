@@ -15,8 +15,8 @@ using std::atomic_uint64_t;
 BT::Game_object::Game_object(string const& name,
                              Physics_engine& phys_engine,
                              Renderer& renderer,
-                             physics_object_key_t phys_obj_key,
-                             render_object_key_t rend_obj_key,
+                             UUID phys_obj_key,
+                             UUID rend_obj_key,
                              vector<Pre_physics_script::Script_type>&& pre_physics_scripts,
                              vector<uint64_t>&& pre_physics_user_datas,
                              vector<Pre_render_script::Script_type>&& pre_render_scripts,
@@ -55,23 +55,13 @@ void BT::Game_object::run_pre_render_scripts(float_t delta_time)
     }
 }
 
-void BT::Game_object::generate_uuid()
-{
-    m_uuid.generate_uuid();
-}
-
-BT::UUID const& BT::Game_object::get_uuid()
-{
-    return m_uuid;
-}
-
 // Scene_serialization_ifc.
 void BT::Game_object::scene_serialize(Scene_serialization_mode mode, json& node_ref)
 {
     if (mode == SCENE_SERIAL_MODE_SERIALIZE)
     {
         node_ref["name"] = m_name;
-        node_ref["guid"] = m_uuid.pretty_repr();
+        node_ref["guid"] = UUID_helper::pretty_repr(get_uuid());
         node_ref["children"][0] = "isodesperately-wantajeff-bezosasmy-lovelydovely";
         node_ref["children"][1] = "santaclauseis-cumming-mytown-andbytownwellletsjustsay";
 
@@ -113,21 +103,23 @@ void BT::Game_object::scene_serialize(Scene_serialization_mode mode, json& node_
 }
 
 
-BT::Game_object_pool::gob_key_t BT::Game_object_pool::emplace(unique_ptr<Game_object>&& game_object)
+BT::UUID BT::Game_object_pool::emplace(unique_ptr<Game_object>&& game_object)
 {
-    gob_key_t key{ m_next_key++ };
+    UUID uuid{ game_object->get_uuid() };
+    if (uuid.is_nil())
+    {
+        logger::printe(logger::ERROR, "Invalid UUID passed in.");
+        assert(false);
+    }
 
     wait_until_free_then_block();
-    m_game_objects.emplace(key, std::move(game_object));
-    auto& game_obj{ m_game_objects.at(key) };
-    m_game_object_uuids.emplace(game_obj->get_uuid(), game_obj.get());
-    assert(m_game_object_uuids.size() == m_game_objects.size());
+    m_game_objects.emplace(uuid, std::move(game_object));
     unblock();
 
-    return key;
+    return uuid;
 }
 
-void BT::Game_object_pool::remove(gob_key_t key)
+void BT::Game_object_pool::remove(UUID key)
 {
     wait_until_free_then_block();
     if (m_game_objects.find(key) == m_game_objects.end())
@@ -137,10 +129,7 @@ void BT::Game_object_pool::remove(gob_key_t key)
         return;
     }
 
-    auto const& del_uuid{ m_game_objects.at(key)->get_uuid() };
-    m_game_object_uuids.erase(del_uuid);
     m_game_objects.erase(key);
-    assert(m_game_object_uuids.size() == m_game_objects.size());
     unblock();
 }
 
@@ -159,18 +148,18 @@ vector<BT::Game_object*> const BT::Game_object_pool::checkout_all_as_list()
     return all_game_objs;
 }
 
-BT::Game_object* BT::Game_object_pool::checkout_one(UUID const& uuid)
+BT::Game_object* BT::Game_object_pool::checkout_one(UUID uuid)
 {
     wait_until_free_then_block();
 
-    if (m_game_object_uuids.find(uuid) == m_game_object_uuids.end())
+    if (m_game_objects.find(uuid) == m_game_objects.end())
     {
-        logger::printef(logger::ERROR, "UUID was invalid: %s", uuid.pretty_repr().c_str());
+        logger::printef(logger::ERROR, "UUID was invalid: %s", UUID_helper::pretty_repr(uuid).c_str());
         assert(false);
         return nullptr;
     }
 
-    return m_game_object_uuids.at(uuid);
+    return m_game_objects.at(uuid).get();
 }
 
 void BT::Game_object_pool::return_list(vector<Game_object*> const&& all_as_list)

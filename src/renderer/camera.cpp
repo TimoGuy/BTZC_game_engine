@@ -85,7 +85,7 @@ struct Camera::Data
             float_t follow_offset_y{ 1.0f };
 
             // Internal state.
-            render_object_key_t render_object_ref{ (render_object_key_t)-1 };
+            UUID render_object_ref{ UUID() };
             vec3 current_follow_pos{ 0.0f, 3.0f, 0.0f };
             vec2 orbits{ glm_rad(0.0f), glm_rad(30.0f) };
             float_t max_orbit_y{ glm_rad(89.0f) };
@@ -185,7 +185,7 @@ void BT::Camera::get_view_direction(vec3& out_view_direction)
 }
 
 // Camera frontend.
-void BT::Camera::set_follow_object(render_object_key_t render_object_ref)
+void BT::Camera::set_follow_object(UUID render_object_ref)
 {
     m_data->frontend.follow_orbit.render_object_ref = render_object_ref;
 }

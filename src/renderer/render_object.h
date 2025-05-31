@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../physics_engine/physics_engine.h"
+#include "../uuid/uuid_ifc.h"
 #include "cglm/cglm.h"
 #include "mesh.h"
 #include <atomic>
@@ -28,19 +29,19 @@ enum Render_layer : uint8_t
 
 class Physics_object;
 
-class Render_object
+class Render_object : public UUID_ifc
 {
 public:
     Render_object(Model const& model,
                   Render_layer layer,
                   mat4 init_transform,
-                  physics_object_key_t tethered_phys_obj = (physics_object_key_t)-1);
+                  UUID tethered_phys_obj = UUID());
 
     void render(Render_layer active_layers);
 
     void set_transform(mat4 transform);
     void get_position(vec3& position);
-    inline physics_object_key_t get_tethered_phys_obj_key() const { return m_tethered_phys_obj; }
+    inline UUID get_tethered_phys_obj_key() const { return m_tethered_phys_obj; }
 
 private:
     Model const& m_model;
@@ -48,23 +49,21 @@ private:
     mat4 m_transform;
 
     // (Optional) Tethered physics object.
-    physics_object_key_t m_tethered_phys_obj;
+    UUID m_tethered_phys_obj;
 };
 
 // @COPYPASTA: Not quite copypasta. It's a little bit different.
-using render_object_key_t = uint64_t;
 class Render_object_pool
 {
 public:
-    render_object_key_t emplace(Render_object&& rend_obj);
-    void remove(render_object_key_t key);
+    UUID emplace(Render_object&& rend_obj);
+    void remove(UUID key);
     vector<Render_object*> checkout_all_render_objs();
-    vector<Render_object*> checkout_render_obj_by_key(vector<render_object_key_t>&& keys);
+    vector<Render_object*> checkout_render_obj_by_key(vector<UUID>&& keys);
     void return_render_objs(vector<Render_object*>&& render_objs);
 
 private:
-    atomic_uint64_t m_next_key{ 0 };
-    unordered_map<render_object_key_t, Render_object> m_render_objects;
+    unordered_map<UUID, Render_object> m_render_objects;
 
     // Synchronization.
     atomic_bool m_blocked{ false };

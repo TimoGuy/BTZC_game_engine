@@ -1,5 +1,6 @@
 #include "physics_engine.h"
 
+#include "logger.h"
 #include "physics_engine_impl.h"
 #include <algorithm>
 #include <cassert>
@@ -95,24 +96,35 @@ void BT::Physics_engine::update_physics()
 }
 
 // Add/remove physics objects.
-physics_object_key_t BT::Physics_engine::emplace_physics_object(
+BT::UUID BT::Physics_engine::emplace_physics_object(
     unique_ptr<Physics_object>&& phys_obj)
 {
-    physics_object_key_t key{ m_next_key++ };
+    UUID uuid{ phys_obj->get_uuid() };
+    if (uuid.is_nil())
+    {
+        logger::printe(logger::ERROR, "Invalid UUID passed in.");
+        assert(false);
+    }
 
     phys_obj_pool_wait_until_free_then_block();
-    m_physics_objects.emplace(key, std::move(phys_obj));
+    if (m_physics_objects.find(uuid) != m_physics_objects.end())
+    {
+        logger::printef(logger::ERROR, "UUID already exists in phys obj pool: %s", UUID_helper::pretty_repr(uuid).c_str());
+        assert(false);
+    }
+
+    m_physics_objects.emplace(uuid, std::move(phys_obj));
     phys_obj_pool_unblock();
 
-    return key;
+    return uuid;
 }
 
-void BT::Physics_engine::remove_physics_object(physics_object_key_t key)
+void BT::Physics_engine::remove_physics_object(UUID key)
 {
     phys_obj_pool_wait_until_free_then_block();
     if (m_physics_objects.find(key) == m_physics_objects.end())
     {
-        // Fail bc key was invalid.
+        logger::printef(logger::ERROR, "UUID does not exist in phys obj pool: %s", UUID_helper::pretty_repr(key).c_str());
         assert(false);
         return;
     }
@@ -121,7 +133,7 @@ void BT::Physics_engine::remove_physics_object(physics_object_key_t key)
     phys_obj_pool_unblock();
 }
 
-BT::Physics_object* BT::Physics_engine::checkout_physics_object(physics_object_key_t key)
+BT::Physics_object* BT::Physics_engine::checkout_physics_object(UUID key)
 {
     phys_obj_pool_wait_until_free_then_block();
     return m_physics_objects.at(key).get();

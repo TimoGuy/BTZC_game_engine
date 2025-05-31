@@ -35,14 +35,15 @@ set(DEPENDENCY_INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/JoltPhysics
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/json/include
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/stb  # Header only (essentially).
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/tinyobjloader
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/uuid_v4)  # Header only.
+    # ${CMAKE_CURRENT_SOURCE_DIR}/third_party/stduuid/include  # @NOTE: Removing this so that it's not easy to mix up the uuid.h header files.
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/tinyobjloader)
 
 add_subdirectory(third_party/fastgltf)
 add_subdirectory(third_party/fmt)
 add_subdirectory(third_party/glfw)
 add_subdirectory(third_party/JoltPhysics/Build)
 add_subdirectory(third_party/json)
+add_subdirectory(third_party/stduuid)
 
 # Executable build.
 add_executable(${PROJECT_NAME}
@@ -101,8 +102,8 @@ add_executable(${PROJECT_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/src/timer/timer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/timer/watchdog_timer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/timer/watchdog_timer.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/uuid/uuid.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/uuid/uuid.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/uuid/uuid_ifc.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/uuid/uuid_ifc.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/btzc_game_engine.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
     
@@ -149,7 +150,8 @@ target_link_libraries(${PROJECT_NAME}
     glfw
     ${GLFW_LIBRARIES}
     Jolt
-    nlohmann_json::nlohmann_json)
+    nlohmann_json::nlohmann_json
+    stduuid)
 
 # Create symlink to assets folder.
 if(DEFINED ASSET_DIR)

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../uuid/uuid_ifc.h"
 #include "cglm/cglm.h"
 #include "Jolt/Jolt.h"
 #include "Jolt/Math/MathTypes.h"
@@ -62,7 +63,7 @@ public:
 class Physics_engine;
 class Model;
 
-class Physics_object
+class Physics_object : public UUID_ifc
 {
 public:
     static unique_ptr<Physics_object> create_triangle_mesh(Physics_engine& phys_engine,
@@ -83,9 +84,9 @@ private:
                    bool interpolate_transform,
                    unique_ptr<Physics_object_type_impl_ifc>&& impl_type);
 public:
-    Physics_object(const Physics_object&)            = delete;
+    Physics_object(Physics_object const&)            = delete;
     Physics_object(Physics_object&&)                 = delete;
-    Physics_object& operator=(const Physics_object&) = delete;
+    Physics_object& operator=(Physics_object const&) = delete;
     Physics_object& operator=(Physics_object&&)      = delete;
 
     Physics_object_type_impl_ifc* get_impl() { return m_type_pimpl.get(); }

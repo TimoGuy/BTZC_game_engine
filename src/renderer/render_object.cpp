@@ -9,7 +9,7 @@
 BT::Render_object::Render_object(Model const& model,
                                  Render_layer layer,
                                  mat4 init_transform,
-                                 physics_object_key_t tethered_phys_obj /*= (physics_object_key_t)-1*/)
+                                 UUID tethered_phys_obj /*= (UUID)-1*/)
     : m_model(model)
     , m_layer(layer)
     , m_tethered_phys_obj(tethered_phys_obj)
@@ -61,18 +61,23 @@ void BT::Render_object::get_position(vec3& position)
     glm_vec3(pos4, position);
 }
 
-BT::render_object_key_t BT::Render_object_pool::emplace(Render_object&& rend_obj)
+BT::UUID BT::Render_object_pool::emplace(Render_object&& rend_obj)
 {
-    render_object_key_t key{ m_next_key++ };
+    UUID uuid{ rend_obj.get_uuid() };
+    if (uuid.is_nil())
+    {
+        logger::printe(logger::ERROR, "Invalid UUID passed in.");
+        assert(false);
+    }
 
     wait_until_free_then_block();
-    m_render_objects.emplace(key, std::move(rend_obj));
+    m_render_objects.emplace(uuid, std::move(rend_obj));
     unblock();
 
-    return key;
+    return uuid;
 }
 
-void BT::Render_object_pool::remove(render_object_key_t key)
+void BT::Render_object_pool::remove(UUID key)
 {
     wait_until_free_then_block();
     if (m_render_objects.find(key) == m_render_objects.end())
@@ -102,7 +107,7 @@ vector<BT::Render_object*> BT::Render_object_pool::checkout_all_render_objs()
     return all_rend_objs;
 }
 
-vector<BT::Render_object*> BT::Render_object_pool::checkout_render_obj_by_key(vector<render_object_key_t>&& keys)
+vector<BT::Render_object*> BT::Render_object_pool::checkout_render_obj_by_key(vector<UUID>&& keys)
 {
     wait_until_free_then_block();
 
@@ -111,10 +116,14 @@ vector<BT::Render_object*> BT::Render_object_pool::checkout_render_obj_by_key(ve
 
     for (auto key : keys)
     {
-        if (m_render_objects.find(key) == m_render_objects.end())
+        if (key.is_nil())
         {
-            // Fail bc key was invalid.
-            logger::printef(logger::WARN, "Render object key %llu does not exist", key);
+            logger::printe(logger::WARN, "Render object UUID is invalid");
+            assert(false);
+        }
+        else if (m_render_objects.find(key) == m_render_objects.end())
+        {
+            logger::printef(logger::WARN, "Render object UUID %s does not exist", UUID_helper::pretty_repr(key).c_str());
             assert(false);
         }
         else

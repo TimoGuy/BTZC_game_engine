@@ -92,33 +92,45 @@ int32_t main()
 
     // POPULATE TEST LEVEL (@TODO: Once level loading is implemented, replace this with it)
     // Physics objects.
-    auto player_char_phys_obj_key = main_physics_engine.emplace_physics_object(
+    auto player_char_phys_obj{
         BT::Physics_object::create_character_controller(main_physics_engine,
                                                         true,
                                                         0.5f,
                                                         2.0f,
                                                         1.0f,
                                                         { JPH::RVec3(0.0f, 5.1f, 0.0f),
-                                                          JPH::Quat::sIdentity() }));
-    main_physics_engine.emplace_physics_object(
+                                                          JPH::Quat::sIdentity() }) };
+    player_char_phys_obj->generate_uuid();
+    auto player_char_phys_obj_key =
+        main_physics_engine.emplace_physics_object(std::move(player_char_phys_obj));
+
+    auto static_level_terrain_phys_obj{
         BT::Physics_object::create_triangle_mesh(main_physics_engine,
-                                                           false,
-                                                           BT::Model_bank::get_model("probuilder_example"),
-                                                           JPH::EMotionType::Static,
-                                                           { JPH::RVec3(0.0f, 1.0f, 0.0f),
-                                                             JPH::Quat::sIdentity() }));
+                                                 false,
+                                                 BT::Model_bank::get_model("probuilder_example"),
+                                                 JPH::EMotionType::Static,
+                                                 { JPH::RVec3(0.0f, 1.0f, 0.0f),
+                                                   JPH::Quat::sIdentity() }) };
+    static_level_terrain_phys_obj->generate_uuid();
+    main_physics_engine.emplace_physics_object(std::move(static_level_terrain_phys_obj));
 
     // Render objects.
     auto& render_object_pool{ main_renderer.get_render_object_pool() };
-    auto player_char_rend_obj_key = render_object_pool.emplace(BT::Render_object{
+
+    BT::Render_object player_char_rend_obj{
         *BT::Model_bank::get_model("box_0.5_2"),
         BT::Render_layer::RENDER_LAYER_DEFAULT,
         GLM_MAT4_IDENTITY,
-        player_char_phys_obj_key });
-    render_object_pool.emplace(BT::Render_object{
+        player_char_phys_obj_key };
+    player_char_rend_obj.generate_uuid();
+    auto player_char_rend_obj_key = render_object_pool.emplace(std::move(player_char_rend_obj));
+
+    BT::Render_object static_level_terrain_rend_obj{
         *BT::Model_bank::get_model("probuilder_example"),
         BT::Render_layer::RENDER_LAYER_DEFAULT,
-        GLM_MAT4_IDENTITY });
+        GLM_MAT4_IDENTITY };
+    static_level_terrain_rend_obj.generate_uuid();
+    render_object_pool.emplace(std::move(static_level_terrain_rend_obj));
 
     // Game objects.
     BT::Game_object_pool game_object_pool;
@@ -127,13 +139,20 @@ int32_t main()
     vector<uint64_t> phys_scripts_datas;
 
     phys_scripts.emplace_back(BT::Pre_physics_script::SCRIPT_TYPE_player_character_movement);
-    BT::Serial::push_u64(phys_scripts_datas, player_char_phys_obj_key);
+    BT::Serial::push_uuid(phys_scripts_datas, player_char_phys_obj_key);
     BT::Serial::push_void_ptr(phys_scripts_datas, &main_input_handler);
     BT::Serial::push_void_ptr(phys_scripts_datas, main_renderer.get_camera_obj());
     BT::Serial::push_u64_persistent_state(phys_scripts_datas);
     BT::Serial::push_u64_persistent_state(phys_scripts_datas);
 
-    game_object_pool.emplace(unique_ptr<BT::Game_object>(
+    vector<BT::Pre_render_script::Script_type> rend_scripts;
+    vector<uint64_t> rend_scripts_datas;
+
+    rend_scripts.emplace_back(BT::Pre_render_script::SCRIPT_TYPE_apply_physics_transform_to_render_object);
+    BT::Serial::push_uuid(rend_scripts_datas, player_char_rend_obj_key);
+    BT::Serial::push_void_ptr(rend_scripts_datas, &main_physics_engine);
+
+    unique_ptr<BT::Game_object> player_char_game_obj{
         new BT::Game_object("My Gay object",
                             main_physics_engine,
                             main_renderer,
@@ -141,8 +160,10 @@ int32_t main()
                             player_char_rend_obj_key,
                             std::move(phys_scripts),
                             std::move(phys_scripts_datas),
-                            { BT::Pre_render_script::SCRIPT_TYPE_apply_physics_transform_to_render_object },
-                            { player_char_rend_obj_key, reinterpret_cast<uint64_t>(&main_physics_engine) } )));
+                            std::move(rend_scripts),
+                            std::move(rend_scripts_datas)) };
+    player_char_game_obj->generate_uuid();
+    game_object_pool.emplace(std::move(player_char_game_obj));
 
     {
         // @DEBUG: @NOCHECKIN.

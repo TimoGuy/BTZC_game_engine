@@ -21,7 +21,7 @@ void BT::Pre_physics_script::script_player_character_movement_serialize(
 {
     if (mode == Scene_serialization_mode::SCENE_SERIAL_MODE_SERIALIZE)
     {
-        node_ref[] = Serial::pop_u64(datas, in_out_read_data_idx);
+        node_ref["phys_obj_key"] = UUID_helper::pretty_repr(Serial::pop_uuid(datas, in_out_read_data_idx));
         // Input state.
         // Camera.
         // Persistent state 1.
@@ -39,7 +39,7 @@ void BT::Pre_physics_script::script_player_character_movement(
     vector<uint64_t> const& datas,
     size_t& in_out_read_data_idx)
 {
-    auto phys_obj_key{ Serial::pop_u64(datas, in_out_read_data_idx) };
+    auto phys_obj_key{ Serial::pop_uuid(datas, in_out_read_data_idx) };
     auto const& input_state{
         reinterpret_cast<Input_handler*>(Serial::pop_void_ptr(datas, in_out_read_data_idx))
             ->get_input_state() };
