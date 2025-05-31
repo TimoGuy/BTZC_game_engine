@@ -56,6 +56,8 @@ private:
     vector<uint64_t> m_pre_physics_user_datas;
     vector<Pre_render_script::Script_type> m_pre_render_scripts;
     vector<uint64_t> m_pre_render_user_datas;
+
+    vector<UUID> m_children;
 };
 
 // vv See below ~~@COPYPASTA. See "mesh.h" "material.h" "shader.h"~~

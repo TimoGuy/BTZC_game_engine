@@ -67,7 +67,6 @@ void BT::Game_object::scene_serialize(Scene_serialization_mode mode, json& node_
 
         size_t scripts_idx{ 0 };
         size_t datas_io_idx{ 0 };
-        vector<uint64_t> datas;
         for (auto pre_phys_script : m_pre_physics_scripts)
         {
             node_ref["pre_physics_scripts"][scripts_idx++] =
@@ -80,10 +79,9 @@ void BT::Game_object::scene_serialize(Scene_serialization_mode mode, json& node_
                                                                      pre_phys_script,
                                                                      mode,
                                                                      node_ref["pre_physics_scripts_datas"],
-                                                                     datas,
+                                                                     m_pre_physics_user_datas,
                                                                      datas_io_idx);
         }
-        
 
         scripts_idx = 0;
         datas_io_idx = 0;

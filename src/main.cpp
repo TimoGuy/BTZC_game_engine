@@ -177,7 +177,7 @@ int32_t main()
     }
 
     // Camera follow ref.
-    main_renderer.get_camera_obj()->set_follow_object(player_char_phys_obj_key);
+    main_renderer.get_camera_obj()->set_follow_object(player_char_rend_obj_key);
 
     // Timer.
     BT::Timer main_timer;

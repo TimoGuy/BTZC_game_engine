@@ -411,7 +411,11 @@ void BT::Renderer::Impl::render_imgui()
 {
     // @NOCHECKIN: @TEMP
     static bool s_show_game_view{ true };
+    static bool s_show_scene_hierarchy{ true };
     static bool s_show_camera_props{ true };
+    static bool s_show_props_inspector{ true };
+    static bool s_show_console{ true };
+    static bool s_show_asset_list{ true };
     static bool show_demo_window = true;
     static ImGuiIO& io = ImGui::GetIO();
 
@@ -514,10 +518,50 @@ void BT::Renderer::Impl::render_imgui()
         ImGui::PopStyleVar();
     }
 
+    // Scene hierarchy.
+    if (s_show_scene_hierarchy)
+    {
+        ImGui::Begin("Scene hierarchy");
+        {
+            ImGui::Text("@TODO: Implement");
+        }
+        ImGui::End();
+    }
+
     // Camera properties.
     if (s_show_camera_props)
     {
         m_camera.render_imgui();
+    }
+
+    // Properties inspector.
+    if (s_show_props_inspector)
+    {
+        ImGui::Begin("Properties inspector");
+        {
+            ImGui::Text("@TODO: Implement");
+        }
+        ImGui::End();
+    }
+
+    // Console.
+    if (s_show_console)
+    {
+        ImGui::Begin("Console");
+        {
+            ImGui::Text("@TODO: Implement");
+        }
+        ImGui::End();
+    }
+
+    // Asset list.
+    if (s_show_asset_list)
+    {
+        ImGui::Begin("Asset list");
+        {
+            ImGui::Text("@TODO: Implement");
+        }
+        ImGui::End();
     }
 
     // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
