@@ -160,13 +160,14 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
     - [ ] Game object serialization to JSON.
         - I think there needs to be some kind of gameobject building block or something to get it all together with???
         - Game object could be serialized to:
-            - Name
-            - Guid
-            - List of Guids that are children.
-            - List of render scripts w/ accompanying data.
-            - List of physics scripts w/ accompanying data.
-            - Render object (and defer here).
-            - Physics object (and defer here).
+            - [x] Name
+            - [x] Guid
+            - [x] List of Guids that are children.
+            - [ ] List of render scripts w/ accompanying data.
+            - [x] List of physics scripts w/ accompanying data.
+            - [ ] Render object (and defer here).
+            - [ ] Physics object (and defer here).
+    - [x] Write JSON to disk.
     - [ ] JSON to Game object generator.
     - [ ] Load level inside a level as a prefab.
     - [ ] Level hierarchy and sorting.

@@ -9,7 +9,7 @@
 BT::Render_object::Render_object(Model const& model,
                                  Render_layer layer,
                                  mat4 init_transform,
-                                 UUID tethered_phys_obj /*= (UUID)-1*/)
+                                 UUID tethered_phys_obj /*= UUID()*/)
     : m_model(model)
     , m_layer(layer)
     , m_tethered_phys_obj(tethered_phys_obj)
