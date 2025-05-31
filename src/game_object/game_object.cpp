@@ -2,6 +2,7 @@
 
 #include "../physics_engine/physics_engine.h"
 #include "../renderer/renderer.h"
+#include "logger.h"
 #include "scripts/pre_physics_scripts.h"
 #include "scripts/pre_render_scripts.h"
 #include <atomic>
@@ -54,30 +55,52 @@ void BT::Game_object::run_pre_render_scripts(float_t delta_time)
     }
 }
 
+void BT::Game_object::generate_uuid()
+{
+    m_uuid.generate_uuid();
+}
+
+BT::UUID const& BT::Game_object::get_uuid()
+{
+    return m_uuid;
+}
+
 // Scene_serialization_ifc.
 void BT::Game_object::scene_serialize(Scene_serialization_mode mode, json& node_ref)
 {
     if (mode == SCENE_SERIAL_MODE_SERIALIZE)
     {
         node_ref["name"] = m_name;
-        node_ref["guid"] = "1234khhlkh-jlkhlkh-i32i32k-nnnnknknknk";
+        node_ref["guid"] = m_uuid.pretty_repr();
         node_ref["children"][0] = "isodesperately-wantajeff-bezosasmy-lovelydovely";
         node_ref["children"][1] = "santaclauseis-cumming-mytown-andbytownwellletsjustsay";
 
         size_t scripts_idx{ 0 };
+        size_t datas_io_idx{ 0 };
+        vector<uint64_t> datas;
         for (auto pre_phys_script : m_pre_physics_scripts)
         {
             node_ref["pre_physics_scripts"][scripts_idx++] =
-                Pre_physics_script::get_script_name_from_type(pre_phys_script).c_str();  // Might fail.
+                Pre_physics_script::get_script_name_from_type(pre_phys_script);
 
-            // @TODO: Add script datas.
+            // Add script datas.
+            Pre_physics_script::execute_pre_physics_script_serialize(nullptr,
+                                                                     &m_phys_engine,
+                                                                     &m_renderer,
+                                                                     pre_phys_script,
+                                                                     mode,
+                                                                     node_ref["pre_physics_scripts_datas"],
+                                                                     datas,
+                                                                     datas_io_idx);
         }
+        
 
         scripts_idx = 0;
+        datas_io_idx = 0;
         for (auto pre_rend_script : m_pre_render_scripts)
         {
             node_ref["pre_render_scripts"][scripts_idx++] =
-                Pre_render_script::get_script_name_from_type(pre_rend_script).c_str();  // Might fail.
+                Pre_render_script::get_script_name_from_type(pre_rend_script);
 
             // @TODO: Add script datas.
         }
@@ -96,6 +119,9 @@ BT::Game_object_pool::gob_key_t BT::Game_object_pool::emplace(unique_ptr<Game_ob
 
     wait_until_free_then_block();
     m_game_objects.emplace(key, std::move(game_object));
+    auto& game_obj{ m_game_objects.at(key) };
+    m_game_object_uuids.emplace(game_obj->get_uuid(), game_obj.get());
+    assert(m_game_object_uuids.size() == m_game_objects.size());
     unblock();
 
     return key;
@@ -111,7 +137,10 @@ void BT::Game_object_pool::remove(gob_key_t key)
         return;
     }
 
+    auto const& del_uuid{ m_game_objects.at(key)->get_uuid() };
+    m_game_object_uuids.erase(del_uuid);
     m_game_objects.erase(key);
+    assert(m_game_object_uuids.size() == m_game_objects.size());
     unblock();
 }
 
@@ -130,7 +159,21 @@ vector<BT::Game_object*> const BT::Game_object_pool::checkout_all_as_list()
     return all_game_objs;
 }
 
-void BT::Game_object_pool::return_all_as_list(vector<Game_object*> const&& all_as_list)
+BT::Game_object* BT::Game_object_pool::checkout_one(UUID const& uuid)
+{
+    wait_until_free_then_block();
+
+    if (m_game_object_uuids.find(uuid) == m_game_object_uuids.end())
+    {
+        logger::printef(logger::ERROR, "UUID was invalid: %s", uuid.pretty_repr().c_str());
+        assert(false);
+        return nullptr;
+    }
+
+    return m_game_object_uuids.at(uuid);
+}
+
+void BT::Game_object_pool::return_list(vector<Game_object*> const&& all_as_list)
 {
     // Assumed that this is the end of using the gameobject list.
     // @TODO: Prevent misuse of this function.

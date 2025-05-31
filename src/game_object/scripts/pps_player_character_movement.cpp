@@ -10,6 +10,30 @@
 #include "serialization.h"
 
 
+void BT::Pre_physics_script::script_player_character_movement_serialize(
+    Input_handler* input_handler,
+    Physics_engine* phys_engine,
+    Renderer* renderer,
+    Scene_serialization_mode mode,
+    json& node_ref,
+    vector<uint64_t> const& datas,
+    size_t& in_out_read_data_idx)
+{
+    if (mode == Scene_serialization_mode::SCENE_SERIAL_MODE_SERIALIZE)
+    {
+        node_ref[] = Serial::pop_u64(datas, in_out_read_data_idx);
+        // Input state.
+        // Camera.
+        // Persistent state 1.
+        // Persistent state 2.
+    }
+    else if (mode == Scene_serialization_mode::SCENE_SERIAL_MODE_DESERIALIZE)
+    {
+        // @TODO
+        assert(false);
+    }
+}
+
 void BT::Pre_physics_script::script_player_character_movement(
     Physics_engine* phys_engine,
     vector<uint64_t> const& datas,

@@ -35,7 +35,8 @@ set(DEPENDENCY_INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/JoltPhysics
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/json/include
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/stb  # Header only (essentially).
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/tinyobjloader)
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/tinyobjloader
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/uuid_v4)  # Header only.
 
 add_subdirectory(third_party/fastgltf)
 add_subdirectory(third_party/fmt)
@@ -46,7 +47,6 @@ add_subdirectory(third_party/json)
 # Executable build.
 add_executable(${PROJECT_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/pps_player_character_movement.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/pre_physics_scripts.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/pre_physics_scripts.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/pre_render_scripts.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/pre_render_scripts.h
@@ -101,6 +101,8 @@ add_executable(${PROJECT_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/src/timer/timer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/timer/watchdog_timer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/timer/watchdog_timer.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/uuid/uuid.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/uuid/uuid.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/btzc_game_engine.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
     

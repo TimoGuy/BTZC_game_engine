@@ -38,7 +38,7 @@ int32_t main()
 
     BT::Input_handler main_input_handler;
     BT::Renderer main_renderer{ main_input_handler,
-                                "Untitled Zelda-like Collectathon Game" };
+                                "No Train No Game" };
     BT::Physics_engine main_physics_engine;
 
     BT::Material_bank::set_camera_read_ifc(&main_renderer);
@@ -152,7 +152,7 @@ int32_t main()
         {
             game_obj->scene_serialize(BT::SCENE_SERIAL_MODE_SERIALIZE, root);
         }
-        game_object_pool.return_all_as_list(std::move(game_objs));
+        game_object_pool.return_list(std::move(game_objs));
     }
 
     // Camera follow ref.
@@ -198,7 +198,7 @@ int32_t main()
             main_renderer.render(delta_time);
         }
 
-        game_object_pool.return_all_as_list(std::move(all_game_objs));
+        game_object_pool.return_list(std::move(all_game_objs));
 
         // @TODO: @HERE: Tick level loading.
     }
