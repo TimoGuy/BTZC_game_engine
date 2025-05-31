@@ -27,6 +27,7 @@
 #include "timer/watchdog_timer.h"
 #include <cstdint>
 #include <memory>
+#include <fstream>  // @DEBUG
 
 using std::make_unique;
 using std::unique_ptr;
@@ -166,14 +167,20 @@ int32_t main()
     game_object_pool.emplace(std::move(player_char_game_obj));
 
     {
-        // @DEBUG: @NOCHECKIN.
-        json root;
+        // Serialize scene.
+        json root = {};
+        size_t game_obj_idx{ 0 };
         auto const game_objs{ game_object_pool.checkout_all_as_list() };
         for (auto game_obj : game_objs)
         {
-            game_obj->scene_serialize(BT::SCENE_SERIAL_MODE_SERIALIZE, root);
+            game_obj->scene_serialize(BT::SCENE_SERIAL_MODE_SERIALIZE, root[game_obj_idx++]);
         }
         game_object_pool.return_list(std::move(game_objs));
+
+        // Save to disk.
+        
+        std::ofstream f{ BTZC_GAME_ENGINE_ASSET_SCENE_PATH "sumthin_cumming_outta_me.btscene" };
+        f << root.dump(4);
     }
 
     // Camera follow ref.

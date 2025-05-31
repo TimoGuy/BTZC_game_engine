@@ -62,14 +62,13 @@ void BT::Game_object::scene_serialize(Scene_serialization_mode mode, json& node_
     {
         node_ref["name"] = m_name;
         node_ref["guid"] = UUID_helper::pretty_repr(get_uuid());
-        node_ref["children"][0] = "isodesperately-wantajeff-bezosasmy-lovelydovely";
-        node_ref["children"][1] = "santaclauseis-cumming-mytown-andbytownwellletsjustsay";
 
         size_t scripts_idx{ 0 };
         size_t datas_io_idx{ 0 };
         for (auto pre_phys_script : m_pre_physics_scripts)
         {
-            node_ref["pre_physics_scripts"][scripts_idx++] =
+            auto& phys_script_node_ref{ node_ref["pre_physics_scripts"][scripts_idx++] };
+            phys_script_node_ref["type"] =
                 Pre_physics_script::get_script_name_from_type(pre_phys_script);
 
             // Add script datas.
@@ -78,7 +77,7 @@ void BT::Game_object::scene_serialize(Scene_serialization_mode mode, json& node_
                                                                      &m_renderer,
                                                                      pre_phys_script,
                                                                      mode,
-                                                                     node_ref["pre_physics_scripts_datas"],
+                                                                     phys_script_node_ref["datas"],
                                                                      m_pre_physics_user_datas,
                                                                      datas_io_idx);
         }
@@ -87,10 +86,17 @@ void BT::Game_object::scene_serialize(Scene_serialization_mode mode, json& node_
         datas_io_idx = 0;
         for (auto pre_rend_script : m_pre_render_scripts)
         {
-            node_ref["pre_render_scripts"][scripts_idx++] =
+            auto& rend_script_node_ref{ node_ref["pre_render_scripts"][scripts_idx++] };
+            rend_script_node_ref["type"] =
                 Pre_render_script::get_script_name_from_type(pre_rend_script);
 
             // @TODO: Add script datas.
+        }
+
+        node_ref["children"] = {};
+        for (auto& child_uuid : m_children)
+        {
+            node_ref["children"].emplace_back(UUID_helper::pretty_repr(get_uuid()));
         }
     }
     else if (mode == SCENE_SERIAL_MODE_DESERIALIZE)

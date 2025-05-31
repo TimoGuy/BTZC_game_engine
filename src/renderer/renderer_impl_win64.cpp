@@ -415,7 +415,7 @@ void BT::Renderer::Impl::render_imgui()
     static bool s_show_camera_props{ true };
     static bool s_show_props_inspector{ true };
     static bool s_show_console{ true };
-    static bool s_show_asset_list{ true };
+    static bool s_show_gameobj_palette{ true };
     static bool show_demo_window = true;
     static ImGuiIO& io = ImGui::GetIO();
 
@@ -554,10 +554,10 @@ void BT::Renderer::Impl::render_imgui()
         ImGui::End();
     }
 
-    // Asset list.
-    if (s_show_asset_list)
+    // Game obj palette.
+    if (s_show_gameobj_palette)
     {
-        ImGui::Begin("Asset list");
+        ImGui::Begin("Game obj palette");
         {
             ImGui::Text("@TODO: Implement");
         }
