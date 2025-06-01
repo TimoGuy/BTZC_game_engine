@@ -63,6 +63,7 @@ void BT::Game_object::scene_serialize(Scene_serialization_mode mode, json& node_
         node_ref["name"] = m_name;
         node_ref["guid"] = UUID_helper::pretty_repr(get_uuid());
 
+        node_ref["pre_physics_scripts"] = json::array();
         size_t scripts_idx{ 0 };
         size_t datas_io_idx{ 0 };
         for (auto pre_phys_script : m_pre_physics_scripts)
@@ -82,6 +83,7 @@ void BT::Game_object::scene_serialize(Scene_serialization_mode mode, json& node_
                                                                      datas_io_idx);
         }
 
+        node_ref["pre_render_scripts"] = json::array();
         scripts_idx = 0;
         datas_io_idx = 0;
         for (auto pre_rend_script : m_pre_render_scripts)
@@ -90,10 +92,18 @@ void BT::Game_object::scene_serialize(Scene_serialization_mode mode, json& node_
             rend_script_node_ref["type"] =
                 Pre_render_script::get_script_name_from_type(pre_rend_script);
 
-            // @TODO: Add script datas.
+            // Add script datas.
+            Pre_render_script::execute_pre_render_script_serialize(nullptr,
+                                                                   &m_phys_engine,
+                                                                   &m_renderer,
+                                                                   pre_rend_script,
+                                                                   mode,
+                                                                   rend_script_node_ref["datas"],
+                                                                   m_pre_render_user_datas,
+                                                                   datas_io_idx);
         }
 
-        node_ref["children"] = {};
+        node_ref["children"] = json::array();
         for (auto& child_uuid : m_children)
         {
             node_ref["children"].emplace_back(UUID_helper::pretty_repr(get_uuid()));

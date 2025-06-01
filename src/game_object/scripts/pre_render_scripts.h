@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../../scene/scene_serialization_ifc.h"
 #include "logger.h"
 #include <array>
 #include <cassert>
@@ -12,13 +13,14 @@ using std::vector;
 
 
 #define LIST_OF_SCRIPTS \
-    X(none) \
     X(apply_physics_transform_to_render_object)
 
 
 namespace BT
 {
 
+class Input_handler;
+class Physics_engine;
 class Renderer;
 
 namespace Pre_render_script
@@ -61,6 +63,33 @@ inline Script_type get_script_type_from_name(string const& name)
     return NUM_SCRIPT_TYPES;
 }
 
+// All script serialization func prototypes.
+#define X(name)  void script_ ## name ## _serialize(Input_handler* input_handler, Physics_engine* phys_engine, Renderer* renderer, Scene_serialization_mode mode, json& node_ref, vector<uint64_t> const& datas, size_t& in_out_read_data_idx);
+LIST_OF_SCRIPTS
+#undef X
+
+inline void execute_pre_render_script_serialize(Input_handler* input_handler,
+                                                 Physics_engine* phys_engine,
+                                                 Renderer* renderer,
+                                                 Script_type script_type,
+                                                 Scene_serialization_mode mode,
+                                                 json& node_ref,
+                                                 vector<uint64_t> const& datas,
+                                                 size_t& in_out_read_data_idx)
+{
+    switch (script_type)
+    {
+        #define X(name)  case SCRIPT_TYPE_ ## name: script_ ## name ## _serialize(input_handler, phys_engine, renderer, mode, node_ref, datas, in_out_read_data_idx); break;
+        LIST_OF_SCRIPTS
+        #undef X
+
+        default:
+            // Unknown/undefined script type entered.
+            assert(false);
+            break;
+    }
+}
+
 // All script func prototypes.
 #define X(name)  void script_ ## name(Renderer* renderer, vector<uint64_t> const& datas, size_t& in_out_read_data_idx);
 LIST_OF_SCRIPTS
@@ -71,11 +100,6 @@ inline void execute_pre_render_script(Renderer* renderer,
                                       vector<uint64_t> const& datas,
                                       size_t& in_out_read_data_idx)
 {
-    if (script_type == SCRIPT_TYPE_none)
-    {   // Exit early for none function.
-        return;
-    }
-
     switch (script_type)
     {
         #define X(name)  case SCRIPT_TYPE_ ## name: script_ ## name(renderer, datas, in_out_read_data_idx); break;

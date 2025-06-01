@@ -150,24 +150,31 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
     - [ ] ~~Camera orbit following is annoying.~~
         - Skip for now and try again later. If it's annoying then ig I'll have to rethink how it works.
 
-1. IN PROGRESS: Level saving/loading.
+1. DONE: Level saving/loading.
     - [ ] ~~Actually, there is a modern yaml parser/emitter for C++ so let's use that. (https://github.com/biojppm/rapidyaml)~~
         - Tried it and it was hard to use. I think I will just use nlohmann's json lib again, since it's just super duper easy to use.
     - [x] Remove RapidYAML and insert nlohmann json.
         - I think I just didn't have the patience for getting yaml in there. Perhaps the speed and the readability of the files may have been worth it. Idk.
     - [x] Remove `crashoz/uuid_v4` uuid implementation.
         - The SIMD was causing too many issues so I opted for a (probably slower) implementation, `mariusbancila/stduuid`.
-    - [ ] Game object serialization to JSON.
+    - [x] Game object serialization to JSON.
         - I think there needs to be some kind of gameobject building block or something to get it all together with???
         - Game object could be serialized to:
             - [x] Name
             - [x] Guid
             - [x] List of Guids that are children (Don't create children, since list is actually flat on the backend).
-            - [ ] List of render scripts w/ accompanying data.
+            - [x] List of render scripts w/ accompanying data.
             - [x] List of physics scripts w/ accompanying data.
-            - [ ] Render object (and defer here).
-            - [ ] Physics object (and defer here).
+            - [ ] ~~Render object (and defer here).~~ DO THIS LATER.
+            - [ ] ~~Physics object (and defer here).~~ DO THIS LATER.
     - [x] Write JSON to disk.
+
+1. IN PROGRESS: Refactor scripts.
+    - Thoughts:
+        - I think that physics objects and render objects should actually own the phys scripts, render scripts, respectively. Or perhaps maybe just having there be a one, single script and it's being owned by the gameobject. And then, it has its "execution time" which can execute on any one of its own triggering functions.
+            - Oh wait! It should be a unified type, that extends from a `Script_ifc` which has all of the hooks defined as empty functions, then each gameobject can have a list of `Script_ifc`'s. Then, each script can choose what to derive in its own header file (which gets pulled into the scripts thing).
+
+1. Level saving/loading (cont.)
     - [ ] JSON to Game object generator.
     - [ ] Load level inside a level as a prefab.
     - [ ] Level hierarchy and sorting.
@@ -175,6 +182,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - [x] Stub out the UI window.
         - [ ] List all the gameobject names.
         - [ ] Click and drag gameobjects around.
+
 
 1. Debug views.
     - [ ] Collision represented as green wireframe triangles.
@@ -192,6 +200,9 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
 
 1. Good pause point.
     - [ ] Release v0.1.0-develop.1
+
+1. Unity to this engine migration.
+    - @TODO.
 
 1. Level authoring tools.
     - [ ] Create, duplicate, delete game objects.

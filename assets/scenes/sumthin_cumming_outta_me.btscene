@@ -1,18 +1,21 @@
 [
     {
-        "children": null,
-        "guid": "b08c2e8c-04c7-46e1-afa3-46520139d676",
+        "children": [],
+        "guid": "c7251dcc-aec2-4148-9fe3-594cea8d82c4",
         "name": "My Gay object",
         "pre_physics_scripts": [
             {
                 "datas": {
-                    "phys_obj_key": "84ee7414-2f17-4103-8d84-e9f76e144bc3"
+                    "phys_obj_key": "913614e6-a920-4c8b-9b89-60456ae5777a"
                 },
                 "type": "pre_physics_script_player_character_movement"
             }
         ],
         "pre_render_scripts": [
             {
+                "datas": {
+                    "rend_obj_key": "2bea4e47-72de-4ef4-8321-27aa334e3a68"
+                },
                 "type": "pre_render_script_apply_physics_transform_to_render_object"
             }
         ]

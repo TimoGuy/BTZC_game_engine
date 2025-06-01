@@ -166,7 +166,7 @@ int32_t main()
     player_char_game_obj->generate_uuid();
     game_object_pool.emplace(std::move(player_char_game_obj));
 
-    {
+    {   // @TODO: @NOCHECKIN: @DEBUG
         // Serialize scene.
         json root = {};
         size_t game_obj_idx{ 0 };
@@ -178,7 +178,6 @@ int32_t main()
         game_object_pool.return_list(std::move(game_objs));
 
         // Save to disk.
-        
         std::ofstream f{ BTZC_GAME_ENGINE_ASSET_SCENE_PATH "sumthin_cumming_outta_me.btscene" };
         f << root.dump(4);
     }
