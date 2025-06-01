@@ -1,12 +1,12 @@
 [
     {
         "children": null,
-        "guid": "908bda41-5de1-4a3f-9b7f-2c7ee7e59336",
+        "guid": "b08c2e8c-04c7-46e1-afa3-46520139d676",
         "name": "My Gay object",
         "pre_physics_scripts": [
             {
                 "datas": {
-                    "phys_obj_key": "234a7db7-2be4-4a85-9b3c-7dd1ebabaef4"
+                    "phys_obj_key": "84ee7414-2f17-4103-8d84-e9f76e144bc3"
                 },
                 "type": "pre_physics_script_player_character_movement"
             }

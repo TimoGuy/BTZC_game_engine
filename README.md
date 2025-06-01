@@ -27,7 +27,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
 
 ## Todo List.
 
-1. Get basic renderer assembled.
+1. DONE: Get basic renderer assembled.
     - [x] Get everything stubbed out for simple hdr renderer.
     - [x] Create mesh importer (simple obj meshes for now).
         - [x] Use tinyobjloader to load obj file.
@@ -54,7 +54,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - [x] Can enter into fly cam when right clicking on background.
             - Add flag for whether mouse is hovering over the game viewport specifically.
 
-1. Get jolt physics working with renderer.
+1. DONE: Get jolt physics working with renderer.
     - [x] Setup jolt physics world (simple singlethreaded job system for now).
     - [x] Create CharacterVirtual cylinder (exactly like tuned jolt physics example).
     - [x] MISSING!!!! Add Pre physics update pass (or use as the pre physics scripts) that runs the ExtendedUpdate() that all the CharacterVirtual objects need to run.
@@ -89,7 +89,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - [x] Create managing pool.
     - [ ] ~~Add physics component to gameobjects.~~
 
-1. Orbit camera and movement for player character.
+1. DONE: Orbit camera and movement for player character.
     - [x] Get the camera to orbit around player character with `update_frontend_follow_orbit()`
         - [x] Get camera to orbit around a point.
         - [x] Get player render object reference and track it.
@@ -122,13 +122,13 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
             - Height is understood to include the radii, so when creating the character, I edit the height so that it is the Jolt definition.
             - Also adds a small assert to make sure that the height is enough to encompass both radii.
 
-1. Some misc pleasing things.
+1. DONE: Some misc pleasing things.
     - [x] Add prototype default texture for probuilder shapes.
         - [x] Get textures working.
         - [x] Make and add the grid texture.
             - I found a random one off twitter.
 
-1. Code review.
+1. DONE: Code review.
     - [ ] ~~Fix `@COPYPASTA` tags where there are banks.~~
         - Do we want to do a pool? A different system?
         - There isn't a way to delete render objects. **That needs to get written before implementing the level loading/saving system.**
@@ -140,7 +140,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - [x] Is this important to think about this early and would it create friction at the expense of performance?
             - Answer: It's not important at this stage. We need to be flexible for any changes.
 
-1. Some misc pleasing things (cont.).
+1. DONE: Some misc pleasing things (cont.).
     - [x] Add crouching.
         - [x] Ctrl to crouch.
         - [x] Jump or Ctrl to uncrouch (w/o jumping).
@@ -150,7 +150,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
     - [ ] ~~Camera orbit following is annoying.~~
         - Skip for now and try again later. If it's annoying then ig I'll have to rethink how it works.
 
-1. Level saving/loading.
+1. IN PROGRESS: Level saving/loading.
     - [ ] ~~Actually, there is a modern yaml parser/emitter for C++ so let's use that. (https://github.com/biojppm/rapidyaml)~~
         - Tried it and it was hard to use. I think I will just use nlohmann's json lib again, since it's just super duper easy to use.
     - [x] Remove RapidYAML and insert nlohmann json.
@@ -162,7 +162,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - Game object could be serialized to:
             - [x] Name
             - [x] Guid
-            - [x] List of Guids that are children.
+            - [x] List of Guids that are children (Don't create children, since list is actually flat on the backend).
             - [ ] List of render scripts w/ accompanying data.
             - [x] List of physics scripts w/ accompanying data.
             - [ ] Render object (and defer here).
@@ -171,24 +171,87 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
     - [ ] JSON to Game object generator.
     - [ ] Load level inside a level as a prefab.
     - [ ] Level hierarchy and sorting.
+        - [ ] Automatically update world transforms of children gameobjects.
+        - [x] Stub out the UI window.
+        - [ ] List all the gameobject names.
+        - [ ] Click and drag gameobjects around.
+
+1. Debug views.
+    - [ ] Collision represented as green wireframe triangles.
+        - Depth test enabled.
+        - Drawn after postprocessing step that tonemaps hdr->ldr.
+        - Sample hdr depth buffer and compare it to all the lines drawn, and use different colors for if in front or behind (i.e. more transparent if behind).
+            - [ ] Change hdr depth buffer from renderbuffer to texture (@NOTE: There will be other shader tricks using the depth buffer like water, so this change will not just be for debug effects).
+    - [ ] Redraw model of selected object as pulsing-color wireframe.
+        - Using same system/groundwork of collision, with same depth testing stuff.
+    - [ ] Wireframe view for everything.
+        - Color by a color generated by their uuids.
+    - [ ] Follow path for player character.
+        - Select a character and enable follow path debug view.
+        - Over the past 500 moved/active physics steps, draw a cube that represents the collision shape and transform of where the character was.
 
 1. Good pause point.
     - [ ] Release v0.1.0-develop.1
 
 1. Level authoring tools.
+    - [ ] Create, duplicate, delete game objects.
+        - Duplicating copies the serialization of the game object, nullifies the guid, then recreates the object.
+    - [ ] In-scene object picker.
+        - Render object to the corresponding gameobject.
+    - [ ] Prefab creator.
+    - [ ] Grid alignment.
+    - [ ] Transform gizmos.
+        - Use Imguizmo.
+        - Also allow for G for translate, R for rotate, and S for scale.
+        - Also (while not using the gizmo) allow for W,E,R to change to 
     - [ ] Orthographic view.
-        - [ ] 
+        - 4-pane view kinda like what maya has.
+            - 1st, main pane is colored, full view
+            - 2-4 are wireframe, colored-by-id views that are orthographic.
+        - Wherever the moving gizmo is is the focus point.
+        - Use scroll wheel to adjust before/after depth for each axis.
+        - Display the camera view axes as boxes showing the depth of each capture.
 
 1. Add cascaded shadow maps to renderer.
     - @TODO.
+    - [ ] Add player shadow as well, but using a different camera setup.
 
 1. Skeletal animations using compute shaders.
+    - [ ] Create buffers to store the deformed models.
+        - 1 per skinned mesh thingy.
     - [ ] Add support for GLTF2 filetype for models.
     - [ ] IK legs.
     - @TODO.
 
 1. Good pause point.
     - [ ] Release v0.1.0-develop.2
+
+1. Work on movement and gameplay stuff (not really engine related for this)!
+    - Base movement principles from a hat in time.
+    - Use animations to really show the movement stuff.
+    - @TODO.
+
+1. Good pause point.
+    - [ ] Release v0.1.0
+
+1. PBR Implementation.
+    - [ ] Simple direct lighting model.
+        - Use Shadowmaps as well.
+    - [ ] Cubemap reflection probes.
+        - Global IBL prefilter map first.
+        - Statically placed reflection probes.
+            - Static reflection capture,
+            - Or incremental reflection capture (round robin of ones in view, then generate prefilter maps amortized).
+            - Have tool representation be a sphere that circumscribes the cube of the near field cutoff of the reflection captures.
+            - If moved during play mode, start spitting out errors (probe moved from initial position!!!)
+    - [ ] Adaptive SH irradiance probes.
+        - [ ] Learn how Spherical Harmonics work.
+        - [ ] Research how to reduce light bleeding when sampling irradiance probes.
+        - Global IBL irradiance map first (or do this one w SH as well???)
+        - Procedurally placed and yeah good luck (Refer to https://unity.com/blog/engine-platform/new-ways-of-applying-global-illumination-in-unity-6)
+
+1. Good pause point.
+    - [ ] Release v0.2.0-develop.0
 
 1. Graphics library procedure abstraction.
     - [ ] FIRST: Check inside the `renderer_impl_win64.h/.cpp` to see what different things OpenGL uses and pull those out.

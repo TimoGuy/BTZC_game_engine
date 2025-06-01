@@ -375,7 +375,6 @@ void BT::Renderer::Impl::create_window_with_gfx_context(string const& title)
     glfwSwapInterval(1);  // Vsync on.
 
     gladLoadGL();
-    glEnable(GL_DEPTH_TEST);
 }
 
 // ImGui.
@@ -761,6 +760,7 @@ void BT::Renderer::Impl::create_hdr_fbo()  // @COPYPASTA.
 
 void BT::Renderer::Impl::render_scene_to_hdr_framebuffer()
 {    
+    glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     glFrontFace(GL_CW);
@@ -779,6 +779,7 @@ void BT::Renderer::Impl::render_scene_to_hdr_framebuffer()
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glDisable(GL_CULL_FACE);
+    glDisable(GL_DEPTH_TEST);
 }
 
 // Helper functions.
