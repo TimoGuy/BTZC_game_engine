@@ -21,14 +21,23 @@ std::array<int, std::mt19937::state_size> generate_seed_data()
 }  // namespace
 
 
-void BT::UUID_ifc::assign_uuid(string const& pretty_uuid)
+void BT::UUID_ifc::assign_uuid(string const& pretty_uuid, bool generate_if_nil)
 {
-    auto opt_uuid{ uuids::uuid::from_string(pretty_uuid) };
-    assert(opt_uuid.has_value());
-    assert(uuids::to_string(opt_uuid.value()) == pretty_uuid);
-    m_uuid = opt_uuid.value();
-    assert(!m_uuid.is_nil());
+    m_uuid = UUID_helper::to_UUID(pretty_uuid);
     assert(m_uuid.as_bytes().size() == 16);
+
+    if (m_uuid.is_nil())
+    {
+        if (generate_if_nil)
+        {
+            generate_uuid();
+        }
+        else
+        {
+            logger::printe(logger::ERROR, "Nil UUID assigned.");
+            assert(false);
+        }
+    }
 }
 
 void BT::UUID_ifc::generate_uuid()

@@ -109,7 +109,7 @@ BT::UUID BT::Physics_engine::emplace_physics_object(
     phys_obj_pool_wait_until_free_then_block();
     if (m_physics_objects.find(uuid) != m_physics_objects.end())
     {
-        logger::printef(logger::ERROR, "UUID already exists in phys obj pool: %s", UUID_helper::pretty_repr(uuid).c_str());
+        logger::printef(logger::ERROR, "UUID already exists in phys obj pool: %s", UUID_helper::to_pretty_repr(uuid).c_str());
         assert(false);
     }
 
@@ -124,7 +124,7 @@ void BT::Physics_engine::remove_physics_object(UUID key)
     phys_obj_pool_wait_until_free_then_block();
     if (m_physics_objects.find(key) == m_physics_objects.end())
     {
-        logger::printef(logger::ERROR, "UUID does not exist in phys obj pool: %s", UUID_helper::pretty_repr(key).c_str());
+        logger::printef(logger::ERROR, "UUID does not exist in phys obj pool: %s", UUID_helper::to_pretty_repr(key).c_str());
         assert(false);
         return;
     }

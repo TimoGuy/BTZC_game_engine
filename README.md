@@ -169,12 +169,17 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
             - [ ] ~~Physics object (and defer here).~~ DO THIS LATER.
     - [x] Write JSON to disk.
 
-1. IN PROGRESS: Refactor scripts.
+1. DONE: Refactor scripts.
     - Thoughts:
         - I think that physics objects and render objects should actually own the phys scripts, render scripts, respectively. Or perhaps maybe just having there be a one, single script and it's being owned by the gameobject. And then, it has its "execution time" which can execute on any one of its own triggering functions.
             - Oh wait! It should be a unified type, that extends from a `Script_ifc` which has all of the hooks defined as empty functions, then each gameobject can have a list of `Script_ifc`'s. Then, each script can choose what to derive in its own header file (which gets pulled into the scripts thing).
+            - [x] Do it ^^
+                - @NOTE: When defining the different script classes that extend `Script_ifc`, it must be a unique name or else (at least clang-cl) doesn't convolute the function names correctly, and they end up being the same class during execution.
 
 1. Level saving/loading (cont.)
+    - [ ] Save and load with JSON:
+        - [ ] Render object.
+        - [ ] Physics object.
     - [ ] JSON to Game object generator.
     - [ ] Load level inside a level as a prefab.
     - [ ] Level hierarchy and sorting.

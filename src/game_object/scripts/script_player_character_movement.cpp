@@ -1,4 +1,4 @@
-#include "pre_physics_scripts.h"
+#include "scripts.h"
 
 #include "../input_handler/input_handler.h"
 #include "../physics_engine/physics_engine.h"
@@ -6,51 +6,78 @@
 #include "cglm/vec3.h"
 #include "Jolt/Jolt.h"
 #include "Jolt/Physics/PhysicsSystem.h"
-#include "logger.h"
-#include "serialization.h"
+#include <memory>
+
+using std::unique_ptr;
 
 
-void BT::Pre_physics_script::script_player_character_movement_serialize(
-    Input_handler* input_handler,
-    Physics_engine* phys_engine,
-    Renderer* renderer,
-    Scene_serialization_mode mode,
-    json& node_ref,
-    vector<uint64_t> const& datas,
-    size_t& in_out_read_data_idx)
+namespace BT::Scripts
 {
-    if (mode == Scene_serialization_mode::SCENE_SERIAL_MODE_SERIALIZE)
+
+class Script_player_character_movement : public Script_ifc
+{
+public:
+    Script_player_character_movement(Input_handler const& input_handler,
+                                     Physics_engine& phys_engine,
+                                     Renderer& renderer,
+                                     UUID phys_obj_key)
+        : m_input_handler{ input_handler }
+        , m_phys_engine{ phys_engine }
+        , m_renderer{ renderer }
+        , m_phys_obj_key{ phys_obj_key }
     {
-        node_ref["phys_obj_key"] = UUID_helper::pretty_repr(Serial::pop_uuid(datas, in_out_read_data_idx));
-        // Input state.
-        // Camera.
-        // Persistent state 1.
-        // Persistent state 2.
     }
-    else if (mode == Scene_serialization_mode::SCENE_SERIAL_MODE_DESERIALIZE)
+
+    Input_handler const& m_input_handler;
+    Physics_engine& m_phys_engine;
+    Renderer& m_renderer;
+    UUID m_phys_obj_key;
+    bool m_prev_jump_pressed{ false };
+    bool m_prev_crouch_pressed{ false };
+
+    // Script_ifc.
+    Script_type get_type() override
     {
-        // @TODO
-        assert(false);
+        return SCRIPT_TYPE_player_character_movement;
     }
+
+    void serialize_datas(json& node_ref) override
+    {
+        node_ref["phys_obj_key"] = UUID_helper::to_pretty_repr(m_phys_obj_key);
+    }
+
+    void on_pre_physics(float_t physics_delta_time) override;
+};
+
+}  // namespace BT
+
+
+// Create script.
+unique_ptr<BT::Scripts::Script_ifc>
+BT::Scripts::Factory_impl_funcs
+    ::create_script_player_character_movement_from_serialized_datas(Input_handler* input_handler,
+                                                                    Physics_engine* phys_engine,
+                                                                    Renderer* renderer,
+                                                                    json const& node_ref)
+{
+    return unique_ptr<Script_ifc>(
+        new Script_player_character_movement{ *input_handler,
+                                              *phys_engine,
+                                              *renderer,
+                                              UUID_helper::to_UUID(node_ref["phys_obj_key"]) });
 }
 
-void BT::Pre_physics_script::script_player_character_movement(
-    Physics_engine* phys_engine,
-    vector<uint64_t> const& datas,
-    size_t& in_out_read_data_idx)
-{
-    auto phys_obj_key{ Serial::pop_uuid(datas, in_out_read_data_idx) };
-    auto const& input_state{
-        reinterpret_cast<Input_handler*>(Serial::pop_void_ptr(datas, in_out_read_data_idx))
-            ->get_input_state() };
-    auto camera{ reinterpret_cast<Camera*>(Serial::pop_void_ptr(datas, in_out_read_data_idx)) };
-    auto& pers_state1{ Serial::pop_u64_persistent_state(datas, in_out_read_data_idx) };
-    auto& pers_state2{ Serial::pop_u64_persistent_state(datas, in_out_read_data_idx) };
 
-    Physics_object* phys_obj{ phys_engine->checkout_physics_object(phys_obj_key) };
+// Script_player_character_movement.
+void BT::Scripts::Script_player_character_movement::on_pre_physics(float_t physics_delta_time)
+{
+    auto const& input_state{ m_input_handler.get_input_state() };
+    auto camera{ m_renderer.get_camera_obj() };
+
+    Physics_object* phys_obj{ m_phys_engine.checkout_physics_object(m_phys_obj_key) };
     auto character_impl{ phys_obj->get_impl() };
 
-    auto phys_system{ reinterpret_cast<JPH::PhysicsSystem*>(phys_engine->get_physics_system_ptr()) };
+    auto phys_system{ reinterpret_cast<JPH::PhysicsSystem*>(m_phys_engine.get_physics_system_ptr()) };
 
     // Tick and get character status.
     JPH::Vec3 ground_velocity;
@@ -102,13 +129,11 @@ void BT::Pre_physics_script::script_player_character_movement(
                              k_standing_speed);
 
     // Extra input checks.
-    bool prev_jump_pressed{ static_cast<bool>(pers_state1) };
-    bool on_jump_press{ input_state.jump.val && !prev_jump_pressed };
-    pers_state1 = input_state.jump.val;
+    bool on_jump_press{ input_state.jump.val && !m_prev_jump_pressed };
+    m_prev_jump_pressed = input_state.jump.val;
 
-    bool prev_crouch_pressed{ static_cast<bool>(pers_state2) };
-    bool on_crouch_press{ input_state.crouch.val && !prev_crouch_pressed };
-    pers_state2 = input_state.crouch.val;
+    bool on_crouch_press{ input_state.crouch.val && !m_prev_crouch_pressed };
+    m_prev_crouch_pressed = input_state.crouch.val;
 
     // Determine new basic velocity.
     JPH::Vec3 current_vertical_velocity = linear_velocity.Dot(up_direction) * up_direction;
@@ -145,7 +170,7 @@ void BT::Pre_physics_script::script_player_character_movement(
     }
 
     // Gravity.
-    new_velocity += (up_rotation * phys_system->GetGravity()) * Physics_engine::k_simulation_delta_time;
+    new_velocity += (up_rotation * phys_system->GetGravity()) * physics_delta_time;
 
     // Input velocity.
     new_velocity += desired_velocity;
@@ -154,7 +179,7 @@ void BT::Pre_physics_script::script_player_character_movement(
     character_impl->set_cc_velocity(new_velocity);
 
     // Finish.
-    phys_engine->return_physics_object(phys_obj);
+    m_phys_engine.return_physics_object(phys_obj);
 
 
 

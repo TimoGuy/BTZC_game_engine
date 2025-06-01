@@ -1,13 +1,13 @@
 #pragma once
 
+#include "../input_handler/input_handler.h"
 #include "../physics_engine/physics_engine.h"
 #include "../physics_engine/physics_object.h"
 #include "../renderer/renderer.h"
 #include "../renderer/render_object.h"
 #include "../scene/scene_serialization_ifc.h"
 #include "../uuid/uuid_ifc.h"
-#include "scripts/pre_physics_scripts.h"
-#include "scripts/pre_render_scripts.h"
+#include "scripts/scripts.h"
 #include <atomic>
 #include <memory>
 #include <string>
@@ -31,15 +31,13 @@ class Game_object : public Scene_serialization_ifc, public UUID_ifc
 {
 public:
     Game_object(string const& name,
+                Input_handler& input_handler,
                 Physics_engine& phys_engine,
                 Renderer& renderer,
                 // Everything below this is planned to be taken care of by `scene_serialize()` for loading.
                 UUID phys_obj_key,
                 UUID rend_obj_key,
-                vector<Pre_physics_script::Script_type>&& pre_physics_scripts,
-                vector<uint64_t>&& pre_physics_user_datas,
-                vector<Pre_render_script::Script_type>&& pre_render_scripts,
-                vector<uint64_t>&& pre_render_user_datas);
+                vector<unique_ptr<Scripts::Script_ifc>>&& scripts);
 
     void run_pre_physics_scripts(float_t physics_delta_time);
     void run_pre_render_scripts(float_t delta_time);
@@ -49,13 +47,11 @@ public:
 
 private:
     string m_name;
+    Input_handler& m_input_handler;
     Physics_engine& m_phys_engine;
     Renderer& m_renderer;
 
-    vector<Pre_physics_script::Script_type> m_pre_physics_scripts;
-    vector<uint64_t> m_pre_physics_user_datas;
-    vector<Pre_render_script::Script_type> m_pre_render_scripts;
-    vector<uint64_t> m_pre_render_user_datas;
+    vector<unique_ptr<Scripts::Script_ifc>> m_scripts;
 
     vector<UUID> m_children;
 };

@@ -1,10 +1,10 @@
 #include "game_object.h"
 
+#include "../input_handler/input_handler.h"
 #include "../physics_engine/physics_engine.h"
 #include "../renderer/renderer.h"
 #include "logger.h"
-#include "scripts/pre_physics_scripts.h"
-#include "scripts/pre_render_scripts.h"
+#include "scripts/scripts.h"
 #include <atomic>
 #include <cassert>
 
@@ -13,45 +13,33 @@ using std::atomic_uint64_t;
 
 
 BT::Game_object::Game_object(string const& name,
+                             Input_handler& input_handler,
                              Physics_engine& phys_engine,
                              Renderer& renderer,
                              UUID phys_obj_key,
                              UUID rend_obj_key,
-                             vector<Pre_physics_script::Script_type>&& pre_physics_scripts,
-                             vector<uint64_t>&& pre_physics_user_datas,
-                             vector<Pre_render_script::Script_type>&& pre_render_scripts,
-                             vector<uint64_t>&& pre_render_user_datas)
+                             vector<unique_ptr<Scripts::Script_ifc>>&& scripts)
     : m_name(name)
+    , m_input_handler(input_handler)
     , m_phys_engine(phys_engine)
     , m_renderer(renderer)
-    , m_pre_physics_scripts(std::move(pre_physics_scripts))
-    , m_pre_physics_user_datas(std::move(pre_physics_user_datas))
-    , m_pre_render_scripts(std::move(pre_render_scripts))
-    , m_pre_render_user_datas(std::move(pre_render_user_datas))
+    , m_scripts(std::move(scripts))
 {
 }
 
 void BT::Game_object::run_pre_physics_scripts(float_t physics_delta_time)
 {
-    size_t read_data_idx{ 0 };
-    for (auto pre_phys_script : m_pre_physics_scripts)
+    for (auto& script : m_scripts)
     {
-        BT::Pre_physics_script::execute_pre_physics_script(&m_phys_engine,
-                                                           pre_phys_script,
-                                                           m_pre_physics_user_datas,
-                                                           read_data_idx);
+        script->on_pre_physics(physics_delta_time);
     }
 }
 
 void BT::Game_object::run_pre_render_scripts(float_t delta_time)
 {
-    size_t read_data_idx{ 0 };
-    for (auto pre_rend_script : m_pre_render_scripts)
+    for (auto& script : m_scripts)
     {
-        BT::Pre_render_script::execute_pre_render_script(&m_renderer,
-                                                         pre_rend_script,
-                                                         m_pre_render_user_datas,
-                                                         read_data_idx);
+        script->on_pre_render(delta_time);
     }
 }
 
@@ -61,58 +49,46 @@ void BT::Game_object::scene_serialize(Scene_serialization_mode mode, json& node_
     if (mode == SCENE_SERIAL_MODE_SERIALIZE)
     {
         node_ref["name"] = m_name;
-        node_ref["guid"] = UUID_helper::pretty_repr(get_uuid());
+        node_ref["guid"] = UUID_helper::to_pretty_repr(get_uuid());
 
-        node_ref["pre_physics_scripts"] = json::array();
+        node_ref["scripts"] = json::array();
         size_t scripts_idx{ 0 };
-        size_t datas_io_idx{ 0 };
-        for (auto pre_phys_script : m_pre_physics_scripts)
+        for (auto& script : m_scripts)
         {
-            auto& phys_script_node_ref{ node_ref["pre_physics_scripts"][scripts_idx++] };
-            phys_script_node_ref["type"] =
-                Pre_physics_script::get_script_name_from_type(pre_phys_script);
-
-            // Add script datas.
-            Pre_physics_script::execute_pre_physics_script_serialize(nullptr,
-                                                                     &m_phys_engine,
-                                                                     &m_renderer,
-                                                                     pre_phys_script,
-                                                                     mode,
-                                                                     phys_script_node_ref["datas"],
-                                                                     m_pre_physics_user_datas,
-                                                                     datas_io_idx);
-        }
-
-        node_ref["pre_render_scripts"] = json::array();
-        scripts_idx = 0;
-        datas_io_idx = 0;
-        for (auto pre_rend_script : m_pre_render_scripts)
-        {
-            auto& rend_script_node_ref{ node_ref["pre_render_scripts"][scripts_idx++] };
-            rend_script_node_ref["type"] =
-                Pre_render_script::get_script_name_from_type(pre_rend_script);
-
-            // Add script datas.
-            Pre_render_script::execute_pre_render_script_serialize(nullptr,
-                                                                   &m_phys_engine,
-                                                                   &m_renderer,
-                                                                   pre_rend_script,
-                                                                   mode,
-                                                                   rend_script_node_ref["datas"],
-                                                                   m_pre_render_user_datas,
-                                                                   datas_io_idx);
+            Scripts::serialize_script(script.get(),
+                                      node_ref["scripts"][scripts_idx++]);
         }
 
         node_ref["children"] = json::array();
         for (auto& child_uuid : m_children)
         {
-            node_ref["children"].emplace_back(UUID_helper::pretty_repr(get_uuid()));
+            node_ref["children"].emplace_back(UUID_helper::to_pretty_repr(child_uuid));
         }
+
+        // @TODO: Serialize render and physics objs.
     }
     else if (mode == SCENE_SERIAL_MODE_DESERIALIZE)
     {
-        // @TODO.
-        assert(false);
+        m_name = node_ref["name"];
+        assign_uuid(node_ref["guid"], true);
+
+        assert(node_ref["scripts"].is_array());
+        for (size_t scripts_idx = 0; scripts_idx < node_ref["scripts"].size();)
+        {
+            m_scripts.emplace_back(
+                Scripts::create_script_from_serialized_datas(&m_input_handler,
+                                                             &m_phys_engine,
+                                                             &m_renderer,
+                                                             node_ref["scripts"][scripts_idx++]));
+        }
+
+        assert(node_ref["children"].is_array());
+        for (auto& child_uuid : node_ref["children"])
+        {
+            m_children.emplace_back(UUID_helper::to_UUID(child_uuid));
+        }
+
+        // @TODO: Deserialize render and physics objs.
     }
 }
 
@@ -168,7 +144,7 @@ BT::Game_object* BT::Game_object_pool::checkout_one(UUID uuid)
 
     if (m_game_objects.find(uuid) == m_game_objects.end())
     {
-        logger::printef(logger::ERROR, "UUID was invalid: %s", UUID_helper::pretty_repr(uuid).c_str());
+        logger::printef(logger::ERROR, "UUID was invalid: %s", UUID_helper::to_pretty_repr(uuid).c_str());
         assert(false);
         return nullptr;
     }

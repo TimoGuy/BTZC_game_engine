@@ -1,5 +1,9 @@
 #pragma once
 
+// This class doesn't seem to be useful anymore, now that we're doing a more polymorphic approach to scripts.
+// Soooo, deprecate???  -Thea 2025/06/01 (Happy Pride Month!!!)
+#if 0
+
 #include "../../uuid/uuid_ifc.h"
 #include "cglm/cglm.h"
 #include "logger.h"
@@ -103,3 +107,5 @@ inline void pop_vec3(vector<uint64_t> const& datas, size_t& in_out_read_data_idx
 }  // namespace Serial
 
 }  // namespace BT
+
+#endif  // 0

@@ -123,7 +123,7 @@ vector<BT::Render_object*> BT::Render_object_pool::checkout_render_obj_by_key(ve
         }
         else if (m_render_objects.find(key) == m_render_objects.end())
         {
-            logger::printef(logger::WARN, "Render object UUID %s does not exist", UUID_helper::pretty_repr(key).c_str());
+            logger::printef(logger::WARN, "Render object UUID %s does not exist", UUID_helper::to_pretty_repr(key).c_str());
             assert(false);
         }
         else

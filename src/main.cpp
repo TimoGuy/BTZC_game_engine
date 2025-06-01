@@ -3,9 +3,7 @@
 #include "cglm/mat4.h"
 #include "renderer/camera.h"
 #include "game_object/game_object.h"
-#include "game_object/scripts/pre_physics_scripts.h"
-#include "game_object/scripts/pre_render_scripts.h"
-#include "game_object/scripts/serialization.h"
+#include "game_object/scripts/scripts.h"
 #include "input_handler/input_handler.h"
 #include "Jolt/Jolt.h"  // @DEBUG
 #include "Jolt/Math/Real.h"  // @DEBUG
@@ -25,6 +23,7 @@
 #include "scene/scene_serialization_ifc.h"
 #include "timer/timer.h"
 #include "timer/watchdog_timer.h"
+#include "uuid/uuid_ifc.h"
 #include <cstdint>
 #include <memory>
 #include <fstream>  // @DEBUG
@@ -136,33 +135,43 @@ int32_t main()
     // Game objects.
     BT::Game_object_pool game_object_pool;
 
-    vector<BT::Pre_physics_script::Script_type> phys_scripts;
-    vector<uint64_t> phys_scripts_datas;
+    vector<unique_ptr<BT::Scripts::Script_ifc>> scripts;
 
-    phys_scripts.emplace_back(BT::Pre_physics_script::SCRIPT_TYPE_player_character_movement);
-    BT::Serial::push_uuid(phys_scripts_datas, player_char_phys_obj_key);
-    BT::Serial::push_void_ptr(phys_scripts_datas, &main_input_handler);
-    BT::Serial::push_void_ptr(phys_scripts_datas, main_renderer.get_camera_obj());
-    BT::Serial::push_u64_persistent_state(phys_scripts_datas);
-    BT::Serial::push_u64_persistent_state(phys_scripts_datas);
+    json scripts_as_json =
+        R"([
+            {
+                "script_type": "script_player_character_movement",
+                "script_datas": {
+                    "phys_obj_key": ""
+                }
+            },
+            {
+                "script_type": "script_apply_physics_transform_to_render_object",
+                "script_datas": {
+                    "rend_obj_key": ""
+                }
+            }
+        ])"_json;
+    scripts_as_json[0]["script_datas"]["phys_obj_key"] = BT::UUID_helper::to_pretty_repr(player_char_phys_obj_key);
+    scripts_as_json[1]["script_datas"]["rend_obj_key"] = BT::UUID_helper::to_pretty_repr(player_char_rend_obj_key);
 
-    vector<BT::Pre_render_script::Script_type> rend_scripts;
-    vector<uint64_t> rend_scripts_datas;
-
-    rend_scripts.emplace_back(BT::Pre_render_script::SCRIPT_TYPE_apply_physics_transform_to_render_object);
-    BT::Serial::push_uuid(rend_scripts_datas, player_char_rend_obj_key);
-    BT::Serial::push_void_ptr(rend_scripts_datas, &main_physics_engine);
+    for (auto& script_as_json : scripts_as_json)
+    {
+        scripts.emplace_back(BT::Scripts::create_script_from_serialized_datas(
+            &main_input_handler,
+            &main_physics_engine,
+            &main_renderer,
+            script_as_json));
+    }
 
     unique_ptr<BT::Game_object> player_char_game_obj{
         new BT::Game_object("My Gay object",
+                            main_input_handler,
                             main_physics_engine,
                             main_renderer,
                             player_char_phys_obj_key,
                             player_char_rend_obj_key,
-                            std::move(phys_scripts),
-                            std::move(phys_scripts_datas),
-                            std::move(rend_scripts),
-                            std::move(rend_scripts_datas)) };
+                            std::move(scripts)) };
     player_char_game_obj->generate_uuid();
     game_object_pool.emplace(std::move(player_char_game_obj));
 

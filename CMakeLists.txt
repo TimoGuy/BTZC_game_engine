@@ -47,10 +47,11 @@ add_subdirectory(third_party/stduuid)
 
 # Executable build.
 add_executable(${PROJECT_NAME}
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/pps_player_character_movement.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/pre_physics_scripts.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/pre_render_scripts.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/prs_apply_phys_xform_to_rend_obj.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/list_of_scripts_begin.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/list_of_scripts_end.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/script_apply_phys_xform_to_rend_obj.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/script_player_character_movement.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/scripts.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/serialization.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/game_object.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/game_object.h
