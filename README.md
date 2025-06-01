@@ -18,6 +18,9 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
 ### Changes
 
 - Grid shader now displays standable and non-standable surfaces.
+- Scripts are now unified, instead of having a list of physics and render scripts.
+- Script data is now held by an actual class, extending a new script interface.
+- `serialization.h` is deprecated (or rather I don't think it's being used, but this may be useful for a binary data saver?)
 
 ### Fixes
 
@@ -176,7 +179,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
             - [x] Do it ^^
                 - @NOTE: When defining the different script classes that extend `Script_ifc`, it must be a unique name or else (at least clang-cl) doesn't convolute the function names correctly, and they end up being the same class during execution.
 
-1. Level saving/loading (cont.)
+1. IN PROGRESS: Level saving/loading (cont.)
     - [ ] Save and load with JSON:
         - [ ] Render object.
         - [ ] Physics object.
