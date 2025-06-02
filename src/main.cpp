@@ -135,44 +135,82 @@ int32_t main()
     // Game objects.
     BT::Game_object_pool game_object_pool;
 
-    vector<unique_ptr<BT::Scripts::Script_ifc>> scripts;
+    // vector<unique_ptr<BT::Scripts::Script_ifc>> scripts;
 
-    json scripts_as_json =
+    // json scripts_as_json =
+    //     R"([
+    //         {
+    //             "script_type": "script_player_character_movement",
+    //             "script_datas": {
+    //                 "phys_obj_key": ""
+    //             }
+    //         },
+    //         {
+    //             "script_type": "script_apply_physics_transform_to_render_object",
+    //             "script_datas": {
+    //                 "rend_obj_key": ""
+    //             }
+    //         }
+    //     ])"_json;
+    // scripts_as_json[0]["script_datas"]["phys_obj_key"] = BT::UUID_helper::to_pretty_repr(player_char_phys_obj_key);
+    // scripts_as_json[1]["script_datas"]["rend_obj_key"] = BT::UUID_helper::to_pretty_repr(player_char_rend_obj_key);
+
+    // for (auto& script_as_json : scripts_as_json)
+    // {
+    //     scripts.emplace_back(BT::Scripts::create_script_from_serialized_datas(
+    //         &main_input_handler,
+    //         &main_physics_engine,
+    //         &main_renderer,
+    //         script_as_json));
+    // }
+
+    unique_ptr<BT::Game_object> player_char_game_obj{
+        new BT::Game_object(main_input_handler,
+                            main_physics_engine,
+                            main_renderer) };
+    json game_obj_as_json =
         R"([
             {
-                "script_type": "script_player_character_movement",
-                "script_datas": {
-                    "phys_obj_key": ""
-                }
-            },
-            {
-                "script_type": "script_apply_physics_transform_to_render_object",
-                "script_datas": {
-                    "rend_obj_key": ""
+                "children": [],
+                "guid": "aae5ebfb-7c2b-49a8-bcb9-658fdea987af",
+                "name": "My Gay object",
+                "scripts": [
+                    {
+                        "script_datas": {
+                            "phys_obj_key": "08743552-fff6-49d2-ad15-efbd121ab773"
+                        },
+                        "script_type": "script_player_character_movement"
+                    },
+                    {
+                        "script_datas": {
+                            "rend_obj_key": "fa2a0c0c-cfd4-47a7-b4e7-01dbbd3b3537"
+                        },
+                        "script_type": "script_apply_physics_transform_to_render_object"
+                    }
+                ],
+                "render_obj": {
+                    "guid": "fa2a0c0c-cfd4-47a7-b4e7-01dbbd3b3537",
+                    "model_name": "box_0.5_2",
+                    "render_layer": 1,
+                    "transform": [[1.0, 0.0, 0.0, 0.0],
+                                  [0.0, 1.0, 0.0, 0.0],
+                                  [0.0, 0.0, 1.0, 0.0],
+                                  [0.0, 0.0, 0.0, 1.0]],
+                    "tethered_phys_obj": "08743552-fff6-49d2-ad15-efbd121ab773"
+                },
+                "physics_obj": {
+                    "guid": "08743552-fff6-49d2-ad15-efbd121ab773",
+                    "type": "character_controller",
+                    "interpolate_transform": true,
+                    "radius": 0.5,
+                    "height": 2.0,
+                    "crouch_height": 1.0,
+                    "init_transform": [[0.0, 5.1, 0.0],
+                                       [0.0, 0.0, 0.0, 1.0]]
                 }
             }
         ])"_json;
-    scripts_as_json[0]["script_datas"]["phys_obj_key"] = BT::UUID_helper::to_pretty_repr(player_char_phys_obj_key);
-    scripts_as_json[1]["script_datas"]["rend_obj_key"] = BT::UUID_helper::to_pretty_repr(player_char_rend_obj_key);
-
-    for (auto& script_as_json : scripts_as_json)
-    {
-        scripts.emplace_back(BT::Scripts::create_script_from_serialized_datas(
-            &main_input_handler,
-            &main_physics_engine,
-            &main_renderer,
-            script_as_json));
-    }
-
-    unique_ptr<BT::Game_object> player_char_game_obj{
-        new BT::Game_object("My Gay object",
-                            main_input_handler,
-                            main_physics_engine,
-                            main_renderer,
-                            player_char_phys_obj_key,
-                            player_char_rend_obj_key,
-                            std::move(scripts)) };
-    player_char_game_obj->generate_uuid();
+    player_char_game_obj->scene_serialize(BT::SCENE_SERIAL_MODE_DESERIALIZE, game_obj_as_json);
     game_object_pool.emplace(std::move(player_char_game_obj));
 
     {   // @TODO: @NOCHECKIN: @DEBUG

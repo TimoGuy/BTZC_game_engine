@@ -297,3 +297,17 @@ BT::Model const* BT::Model_bank::get_model(string const& name)
 
     return model_ptr;
 }
+
+string BT::Model_bank::get_model_name(Model const* model_ptr)
+{
+    string model_name{ "" };
+
+    for (auto& model : s_models)
+        if (model.second.get() == model_ptr)
+        {
+            model_name = model.first;
+            break;
+        }
+
+    return model_name;
+}

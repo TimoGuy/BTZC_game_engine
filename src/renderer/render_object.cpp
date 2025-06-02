@@ -61,6 +61,35 @@ void BT::Render_object::get_position(vec3& position)
     glm_vec3(pos4, position);
 }
 
+// Scene_serialization_ifc.
+void BT::Render_object::scene_serialize(Scene_serialization_mode mode, json& node_ref)
+{
+    if (mode == SCENE_SERIAL_MODE_SERIALIZE)
+    {
+        node_ref["guid"] = UUID_helper::to_pretty_repr(get_uuid());
+        node_ref["model_name"] = Model_bank::get_model_name(&m_model);
+        node_ref["render_layer"] = static_cast<uint8_t>(m_layer);
+
+        node_ref["transform"] = json::array();
+        for (size_t i = 0; i < 4; i++)
+            for (size_t j = 0; j < 4; j++)
+            {
+                node_ref["transform"][i][j] = m_transform[i][j];
+            }
+
+        node_ref["tethered_phys_obj"] = (m_tethered_phys_obj.is_nil() ?
+                                         nullptr :
+                                         UUID_helper::to_pretty_repr(m_tethered_phys_obj));
+    }
+    else if (mode == SCENE_SERIAL_MODE_DESERIALIZE)
+    {
+        assign_uuid(node_ref["guid"], true);
+
+        // @TODO!
+        assert(false);
+    }
+}
+
 BT::UUID BT::Render_object_pool::emplace(Render_object&& rend_obj)
 {
     UUID uuid{ rend_obj.get_uuid() };

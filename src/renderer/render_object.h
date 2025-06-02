@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../physics_engine/physics_engine.h"
+#include "../scene/scene_serialization_ifc.h"
 #include "../uuid/uuid_ifc.h"
 #include "cglm/cglm.h"
 #include "mesh.h"
@@ -29,7 +30,7 @@ enum Render_layer : uint8_t
 
 class Physics_object;
 
-class Render_object : public UUID_ifc
+class Render_object : public Scene_serialization_ifc, public UUID_ifc
 {
 public:
     Render_object(Model const& model,
@@ -42,6 +43,9 @@ public:
     void set_transform(mat4 transform);
     void get_position(vec3& position);
     inline UUID get_tethered_phys_obj_key() const { return m_tethered_phys_obj; }
+
+    // Scene_serialization_ifc.
+    void scene_serialize(Scene_serialization_mode mode, json& node_ref) override;
 
 private:
     Model const& m_model;

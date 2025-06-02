@@ -30,14 +30,9 @@ namespace BT
 class Game_object : public Scene_serialization_ifc, public UUID_ifc
 {
 public:
-    Game_object(string const& name,
-                Input_handler& input_handler,
+    Game_object(Input_handler& input_handler,
                 Physics_engine& phys_engine,
-                Renderer& renderer,
-                // Everything below this is planned to be taken care of by `scene_serialize()` for loading.
-                UUID phys_obj_key,
-                UUID rend_obj_key,
-                vector<unique_ptr<Scripts::Script_ifc>>&& scripts);
+                Renderer& renderer);
 
     void run_pre_physics_scripts(float_t physics_delta_time);
     void run_pre_render_scripts(float_t delta_time);
@@ -46,11 +41,13 @@ public:
     void scene_serialize(Scene_serialization_mode mode, json& node_ref) override;
 
 private:
-    string m_name;
     Input_handler& m_input_handler;
     Physics_engine& m_phys_engine;
     Renderer& m_renderer;
 
+    string m_name;
+    UUID m_phys_obj_key;
+    UUID m_rend_obj_key;
     vector<unique_ptr<Scripts::Script_ifc>> m_scripts;
 
     vector<UUID> m_children;

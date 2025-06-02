@@ -12,18 +12,12 @@ using std::atomic_uint8_t;
 using std::atomic_uint64_t;
 
 
-BT::Game_object::Game_object(string const& name,
-                             Input_handler& input_handler,
+BT::Game_object::Game_object(Input_handler& input_handler,
                              Physics_engine& phys_engine,
-                             Renderer& renderer,
-                             UUID phys_obj_key,
-                             UUID rend_obj_key,
-                             vector<unique_ptr<Scripts::Script_ifc>>&& scripts)
-    : m_name(name)
-    , m_input_handler(input_handler)
+                             Renderer& renderer)
+    : m_input_handler(input_handler)
     , m_phys_engine(phys_engine)
     , m_renderer(renderer)
-    , m_scripts(std::move(scripts))
 {
 }
 
@@ -65,7 +59,19 @@ void BT::Game_object::scene_serialize(Scene_serialization_mode mode, json& node_
             node_ref["children"].emplace_back(UUID_helper::to_pretty_repr(child_uuid));
         }
 
-        // @TODO: Serialize render and physics objs.
+        // @TODO: Serialize physics obj.
+
+        // Serialize render obj.
+        if (m_rend_obj_key.is_nil())
+        {
+            node_ref["render_obj"] = nullptr;
+        }
+        else
+        {
+            auto rend_objs{ m_renderer.get_render_object_pool().checkout_render_obj_by_key({ m_rend_obj_key }) };
+            assert(rend_objs.size() == 1);
+            rend_objs.front()->scene_serialize(mode, node_ref["render_obj"]);
+        }
     }
     else if (mode == SCENE_SERIAL_MODE_DESERIALIZE)
     {
