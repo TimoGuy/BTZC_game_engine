@@ -33,7 +33,7 @@ class Physics_object;
 class Render_object : public Scene_serialization_ifc, public UUID_ifc
 {
 public:
-    Render_object(Model const& model,
+    Render_object(Model const* model,
                   Render_layer layer,
                   mat4 init_transform,
                   UUID tethered_phys_obj = UUID());
@@ -48,7 +48,7 @@ public:
     void scene_serialize(Scene_serialization_mode mode, json& node_ref) override;
 
 private:
-    Model const& m_model;
+    Model const* m_model;
     Render_layer m_layer;
     mat4 m_transform;
 

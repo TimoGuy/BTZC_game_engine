@@ -181,7 +181,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
 
 1. IN PROGRESS: Level saving/loading (cont.)
     - [ ] Save and load with JSON:
-        - [ ] Render object.
+        - [x] Render object.
         - [ ] Physics object.
     - [ ] JSON to Game object generator.
     - [ ] Load level inside a level as a prefab.

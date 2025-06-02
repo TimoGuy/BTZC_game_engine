@@ -59,7 +59,17 @@ void BT::Game_object::scene_serialize(Scene_serialization_mode mode, json& node_
             node_ref["children"].emplace_back(UUID_helper::to_pretty_repr(child_uuid));
         }
 
-        // @TODO: Serialize physics obj.
+        // Serialize physics obj.
+        if (m_phys_obj_key.is_nil())
+        {
+            node_ref["physics_obj"] = nullptr;
+        }
+        else
+        {
+            auto phys_obj{ m_phys_engine.checkout_physics_object(m_phys_obj_key) };
+            phys_obj->scene_serialize(mode, node_ref["physics_obj"]);
+            m_phys_engine.return_physics_object(phys_obj);
+        }
 
         // Serialize render obj.
         if (m_rend_obj_key.is_nil())
@@ -68,9 +78,13 @@ void BT::Game_object::scene_serialize(Scene_serialization_mode mode, json& node_
         }
         else
         {
-            auto rend_objs{ m_renderer.get_render_object_pool().checkout_render_obj_by_key({ m_rend_obj_key }) };
+            auto rend_objs{
+                m_renderer.get_render_object_pool()
+                    .checkout_render_obj_by_key({ m_rend_obj_key }) };
             assert(rend_objs.size() == 1);
             rend_objs.front()->scene_serialize(mode, node_ref["render_obj"]);
+            m_renderer.get_render_object_pool()
+                .return_render_objs(std::move(rend_objs));
         }
     }
     else if (mode == SCENE_SERIAL_MODE_DESERIALIZE)
@@ -94,7 +108,25 @@ void BT::Game_object::scene_serialize(Scene_serialization_mode mode, json& node_
             m_children.emplace_back(UUID_helper::to_UUID(child_uuid));
         }
 
-        // @TODO: Deserialize render and physics objs.
+        // Deserialize physics obj.
+        if (node_ref["physics_obj"].is_object())
+        {
+            auto new_phys_obj{
+                Physics_object::create_physics_object_from_serialization(node_ref["physics_obj"]) };
+            m_phys_obj_key =
+                m_phys_engine.emplace_physics_object(std::move(new_phys_obj));
+        }
+
+        // Deserialize render obj.
+        if (node_ref["render_obj"].is_object())
+        {
+            Render_object new_rend_obj{ nullptr,
+                                        Render_layer::RENDER_LAYER_DEFAULT,
+                                        GLM_MAT4_IDENTITY };
+            new_rend_obj.scene_serialize(mode, node_ref["render_obj"]);
+            m_rend_obj_key =
+                m_renderer.get_render_object_pool().emplace(std::move(new_rend_obj));
+        }
     }
 }
 

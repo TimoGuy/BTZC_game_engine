@@ -118,7 +118,7 @@ int32_t main()
     auto& render_object_pool{ main_renderer.get_render_object_pool() };
 
     BT::Render_object player_char_rend_obj{
-        *BT::Model_bank::get_model("box_0.5_2"),
+        BT::Model_bank::get_model("box_0.5_2"),
         BT::Render_layer::RENDER_LAYER_DEFAULT,
         GLM_MAT4_IDENTITY,
         player_char_phys_obj_key };
@@ -126,7 +126,7 @@ int32_t main()
     auto player_char_rend_obj_key = render_object_pool.emplace(std::move(player_char_rend_obj));
 
     BT::Render_object static_level_terrain_rend_obj{
-        *BT::Model_bank::get_model("probuilder_example"),
+        BT::Model_bank::get_model("probuilder_example"),
         BT::Render_layer::RENDER_LAYER_DEFAULT,
         GLM_MAT4_IDENTITY };
     static_level_terrain_rend_obj.generate_uuid();
@@ -210,7 +210,7 @@ int32_t main()
                 }
             }
         ])"_json;
-    player_char_game_obj->scene_serialize(BT::SCENE_SERIAL_MODE_DESERIALIZE, game_obj_as_json);
+    player_char_game_obj->scene_serialize(BT::SCENE_SERIAL_MODE_DESERIALIZE, game_obj_as_json[0]);
     game_object_pool.emplace(std::move(player_char_game_obj));
 
     {   // @TODO: @NOCHECKIN: @DEBUG

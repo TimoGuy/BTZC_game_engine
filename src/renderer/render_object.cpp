@@ -6,7 +6,7 @@
 #include "mesh.h"
 
 
-BT::Render_object::Render_object(Model const& model,
+BT::Render_object::Render_object(Model const* model,
                                  Render_layer layer,
                                  mat4 init_transform,
                                  UUID tethered_phys_obj /*= UUID()*/)
@@ -45,7 +45,7 @@ void BT::Render_object::render(Render_layer active_layers)
 {
     if (m_layer & active_layers)
     {
-        m_model.render_model(m_transform);
+        m_model->render_model(m_transform);
     }
 }
 
@@ -67,7 +67,7 @@ void BT::Render_object::scene_serialize(Scene_serialization_mode mode, json& nod
     if (mode == SCENE_SERIAL_MODE_SERIALIZE)
     {
         node_ref["guid"] = UUID_helper::to_pretty_repr(get_uuid());
-        node_ref["model_name"] = Model_bank::get_model_name(&m_model);
+        node_ref["model_name"] = Model_bank::get_model_name(m_model);
         node_ref["render_layer"] = static_cast<uint8_t>(m_layer);
 
         node_ref["transform"] = json::array();
@@ -84,9 +84,20 @@ void BT::Render_object::scene_serialize(Scene_serialization_mode mode, json& nod
     else if (mode == SCENE_SERIAL_MODE_DESERIALIZE)
     {
         assign_uuid(node_ref["guid"], true);
+        m_model = Model_bank::get_model(node_ref["model_name"]);
+        m_layer = Render_layer(static_cast<uint8_t>(node_ref["render_layer"]));
 
-        // @TODO!
-        assert(false);
+        assert(node_ref["transform"].is_array());
+        for (size_t i = 0; i < 4; i++)
+            for (size_t j = 0; j < 4; j++)
+            {
+                m_transform[i][j] = node_ref["transform"][i][j];
+            }
+        
+        if (node_ref["tethered_phys_obj"].is_string())
+        {
+            m_tethered_phys_obj = UUID_helper::to_UUID(node_ref["tethered_phys_obj"]);
+        }
     }
 }
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../scene/scene_serialization_ifc.h"
 #include "../uuid/uuid_ifc.h"
 #include "cglm/cglm.h"
 #include "Jolt/Jolt.h"
@@ -63,9 +64,11 @@ public:
 class Physics_engine;
 class Model;
 
-class Physics_object : public UUID_ifc
+class Physics_object : public Scene_serialization_ifc, public UUID_ifc
 {
 public:
+    static unique_ptr<Physics_object> create_physics_object_from_serialization(
+        json& node_ref);
     static unique_ptr<Physics_object> create_triangle_mesh(Physics_engine& phys_engine,
                                                                      bool interpolate_transform,
                                                                      Model const* model,
@@ -93,6 +96,9 @@ public:
     void read_and_store_new_transform();
 
     void get_transform_for_rendering(rvec3& out_position, versor& out_rotation);
+
+    // Scene_serialization_ifc.
+    void scene_serialize(Scene_serialization_mode mode, json& node_ref) override;
 
 private:
     bool m_interpolate;
