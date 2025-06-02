@@ -191,6 +191,17 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - [ ] List all the gameobject names.
         - [ ] Click and drag gameobjects around.
 
+1. Refactor?
+    - Thoughts:
+        - The gameobject will have a transform so that the transform hierarchy is possible.
+        - Soooo, does that mean that there will be redundant transforms for both the render object and the gameobject? It kinda seems that way. Most gameobjects will have associated render objects. They'll have transforms anyway for the transform hierarchy.
+        - But physics objects will control the gameobject transform. Going the other way will pop errors ~~unless the physics object is a kinematic tri-mesh~~ (we're gonna not implement that for now. If a gameobject w/ a physics object is told to move, it will print an error (during gameplay)).
+            - Maybe in the future the need for physics objects acting on other physics objects will be wanted. Once that comes, this feature will be implemented. It's just kinda unsure how the physics part of it all will work. Perhaps if a gameobject w/ physics object link is found, then the constraints in the physics engine will be the driving factor and the gameobject transform hierarchy is simply ignored? That could maybe work idk.
+        - But yeah, it really seems like especially since representing skeleton mesh bones with gameobjects is gonna be the plan, having gameobjects transforms be the "representation", have physics objects drive the gameobject transform, and render objects read the gameobject transform, that's the way that it should be done.
+        - [ ] Think about these thoughts ^^
+            - How will the skeleton mesh transform propagation work?
+            - Will there be a dirty flag for local transforms that are changed and then after all changes are made the global transforms are recalculated based off the dirty flags???? I think having a two step approach probably is the way to go, that way the batch change can happen in just one fell swoop.
+            
 
 1. Debug views.
     - [ ] Collision represented as green wireframe triangles.
