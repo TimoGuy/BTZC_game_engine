@@ -5,6 +5,14 @@ project(btzc_game_engine
     VERSION 0.1.0
     LANGUAGES CXX C)
 
+# App icon.
+if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    enable_language("RC")
+    set(WIN64_RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/win64/app_icon.rc)
+else()
+    message(FATAL_ERROR "Asset folder location must be defined in `ASSET_DIR`")
+endif()
+
 # C/C++ standard.
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED True)
@@ -137,7 +145,10 @@ add_executable(${PROJECT_NAME}
     
     # Tinyobjloader source files.
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/tinyobjloader/tiny_obj_loader.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/tinyobjloader/tiny_obj_loader.h)
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/tinyobjloader/tiny_obj_loader.h
+
+    # Native extras.
+    ${WIN64_RESOURCES})
 
 target_include_directories(${PROJECT_NAME}
     PRIVATE
