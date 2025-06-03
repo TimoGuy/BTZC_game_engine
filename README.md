@@ -180,11 +180,11 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
                 - @NOTE: When defining the different script classes that extend `Script_ifc`, it must be a unique name or else (at least clang-cl) doesn't convolute the function names correctly, and they end up being the same class during execution.
 
 1. IN PROGRESS: Level saving/loading (cont.)
-    - [ ] Save and load with JSON:
+    - [x] Save and load with JSON:
         - [x] Render object.
-        - [ ] Physics object.
-    - [ ] JSON to Game object generator.
-    - [ ] Load level inside a level as a prefab.
+        - [x] Physics object.
+    - [x] JSON to Game object generator.
+    - [ ] ~~Load level inside a level as a prefab.~~
     - [ ] Level hierarchy and sorting.
         - [ ] Automatically update world transforms of children gameobjects.
         - [x] Stub out the UI window.
@@ -192,7 +192,14 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - [ ] Click and drag gameobjects around.
 
 1. Refactor?
-    - Thoughts:
+    - Thoughts on phys obj creation system:
+        - Forcing that assymetrical phys obj creation method (w/ `create_physics_object_from_serialization()`) really sucks.
+        - I think that you should be able to create a physics object that's empty, and then after that do `scene_serialize()` and create a default physics object in the type you're looking for, or something bc this really ain't it.
+        - Idk. Pre-packing defaults for the physics objects does seem like a bit of a hassle ngl. (i.e. thinking about writing static json premade thingies for every new type you got). Tho honestly that might just be a fine way of doing things ig. idk!
+            - Also, maybe creating the physics objects doesn't need to happen immediately anyway, bc the physics objects will just be created when the game is starting to be played anyway, not during level authoring time.
+        - Hmmm, also seems like there needs to be a `scene_serialize()` thing for the impl of the thingies.
+        - [ ] Think about these thoughts ^^
+    - Thoughts on transform hierarchy:
         - The gameobject will have a transform so that the transform hierarchy is possible.
         - Soooo, does that mean that there will be redundant transforms for both the render object and the gameobject? It kinda seems that way. Most gameobjects will have associated render objects. They'll have transforms anyway for the transform hierarchy.
         - But physics objects will control the gameobject transform. Going the other way will pop errors ~~unless the physics object is a kinematic tri-mesh~~ (we're gonna not implement that for now. If a gameobject w/ a physics object is told to move, it will print an error (during gameplay)).

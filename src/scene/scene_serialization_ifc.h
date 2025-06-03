@@ -16,6 +16,7 @@ enum Scene_serialization_mode
 class Scene_serialization_ifc
 {
 public:
+    virtual ~Scene_serialization_ifc() = default;
     virtual void scene_serialize(Scene_serialization_mode mode, json& node_ref) = 0;
 };
 

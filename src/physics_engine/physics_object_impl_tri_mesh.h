@@ -29,12 +29,15 @@ public:
     Phys_obj_impl_tri_mesh& operator=(Phys_obj_impl_tri_mesh&&)      = delete;
     ~Phys_obj_impl_tri_mesh();
 
-    Physics_object_type get_type() override { return PHYSICS_OBJECT_TYPE_KINEMATIC_TRIANGLE_MESH; }
+    Physics_object_type get_type() override { return PHYSICS_OBJECT_TYPE_TRIANGLE_MESH; }
     void move_kinematic(Physics_transform&& new_transform) override;
     Physics_transform read_transform() override;
 
+    // Scene_serialization_ifc.
+    void scene_serialize(Scene_serialization_mode mode, json& node_ref) override;
 private:
     JPH::BodyInterface& m_phys_body_ifc;
+    Model const* m_model;  // Save for serialization purposes.
     JPH::BodyID m_body_id;
     bool m_can_move;
 };

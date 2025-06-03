@@ -112,7 +112,8 @@ void BT::Game_object::scene_serialize(Scene_serialization_mode mode, json& node_
         if (node_ref["physics_obj"].is_object())
         {
             auto new_phys_obj{
-                Physics_object::create_physics_object_from_serialization(node_ref["physics_obj"]) };
+                Physics_object::create_physics_object_from_serialization(m_phys_engine,
+                                                                         node_ref["physics_obj"]) };
             m_phys_obj_key =
                 m_phys_engine.emplace_physics_object(std::move(new_phys_obj));
         }

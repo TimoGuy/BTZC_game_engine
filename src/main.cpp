@@ -117,13 +117,13 @@ int32_t main()
     // Render objects.
     auto& render_object_pool{ main_renderer.get_render_object_pool() };
 
-    BT::Render_object player_char_rend_obj{
-        BT::Model_bank::get_model("box_0.5_2"),
-        BT::Render_layer::RENDER_LAYER_DEFAULT,
-        GLM_MAT4_IDENTITY,
-        player_char_phys_obj_key };
-    player_char_rend_obj.generate_uuid();
-    auto player_char_rend_obj_key = render_object_pool.emplace(std::move(player_char_rend_obj));
+    // BT::Render_object player_char_rend_obj{
+    //     BT::Model_bank::get_model("box_0.5_2"),
+    //     BT::Render_layer::RENDER_LAYER_DEFAULT,
+    //     GLM_MAT4_IDENTITY,
+    //     player_char_phys_obj_key };
+    // player_char_rend_obj.generate_uuid();
+    // auto player_char_rend_obj_key = render_object_pool.emplace(std::move(player_char_rend_obj));
 
     BT::Render_object static_level_terrain_rend_obj{
         BT::Model_bank::get_model("probuilder_example"),
@@ -164,11 +164,7 @@ int32_t main()
     //         script_as_json));
     // }
 
-    unique_ptr<BT::Game_object> player_char_game_obj{
-        new BT::Game_object(main_input_handler,
-                            main_physics_engine,
-                            main_renderer) };
-    json game_obj_as_json =
+    json scene_as_json =
         R"([
             {
                 "children": [],
@@ -210,8 +206,15 @@ int32_t main()
                 }
             }
         ])"_json;
-    player_char_game_obj->scene_serialize(BT::SCENE_SERIAL_MODE_DESERIALIZE, game_obj_as_json[0]);
-    game_object_pool.emplace(std::move(player_char_game_obj));
+    for (auto& game_obj_node : scene_as_json)
+    {
+        unique_ptr<BT::Game_object> new_game_obj{
+            new BT::Game_object(main_input_handler,
+                                main_physics_engine,
+                                main_renderer) };
+        new_game_obj->scene_serialize(BT::SCENE_SERIAL_MODE_DESERIALIZE, game_obj_node);
+        game_object_pool.emplace(std::move(new_game_obj));
+    }
 
     {   // @TODO: @NOCHECKIN: @DEBUG
         // Serialize scene.
@@ -230,7 +233,7 @@ int32_t main()
     }
 
     // Camera follow ref.
-    main_renderer.get_camera_obj()->set_follow_object(player_char_rend_obj_key);
+    // main_renderer.get_camera_obj()->set_follow_object(player_char_rend_obj_key);
 
     // Timer.
     BT::Timer main_timer;

@@ -22,6 +22,7 @@ BT::Phys_obj_impl_tri_mesh::Phys_obj_impl_tri_mesh(Physics_engine& phys_engine,
                                                    JPH::EMotionType motion_type,
                                                    Physics_transform&& init_transform)
     : m_phys_body_ifc{ *reinterpret_cast<JPH::BodyInterface*>(phys_engine.get_physics_body_ifc()) }
+    , m_model{ model }
     , m_can_move{ motion_type == JPH::EMotionType::Kinematic }
 {
     if (motion_type == JPH::EMotionType::Dynamic)
@@ -31,7 +32,7 @@ BT::Phys_obj_impl_tri_mesh::Phys_obj_impl_tri_mesh(Physics_engine& phys_engine,
         return;
     }
 
-    auto verts_indices{ model->get_all_vertices_and_indices() };
+    auto verts_indices{ m_model->get_all_vertices_and_indices() };
 
     // @NOTE: I think there might be some extra stuff Jolt is doing in the behind
     //   that makes the triangle list better than using the inefficient-for-physics
@@ -106,4 +107,20 @@ BT::Physics_transform BT::Phys_obj_impl_tri_mesh::read_transform()
 {
     return { m_phys_body_ifc.GetCenterOfMassPosition(m_body_id),
              m_phys_body_ifc.GetRotation(m_body_id) };
+}
+
+// Scene_serialization_ifc.
+void BT::Phys_obj_impl_tri_mesh::scene_serialize(Scene_serialization_mode mode,
+                                                 json& node_ref)
+{
+    if (mode == SCENE_SERIAL_MODE_SERIALIZE)
+    {
+        node_ref["model_name"] = Model_bank::get_model_name(m_model);
+        node_ref["motion_type"] = m_phys_body_ifc.GetMotionType(m_body_id);
+    }
+    else if (mode == SCENE_SERIAL_MODE_DESERIALIZE)
+    {
+        // @TODO: Get rid of the assymetrical creation/serialization structure. (or not! Depends on how you feel during the upcoming code review)  -Thea 2025/06/03
+        assert(false);
+    }
 }

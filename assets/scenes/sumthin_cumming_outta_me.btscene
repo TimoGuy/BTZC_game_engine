@@ -3,6 +3,27 @@
         "children": [],
         "guid": "aae5ebfb-7c2b-49a8-bcb9-658fdea987af",
         "name": "My Gay object",
+        "physics_obj": {
+            "crouch_height": 1.0,
+            "guid": "08743552-fff6-49d2-ad15-efbd121ab773",
+            "height": 1.0,
+            "initial_transform": [
+                [
+                    0.0,
+                    5.099999904632568,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0
+                ]
+            ],
+            "interpolate_transform": true,
+            "radius": 0.5,
+            "type": "character_controller"
+        },
         "render_obj": {
             "guid": "fa2a0c0c-cfd4-47a7-b4e7-01dbbd3b3537",
             "model_name": "box_0.5_2",

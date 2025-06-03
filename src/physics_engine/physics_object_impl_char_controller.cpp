@@ -186,6 +186,23 @@ BT::Physics_transform BT::Phys_obj_impl_char_controller::read_transform()
     return { m_character->GetPosition(), m_character->GetRotation() };
 }
 
+// Scene_serialization_ifc.
+void BT::Phys_obj_impl_char_controller::scene_serialize(Scene_serialization_mode mode,
+                                                        json& node_ref)
+{
+    if (mode == SCENE_SERIAL_MODE_SERIALIZE)
+    {
+        node_ref["radius"] = m_radius;
+        node_ref["height"] = m_height;
+        node_ref["crouch_height"] = m_crouch_height;
+    }
+    else if (mode == SCENE_SERIAL_MODE_DESERIALIZE)
+    {
+        // @TODO: Get rid of the assymetrical creation/serialization structure. (or not! Depends on how you feel during the upcoming code review)  -Thea 2025/06/03
+        assert(false);
+    }
+}
+
 // Character contact listener.
 void BT::Phys_obj_impl_char_controller::OnAdjustBodyVelocity(JPH::CharacterVirtual const* inCharacter,
                                                              JPH::Body const& in_body2,

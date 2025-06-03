@@ -13,11 +13,13 @@
 #include <cassert>
 #include <memory>
 #include <utility>
+#include <vector>
 
 using JPH::Real;
 using std::atomic_size_t;
-using std::unique_ptr;
 using std::pair;
+using std::unique_ptr;
+using std::vector;
 
 
 namespace BT
@@ -27,9 +29,14 @@ using rvec3 = JPH::Real[3];
 
 enum Physics_object_type
 {
-    PHYSICS_OBJECT_TYPE_KINEMATIC_TRIANGLE_MESH = 0,
+    PHYSICS_OBJECT_TYPE_TRIANGLE_MESH = 0,
     PHYSICS_OBJECT_TYPE_CHARACTER_CONTROLLER,
     NUM_PHYSICS_OBJECT_TYPES
+};
+
+inline static const vector<pair<string, BT::Physics_object_type>> k_phys_obj_str_type_pairs{
+    { "triangle_mesh", PHYSICS_OBJECT_TYPE_TRIANGLE_MESH },
+    { "character_controller", PHYSICS_OBJECT_TYPE_CHARACTER_CONTROLLER },
 };
 
 struct Physics_transform
@@ -38,7 +45,7 @@ struct Physics_transform
     JPH::Quat rotation = JPH::Quat::sIdentity();
 };
 
-class Physics_object_type_impl_ifc
+class Physics_object_type_impl_ifc : public Scene_serialization_ifc
 {
 public:
     virtual ~Physics_object_type_impl_ifc() = default;
@@ -68,6 +75,7 @@ class Physics_object : public Scene_serialization_ifc, public UUID_ifc
 {
 public:
     static unique_ptr<Physics_object> create_physics_object_from_serialization(
+        Physics_engine& phys_engine,
         json& node_ref);
     static unique_ptr<Physics_object> create_triangle_mesh(Physics_engine& phys_engine,
                                                                      bool interpolate_transform,

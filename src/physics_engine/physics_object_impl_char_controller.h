@@ -44,6 +44,9 @@ public:
     void on_pre_update(float_t physics_delta_time) override;
     Physics_transform read_transform() override;
 
+    // Scene_serialization_ifc.
+    void scene_serialize(Scene_serialization_mode mode, json& node_ref) override;
+
     // Character contact listener.
     void OnAdjustBodyVelocity(JPH::CharacterVirtual const* inCharacter,
                               JPH::Body const& in_body2,
