@@ -4,6 +4,7 @@
 #include "../physics_engine/physics_engine.h"
 #include "../renderer/renderer.h"
 #include "imgui.h"
+#include "imgui_internal.h"
 #include "logger.h"
 #include "misc/cpp/imgui_stdlib.h"
 #include "scripts/scripts.h"
@@ -37,6 +38,11 @@ void BT::Game_object::run_pre_render_scripts(float_t delta_time)
     {
         script->on_pre_render(delta_time);
     }
+}
+
+void BT::Game_object::set_name(string&& name)
+{
+    m_name = std::move(name);
 }
 
 string BT::Game_object::get_name()
@@ -259,10 +265,37 @@ void BT::Game_object_pool::render_imgui_scene_hierarchy()
 
     // Draw out scene hierarchy.
     auto next_id{ reinterpret_cast<intptr_t>(this) };
+    ImGui::Begin("Scene hierarchy");
+
+    // if (ImGui::IsItemClicked())  // Reset selected obj when clicking.
+    if (ImGui::IsMouseClicked(0) && ImGui::IsWindowHovered())  // Reset selected obj when clicking.
+        m_selected_game_obj = UUID();
+
     for (auto root_node : root_nodes_scene_hierarchy)
     {
         render_imgui_scene_hierarchy_node_recursive(root_node, next_id);
     }
+    ImGui::End();
+
+    // Draw out inspector (if >0 objs are selected).
+    ImGui::Begin("Properties inspector");
+    if (!m_selected_game_obj.is_nil())
+    {
+        auto game_obj{ m_game_objects.at(m_selected_game_obj).get() };
+
+        auto name{ game_obj->get_name() };
+        if (ImGui::InputText("Name", &name))
+            game_obj->set_name(std::move(name));
+
+        ImGui::Text("UUID: %s", UUID_helper::to_pretty_repr(game_obj->get_uuid()).c_str());
+
+        // @TODO: Add more like transform and stuff.
+    }
+    else
+    {
+        ImGui::Text("Select a game object to inspect its properties.");
+    }
+    ImGui::End();
 
     // @NOTE: Called from `renderer.render()` so game objs already checked out.
     // unblock();
@@ -290,7 +323,7 @@ void BT::Game_object_pool::render_imgui_scene_hierarchy_node_recursive(void* nod
                         node_flags,
                         "%s",
                         node->game_obj->get_name().c_str());
-    if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
+    if (ImGui::IsItemClicked())
         m_selected_game_obj = cur_uuid;
     if (ImGui::BeginDragDropSource())
     {

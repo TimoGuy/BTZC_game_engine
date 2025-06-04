@@ -413,7 +413,6 @@ void BT::Renderer::Impl::render_imgui()
     static bool s_show_game_view{ true };
     static bool s_show_scene_hierarchy{ true };
     static bool s_show_camera_props{ true };
-    static bool s_show_props_inspector{ true };
     static bool s_show_console{ true };
     static bool s_show_gameobj_palette{ true };
     static bool show_demo_window = true;
@@ -521,27 +520,13 @@ void BT::Renderer::Impl::render_imgui()
     // Scene hierarchy.
     if (s_show_scene_hierarchy)
     {
-        ImGui::Begin("Scene hierarchy");
-        {
-            m_renderer.m_game_obj_pool->render_imgui_scene_hierarchy();
-        }
-        ImGui::End();
+        m_renderer.m_game_obj_pool->render_imgui_scene_hierarchy();
     }
 
     // Camera properties.
     if (s_show_camera_props)
     {
         m_camera.render_imgui();
-    }
-
-    // Properties inspector.
-    if (s_show_props_inspector)
-    {
-        ImGui::Begin("Properties inspector");
-        {
-            ImGui::Text("@TODO: Implement");
-        }
-        ImGui::End();
     }
 
     // Console.

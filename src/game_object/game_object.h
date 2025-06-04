@@ -37,6 +37,7 @@ public:
     void run_pre_physics_scripts(float_t physics_delta_time);
     void run_pre_render_scripts(float_t delta_time);
 
+    void set_name(string&& name);
     string get_name();
     vector<UUID> get_children_uuids();
 
