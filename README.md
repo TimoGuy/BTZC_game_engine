@@ -190,8 +190,14 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - [x] Stub out the UI window.
         - [x] List all the gameobject names.
         - [ ] Click and drag gameobjects around.
+            - Be able to add child to game objects.
+        - [ ] Show inspector when a game object is selected.
 
 1. Refactor?
+    - Thoughts on clunkiness of ImGui render:
+        - I don't think that the renderer should be in charge of ImGui stuff. It kinda doesn't make sense. The renderer should just be in charge of rendering render objects, and ImGui is a system that touches everything, so it shouldn't be part of the renderer at all. Just a `render_imgui()` function callout and that's it.
+        - It doesn't need to be a callout but idk, it's weird how this just kinda happens and it shouldn't.
+        - Maybe create a class that does touch everything, and the renderer just holds a reference to it and calls `render_imgui()` from there. That way it's like a callout but the renderer doesn't have to have its hands in every single system it wants to touch.
     - Thoughts on phys obj creation system:
         - Forcing that assymetrical phys obj creation method (w/ `create_physics_object_from_serialization()`) really sucks.
         - I think that you should be able to create a physics object that's empty, and then after that do `scene_serialize()` and create a default physics object in the type you're looking for, or something bc this really ain't it.
