@@ -188,7 +188,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
     - [ ] Level hierarchy and sorting.
         - [ ] Automatically update world transforms of children gameobjects.
         - [x] Stub out the UI window.
-        - [ ] List all the gameobject names.
+        - [x] List all the gameobject names.
         - [ ] Click and drag gameobjects around.
 
 1. Refactor?

@@ -135,6 +135,8 @@ int32_t main()
     // Game objects.
     BT::Game_object_pool game_object_pool;
 
+    main_renderer.imgui_set_game_obj_pool_ref(&game_object_pool);  // @NOCHECKIN: Idk if this is the best...
+
     // vector<unique_ptr<BT::Scripts::Script_ifc>> scripts;
 
     // json scripts_as_json =

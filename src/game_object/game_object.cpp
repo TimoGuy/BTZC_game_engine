@@ -3,7 +3,9 @@
 #include "../input_handler/input_handler.h"
 #include "../physics_engine/physics_engine.h"
 #include "../renderer/renderer.h"
+#include "imgui.h"
 #include "logger.h"
+#include "misc/cpp/imgui_stdlib.h"
 #include "scripts/scripts.h"
 #include <atomic>
 #include <cassert>
@@ -35,6 +37,16 @@ void BT::Game_object::run_pre_render_scripts(float_t delta_time)
     {
         script->on_pre_render(delta_time);
     }
+}
+
+string BT::Game_object::get_name()
+{
+    return m_name;
+}
+
+vector<BT::UUID> BT::Game_object::get_children_uuids()
+{
+    return m_children;
 }
 
 // Scene_serialization_ifc.
@@ -199,6 +211,98 @@ void BT::Game_object_pool::return_list(vector<Game_object*> const&& all_as_list)
     // @COPYPASTA.
     (void)all_as_list;
     unblock();
+}
+
+// Debug ImGui.
+namespace
+{
+
+struct Hierarchy_node
+{
+    bool is_root{ true };
+    BT::Game_object* game_obj{ nullptr };
+    vector<Hierarchy_node*> children;
+};
+
+}  // namespace
+
+void BT::Game_object_pool::render_imgui_scene_hierarchy()
+{
+    // @NOTE: Called from `renderer.render()` so game objs already checked out.
+    // wait_until_free_then_block();
+    
+    // Gather structured hierarchy.
+    vector<Hierarchy_node> flat_scene_hierarchy;
+    vector<Hierarchy_node*> root_nodes_scene_hierarchy;
+
+    for (auto& game_obj : m_game_objects)
+        flat_scene_hierarchy.emplace_back(true,
+                                     game_obj.second.get());
+
+    for (auto& scene_node : flat_scene_hierarchy)
+        root_nodes_scene_hierarchy.emplace_back(&scene_node);
+    
+    for (auto& scene_node : flat_scene_hierarchy)
+        for(auto child_uuid : scene_node.game_obj->get_children_uuids())
+            for (size_t i = 0; i < root_nodes_scene_hierarchy.size(); i++)
+            {
+                auto root_node{ root_nodes_scene_hierarchy[i] };
+                if (child_uuid == root_node->game_obj->get_uuid())
+                {
+                    // Turns out wasn't a root node.
+                    root_node->is_root = false;
+                    scene_node.children.emplace_back(root_node);
+                    root_nodes_scene_hierarchy.erase(root_nodes_scene_hierarchy.begin() + i);
+                    break;
+                }
+            }
+
+    // Draw out scene hierarchy.
+    auto next_id{ reinterpret_cast<intptr_t>(this) };
+    for (auto root_node : root_nodes_scene_hierarchy)
+    {
+        render_imgui_scene_hierarchy_node_recursive(root_node, next_id);
+    }
+
+    // @NOTE: Called from `renderer.render()` so game objs already checked out.
+    // unblock();
+}
+
+void BT::Game_object_pool::render_imgui_scene_hierarchy_node_recursive(void* node_void_ptr, intptr_t& next_id)
+{
+    auto node{ reinterpret_cast<Hierarchy_node*>(node_void_ptr) };  // I like the stink.  -Thea 2025/06/03
+
+    constexpr ImGuiTreeNodeFlags k_base_flags{ ImGuiTreeNodeFlags_SpanAvailWidth |
+                                               ImGuiTreeNodeFlags_DrawLinesToNodes };
+    ImGuiTreeNodeFlags node_flags{ k_base_flags };
+
+    auto cur_uuid{ node->game_obj->get_uuid() };
+    if (cur_uuid == m_selected_game_obj)
+        node_flags |= ImGuiTreeNodeFlags_Selected;
+
+    auto const& child_nodes{ node->children };
+    if (child_nodes.empty())
+        node_flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+
+    // Draw my node.
+    ImGui::TreeNodeEx(reinterpret_cast<void*>(next_id++),
+                        node_flags,
+                        "%s",
+                        node->game_obj->get_name().c_str());
+    if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
+        m_selected_game_obj = cur_uuid;
+    if (ImGui::BeginDragDropSource())
+    {
+        ImGui::SetDragDropPayload("_TREENODE", NULL, 0);
+        ImGui::Text("This is a drag and drop source");
+        ImGui::EndDragDropSource();
+    }
+
+    // Draw children nodes.
+    for (auto child_node : child_nodes)
+    {
+        render_imgui_scene_hierarchy_node_recursive(child_node, next_id);
+    }
 }
 
 // Synchronization.

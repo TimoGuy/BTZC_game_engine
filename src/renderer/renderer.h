@@ -13,6 +13,7 @@ namespace BT
 {
 
 class Camera;
+class Game_object_pool;
 
 class Renderer : public Camera_read_ifc
 {
@@ -46,9 +47,13 @@ public:
 
     // Create image texture.
 
+    // ImGui.
+    void imgui_set_game_obj_pool_ref(Game_object_pool* pool) { m_game_obj_pool = pool; }
+
     class Impl;
 
 private:
+    Game_object_pool* m_game_obj_pool{ nullptr };
     std::unique_ptr<Impl> m_pimpl;
 };
 

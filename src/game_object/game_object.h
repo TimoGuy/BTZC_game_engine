@@ -37,6 +37,9 @@ public:
     void run_pre_physics_scripts(float_t physics_delta_time);
     void run_pre_render_scripts(float_t delta_time);
 
+    string get_name();
+    vector<UUID> get_children_uuids();
+
     // Scene_serialization_ifc.
     void scene_serialize(Scene_serialization_mode mode, json& node_ref) override;
 
@@ -65,6 +68,9 @@ public:
     Game_object* checkout_one(UUID key);
     void return_list(vector<Game_object*> const&& all_as_list);
 
+    // Debug ImGui.
+    void render_imgui_scene_hierarchy();
+
 private:
     unordered_map<UUID, unique_ptr<Game_object>> m_game_objects;
 
@@ -73,6 +79,10 @@ private:
 
     void wait_until_free_then_block();
     void unblock();
+
+    // Debug ImGui data.
+    UUID m_selected_game_obj;
+    void render_imgui_scene_hierarchy_node_recursive(void* node_void_ptr, intptr_t& next_id);
 };
 
 }  // namespace BT

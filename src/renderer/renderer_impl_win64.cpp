@@ -15,6 +15,7 @@
 
 #include "../btzc_game_engine.h"
 #include "../input_handler/input_handler.h"
+#include "../game_object/game_object.h"
 #include "logger.h"
 #include "material.h"
 #include "render_object.h"
@@ -522,7 +523,7 @@ void BT::Renderer::Impl::render_imgui()
     {
         ImGui::Begin("Scene hierarchy");
         {
-            ImGui::Text("@TODO: Implement");
+            m_renderer.m_game_obj_pool->render_imgui_scene_hierarchy();
         }
         ImGui::End();
     }
