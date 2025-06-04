@@ -273,7 +273,8 @@ void BT::Game_object_pool::render_imgui_scene_hierarchy_node_recursive(void* nod
     auto node{ reinterpret_cast<Hierarchy_node*>(node_void_ptr) };  // I like the stink.  -Thea 2025/06/03
 
     constexpr ImGuiTreeNodeFlags k_base_flags{ ImGuiTreeNodeFlags_SpanAvailWidth |
-                                               ImGuiTreeNodeFlags_DrawLinesToNodes };
+                                               ImGuiTreeNodeFlags_DrawLinesToNodes |
+                                               ImGuiTreeNodeFlags_DefaultOpen };
     ImGuiTreeNodeFlags node_flags{ k_base_flags };
 
     auto cur_uuid{ node->game_obj->get_uuid() };
