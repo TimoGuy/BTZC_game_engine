@@ -4,7 +4,6 @@
 #include "../physics_engine/physics_engine.h"
 #include "../renderer/renderer.h"
 #include "imgui.h"
-#include "imgui_internal.h"
 #include "logger.h"
 #include "misc/cpp/imgui_stdlib.h"
 #include "scripts/scripts.h"
@@ -150,17 +149,16 @@ void BT::Game_object::scene_serialize(Scene_serialization_mode mode, json& node_
 }
 
 
+BT::Game_object_pool::Game_object_pool(
+    function<unique_ptr<Game_object>()>&& create_new_empty_game_obj_callback_fn)
+    : m_create_new_empty_game_obj_callback_fn{ std::move(create_new_empty_game_obj_callback_fn) }
+{
+}
+
 BT::UUID BT::Game_object_pool::emplace(unique_ptr<Game_object>&& game_object)
 {
-    UUID uuid{ game_object->get_uuid() };
-    if (uuid.is_nil())
-    {
-        logger::printe(logger::ERROR, "Invalid UUID passed in.");
-        assert(false);
-    }
-
     wait_until_free_then_block();
-    m_game_objects.emplace(uuid, std::move(game_object));
+    UUID uuid{ emplace_no_lock(std::move(game_object)) };
     unblock();
 
     return uuid;
@@ -267,9 +265,17 @@ void BT::Game_object_pool::render_imgui_scene_hierarchy()
     auto next_id{ reinterpret_cast<intptr_t>(this) };
     ImGui::Begin("Scene hierarchy");
 
-    // if (ImGui::IsItemClicked())  // Reset selected obj when clicking.
-    if (ImGui::IsMouseClicked(0) && ImGui::IsWindowHovered())  // Reset selected obj when clicking.
+    // Reset selected obj when clicking.
+    if (ImGui::IsMouseClicked(0) && ImGui::IsWindowHovered())
         m_selected_game_obj = UUID();
+
+    if (ImGui::Button("Create new empty##create_new_game_obj"))
+    {
+        // Create new empty game obj.
+        emplace_no_lock(m_create_new_empty_game_obj_callback_fn());
+    }
+
+    ImGui::Separator();
 
     for (auto root_node : root_nodes_scene_hierarchy)
     {
@@ -299,6 +305,20 @@ void BT::Game_object_pool::render_imgui_scene_hierarchy()
 
     // @NOTE: Called from `renderer.render()` so game objs already checked out.
     // unblock();
+}
+
+BT::UUID BT::Game_object_pool::emplace_no_lock(unique_ptr<Game_object>&& game_object)
+{
+    UUID uuid{ game_object->get_uuid() };
+    if (uuid.is_nil())
+    {
+        logger::printe(logger::ERROR, "Invalid UUID passed in.");
+        assert(false);
+    }
+
+    m_game_objects.emplace(uuid, std::move(game_object));
+
+    return uuid;
 }
 
 void BT::Game_object_pool::render_imgui_scene_hierarchy_node_recursive(void* node_void_ptr, intptr_t& next_id)

@@ -191,12 +191,15 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - [x] Deselect game object when click within scene hierarchy window.
         - [x] Show inspector when a game object is selected.
             - Don't show much, just basic stuff like guid.
-        - [ ] Create new game objects.
+        - [x] Create new game objects.
         - [ ] Click and drag gameobjects around.
             - Be able to add child to game objects.
         - [ ] Automatically update world transforms of children gameobjects.
 
 1. Refactor?
+    - Thoughts:
+        - I need somewhere to create a new empty gameobject!!!
+        - [ ] Create a callback function.
     - Thoughts on clunkiness of ImGui render:
         - I don't think that the renderer should be in charge of ImGui stuff. It kinda doesn't make sense. The renderer should just be in charge of rendering render objects, and ImGui is a system that touches everything, so it shouldn't be part of the renderer at all. Just a `render_imgui()` function callout and that's it.
         - It doesn't need to be a callout but idk, it's weird how this just kinda happens and it shouldn't.

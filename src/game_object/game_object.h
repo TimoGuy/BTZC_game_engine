@@ -9,6 +9,7 @@
 #include "../uuid/uuid_ifc.h"
 #include "scripts/scripts.h"
 #include <atomic>
+#include <functional>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -17,6 +18,7 @@
 
 using std::atomic_bool;
 using std::atomic_uint64_t;
+using std::function;
 using std::pair;
 using std::string;
 using std::unique_ptr;
@@ -62,6 +64,8 @@ private:
 class Game_object_pool
 {
 public:
+    Game_object_pool(function<unique_ptr<Game_object>()>&& create_new_empty_game_obj_callback_fn);
+
     UUID emplace(unique_ptr<Game_object>&& game_object);
     void remove(UUID key);
 
@@ -73,6 +77,8 @@ public:
     void render_imgui_scene_hierarchy();
 
 private:
+    UUID emplace_no_lock(unique_ptr<Game_object>&& game_object);
+
     unordered_map<UUID, unique_ptr<Game_object>> m_game_objects;
 
     // Synchronization.
@@ -82,6 +88,7 @@ private:
     void unblock();
 
     // Debug ImGui data.
+    function<unique_ptr<Game_object>()> m_create_new_empty_game_obj_callback_fn;
     UUID m_selected_game_obj;
     void render_imgui_scene_hierarchy_node_recursive(void* node_void_ptr, intptr_t& next_id);
 };

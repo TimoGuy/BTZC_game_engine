@@ -133,7 +133,15 @@ int32_t main()
     render_object_pool.emplace(std::move(static_level_terrain_rend_obj));
 
     // Game objects.
-    BT::Game_object_pool game_object_pool;
+    BT::Game_object_pool game_object_pool([&]() {
+        auto new_game_obj = unique_ptr<BT::Game_object>{
+            new BT::Game_object(main_input_handler,
+                                main_physics_engine,
+                                main_renderer) };
+        new_game_obj->set_name("New Game Object");
+        new_game_obj->generate_uuid();
+        return new_game_obj;
+    });
 
     main_renderer.imgui_set_game_obj_pool_ref(&game_object_pool);  // @NOCHECKIN: Idk if this is the best...
 
