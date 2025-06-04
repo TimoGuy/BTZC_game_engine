@@ -186,13 +186,15 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
     - [x] JSON to Game object generator.
     - [ ] ~~Load level inside a level as a prefab.~~
     - [ ] Level hierarchy and sorting.
-        - [ ] Automatically update world transforms of children gameobjects.
         - [x] Stub out the UI window.
         - [x] List all the gameobject names.
         - [x] Deselect game object when click within scene hierarchy window.
+        - [x] Show inspector when a game object is selected.
+            - Don't show much, just basic stuff like guid.
+        - [ ] Create new game objects.
         - [ ] Click and drag gameobjects around.
             - Be able to add child to game objects.
-        - [ ] Show inspector when a game object is selected.
+        - [ ] Automatically update world transforms of children gameobjects.
 
 1. Refactor?
     - Thoughts on clunkiness of ImGui render:
