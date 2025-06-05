@@ -4,6 +4,7 @@
 #include "../physics_engine/physics_engine.h"
 #include "../renderer/renderer.h"
 #include "imgui.h"
+#include "imgui_internal.h"
 #include "logger.h"
 #include "misc/cpp/imgui_stdlib.h"
 #include "scripts/scripts.h"
@@ -277,10 +278,13 @@ void BT::Game_object_pool::render_imgui_scene_hierarchy()
 
     ImGui::Separator();
 
+    ImGui::PushStyleVarY(ImGuiStyleVar_ItemSpacing, 0.0f);
     for (auto root_node : root_nodes_scene_hierarchy)
     {
         render_imgui_scene_hierarchy_node_recursive(root_node, next_id);
     }
+    ImGui::PopStyleVar();
+
     ImGui::End();
 
     // Draw out inspector (if >0 objs are selected).
@@ -339,7 +343,7 @@ void BT::Game_object_pool::render_imgui_scene_hierarchy_node_recursive(void* nod
         node_flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
 
     // Draw my node.
-    ImGui::TreeNodeEx(reinterpret_cast<void*>(next_id++),
+    ImGui::TreeNodeEx(reinterpret_cast<void*>(next_id),
                         node_flags,
                         "%s",
                         node->game_obj->get_name().c_str());
@@ -347,10 +351,40 @@ void BT::Game_object_pool::render_imgui_scene_hierarchy_node_recursive(void* nod
         m_selected_game_obj = cur_uuid;
     if (ImGui::BeginDragDropSource())
     {
-        ImGui::SetDragDropPayload("_TREENODE", NULL, 0);
+        ImGui::SetDragDropPayload("_GAMEOBJ_TREENODE", &m_selected_game_obj, sizeof(m_selected_game_obj));
         ImGui::Text("This is a drag and drop source");
         ImGui::EndDragDropSource();
     }
+    if (ImGui::BeginDragDropTarget())
+    {
+        ImGuiDragDropFlags drop_target_flags = 0;
+        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_GAMEOBJ_TREENODE", drop_target_flags))
+        {
+            assert(false);
+        }
+        ImGui::EndDragDropTarget();
+    }
+
+    // Draw between node.
+    ImGui::PushStyleColor(ImGuiCol_Button, 0x00000000);
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, 0x00000000);
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, 0x00000000);
+    ImGui::ButtonEx(("##between_node_button__" + std::to_string(next_id)).c_str(),
+                    ImVec2(ImGui::GetContentRegionAvail().x, 6),
+                    ImGuiButtonFlags_NoNavFocus);
+    ImGui::PopStyleColor(3);
+    if (ImGui::BeginDragDropTarget())
+    {
+        ImGuiDragDropFlags drop_target_flags = 0;
+        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_GAMEOBJ_TREENODE", drop_target_flags))
+        {
+            assert(false);
+        }
+        ImGui::EndDragDropTarget();
+    }
+
+    // Increment id.
+    next_id++;
 
     // Draw children nodes.
     for (auto child_node : child_nodes)
