@@ -42,6 +42,7 @@ public:
     void set_name(string&& name);
     string get_name();
     vector<UUID> get_children_uuids();
+    void insert_child_uuid(UUID new_child, size_t position = 0);
 
     // Scene_serialization_ifc.
     void scene_serialize(Scene_serialization_mode mode, json& node_ref) override;
@@ -56,6 +57,7 @@ private:
     UUID m_rend_obj_key;
     vector<unique_ptr<Scripts::Script_ifc>> m_scripts;
 
+    static_assert(false, "@TODO: @HERE: Add `UUID m_parent` here!!!!!");
     vector<UUID> m_children;
 };
 
@@ -88,9 +90,24 @@ private:
     void unblock();
 
     // Debug ImGui data.
+    struct Modify_scene_hierarchy_action
+    {
+        bool commit{ false };
+        enum Action_type
+        {
+            INSERT_AS_CHILD,
+            INSERT_BEFORE,
+            INSERT_AFTER,
+        } type;
+        UUID anchor_subject;
+        UUID modifying_object;
+    };
+
     function<unique_ptr<Game_object>()> m_create_new_empty_game_obj_callback_fn;
     UUID m_selected_game_obj;
-    void render_imgui_scene_hierarchy_node_recursive(void* node_void_ptr, intptr_t& next_id);
+    void render_imgui_scene_hierarchy_node_recursive(void* node_void_ptr,
+                                                     Modify_scene_hierarchy_action& modify_action,
+                                                     intptr_t& next_id);
 };
 
 }  // namespace BT

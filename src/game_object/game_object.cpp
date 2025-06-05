@@ -13,6 +13,7 @@
 
 using std::atomic_uint8_t;
 using std::atomic_uint64_t;
+using std::max;
 
 
 BT::Game_object::Game_object(Input_handler& input_handler,
@@ -53,6 +54,12 @@ string BT::Game_object::get_name()
 vector<BT::UUID> BT::Game_object::get_children_uuids()
 {
     return m_children;
+}
+
+void BT::Game_object::insert_child_uuid(UUID new_child, size_t position /*= 0*/)
+{
+    static_assert(false, "@TODO: @HERE: Set the `new_child`'s parent uuid to me here!");
+    m_children.insert(m_children.begin() + position, new_child);
 }
 
 // Scene_serialization_ifc.
@@ -279,10 +286,34 @@ void BT::Game_object_pool::render_imgui_scene_hierarchy()
     ImGui::Separator();
 
     ImGui::PushStyleVarY(ImGuiStyleVar_ItemSpacing, 0.0f);
+
+    Modify_scene_hierarchy_action modify_action;
+
+    // Draw scene nodes.
     for (auto root_node : root_nodes_scene_hierarchy)
     {
-        render_imgui_scene_hierarchy_node_recursive(root_node, next_id);
+        render_imgui_scene_hierarchy_node_recursive(root_node, modify_action, next_id);
     }
+
+    // Draw final after node.
+    ImGui::PushStyleColor(ImGuiCol_Button, 0x00000000);
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, 0x00000000);
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, 0x00000000);
+    ImGui::ButtonEx(("##between_node_button__" + std::to_string(next_id)).c_str(),
+                    ImVec2(ImGui::GetContentRegionAvail().x,
+                           max(6.0f, ImGui::GetContentRegionAvail().y)),
+                    ImGuiButtonFlags_NoNavFocus);
+    ImGui::PopStyleColor(3);
+    if (ImGui::BeginDragDropTarget())
+    {
+        ImGuiDragDropFlags drop_target_flags = 0;
+        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_GAMEOBJ_TREENODE", drop_target_flags))
+        {
+            assert(false);
+        }
+        ImGui::EndDragDropTarget();
+    }
+
     ImGui::PopStyleVar();
 
     ImGui::End();
@@ -307,6 +338,33 @@ void BT::Game_object_pool::render_imgui_scene_hierarchy()
     }
     ImGui::End();
 
+    // Commit modify action if made.
+    if (modify_action.commit)
+    {
+        switch (modify_action.type)
+        {
+            case Modify_scene_hierarchy_action::INSERT_AS_CHILD:
+                // @TODO: Goto parent of `modifying_object` and sever parent-child relationship.
+                m_game_objects.at(modify_action.anchor_subject)
+                    ->insert_child_uuid(modify_action.modifying_object);
+                break;
+
+            case Modify_scene_hierarchy_action::INSERT_BEFORE:
+                // @TODO: Implement.
+                assert(false);
+                break;
+
+            case Modify_scene_hierarchy_action::INSERT_AFTER:
+                // @TODO: Implement.
+                assert(false);
+                break;
+
+            default:
+                assert(false);
+                break;
+        }
+    }
+
     // @NOTE: Called from `renderer.render()` so game objs already checked out.
     // unblock();
 }
@@ -325,7 +383,9 @@ BT::UUID BT::Game_object_pool::emplace_no_lock(unique_ptr<Game_object>&& game_ob
     return uuid;
 }
 
-void BT::Game_object_pool::render_imgui_scene_hierarchy_node_recursive(void* node_void_ptr, intptr_t& next_id)
+void BT::Game_object_pool::render_imgui_scene_hierarchy_node_recursive(void* node_void_ptr,
+                                                                       Modify_scene_hierarchy_action& modify_action,
+                                                                       intptr_t& next_id)
 {
     auto node{ reinterpret_cast<Hierarchy_node*>(node_void_ptr) };  // I like the stink.  -Thea 2025/06/03
 
@@ -341,6 +401,24 @@ void BT::Game_object_pool::render_imgui_scene_hierarchy_node_recursive(void* nod
     auto const& child_nodes{ node->children };
     if (child_nodes.empty())
         node_flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+
+    // Draw between/before node.
+    ImGui::PushStyleColor(ImGuiCol_Button, 0x00000000);
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, 0x00000000);
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, 0x00000000);
+    ImGui::ButtonEx(("##between_node_button__" + std::to_string(next_id)).c_str(),
+                    ImVec2(ImGui::GetContentRegionAvail().x, 6),
+                    ImGuiButtonFlags_NoNavFocus);
+    ImGui::PopStyleColor(3);
+    if (ImGui::BeginDragDropTarget())
+    {
+        ImGuiDragDropFlags drop_target_flags = 0;
+        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_GAMEOBJ_TREENODE", drop_target_flags))
+        {
+            assert(false);
+        }
+        ImGui::EndDragDropTarget();
+    }
 
     // Draw my node.
     ImGui::TreeNodeEx(reinterpret_cast<void*>(next_id),
@@ -360,25 +438,10 @@ void BT::Game_object_pool::render_imgui_scene_hierarchy_node_recursive(void* nod
         ImGuiDragDropFlags drop_target_flags = 0;
         if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_GAMEOBJ_TREENODE", drop_target_flags))
         {
-            assert(false);
-        }
-        ImGui::EndDragDropTarget();
-    }
-
-    // Draw between node.
-    ImGui::PushStyleColor(ImGuiCol_Button, 0x00000000);
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, 0x00000000);
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, 0x00000000);
-    ImGui::ButtonEx(("##between_node_button__" + std::to_string(next_id)).c_str(),
-                    ImVec2(ImGui::GetContentRegionAvail().x, 6),
-                    ImGuiButtonFlags_NoNavFocus);
-    ImGui::PopStyleColor(3);
-    if (ImGui::BeginDragDropTarget())
-    {
-        ImGuiDragDropFlags drop_target_flags = 0;
-        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_GAMEOBJ_TREENODE", drop_target_flags))
-        {
-            assert(false);
+            modify_action.commit = true;
+            modify_action.type = Modify_scene_hierarchy_action::INSERT_AS_CHILD;
+            modify_action.anchor_subject = node->game_obj->get_uuid();
+            modify_action.modifying_object = *reinterpret_cast<UUID*>(payload->Data);
         }
         ImGui::EndDragDropTarget();
     }
