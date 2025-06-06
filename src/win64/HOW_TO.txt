@@ -1,0 +1,8 @@
+Extract the png-to-ico program in the zip file.
+
+Click and drag the png into the batch file.
+
+Voila. It will generate multi-res ico files automatically so there's really nothing needed.
+
+
+SIDE NOTE: Download png-to-ico progam at https://github.com/FoxP/PNG-to-ICO

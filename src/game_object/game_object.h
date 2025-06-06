@@ -105,6 +105,8 @@ private:
         UUID modifying_object;
     };
 
+    vector<UUID> m_root_level_game_obj_ordering;
+
     function<unique_ptr<Game_object>()> m_create_new_empty_game_obj_callback_fn;
     UUID m_selected_game_obj;
     void render_imgui_scene_hierarchy_node_recursive(void* node_void_ptr,

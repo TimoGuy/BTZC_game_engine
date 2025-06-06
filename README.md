@@ -192,14 +192,16 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - [x] Show inspector when a game object is selected.
             - Don't show much, just basic stuff like guid.
         - [x] Create new game objects.
-        - [ ] Click and drag gameobjects around.
+        - [x] Click and drag gameobjects around.
             - Be able to add child to game objects.
-        - [ ] Automatically update world transforms of children gameobjects.
+        - [ ] Add root object ordering.
+            - Ig this could be serialized into the scene as well?
+            - Just a list of the UUIDs of all root game objects honestly should be fine.
 
 1. Refactor?
     - Thoughts:
         - I need somewhere to create a new empty gameobject!!!
-        - [ ] Create a callback function.
+        - [x] Create a callback function.
     - Thoughts on clunkiness of ImGui render:
         - I don't think that the renderer should be in charge of ImGui stuff. It kinda doesn't make sense. The renderer should just be in charge of rendering render objects, and ImGui is a system that touches everything, so it shouldn't be part of the renderer at all. Just a `render_imgui()` function callout and that's it.
         - It doesn't need to be a callout but idk, it's weird how this just kinda happens and it shouldn't.
@@ -220,6 +222,8 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - [ ] Think about these thoughts ^^
             - How will the skeleton mesh transform propagation work?
             - Will there be a dirty flag for local transforms that are changed and then after all changes are made the global transforms are recalculated based off the dirty flags???? I think having a two step approach probably is the way to go, that way the batch change can happen in just one fell swoop.
+        - If decide to transition into a transform hierarchy:
+            - [ ] Automatically update world transforms of children gameobjects.
             
 
 1. Debug views.
