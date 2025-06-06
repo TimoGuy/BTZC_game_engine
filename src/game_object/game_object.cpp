@@ -77,9 +77,12 @@ void BT::Game_object::remove_child(Game_object& remove_child)
             // Sever parent-child relationship.
             remove_child.m_parent = UUID();
             m_children.erase(it);
-            break;
+            return;
         }
     }
+
+    logger::printe(logger::ERROR, "Unchilding game object is not a child.");
+    assert(false);
 }
 
 // Scene_serialization_ifc.
@@ -338,7 +341,9 @@ void BT::Game_object_pool::render_imgui_scene_hierarchy()
         ImGuiDragDropFlags drop_target_flags = 0;
         if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_GAMEOBJ_TREENODE", drop_target_flags))
         {
-            assert(false);
+            modify_action.commit = true;
+            modify_action.type = Modify_scene_hierarchy_action::INSERT_AT_END;
+            modify_action.modifying_object = *reinterpret_cast<UUID*>(payload->Data);
         }
         ImGui::EndDragDropTarget();
     }
@@ -391,14 +396,47 @@ void BT::Game_object_pool::render_imgui_scene_hierarchy()
             }
 
             case Modify_scene_hierarchy_action::INSERT_BEFORE:
-                // @TODO: Implement.
-                assert(false);
-                break;
+            {
+                auto& modifying_obj_game_obj{
+                    m_game_objects.at(modify_action.modifying_object) };
 
-            case Modify_scene_hierarchy_action::INSERT_AFTER:
-                // @TODO: Implement.
-                assert(false);
+                if (!modifying_obj_game_obj->get_parent_uuid().is_nil())
+                {
+                    // Goto parent of `modifying_object` and sever parent-child relationship.
+                    m_game_objects.at(modifying_obj_game_obj->get_parent_uuid())
+                        ->remove_child(*modifying_obj_game_obj);
+                }
+
+                auto anchor_parent_uuid{
+                    m_game_objects.at(modify_action.anchor_subject)->get_parent_uuid() };
+                if (!anchor_parent_uuid.is_nil())
+                {
+                    // Add new parent-child relationship (so that modify-GO is sibling of anchor-GO).
+                    m_game_objects.at(anchor_parent_uuid)
+                        ->insert_child(*modifying_obj_game_obj);
+                }
+
+                // @TODO: Reorder to before anchor.
+
                 break;
+            }
+
+            case Modify_scene_hierarchy_action::INSERT_AT_END:
+            {
+                auto& modifying_obj_game_obj{
+                    m_game_objects.at(modify_action.modifying_object) };
+
+                if (!modifying_obj_game_obj->get_parent_uuid().is_nil())
+                {
+                    // Goto parent of `modifying_object` and sever parent-child relationship.
+                    m_game_objects.at(modifying_obj_game_obj->get_parent_uuid())
+                        ->remove_child(*modifying_obj_game_obj);
+                }
+
+                // @TODO: Reorder to end.
+
+                break;
+            }
 
             default:
                 assert(false);
@@ -457,7 +495,10 @@ void BT::Game_object_pool::render_imgui_scene_hierarchy_node_recursive(void* nod
         ImGuiDragDropFlags drop_target_flags = 0;
         if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_GAMEOBJ_TREENODE", drop_target_flags))
         {
-            assert(false);
+            modify_action.commit = true;
+            modify_action.type = Modify_scene_hierarchy_action::INSERT_BEFORE;
+            modify_action.anchor_subject = node->game_obj->get_uuid();
+            modify_action.modifying_object = *reinterpret_cast<UUID*>(payload->Data);
         }
         ImGui::EndDragDropTarget();
     }

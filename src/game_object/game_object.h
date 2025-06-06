@@ -99,7 +99,7 @@ private:
         {
             INSERT_AS_CHILD,
             INSERT_BEFORE,
-            INSERT_AFTER,
+            INSERT_AT_END,
         } type;
         UUID anchor_subject;
         UUID modifying_object;
