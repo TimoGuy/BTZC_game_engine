@@ -197,6 +197,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - [ ] Add root object ordering.
             - Ig this could be serialized into the scene as well?
             - Just a list of the UUIDs of all root game objects honestly should be fine.
+            - [x] Adds another list to handle the ordering of the root nodes (`m_root_level_game_obj_ordering`) and shows the sorting correctly.
 
 1. Refactor?
     - Thoughts:

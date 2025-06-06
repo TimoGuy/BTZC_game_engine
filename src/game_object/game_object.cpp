@@ -300,6 +300,23 @@ void BT::Game_object_pool::render_imgui_scene_hierarchy()
                     break;
                 }
             }
+    
+    // Reorder root nodes list according to provided uuid list.
+    assert(m_root_level_game_obj_ordering.size() == root_nodes_scene_hierarchy.size());
+    vector<Hierarchy_node*> root_nodes_ordered_scene_hierarchy;
+    root_nodes_ordered_scene_hierarchy.reserve(root_nodes_scene_hierarchy.size());
+    for (auto root_uuid : m_root_level_game_obj_ordering)
+        for (auto it = root_nodes_scene_hierarchy.begin(); it != root_nodes_scene_hierarchy.end(); it++)
+        {
+            auto root_node{ *it };
+            if (root_uuid == root_node->game_obj->get_uuid())
+            {
+                // Move to the back of the ordered list.
+                root_nodes_ordered_scene_hierarchy.emplace_back(root_node);
+                root_nodes_scene_hierarchy.erase(it);
+            }
+        }
+    assert(root_nodes_scene_hierarchy.empty());
 
     // Draw out scene hierarchy.
     auto next_id{ reinterpret_cast<intptr_t>(this) };
@@ -322,7 +339,7 @@ void BT::Game_object_pool::render_imgui_scene_hierarchy()
     Modify_scene_hierarchy_action modify_action;
 
     // Draw scene nodes.
-    for (auto root_node : root_nodes_scene_hierarchy)
+    for (auto root_node : root_nodes_ordered_scene_hierarchy)
     {
         render_imgui_scene_hierarchy_node_recursive(root_node, modify_action, next_id);
     }
