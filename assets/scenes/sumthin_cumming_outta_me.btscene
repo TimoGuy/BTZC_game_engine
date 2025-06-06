@@ -3,6 +3,7 @@
         "children": [],
         "guid": "aae5ebfb-7c2b-49a8-bcb9-658fdea987af",
         "name": "My Gay object",
+        "parent": null,
         "physics_obj": {
             "crouch_height": 1.0,
             "guid": "08743552-fff6-49d2-ad15-efbd121ab773",

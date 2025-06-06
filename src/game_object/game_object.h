@@ -41,8 +41,10 @@ public:
 
     void set_name(string&& name);
     string get_name();
+    UUID get_parent_uuid();
     vector<UUID> get_children_uuids();
-    void insert_child_uuid(UUID new_child, size_t position = 0);
+    void insert_child(Game_object& new_child, size_t position = 0);
+    void remove_child(Game_object& remove_child);
 
     // Scene_serialization_ifc.
     void scene_serialize(Scene_serialization_mode mode, json& node_ref) override;
@@ -57,7 +59,7 @@ private:
     UUID m_rend_obj_key;
     vector<unique_ptr<Scripts::Script_ifc>> m_scripts;
 
-    static_assert(false, "@TODO: @HERE: Add `UUID m_parent` here!!!!!");
+    UUID m_parent;
     vector<UUID> m_children;
 };
 

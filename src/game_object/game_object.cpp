@@ -51,15 +51,35 @@ string BT::Game_object::get_name()
     return m_name;
 }
 
+BT::UUID BT::Game_object::get_parent_uuid()
+{
+    return m_parent;
+}
+
 vector<BT::UUID> BT::Game_object::get_children_uuids()
 {
     return m_children;
 }
 
-void BT::Game_object::insert_child_uuid(UUID new_child, size_t position /*= 0*/)
+void BT::Game_object::insert_child(Game_object& new_child, size_t position /*= 0*/)
 {
-    static_assert(false, "@TODO: @HERE: Set the `new_child`'s parent uuid to me here!");
-    m_children.insert(m_children.begin() + position, new_child);
+    new_child.m_parent = get_uuid();
+    m_children.insert(m_children.begin() + position, new_child.get_uuid());
+}
+
+void BT::Game_object::remove_child(Game_object& remove_child)
+{
+    for (auto it = m_children.begin(); it != m_children.end(); it++)
+    {
+        auto child_uuid{ *it };
+        if (child_uuid == remove_child.get_uuid())
+        {
+            // Sever parent-child relationship.
+            remove_child.m_parent = UUID();
+            m_children.erase(it);
+            break;
+        }
+    }
 }
 
 // Scene_serialization_ifc.
@@ -77,6 +97,11 @@ void BT::Game_object::scene_serialize(Scene_serialization_mode mode, json& node_
             Scripts::serialize_script(script.get(),
                                       node_ref["scripts"][scripts_idx++]);
         }
+
+        if (m_parent.is_nil())
+            node_ref["parent"] = nullptr;
+        else
+            node_ref["parent"] = UUID_helper::to_pretty_repr(m_parent);
 
         node_ref["children"] = json::array();
         for (auto& child_uuid : m_children)
@@ -126,6 +151,10 @@ void BT::Game_object::scene_serialize(Scene_serialization_mode mode, json& node_
                                                              &m_renderer,
                                                              node_ref["scripts"][scripts_idx++]));
         }
+
+        m_parent = (node_ref["parent"].is_null() ?
+                    UUID() :
+                    UUID_helper::to_UUID(node_ref["parent"]));
 
         assert(node_ref["children"].is_array());
         for (auto& child_uuid : node_ref["children"])
@@ -344,10 +373,22 @@ void BT::Game_object_pool::render_imgui_scene_hierarchy()
         switch (modify_action.type)
         {
             case Modify_scene_hierarchy_action::INSERT_AS_CHILD:
-                // @TODO: Goto parent of `modifying_object` and sever parent-child relationship.
+            {
+                auto& modifying_obj_game_obj{
+                    m_game_objects.at(modify_action.modifying_object) };
+
+                if (!modifying_obj_game_obj->get_parent_uuid().is_nil())
+                {
+                    // Goto parent of `modifying_object` and sever parent-child relationship.
+                    m_game_objects.at(modifying_obj_game_obj->get_parent_uuid())
+                        ->remove_child(*modifying_obj_game_obj);
+                }
+
+                // Add new parent-child relationship.
                 m_game_objects.at(modify_action.anchor_subject)
-                    ->insert_child_uuid(modify_action.modifying_object);
+                    ->insert_child(*modifying_obj_game_obj);
                 break;
+            }
 
             case Modify_scene_hierarchy_action::INSERT_BEFORE:
                 // @TODO: Implement.
@@ -399,7 +440,8 @@ void BT::Game_object_pool::render_imgui_scene_hierarchy_node_recursive(void* nod
         node_flags |= ImGuiTreeNodeFlags_Selected;
 
     auto const& child_nodes{ node->children };
-    if (child_nodes.empty())
+    bool treat_as_leaf_node{ child_nodes.empty() };
+    if (treat_as_leaf_node)
         node_flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
 
     // Draw between/before node.
@@ -421,10 +463,10 @@ void BT::Game_object_pool::render_imgui_scene_hierarchy_node_recursive(void* nod
     }
 
     // Draw my node.
-    ImGui::TreeNodeEx(reinterpret_cast<void*>(next_id),
-                        node_flags,
-                        "%s",
-                        node->game_obj->get_name().c_str());
+    bool tree_node_open = ImGui::TreeNodeEx(reinterpret_cast<void*>(next_id),
+                                            node_flags,
+                                            "%s",
+                                            node->game_obj->get_name().c_str());
     if (ImGui::IsItemClicked())
         m_selected_game_obj = cur_uuid;
     if (ImGui::BeginDragDropSource())
@@ -449,10 +491,14 @@ void BT::Game_object_pool::render_imgui_scene_hierarchy_node_recursive(void* nod
     // Increment id.
     next_id++;
 
-    // Draw children nodes.
-    for (auto child_node : child_nodes)
+    if (tree_node_open && !treat_as_leaf_node)
     {
-        render_imgui_scene_hierarchy_node_recursive(child_node, next_id);
+        // Draw children nodes.
+        for (auto child_node : child_nodes)
+        {
+            render_imgui_scene_hierarchy_node_recursive(child_node, modify_action, next_id);
+        }
+        ImGui::TreePop();
     }
 }
 
