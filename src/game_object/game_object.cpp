@@ -214,6 +214,9 @@ void BT::Game_object_pool::remove(UUID key)
         return;
     }
 
+    if (m_game_objects.at(key)->get_parent_uuid().is_nil())
+        remove_root_level_status(key);
+
     m_game_objects.erase(key);
     unblock();
 }
@@ -255,6 +258,19 @@ void BT::Game_object_pool::return_list(vector<Game_object*> const&& all_as_list)
     // @COPYPASTA.
     (void)all_as_list;
     unblock();
+}
+
+// Scene_serialization_ifc.
+void BT::Game_object_pool::scene_serialize(Scene_serialization_mode mode, json& node_ref)
+{
+    if (mode == SCENE_SERIAL_MODE_SERIALIZE)
+    {
+
+    }
+    else if (mode == SCENE_SERIAL_MODE_DESERIALIZE)
+    {
+        
+    }
 }
 
 // Debug ImGui.
@@ -302,10 +318,10 @@ void BT::Game_object_pool::render_imgui_scene_hierarchy()
             }
     
     // Reorder root nodes list according to provided uuid list.
-    assert(m_root_level_game_obj_ordering.size() == root_nodes_scene_hierarchy.size());
+    assert(m_root_level_game_objects_ordering.size() == root_nodes_scene_hierarchy.size());
     vector<Hierarchy_node*> root_nodes_ordered_scene_hierarchy;
     root_nodes_ordered_scene_hierarchy.reserve(root_nodes_scene_hierarchy.size());
-    for (auto root_uuid : m_root_level_game_obj_ordering)
+    for (auto root_uuid : m_root_level_game_objects_ordering)
         for (auto it = root_nodes_scene_hierarchy.begin(); it != root_nodes_scene_hierarchy.end(); it++)
         {
             auto root_node{ *it };
@@ -313,10 +329,10 @@ void BT::Game_object_pool::render_imgui_scene_hierarchy()
             {
                 // Move to the back of the ordered list.
                 root_nodes_ordered_scene_hierarchy.emplace_back(root_node);
-                root_nodes_scene_hierarchy.erase(it);
             }
         }
-    assert(root_nodes_scene_hierarchy.empty());
+    assert(root_nodes_scene_hierarchy.size() == root_nodes_ordered_scene_hierarchy.size());
+    root_nodes_scene_hierarchy.clear();
 
     // Draw out scene hierarchy.
     auto next_id{ reinterpret_cast<intptr_t>(this) };
@@ -399,12 +415,16 @@ void BT::Game_object_pool::render_imgui_scene_hierarchy()
                 auto& modifying_obj_game_obj{
                     m_game_objects.at(modify_action.modifying_object) };
 
-                if (!modifying_obj_game_obj->get_parent_uuid().is_nil())
+                // @COPYPASTA: Appears 3 times vv.
+                if (modifying_obj_game_obj->get_parent_uuid().is_nil())
+                    remove_root_level_status(modifying_obj_game_obj->get_uuid());
+                else
                 {
                     // Goto parent of `modifying_object` and sever parent-child relationship.
                     m_game_objects.at(modifying_obj_game_obj->get_parent_uuid())
                         ->remove_child(*modifying_obj_game_obj);
                 }
+                // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
                 // Add new parent-child relationship.
                 m_game_objects.at(modify_action.anchor_subject)
@@ -414,26 +434,54 @@ void BT::Game_object_pool::render_imgui_scene_hierarchy()
 
             case Modify_scene_hierarchy_action::INSERT_BEFORE:
             {
+                if (modify_action.modifying_object == modify_action.anchor_subject)
+                    // Cancel operation if moving the object to the same exact place.
+                    break;
+
                 auto& modifying_obj_game_obj{
                     m_game_objects.at(modify_action.modifying_object) };
 
-                if (!modifying_obj_game_obj->get_parent_uuid().is_nil())
+                // @COPYPASTA: Appears 3 times vv.
+                if (modifying_obj_game_obj->get_parent_uuid().is_nil())
+                    remove_root_level_status(modifying_obj_game_obj->get_uuid());
+                else
                 {
                     // Goto parent of `modifying_object` and sever parent-child relationship.
                     m_game_objects.at(modifying_obj_game_obj->get_parent_uuid())
                         ->remove_child(*modifying_obj_game_obj);
                 }
+                // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
                 auto anchor_parent_uuid{
                     m_game_objects.at(modify_action.anchor_subject)->get_parent_uuid() };
-                if (!anchor_parent_uuid.is_nil())
+                if (anchor_parent_uuid.is_nil())
+                {
+                    // Add game object as a root level object.
+                    for (auto it = m_root_level_game_objects_ordering.begin();
+                         it != m_root_level_game_objects_ordering.end(); it++)
+                        if (*it == modify_action.anchor_subject)
+                        {
+                            // Insert placement to before this index.
+                            m_root_level_game_objects_ordering.emplace(
+                                it,
+                                modifying_obj_game_obj->get_uuid());
+                            break;
+                        }
+                }
+                else
                 {
                     // Add new parent-child relationship (so that modify-GO is sibling of anchor-GO).
-                    m_game_objects.at(anchor_parent_uuid)
-                        ->insert_child(*modifying_obj_game_obj);
+                    size_t position{ 0 };
+                    auto& anchor_parent_game_obj{ m_game_objects.at(anchor_parent_uuid) };
+                    auto children_uuids{ anchor_parent_game_obj->get_children_uuids() };
+                    for (; position < children_uuids.size(); position++)
+                        if (children_uuids[position] == modify_action.anchor_subject)
+                        {
+                            m_game_objects.at(anchor_parent_uuid)
+                                ->insert_child(*modifying_obj_game_obj, position);
+                            break;
+                        }
                 }
-
-                // @TODO: Reorder to before anchor.
 
                 break;
             }
@@ -443,14 +491,19 @@ void BT::Game_object_pool::render_imgui_scene_hierarchy()
                 auto& modifying_obj_game_obj{
                     m_game_objects.at(modify_action.modifying_object) };
 
-                if (!modifying_obj_game_obj->get_parent_uuid().is_nil())
+                // @COPYPASTA: Appears 3 times vv.
+                if (modifying_obj_game_obj->get_parent_uuid().is_nil())
+                    remove_root_level_status(modifying_obj_game_obj->get_uuid());
+                else
                 {
                     // Goto parent of `modifying_object` and sever parent-child relationship.
                     m_game_objects.at(modifying_obj_game_obj->get_parent_uuid())
                         ->remove_child(*modifying_obj_game_obj);
                 }
+                // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-                // @TODO: Reorder to end.
+                // Add game object as a root level object at end.
+                m_root_level_game_objects_ordering.emplace_back(modifying_obj_game_obj->get_uuid());
 
                 break;
             }
@@ -474,9 +527,24 @@ BT::UUID BT::Game_object_pool::emplace_no_lock(unique_ptr<Game_object>&& game_ob
         assert(false);
     }
 
+    if (game_object->get_parent_uuid().is_nil())
+    {
+        // Add game object as a root level object.
+        m_root_level_game_objects_ordering.emplace_back(uuid);
+    }
+
     m_game_objects.emplace(uuid, std::move(game_object));
 
     return uuid;
+}
+
+void BT::Game_object_pool::remove_root_level_status(UUID key)
+{
+    m_root_level_game_objects_ordering.erase(
+        std::remove(m_root_level_game_objects_ordering.begin(),
+                    m_root_level_game_objects_ordering.end(),
+                    key),
+        m_root_level_game_objects_ordering.end());
 }
 
 void BT::Game_object_pool::render_imgui_scene_hierarchy_node_recursive(void* node_void_ptr,

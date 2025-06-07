@@ -65,7 +65,7 @@ private:
 
 // vv See below ~~@COPYPASTA. See "mesh.h" "material.h" "shader.h"~~
 // @NOTE: Not quite copypasta. It's a little bit different.
-class Game_object_pool
+class Game_object_pool : public Scene_serialization_ifc
 {
 public:
     Game_object_pool(function<unique_ptr<Game_object>()>&& create_new_empty_game_obj_callback_fn);
@@ -77,13 +77,21 @@ public:
     Game_object* checkout_one(UUID key);
     void return_list(vector<Game_object*> const&& all_as_list);
 
+    // Scene_serialization_ifc.
+    void scene_serialize(Scene_serialization_mode mode, json& node_ref) override;
+
     // Debug ImGui.
     void render_imgui_scene_hierarchy();
 
 private:
     UUID emplace_no_lock(unique_ptr<Game_object>&& game_object);
 
+    void remove_root_level_status(UUID key);
+
+    bool validate_game_object_hierarchy();
+
     unordered_map<UUID, unique_ptr<Game_object>> m_game_objects;
+    vector<UUID> m_root_level_game_objects_ordering;
 
     // Synchronization.
     atomic_bool m_blocked{ false };
@@ -104,8 +112,6 @@ private:
         UUID anchor_subject;
         UUID modifying_object;
     };
-
-    vector<UUID> m_root_level_game_obj_ordering;
 
     function<unique_ptr<Game_object>()> m_create_new_empty_game_obj_callback_fn;
     UUID m_selected_game_obj;
