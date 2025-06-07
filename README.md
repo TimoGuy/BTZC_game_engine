@@ -207,6 +207,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - I don't think that the renderer should be in charge of ImGui stuff. It kinda doesn't make sense. The renderer should just be in charge of rendering render objects, and ImGui is a system that touches everything, so it shouldn't be part of the renderer at all. Just a `render_imgui()` function callout and that's it.
         - It doesn't need to be a callout but idk, it's weird how this just kinda happens and it shouldn't.
         - Maybe create a class that does touch everything, and the renderer just holds a reference to it and calls `render_imgui()` from there. That way it's like a callout but the renderer doesn't have to have its hands in every single system it wants to touch.
+        - [ ] Yeah, this change needs to be made. DO IT.
     - Thoughts on phys obj creation system:
         - Forcing that assymetrical phys obj creation method (w/ `create_physics_object_from_serialization()`) really sucks.
         - I think that you should be able to create a physics object that's empty, and then after that do `scene_serialize()` and create a default physics object in the type you're looking for, or something bc this really ain't it.
@@ -214,6 +215,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
             - Also, maybe creating the physics objects doesn't need to happen immediately anyway, bc the physics objects will just be created when the game is starting to be played anyway, not during level authoring time.
         - Hmmm, also seems like there needs to be a `scene_serialize()` thing for the impl of the thingies.
         - [ ] Think about these thoughts ^^
+            - I think that this kinda change would be good. Like changing the `create_char_controller()` thing to be more of a decorator function and creating an abstract form physics thing that has no impl would be good.
     - Thoughts on transform hierarchy:
         - The gameobject will have a transform so that the transform hierarchy is possible.
         - Soooo, does that mean that there will be redundant transforms for both the render object and the gameobject? It kinda seems that way. Most gameobjects will have associated render objects. They'll have transforms anyway for the transform hierarchy.
