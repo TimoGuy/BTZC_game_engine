@@ -179,13 +179,13 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
             - [x] Do it ^^
                 - @NOTE: When defining the different script classes that extend `Script_ifc`, it must be a unique name or else (at least clang-cl) doesn't convolute the function names correctly, and they end up being the same class during execution.
 
-1. IN PROGRESS: Level saving/loading (cont.)
+1. DONE: Level saving/loading (cont.)
     - [x] Save and load with JSON:
         - [x] Render object.
         - [x] Physics object.
     - [x] JSON to Game object generator.
     - [ ] ~~Load level inside a level as a prefab.~~
-    - [ ] Level hierarchy and sorting.
+    - [x] Level hierarchy and sorting.
         - [x] Stub out the UI window.
         - [x] List all the gameobject names.
         - [x] Deselect game object when click within scene hierarchy window.
