@@ -199,23 +199,10 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
             - Just a list of the UUIDs of all root game objects honestly should be fine.
             - [x] Adds another list to handle the ordering of the root nodes (`m_root_level_game_obj_ordering`) and shows the sorting correctly.
 
-1. Refactor?
+1. IN PROGRESS: Refactor?
     - Thoughts:
         - I need somewhere to create a new empty gameobject!!!
         - [x] Create a callback function.
-    - Thoughts on clunkiness of ImGui render:
-        - I don't think that the renderer should be in charge of ImGui stuff. It kinda doesn't make sense. The renderer should just be in charge of rendering render objects, and ImGui is a system that touches everything, so it shouldn't be part of the renderer at all. Just a `render_imgui()` function callout and that's it.
-        - It doesn't need to be a callout but idk, it's weird how this just kinda happens and it shouldn't.
-        - Maybe create a class that does touch everything, and the renderer just holds a reference to it and calls `render_imgui()` from there. That way it's like a callout but the renderer doesn't have to have its hands in every single system it wants to touch.
-        - [ ] Yeah, this change needs to be made. DO IT.
-    - Thoughts on phys obj creation system:
-        - Forcing that assymetrical phys obj creation method (w/ `create_physics_object_from_serialization()`) really sucks.
-        - I think that you should be able to create a physics object that's empty, and then after that do `scene_serialize()` and create a default physics object in the type you're looking for, or something bc this really ain't it.
-        - Idk. Pre-packing defaults for the physics objects does seem like a bit of a hassle ngl. (i.e. thinking about writing static json premade thingies for every new type you got). Tho honestly that might just be a fine way of doing things ig. idk!
-            - Also, maybe creating the physics objects doesn't need to happen immediately anyway, bc the physics objects will just be created when the game is starting to be played anyway, not during level authoring time.
-        - Hmmm, also seems like there needs to be a `scene_serialize()` thing for the impl of the thingies.
-        - [ ] Think about these thoughts ^^
-            - I think that this kinda change would be good. Like changing the `create_char_controller()` thing to be more of a decorator function and creating an abstract form physics thing that has no impl would be good.
     - Thoughts on transform hierarchy:
         - The gameobject will have a transform so that the transform hierarchy is possible.
         - Soooo, does that mean that there will be redundant transforms for both the render object and the gameobject? It kinda seems that way. Most gameobjects will have associated render objects. They'll have transforms anyway for the transform hierarchy.
@@ -227,7 +214,19 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
             - Will there be a dirty flag for local transforms that are changed and then after all changes are made the global transforms are recalculated based off the dirty flags???? I think having a two step approach probably is the way to go, that way the batch change can happen in just one fell swoop.
         - If decide to transition into a transform hierarchy:
             - [ ] Automatically update world transforms of children gameobjects.
-            
+    - Thoughts on phys obj creation system:
+        - Forcing that assymetrical phys obj creation method (w/ `create_physics_object_from_serialization()`) really sucks.
+        - I think that you should be able to create a physics object that's empty, and then after that do `scene_serialize()` and create a default physics object in the type you're looking for, or something bc this really ain't it.
+        - Idk. Pre-packing defaults for the physics objects does seem like a bit of a hassle ngl. (i.e. thinking about writing static json premade thingies for every new type you got). Tho honestly that might just be a fine way of doing things ig. idk!
+            - Also, maybe creating the physics objects doesn't need to happen immediately anyway, bc the physics objects will just be created when the game is starting to be played anyway, not during level authoring time.
+        - Hmmm, also seems like there needs to be a `scene_serialize()` thing for the impl of the thingies.
+        - [ ] Think about these thoughts ^^
+            - I think that this kinda change would be good. Like changing the `create_char_controller()` thing to be more of a decorator function and creating an abstract form physics thing that has no impl would be good.
+    - Thoughts on clunkiness of ImGui render:
+        - I don't think that the renderer should be in charge of ImGui stuff. It kinda doesn't make sense. The renderer should just be in charge of rendering render objects, and ImGui is a system that touches everything, so it shouldn't be part of the renderer at all. Just a `render_imgui()` function callout and that's it.
+        - It doesn't need to be a callout but idk, it's weird how this just kinda happens and it shouldn't.
+        - Maybe create a class that does touch everything, and the renderer just holds a reference to it and calls `render_imgui()` from there. That way it's like a callout but the renderer doesn't have to have its hands in every single system it wants to touch.
+        - [ ] Yeah, this change needs to be made. DO IT.
 
 1. Debug views.
     - [ ] Collision represented as green wireframe triangles.
