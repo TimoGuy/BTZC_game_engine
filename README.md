@@ -224,6 +224,13 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
                         - Round-robin timeslice: skeleton is put into a round robin and then X number of animations are processed
                             - This helps keep the burden low.
             - Will there be a dirty flag for local transforms that are changed and then after all changes are made the global transforms are recalculated based off the dirty flags???? I think having a two step approach probably is the way to go, that way the batch change can happen in just one fell swoop.
+                - Yes.
+                - Rather, there should be a dirty flag for the render step and a dirty flag for the physics step.
+                    - ^^ Wait wait, is there even a need for this? I don't think this needs to be done imo. I think just one dirty flag is fine.
+                        - Bc dirty flags are set when an update is requested. Mmmmm maybe that update doesn't have to happen immediately?
+                        - The results of the skeletal mesh stuff will be stored in the game obj transforms.
+                    - These should also be atomic. That way the atomic vars' const refs can be passed around and the whole process can take place over worker threads.
+                        - I think it could be like a set of jobs sorted by a breadth first approach so that as soon as one matrix is calculated and the is_dirty flag is turned off, 
         - If decide to transition into a transform hierarchy:
             - [ ] Automatically update world transforms of children gameobjects.
     - Thoughts on phys obj creation system:
