@@ -211,6 +211,18 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - But yeah, it really seems like especially since representing skeleton mesh bones with gameobjects is gonna be the plan, having gameobjects transforms be the "representation", have physics objects drive the gameobject transform, and render objects read the gameobject transform, that's the way that it should be done.
         - [ ] Think about these thoughts ^^
             - How will the skeleton mesh transform propagation work?
+                - ANSWER: I think that basically there could be a few levels of detail for calculating the skeletal mesh transforms:
+                    - A checkbox of whether to recalc the skeletal mesh's gameobjects for physics objects' step as well.
+                        - ~~Level-of-detail for physics calculations.~~ Actually, the arm needs to be completely calculated for the sword (if we wanted swords to update every step but the bodies to update at half rate), so whole body should just be done.
+                        - So realtime (limited by the constant frame timing of the 50hz physics)
+                    - Level-of-detail for rendering vv
+                        - Realtime: every frame is calculated.
+                        - Physics copy (only available if physics is enabled): never recalculates for rendering but rather copies/relies on the physics recalculation results.
+                            - Or rather uploads the results to the gpu.
+                                - This should be fast... right? Idk until we try.
+                            - If the physics calc checkbox is unchecked, it's changed to the next one vv
+                        - Round-robin timeslice: skeleton is put into a round robin and then X number of animations are processed
+                            - This helps keep the burden low.
             - Will there be a dirty flag for local transforms that are changed and then after all changes are made the global transforms are recalculated based off the dirty flags???? I think having a two step approach probably is the way to go, that way the batch change can happen in just one fell swoop.
         - If decide to transition into a transform hierarchy:
             - [ ] Automatically update world transforms of children gameobjects.
