@@ -6,16 +6,15 @@
 #include "Jolt/Jolt.h"
 #include "Jolt/Math/MathTypes.h"
 #include "Jolt/Math/Quat.h"
-#include "Jolt/Math/Real.h"
 #include "Jolt/Physics/Body/MotionType.h"
 #include "Jolt/Physics/Character/CharacterVirtual.h"
+#include "rvec3.h"
 #include <atomic>
 #include <cassert>
 #include <memory>
 #include <utility>
 #include <vector>
 
-using JPH::Real;
 using std::atomic_size_t;
 using std::pair;
 using std::unique_ptr;
@@ -24,8 +23,6 @@ using std::vector;
 
 namespace BT
 {
-
-using rvec3 = JPH::Real[3];
 
 enum Physics_object_type
 {

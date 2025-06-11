@@ -18,6 +18,8 @@ using std::vector;
 namespace BT
 {
 
+class Game_object;
+
 enum Render_layer : uint8_t
 {
     RENDER_LAYER_ALL          = 0b11111111,
@@ -33,9 +35,9 @@ class Physics_object;
 class Render_object : public Scene_serialization_ifc, public UUID_ifc
 {
 public:
-    Render_object(Model const* model,
+    Render_object(Game_object& game_obj,
+                  Model const* model,
                   Render_layer layer,
-                  mat4 init_transform,
                   UUID tethered_phys_obj = UUID());
 
     void render(Render_layer active_layers);
@@ -48,9 +50,9 @@ public:
     void scene_serialize(Scene_serialization_mode mode, json& node_ref) override;
 
 private:
+    Game_object& m_game_obj;
     Model const* m_model;
     Render_layer m_layer;
-    mat4 m_transform;
 
     // (Optional) Tethered physics object.
     UUID m_tethered_phys_obj;

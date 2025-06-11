@@ -6,16 +6,15 @@
 #include "mesh.h"
 
 
-BT::Render_object::Render_object(Model const* model,
+BT::Render_object::Render_object(Game_object& game_obj,
+                                 Model const* model,
                                  Render_layer layer,
-                                 mat4 init_transform,
                                  UUID tethered_phys_obj /*= UUID()*/)
-    : m_model(model)
+    : m_game_obj(game_obj)
+    , m_model(model)
     , m_layer(layer)
     , m_tethered_phys_obj(tethered_phys_obj)
 {
-    glm_mat4_copy(init_transform, m_transform);
-
     // Check that the layer is a single layer, not an aggregate layer.
     constexpr uint32_t k_num_shifts{ sizeof(Render_layer) * 8 };
     uint32_t num_matches{ 0 };

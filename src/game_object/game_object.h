@@ -2,11 +2,11 @@
 
 #include "../input_handler/input_handler.h"
 #include "../physics_engine/physics_engine.h"
-#include "../physics_engine/physics_object.h"
+#include "../physics_engine/rvec3.h"
 #include "../renderer/renderer.h"
-#include "../renderer/render_object.h"
 #include "../scene/scene_serialization_ifc.h"
 #include "../uuid/uuid_ifc.h"
+#include "cglm/quat.h"
 #include "scripts/scripts.h"
 #include <atomic>
 #include <functional>
@@ -28,6 +28,13 @@ using std::vector;
 
 namespace BT
 {
+
+struct Game_object_transform
+{
+    rvec3  position{ 0.0, 0.0, 0.0 };
+    versor rotation = GLM_QUAT_IDENTITY_INIT;
+    vec3   scale{ 0.0f, 0.0f, 0.0f };
+};
 
 class Game_object : public Scene_serialization_ifc, public UUID_ifc
 {
@@ -53,6 +60,8 @@ private:
     Input_handler& m_input_handler;
     Physics_engine& m_phys_engine;
     Renderer& m_renderer;
+
+    Game_object_transform m_transform;
 
     string m_name;
     UUID m_phys_obj_key;
