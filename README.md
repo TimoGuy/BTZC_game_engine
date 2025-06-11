@@ -14,6 +14,8 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
 
 - Backface culling.
 - 10 second async watchdog (for crashing the program if it falls into an infinite loop).
+- Game object serialization/deserialization.
+- .exe and window icons.
 
 ### Changes
 
@@ -21,6 +23,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
 - Scripts are now unified, instead of having a list of physics and render scripts.
 - Script data is now held by an actual class, extending a new script interface.
 - `serialization.h` is deprecated (or rather I don't think it's being used, but this may be useful for a binary data saver?)
+- Implementation of render obj, physics obj, and game obj keys are via UUID.
 
 ### Fixes
 
@@ -198,6 +201,10 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
             - Ig this could be serialized into the scene as well?
             - Just a list of the UUIDs of all root game objects honestly should be fine.
             - [x] Adds another list to handle the ordering of the root nodes (`m_root_level_game_obj_ordering`) and shows the sorting correctly.
+
+1. DONE: Window icon.
+    - [x] Add a simple icon to exe and window.
+        - [x] Leave instructions for how to create the icon and exe.
 
 1. IN PROGRESS: Refactor?
     - Thoughts:
