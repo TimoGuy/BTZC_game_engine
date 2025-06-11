@@ -20,6 +20,9 @@
 #include "material.h"
 #include "render_object.h"
 #include "renderer.h"
+#include "stb_image.h"
+#define STB_IMAGE_RESIZE_IMPLEMENTATION
+#include "stb_image_resize2.h"
 #include "texture.h"
 #include <cassert>
 #include <gl/gl.h>
@@ -334,6 +337,7 @@ void BT::Renderer::Impl::calc_ideal_standard_window_dim_and_apply_center_hints()
     glfwWindowHint(GLFW_POSITION_X, centered_window_pos[0]);
     glfwWindowHint(GLFW_POSITION_Y, centered_window_pos[1]);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+    glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 
     // Apply wanted viewport dimensions.
     if (!m_render_to_ldr)
@@ -344,6 +348,49 @@ void BT::Renderer::Impl::calc_ideal_standard_window_dim_and_apply_center_hints()
 
 void BT::Renderer::Impl::create_window_with_gfx_context(string const& title)
 {
+    // Load window icon.
+    string window_icon_fname{ BTZC_GAME_ENGINE_ASSET_SETTINGS_PATH "app_icon.png" };
+    int32_t width;
+    int32_t height;
+    int32_t num_channels;
+    stbi_set_flip_vertically_on_load_thread(false);
+    uint8_t* data{ stbi_load(window_icon_fname.c_str(),
+                             &width,
+                             &height,
+                             &num_channels,
+                             STBI_default) };
+    if (width != height)
+    {
+        logger::printef(logger::ERROR,
+                        "Dimensions are unequal. Unsuitable for a window icon. Dims={ %i, %i }",
+                        width, height);
+        assert(false);
+        return;
+    }
+    if (num_channels != 4)
+    {
+        logger::printef(logger::ERROR,
+                        "Window icon \"%s\" is not RGBA. Channels: %i",
+                        window_icon_fname.c_str(),
+                        num_channels);
+        assert(false);
+        return;
+    }
+
+    // Resize to wanted icon sizes.
+    // constexpr array<uint32_t, 4> k_wanted_icon_sizes{ 16, 32, 48, 256 };
+
+    // constexpr array<uint32_t, 1> k_wanted_icon_sizes{ 256 };
+    // vector<GLFWimage> window_icons;
+    // for (uint32_t wanted_size : k_wanted_icon_sizes)
+    // {
+    //     stbir_resize_uint8_srgb(data, )
+    //     window_icons.emplace_back(wanted_size, wanted_size, data);
+    // }
+
+    GLFWimage window_icon{ width, height, data };
+
+    // Create window.
     stringstream full_title_str;
     full_title_str
         << title                      << " - "
@@ -359,10 +406,17 @@ void BT::Renderer::Impl::create_window_with_gfx_context(string const& title)
                                        nullptr);
     assert(m_window_handle != nullptr);
 
+    // Set window icons.
+    auto win_handle{ reinterpret_cast<GLFWwindow*>(m_window_handle) };
+    // glfwSetWindowIcon(win_handle,
+    //                   static_cast<int>(window_icons.size()),
+    //                   window_icons.data());
+    glfwSetWindowIcon(win_handle, 1, &window_icon);
+    glfwShowWindow(win_handle);
+
     // Window callbacks.
     // @NOTE: With key callbacks etc that's also used by Imgui, Imgui
     //   chains these callbacks so they don't get lost.
-    auto win_handle{ reinterpret_cast<GLFWwindow*>(m_window_handle) };
     glfwSetKeyCallback(win_handle, key_callback);
     glfwSetMouseButtonCallback(win_handle, mouse_button_callback);
     glfwSetCursorPosCallback(win_handle, cursor_position_callback);

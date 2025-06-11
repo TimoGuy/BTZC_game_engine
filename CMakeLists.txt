@@ -142,6 +142,7 @@ add_executable(${PROJECT_NAME}
 
     # stb header files.
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/stb/stb_image.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/stb/stb_image_resize2.h
     
     # Tinyobjloader source files.
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/tinyobjloader/tiny_obj_loader.cc
