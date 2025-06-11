@@ -16,6 +16,11 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
 - 10 second async watchdog (for crashing the program if it falls into an infinite loop).
 - Game object serialization/deserialization.
 - .exe and window icons.
+- TODO vv
+- Transform hierarchy for both rendering and physics steps.
+- Job system (for fast transform hierarchy updating for now).
+- Debug view for collision.
+- Render object picking.
 
 ### Changes
 
@@ -24,6 +29,10 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
 - Script data is now held by an actual class, extending a new script interface.
 - `serialization.h` is deprecated (or rather I don't think it's being used, but this may be useful for a binary data saver?)
 - Implementation of render obj, physics obj, and game obj keys are via UUID.
+- TODO vv
+- Physics objs when created are dummy phys objs and using the deserialize or other creation methods do they actually do something in the physics world.
+- ImGui is its own section of the application now.
+    - Current plan is to ship it with the final application as well.
 
 ### Fixes
 
@@ -218,7 +227,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - But yeah, it really seems like especially since representing skeleton mesh bones with gameobjects is gonna be the plan, having gameobjects transforms be the "representation", have physics objects drive the gameobject transform, and render objects read the gameobject transform, that's the way that it should be done.
         - [ ] Think about these thoughts ^^
             - How will the skeleton mesh transform propagation work?
-                - ANSWER: I think that basically there could be a few levels of detail for calculating the skeletal mesh transforms:
+                - ANSWER: I think that basically there could be a few levels of detail for calculating the skeletal mesh transforms: (@IQHEWRIHDFKNAXI)
                     - A checkbox of whether to recalc the skeletal mesh's gameobjects for physics objects' step as well.
                         - ~~Level-of-detail for physics calculations.~~ Actually, the arm needs to be completely calculated for the sword (if we wanted swords to update every step but the bodies to update at half rate), so whole body should just be done.
                         - So realtime (limited by the constant frame timing of the 50hz physics)
@@ -239,7 +248,8 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
                     - These should also be atomic. That way the atomic vars' const refs can be passed around and the whole process can take place over worker threads.
                         - I think it could be like a set of jobs sorted by a breadth first approach so that as soon as one matrix is calculated and the is_dirty flag is turned off, 
         - If decide to transition into a transform hierarchy:
-            - [ ] Automatically update world transforms of children gameobjects.
+            - [ ] ~~Automatically update world transforms of children gameobjects.~~
+            - [ ] Create job system to easily update transform hierarchy.
     - Thoughts on phys obj creation system:
         - Forcing that assymetrical phys obj creation method (w/ `create_physics_object_from_serialization()`) really sucks.
         - I think that you should be able to create a physics object that's empty, and then after that do `scene_serialize()` and create a default physics object in the type you're looking for, or something bc this really ain't it.
@@ -298,8 +308,10 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
 1. Add cascaded shadow maps to renderer.
     - @TODO.
     - [ ] Add player shadow as well, but using a different camera setup.
+        - Drop shadow.
 
 1. Skeletal animations using compute shaders.
+    - [ ] See `@IQHEWRIHDFKNAXI` for levels of detail and round-robin system.
     - [ ] Create buffers to store the deformed models.
         - 1 per skinned mesh thingy.
     - [ ] Add support for GLTF2 filetype for models.
@@ -346,4 +358,4 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - GOAL cont: And then work on the renderer for vulkan!
     - [ ] Create/delete framebuffers.
     - [ ] Create/delete images, views, and samplers.
-    - [ ] Run mipmapping.
+    - [ ] Run mipmapping generation.
