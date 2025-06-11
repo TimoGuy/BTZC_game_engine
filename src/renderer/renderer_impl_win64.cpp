@@ -349,7 +349,7 @@ void BT::Renderer::Impl::calc_ideal_standard_window_dim_and_apply_center_hints()
 void BT::Renderer::Impl::create_window_with_gfx_context(string const& title)
 {
     // Load window icon.
-    string window_icon_fname{ BTZC_GAME_ENGINE_ASSET_SETTINGS_PATH "app_icon.png" };
+    string window_icon_fname{ BTZC_GAME_ENGINE_ASSET_SETTINGS_PATH "app_icon_48x48.png" };
     int32_t width;
     int32_t height;
     int32_t num_channels;
@@ -378,17 +378,23 @@ void BT::Renderer::Impl::create_window_with_gfx_context(string const& title)
     }
 
     // Resize to wanted icon sizes.
-    // constexpr array<uint32_t, 4> k_wanted_icon_sizes{ 16, 32, 48, 256 };
-
-    // constexpr array<uint32_t, 1> k_wanted_icon_sizes{ 256 };
-    // vector<GLFWimage> window_icons;
-    // for (uint32_t wanted_size : k_wanted_icon_sizes)
-    // {
-    //     stbir_resize_uint8_srgb(data, )
-    //     window_icons.emplace_back(wanted_size, wanted_size, data);
-    // }
-
-    GLFWimage window_icon{ width, height, data };
+    // @NOTE: @TODO: FUCK GLFW!!!!!! Make your own win32 wrapper or set the win32
+    //   icon selection to a different one than the shit glfw has. If I provide
+    //   16x16 and a 48x48 icons for win32, glfw will select the 16x16 for the 16x16
+    //   AND the 32x32 instead of the 48x48. So the big icon looks like hot garbage.
+    // @NOTE: 16x16 and 48x48 icons for windows are the best sizes w/ the different
+    //   sizes for windows (taskbar (esp. XL size) and decorated window).
+    // @WORKAROUND: only provide the 48x48 icon. The 16x16 icon suffers but oh well.
+    constexpr array<uint32_t, 1> k_wanted_icon_sizes{ 48 };
+    vector<GLFWimage> window_icons;
+    for (uint32_t wanted_size : k_wanted_icon_sizes)
+    {
+        uint8_t* output_data{
+            stbir_resize_uint8_srgb(data, width, height, 0,
+                                    nullptr, wanted_size, wanted_size, 0,
+                                    STBIR_RGBA) };
+        window_icons.emplace_back(wanted_size, wanted_size, output_data);
+    }
 
     // Create window.
     stringstream full_title_str;
@@ -405,13 +411,12 @@ void BT::Renderer::Impl::create_window_with_gfx_context(string const& title)
                                        nullptr,
                                        nullptr);
     assert(m_window_handle != nullptr);
+    auto win_handle{ reinterpret_cast<GLFWwindow*>(m_window_handle) };
 
     // Set window icons.
-    auto win_handle{ reinterpret_cast<GLFWwindow*>(m_window_handle) };
-    // glfwSetWindowIcon(win_handle,
-    //                   static_cast<int>(window_icons.size()),
-    //                   window_icons.data());
-    glfwSetWindowIcon(win_handle, 1, &window_icon);
+    glfwSetWindowIcon(win_handle,
+                      static_cast<int>(window_icons.size()),
+                      window_icons.data());
     glfwShowWindow(win_handle);
 
     // Window callbacks.
