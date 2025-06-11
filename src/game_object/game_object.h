@@ -29,11 +29,14 @@ using std::vector;
 namespace BT
 {
 
-struct Game_object_transform
+struct Game_object_transform : public Scene_serialization_ifc
 {
     rvec3  position{ 0.0, 0.0, 0.0 };
     versor rotation = GLM_QUAT_IDENTITY_INIT;
     vec3   scale{ 0.0f, 0.0f, 0.0f };
+
+    // Scene_serialization_ifc.
+    void scene_serialize(Scene_serialization_mode mode, json& node_ref) override;
 };
 
 class Game_object : public Scene_serialization_ifc, public UUID_ifc
@@ -62,6 +65,7 @@ private:
     Renderer& m_renderer;
 
     Game_object_transform m_transform;
+    Game_object_transform m_local_transform;
 
     string m_name;
     UUID m_phys_obj_key;

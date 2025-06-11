@@ -16,6 +16,36 @@ using std::atomic_uint64_t;
 using std::max;
 
 
+void BT::Game_object_transform::scene_serialize(Scene_serialization_mode mode, json& node_ref)
+{
+    if (mode == SCENE_SERIAL_MODE_DESERIALIZE)
+    {
+        node_ref["position"][0] = position[0];
+        node_ref["position"][1] = position[1];
+        node_ref["position"][2] = position[2];
+        node_ref["rotation"][0] = rotation[0];
+        node_ref["rotation"][1] = rotation[1];
+        node_ref["rotation"][2] = rotation[2];
+        node_ref["rotation"][3] = rotation[3];
+        node_ref["scale"][0]    = scale[0];
+        node_ref["scale"][1]    = scale[1];
+        node_ref["scale"][2]    = scale[2];
+    }
+    else if (mode == SCENE_SERIAL_MODE_DESERIALIZE)
+    {
+        position[0] = node_ref["position"][0];
+        position[1] = node_ref["position"][1];
+        position[2] = node_ref["position"][2];
+        rotation[0] = node_ref["rotation"][0];
+        rotation[1] = node_ref["rotation"][1];
+        rotation[2] = node_ref["rotation"][2];
+        rotation[3] = node_ref["rotation"][3];
+        scale[0]    = node_ref["scale"][0];
+        scale[1]    = node_ref["scale"][1];
+        scale[2]    = node_ref["scale"][2];
+    }
+}
+
 BT::Game_object::Game_object(Input_handler& input_handler,
                              Physics_engine& phys_engine,
                              Renderer& renderer)
@@ -88,19 +118,11 @@ void BT::Game_object::remove_child(Game_object& remove_child)
 // Scene_serialization_ifc.
 void BT::Game_object::scene_serialize(Scene_serialization_mode mode, json& node_ref)
 {
+    m_transform.scene_serialize(mode, node_ref["transform"]);
+    m_local_transform.scene_serialize(mode, node_ref["local_transform"]);
+
     if (mode == SCENE_SERIAL_MODE_SERIALIZE)
     {
-        node_ref["transform"]["position"][0] = m_transform.position[0];
-        node_ref["transform"]["position"][1] = m_transform.position[1];
-        node_ref["transform"]["position"][2] = m_transform.position[2];
-        node_ref["transform"]["rotation"][0] = m_transform.rotation[0];
-        node_ref["transform"]["rotation"][1] = m_transform.rotation[1];
-        node_ref["transform"]["rotation"][2] = m_transform.rotation[2];
-        node_ref["transform"]["rotation"][3] = m_transform.rotation[3];
-        node_ref["transform"]["scale"][0]    = m_transform.scale[0];
-        node_ref["transform"]["scale"][1]    = m_transform.scale[1];
-        node_ref["transform"]["scale"][2]    = m_transform.scale[2];
-
         node_ref["name"] = m_name;
         node_ref["guid"] = UUID_helper::to_pretty_repr(get_uuid());
 
@@ -153,17 +175,6 @@ void BT::Game_object::scene_serialize(Scene_serialization_mode mode, json& node_
     }
     else if (mode == SCENE_SERIAL_MODE_DESERIALIZE)
     {
-        m_transform.position[0] = node_ref["transform"]["position"][0];
-        m_transform.position[1] = node_ref["transform"]["position"][1];
-        m_transform.position[2] = node_ref["transform"]["position"][2];
-        m_transform.rotation[0] = node_ref["transform"]["rotation"][0];
-        m_transform.rotation[1] = node_ref["transform"]["rotation"][1];
-        m_transform.rotation[2] = node_ref["transform"]["rotation"][2];
-        m_transform.rotation[3] = node_ref["transform"]["rotation"][3];
-        m_transform.scale[0]    = node_ref["transform"]["scale"][0];
-        m_transform.scale[1]    = node_ref["transform"]["scale"][1];
-        m_transform.scale[2]    = node_ref["transform"]["scale"][2];
-
         m_name = node_ref["name"];
         assign_uuid(node_ref["guid"], true);
 
