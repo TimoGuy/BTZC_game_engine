@@ -1,5 +1,6 @@
 #include "render_object.h"
 
+#include "../game_object/game_object.h"
 #include "cglm/affine.h"
 #include "cglm/cglm.h"
 #include "logger.h"
@@ -44,20 +45,10 @@ void BT::Render_object::render(Render_layer active_layers)
 {
     if (m_layer & active_layers)
     {
-        m_model->render_model(m_transform);
+        mat4 transform;
+        m_game_obj.get_transform_handle().get_transform_as_mat4(transform);
+        m_model->render_model(transform);
     }
-}
-
-void BT::Render_object::set_transform(mat4 transform)
-{
-    glm_mat4_copy(transform, m_transform);
-}
-
-void BT::Render_object::get_position(vec3& position)
-{
-    vec4 pos4;
-    glm_vec4_copy(m_transform[3], pos4);  // Copied from `glm_decompose()`.
-    glm_vec3(pos4, position);
 }
 
 // Scene_serialization_ifc.
@@ -69,13 +60,6 @@ void BT::Render_object::scene_serialize(Scene_serialization_mode mode, json& nod
         node_ref["model_name"] = Model_bank::get_model_name(m_model);
         node_ref["render_layer"] = static_cast<uint8_t>(m_layer);
 
-        node_ref["transform"] = json::array();
-        for (size_t i = 0; i < 4; i++)
-            for (size_t j = 0; j < 4; j++)
-            {
-                node_ref["transform"][i][j] = m_transform[i][j];
-            }
-
         node_ref["tethered_phys_obj"] = (m_tethered_phys_obj.is_nil() ?
                                          nullptr :
                                          UUID_helper::to_pretty_repr(m_tethered_phys_obj));
@@ -85,13 +69,6 @@ void BT::Render_object::scene_serialize(Scene_serialization_mode mode, json& nod
         assign_uuid(node_ref["guid"], true);
         m_model = Model_bank::get_model(node_ref["model_name"]);
         m_layer = Render_layer(static_cast<uint8_t>(node_ref["render_layer"]));
-
-        assert(node_ref["transform"].is_array());
-        for (size_t i = 0; i < 4; i++)
-            for (size_t j = 0; j < 4; j++)
-            {
-                m_transform[i][j] = node_ref["transform"][i][j];
-            }
         
         if (node_ref["tethered_phys_obj"].is_string())
         {

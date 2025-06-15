@@ -3,6 +3,8 @@
 #include "../input_handler/input_handler.h"
 #include "../physics_engine/physics_engine.h"
 #include "../renderer/renderer.h"
+#include "cglm/quat.h"
+#include "cglm/vec3.h"
 #include "imgui.h"
 #include "imgui_internal.h"
 #include "logger.h"
@@ -16,7 +18,8 @@ using std::atomic_uint64_t;
 using std::max;
 
 
-void BT::Game_object_transform::scene_serialize(Scene_serialization_mode mode, json& node_ref)
+void BT::Transform_data::scene_serialize(Scene_serialization_mode mode,
+                                         json& node_ref)
 {
     if (mode == SCENE_SERIAL_MODE_DESERIALIZE)
     {
@@ -46,6 +49,101 @@ void BT::Game_object_transform::scene_serialize(Scene_serialization_mode mode, j
     }
 }
 
+BT::Transform_data BT::Transform_data::append_transform(Transform_data next)
+{
+    #define GLM_RVEC3_SCALE_V3(a, v, dest)                                      \
+    dest[0] = a[0] * v[0];                                                      \
+    dest[1] = a[1] * v[1];                                                      \
+    dest[2] = a[2] * v[2]
+
+    #define GLM_MAT3_MUL_RVEC3(m, v, dest)                                      \
+    do {                                                                        \
+    rvec3 temp;                                                                 \
+    temp[0] = m[0][0] * v[0] + m[1][0] * v[1] + m[2][0] * v[2];                 \
+    temp[1] = m[0][1] * v[0] + m[1][1] * v[1] + m[2][1] * v[2];                 \
+    temp[2] = m[0][2] * v[0] + m[1][2] * v[1] + m[2][2] * v[2];                 \
+    dest[0] = temp[0];                                                          \
+    dest[1] = temp[1];                                                          \
+    dest[2] = temp[2];                                                          \
+    } while(false)
+
+    #define GLM_RVEC3_ADD(a, b, dest)                                           \
+    dest[0] = a[0] + b[0];                                                      \
+    dest[1] = a[1] + b[1];                                                      \
+    dest[2] = a[2] + b[2]
+
+    Transform_data result;
+
+    mat3 my_rot_mat3;
+    glm_quat_mat3(rotation, my_rot_mat3);
+
+    GLM_RVEC3_SCALE_V3(next.position, scale, result.position);
+    GLM_MAT3_MUL_RVEC3(my_rot_mat3, result.position, result.position);
+    GLM_RVEC3_ADD(position, result.position, result.position);
+
+    glm_quat_mul(next.rotation, rotation, result.rotation);  // @NOTE: p is the rotation after q.
+
+    glm_vec3_mul(next.scale, scale, result.scale);
+
+    #undef GLM_RVEC3_SCALE_V3
+    #undef GLM_MAT3_MUL_RVEC3
+    #undef GLM_RVEC3_ADD
+
+    return result;
+}
+
+BT::Transform_data BT::Transform_data::calc_inverse()
+{
+    Transform_data result;
+    result.position[0] = -position[0];
+    result.position[1] = -position[1];
+    result.position[2] = -position[2];
+    glm_quat_inv(rotation, result.rotation);
+    result.scale[0] = 1.0f / scale[0];
+    result.scale[1] = 1.0f / scale[1];
+    result.scale[2] = 1.0f / scale[2];
+    return result;
+}
+
+bool BT::Game_object_transform::update_to_clean(Game_object_transform* parent_transform)
+{
+    bool changed{ false };
+    switch (m_dirty_flag.load())
+    {
+        case k_not_dirty:
+            // Do nothing.
+            break;
+
+        case k_global_trans_dirty:
+            // Update local transform.
+            m_local_transform = (parent_transform == nullptr ?
+                                 m_global_transform :
+                                 parent_transform->m_global_transform
+                                     .calc_inverse()
+                                     .append_transform(m_global_transform));
+            changed = true;
+            break;
+
+        case k_local_trans_dirty:
+            // Update global transform.
+            m_global_transform = (parent_transform == nullptr ?
+                                  m_local_transform :
+                                  parent_transform->m_global_transform
+                                      .append_transform(m_local_transform));
+            changed = true;
+            break;
+    }
+
+    m_dirty_flag.store(k_not_dirty);
+    return changed;
+}
+
+void BT::Game_object_transform::scene_serialize(Scene_serialization_mode mode, json& node_ref)
+{
+    m_global_transform.scene_serialize(mode, node_ref["global"]);
+    m_local_transform.scene_serialize(mode, node_ref["local"]);
+}
+
 BT::Game_object::Game_object(Input_handler& input_handler,
                              Physics_engine& phys_engine,
                              Renderer& renderer)
@@ -53,6 +151,11 @@ BT::Game_object::Game_object(Input_handler& input_handler,
     , m_phys_engine(phys_engine)
     , m_renderer(renderer)
 {
+}
+
+void BT::Game_object::set_assigned_pool(BT::Game_object_pool* pool)
+{
+    m_assigned_pool = pool;
 }
 
 void BT::Game_object::run_pre_physics_scripts(float_t physics_delta_time)
@@ -115,11 +218,31 @@ void BT::Game_object::remove_child(Game_object& remove_child)
     assert(false);
 }
 
+void BT::Game_object::propagate_transform_changes(Game_object* parent_game_object /*= nullptr*/)
+{
+    bool propagate_dirty{ false };
+    if (parent_game_object == nullptr && !m_parent.is_nil())
+    {
+        // Try querying for the parent game object.
+        parent_game_object = m_assigned_pool->get_one_no_lock(m_parent);
+    }
+
+    propagate_dirty = m_transform.update_to_clean(parent_game_object == nullptr ?
+                                                  nullptr :
+                                                  &parent_game_object->m_transform);
+    for (auto child : m_children)
+    {
+        auto child_go{ m_assigned_pool->get_one_no_lock(child) };
+        if (propagate_dirty)
+            child_go->m_transform.mark_dirty();
+        child_go->propagate_transform_changes(this);
+    }
+}
+
 // Scene_serialization_ifc.
 void BT::Game_object::scene_serialize(Scene_serialization_mode mode, json& node_ref)
 {
     m_transform.scene_serialize(mode, node_ref["transform"]);
-    m_local_transform.scene_serialize(mode, node_ref["local_transform"]);
 
     if (mode == SCENE_SERIAL_MODE_SERIALIZE)
     {
@@ -211,9 +334,9 @@ void BT::Game_object::scene_serialize(Scene_serialization_mode mode, json& node_
         // Deserialize render obj.
         if (node_ref["render_obj"].is_object())
         {
-            Render_object new_rend_obj{ nullptr,
-                                        Render_layer::RENDER_LAYER_DEFAULT,
-                                        GLM_MAT4_IDENTITY };
+            Render_object new_rend_obj{ *this,
+                                        nullptr,
+                                        Render_layer::RENDER_LAYER_DEFAULT };
             new_rend_obj.scene_serialize(mode, node_ref["render_obj"]);
             m_rend_obj_key =
                 m_renderer.get_render_object_pool().emplace(std::move(new_rend_obj));
@@ -250,6 +373,7 @@ void BT::Game_object_pool::remove(UUID key)
     if (m_game_objects.at(key)->get_parent_uuid().is_nil())
         remove_root_level_status(key);
 
+    m_game_objects.at(key)->set_assigned_pool(nullptr);
     m_game_objects.erase(key);
     unblock();
 }
@@ -566,6 +690,7 @@ BT::UUID BT::Game_object_pool::emplace_no_lock(unique_ptr<Game_object>&& game_ob
         m_root_level_game_objects_ordering.emplace_back(uuid);
     }
 
+    game_object->set_assigned_pool(this);
     m_game_objects.emplace(uuid, std::move(game_object));
 
     return uuid;
