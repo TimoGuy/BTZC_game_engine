@@ -92,27 +92,27 @@ int32_t main()
 
     // POPULATE TEST LEVEL (@TODO: Once level loading is implemented, replace this with it)
     // Physics objects.
-    auto player_char_phys_obj{
-        BT::Physics_object::create_character_controller(main_physics_engine,
-                                                        true,
-                                                        0.5f,
-                                                        2.0f,
-                                                        1.0f,
-                                                        { JPH::RVec3(0.0f, 5.1f, 0.0f),
-                                                          JPH::Quat::sIdentity() }) };
-    player_char_phys_obj->generate_uuid();
-    auto player_char_phys_obj_key =
-        main_physics_engine.emplace_physics_object(std::move(player_char_phys_obj));
+    // auto player_char_phys_obj{
+    //     BT::Physics_object::create_character_controller(main_physics_engine,
+    //                                                     true,
+    //                                                     0.5f,
+    //                                                     2.0f,
+    //                                                     1.0f,
+    //                                                     { JPH::RVec3(0.0f, 5.1f, 0.0f),
+    //                                                       JPH::Quat::sIdentity() }) };
+    // player_char_phys_obj->generate_uuid();
+    // auto player_char_phys_obj_key =
+    //     main_physics_engine.emplace_physics_object(std::move(player_char_phys_obj));
 
-    auto static_level_terrain_phys_obj{
-        BT::Physics_object::create_triangle_mesh(main_physics_engine,
-                                                 false,
-                                                 BT::Model_bank::get_model("probuilder_example"),
-                                                 JPH::EMotionType::Static,
-                                                 { JPH::RVec3(0.0f, 1.0f, 0.0f),
-                                                   JPH::Quat::sIdentity() }) };
-    static_level_terrain_phys_obj->generate_uuid();
-    main_physics_engine.emplace_physics_object(std::move(static_level_terrain_phys_obj));
+    // auto static_level_terrain_phys_obj{
+    //     BT::Physics_object::create_triangle_mesh(main_physics_engine,
+    //                                              false,
+    //                                              BT::Model_bank::get_model("probuilder_example"),
+    //                                              JPH::EMotionType::Static,
+    //                                              { JPH::RVec3(0.0f, 1.0f, 0.0f),
+    //                                                JPH::Quat::sIdentity() }) };
+    // static_level_terrain_phys_obj->generate_uuid();
+    // main_physics_engine.emplace_physics_object(std::move(static_level_terrain_phys_obj));
 
     // Render objects.
     auto& render_object_pool{ main_renderer.get_render_object_pool() };
@@ -125,54 +125,27 @@ int32_t main()
     // player_char_rend_obj.generate_uuid();
     // auto player_char_rend_obj_key = render_object_pool.emplace(std::move(player_char_rend_obj));
 
-    BT::Render_object static_level_terrain_rend_obj{
-        BT::Model_bank::get_model("probuilder_example"),
-        BT::Render_layer::RENDER_LAYER_DEFAULT,
-        GLM_MAT4_IDENTITY };
-    static_level_terrain_rend_obj.generate_uuid();
-    render_object_pool.emplace(std::move(static_level_terrain_rend_obj));
+    // BT::Render_object static_level_terrain_rend_obj{
+    //     BT::Model_bank::get_model("probuilder_example"),
+    //     BT::Render_layer::RENDER_LAYER_DEFAULT,
+    //     GLM_MAT4_IDENTITY };
+    // static_level_terrain_rend_obj.generate_uuid();
+    // render_object_pool.emplace(std::move(static_level_terrain_rend_obj));
 
     // Game objects.
-    BT::Game_object_pool game_object_pool([&]() {
+    BT::Game_object_pool game_object_pool;
+    game_object_pool.set_callback_fn([&]() {
         auto new_game_obj = unique_ptr<BT::Game_object>{
             new BT::Game_object(main_input_handler,
                                 main_physics_engine,
-                                main_renderer) };
+                                main_renderer,
+                                game_object_pool) };
         new_game_obj->set_name("New Game Object");
         new_game_obj->generate_uuid();
         return new_game_obj;
     });
 
     main_renderer.imgui_set_game_obj_pool_ref(&game_object_pool);  // @NOCHECKIN: Idk if this is the best...
-
-    // vector<unique_ptr<BT::Scripts::Script_ifc>> scripts;
-
-    // json scripts_as_json =
-    //     R"([
-    //         {
-    //             "script_type": "script_player_character_movement",
-    //             "script_datas": {
-    //                 "phys_obj_key": ""
-    //             }
-    //         },
-    //         {
-    //             "script_type": "script_apply_physics_transform_to_render_object",
-    //             "script_datas": {
-    //                 "rend_obj_key": ""
-    //             }
-    //         }
-    //     ])"_json;
-    // scripts_as_json[0]["script_datas"]["phys_obj_key"] = BT::UUID_helper::to_pretty_repr(player_char_phys_obj_key);
-    // scripts_as_json[1]["script_datas"]["rend_obj_key"] = BT::UUID_helper::to_pretty_repr(player_char_rend_obj_key);
-
-    // for (auto& script_as_json : scripts_as_json)
-    // {
-    //     scripts.emplace_back(BT::Scripts::create_script_from_serialized_datas(
-    //         &main_input_handler,
-    //         &main_physics_engine,
-    //         &main_renderer,
-    //         script_as_json));
-    // }
 
     json scene_as_json =
         R"([
@@ -189,7 +162,7 @@ int32_t main()
                     },
                     {
                         "script_datas": {
-                            "rend_obj_key": "fa2a0c0c-cfd4-47a7-b4e7-01dbbd3b3537"
+                            "game_obj_key": "aae5ebfb-7c2b-49a8-bcb9-658fdea987af"
                         },
                         "script_type": "script_apply_physics_transform_to_render_object"
                     }
@@ -201,8 +174,7 @@ int32_t main()
                     "transform": [[1.0, 0.0, 0.0, 0.0],
                                   [0.0, 1.0, 0.0, 0.0],
                                   [0.0, 0.0, 1.0, 0.0],
-                                  [0.0, 0.0, 0.0, 1.0]],
-                    "tethered_phys_obj": "08743552-fff6-49d2-ad15-efbd121ab773"
+                                  [0.0, 0.0, 0.0, 1.0]]
                 },
                 "physics_obj": {
                     "guid": "08743552-fff6-49d2-ad15-efbd121ab773",
@@ -214,6 +186,29 @@ int32_t main()
                     "init_transform": [[0.0, 5.1, 0.0],
                                        [0.0, 0.0, 0.0, 1.0]]
                 }
+            },
+            {
+                "children": [],
+                "guid": "aae5ebfb-7c2b-49a8-bcb9-658fdea987ae",
+                "name": "Static ground geometry",
+                "render_obj": {
+                    "guid": "fa2a0c0c-cfd4-47a7-b4e7-01dbbd3b3538",
+                    "model_name": "probuilder_example",
+                    "render_layer": 1,
+                    "transform": [[1.0, 0.0, 0.0, 0.0],
+                                  [0.0, 1.0, 0.0, 0.0],
+                                  [0.0, 0.0, 1.0, 0.0],
+                                  [0.0, 0.0, 0.0, 1.0]]
+                },
+                "physics_obj": {
+                    "guid": "08743552-fff6-49d2-ad15-efbd121ab772",
+                    "type": "triangle_mesh",
+                    "interpolate_transform": false,
+                    "model_name": "probuilder_example",
+                    "motion_type": 0,
+                    "init_transform": [[0.0, 0.0, 0.0],
+                                       [0.0, 0.0, 0.0, 1.0]]
+                }
             }
         ])"_json;
     for (auto& game_obj_node : scene_as_json)
@@ -221,7 +216,8 @@ int32_t main()
         unique_ptr<BT::Game_object> new_game_obj{
             new BT::Game_object(main_input_handler,
                                 main_physics_engine,
-                                main_renderer) };
+                                main_renderer,
+                                game_object_pool) };
         new_game_obj->scene_serialize(BT::SCENE_SERIAL_MODE_DESERIALIZE, game_obj_node);
         game_object_pool.emplace(std::move(new_game_obj));
     }
@@ -241,9 +237,6 @@ int32_t main()
         std::ofstream f{ BTZC_GAME_ENGINE_ASSET_SCENE_PATH "sumthin_cumming_outta_me.btscene" };
         f << root.dump(4);
     }
-
-    // Camera follow ref.
-    // main_renderer.get_camera_obj()->set_follow_object(player_char_rend_obj_key);
 
     // Timer.
     BT::Timer main_timer;

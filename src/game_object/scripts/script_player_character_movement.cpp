@@ -58,6 +58,7 @@ BT::Scripts::Factory_impl_funcs
     ::create_script_player_character_movement_from_serialized_datas(Input_handler* input_handler,
                                                                     Physics_engine* phys_engine,
                                                                     Renderer* renderer,
+                                                                    Game_object_pool* game_obj_pool,
                                                                     json const& node_ref)
 {
     return unique_ptr<Script_ifc>(

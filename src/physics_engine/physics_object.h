@@ -24,6 +24,8 @@ using std::vector;
 namespace BT
 {
 
+class Game_object;
+
 enum Physics_object_type
 {
     PHYSICS_OBJECT_TYPE_TRIANGLE_MESH = 0,
@@ -72,14 +74,17 @@ class Physics_object : public Scene_serialization_ifc, public UUID_ifc
 {
 public:
     static unique_ptr<Physics_object> create_physics_object_from_serialization(
+        Game_object& game_obj,
         Physics_engine& phys_engine,
         json& node_ref);
-    static unique_ptr<Physics_object> create_triangle_mesh(Physics_engine& phys_engine,
-                                                                     bool interpolate_transform,
-                                                                     Model const* model,
-                                                                     JPH::EMotionType motion_type,
-                                                                     Physics_transform&& init_transform);
-    static unique_ptr<Physics_object> create_character_controller(Physics_engine& phys_engine,
+    static unique_ptr<Physics_object> create_triangle_mesh(Game_object& game_obj,
+                                                           Physics_engine& phys_engine,
+                                                           bool interpolate_transform,
+                                                           Model const* model,
+                                                           JPH::EMotionType motion_type,
+                                                           Physics_transform&& init_transform);
+    static unique_ptr<Physics_object> create_character_controller(Game_object& game_obj,
+                                                                  Physics_engine& phys_engine,
                                                                   bool interpolate_transform,
                                                                   float_t radius,
                                                                   float_t height,
@@ -88,7 +93,8 @@ public:
 
 private:
     // Required to use a factory function to init.
-    Physics_object(Physics_engine const* phys_engine,
+    Physics_object(Game_object& game_obj,
+                   Physics_engine const* phys_engine,
                    bool interpolate_transform,
                    unique_ptr<Physics_object_type_impl_ifc>&& impl_type);
 public:
@@ -100,14 +106,15 @@ public:
     Physics_object_type_impl_ifc* get_impl() { return m_type_pimpl.get(); }
     void read_and_store_new_transform();
 
-    void get_transform_for_rendering(rvec3& out_position, versor& out_rotation);
+    void get_transform_for_game_obj(rvec3& out_position, versor& out_rotation);
 
     // Scene_serialization_ifc.
     void scene_serialize(Scene_serialization_mode mode, json& node_ref) override;
 
 private:
-    bool m_interpolate;
+    Game_object& m_game_obj;
     Physics_engine const* m_phys_engine;
+    bool m_interpolate;
 
     unique_ptr<Physics_object_type_impl_ifc> m_type_pimpl;
 

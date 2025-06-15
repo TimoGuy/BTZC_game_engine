@@ -1,5 +1,6 @@
 #include "physics_object.h"
 
+#include "../game_object/game_object.h"
 #include "../renderer/mesh.h"
 #include "Jolt/Jolt.h"
 #include "Jolt/Math/MathTypes.h"
@@ -47,6 +48,7 @@ void quat_to_json(JPH::Quat rotation, json& node_ref)
 }  // namespace
 
 unique_ptr<BT::Physics_object> BT::Physics_object::create_physics_object_from_serialization(
+    Game_object& game_obj,
     Physics_engine& phys_engine,
     json& node_ref)
 {
@@ -67,7 +69,8 @@ unique_ptr<BT::Physics_object> BT::Physics_object::create_physics_object_from_se
     switch (type)
     {
         case PHYSICS_OBJECT_TYPE_TRIANGLE_MESH:
-            new_phys_obj = create_triangle_mesh(phys_engine,
+            new_phys_obj = create_triangle_mesh(game_obj,
+                                                phys_engine,
                                                 node_ref["interpolate_transform"],
                                                 Model_bank::get_model(node_ref["model_name"]),
                                                 node_ref["motion_type"],
@@ -77,7 +80,8 @@ unique_ptr<BT::Physics_object> BT::Physics_object::create_physics_object_from_se
 
         case PHYSICS_OBJECT_TYPE_CHARACTER_CONTROLLER:
             new_phys_obj =
-                create_character_controller(phys_engine,
+                create_character_controller(game_obj,
+                                            phys_engine,
                                             node_ref["interpolate_transform"],
                                             node_ref["radius"],
                                             node_ref["height"],
@@ -97,7 +101,8 @@ unique_ptr<BT::Physics_object> BT::Physics_object::create_physics_object_from_se
     return new_phys_obj;
 }
 
-unique_ptr<BT::Physics_object> BT::Physics_object::create_triangle_mesh(Physics_engine& phys_engine,
+unique_ptr<BT::Physics_object> BT::Physics_object::create_triangle_mesh(Game_object& game_obj,
+                                                                        Physics_engine& phys_engine,
                                                                         bool interpolate_transform,
                                                                         Model const* model,
                                                                         JPH::EMotionType motion_type,
@@ -109,10 +114,11 @@ unique_ptr<BT::Physics_object> BT::Physics_object::create_triangle_mesh(Physics_
                                                  motion_type,
                                                  std::move(init_transform));
     return unique_ptr<Physics_object>(
-        new Physics_object(&phys_engine, interpolate_transform, std::move(tri_mesh)));
+        new Physics_object(game_obj, &phys_engine, interpolate_transform, std::move(tri_mesh)));
 }
 
-unique_ptr<BT::Physics_object> BT::Physics_object::create_character_controller(Physics_engine& phys_engine,
+unique_ptr<BT::Physics_object> BT::Physics_object::create_character_controller(Game_object& game_obj,
+                                                                               Physics_engine& phys_engine,
                                                                                bool interpolate_transform,
                                                                                float_t radius,
                                                                                float_t height,
@@ -126,13 +132,15 @@ unique_ptr<BT::Physics_object> BT::Physics_object::create_character_controller(P
                                                    crouch_height,
                                                    std::move(init_transform));
     return unique_ptr<Physics_object>(
-        new Physics_object(&phys_engine, interpolate_transform, std::move(cc)));
+        new Physics_object(game_obj, &phys_engine, interpolate_transform, std::move(cc)));
 }
 
-BT::Physics_object::Physics_object(Physics_engine const* phys_engine,
+BT::Physics_object::Physics_object(Game_object& game_obj,
+                                   Physics_engine const* phys_engine,
                                    bool interpolate_transform,
                                    unique_ptr<Physics_object_type_impl_ifc>&& impl_type)
-    : m_phys_engine{ phys_engine }
+    : m_game_obj{ game_obj }
+    , m_phys_engine{ phys_engine }
     , m_interpolate{ interpolate_transform }
     , m_type_pimpl{ std::move(impl_type) }
 {
@@ -149,7 +157,7 @@ void BT::Physics_object::read_and_store_new_transform()
     m_trip_buf_offset.store(trip_buf_offset + 1);
 }
 
-void BT::Physics_object::get_transform_for_rendering(rvec3& out_position, versor& out_rotation)
+void BT::Physics_object::get_transform_for_game_obj(rvec3& out_position, versor& out_rotation)
 {
     size_t trip_buf_offset{ m_trip_buf_offset.load() };
 

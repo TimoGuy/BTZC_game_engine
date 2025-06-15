@@ -146,16 +146,13 @@ void BT::Game_object_transform::scene_serialize(Scene_serialization_mode mode, j
 
 BT::Game_object::Game_object(Input_handler& input_handler,
                              Physics_engine& phys_engine,
-                             Renderer& renderer)
+                             Renderer& renderer,
+                             Game_object_pool& obj_pool)
     : m_input_handler(input_handler)
     , m_phys_engine(phys_engine)
     , m_renderer(renderer)
+    , m_obj_pool(obj_pool)
 {
-}
-
-void BT::Game_object::set_assigned_pool(BT::Game_object_pool* pool)
-{
-    m_assigned_pool = pool;
 }
 
 void BT::Game_object::run_pre_physics_scripts(float_t physics_delta_time)
@@ -182,6 +179,16 @@ void BT::Game_object::set_name(string&& name)
 string BT::Game_object::get_name()
 {
     return m_name;
+}
+
+BT::UUID BT::Game_object::get_phys_obj_key()
+{
+    return m_phys_obj_key;
+}
+
+BT::UUID BT::Game_object::get_rend_obj_key()
+{
+    return m_rend_obj_key;
 }
 
 BT::UUID BT::Game_object::get_parent_uuid()
@@ -224,7 +231,7 @@ void BT::Game_object::propagate_transform_changes(Game_object* parent_game_objec
     if (parent_game_object == nullptr && !m_parent.is_nil())
     {
         // Try querying for the parent game object.
-        parent_game_object = m_assigned_pool->get_one_no_lock(m_parent);
+        parent_game_object = m_obj_pool.get_one_no_lock(m_parent);
     }
 
     propagate_dirty = m_transform.update_to_clean(parent_game_object == nullptr ?
@@ -232,7 +239,7 @@ void BT::Game_object::propagate_transform_changes(Game_object* parent_game_objec
                                                   &parent_game_object->m_transform);
     for (auto child : m_children)
     {
-        auto child_go{ m_assigned_pool->get_one_no_lock(child) };
+        auto child_go{ m_obj_pool.get_one_no_lock(child) };
         if (propagate_dirty)
             child_go->m_transform.mark_dirty();
         child_go->propagate_transform_changes(this);
@@ -301,31 +308,39 @@ void BT::Game_object::scene_serialize(Scene_serialization_mode mode, json& node_
         m_name = node_ref["name"];
         assign_uuid(node_ref["guid"], true);
 
-        assert(node_ref["scripts"].is_array());
-        for (size_t scripts_idx = 0; scripts_idx < node_ref["scripts"].size();)
+        if (!node_ref["scripts"].is_null())
         {
-            m_scripts.emplace_back(
-                Scripts::create_script_from_serialized_datas(&m_input_handler,
-                                                             &m_phys_engine,
-                                                             &m_renderer,
-                                                             node_ref["scripts"][scripts_idx++]));
+            assert(node_ref["scripts"].is_array());
+            for (size_t scripts_idx = 0; scripts_idx < node_ref["scripts"].size();)
+            {
+                m_scripts.emplace_back(
+                    Scripts::create_script_from_serialized_datas(&m_input_handler,
+                                                                 &m_phys_engine,
+                                                                 &m_renderer,
+                                                                 &m_obj_pool,
+                                                                 node_ref["scripts"][scripts_idx++]));
+            }
         }
 
         m_parent = (node_ref["parent"].is_null() ?
                     UUID() :
                     UUID_helper::to_UUID(node_ref["parent"]));
 
-        assert(node_ref["children"].is_array());
-        for (auto& child_uuid : node_ref["children"])
+        if (!node_ref["children"].is_null())
         {
-            m_children.emplace_back(UUID_helper::to_UUID(child_uuid));
+            assert(node_ref["children"].is_array());
+            for (auto& child_uuid : node_ref["children"])
+            {
+                m_children.emplace_back(UUID_helper::to_UUID(child_uuid));
+            }
         }
 
         // Deserialize physics obj.
         if (node_ref["physics_obj"].is_object())
         {
             auto new_phys_obj{
-                Physics_object::create_physics_object_from_serialization(m_phys_engine,
+                Physics_object::create_physics_object_from_serialization(*this,
+                                                                         m_phys_engine,
                                                                          node_ref["physics_obj"]) };
             m_phys_obj_key =
                 m_phys_engine.emplace_physics_object(std::move(new_phys_obj));
@@ -345,10 +360,10 @@ void BT::Game_object::scene_serialize(Scene_serialization_mode mode, json& node_
 }
 
 
-BT::Game_object_pool::Game_object_pool(
+void BT::Game_object_pool::set_callback_fn(
     function<unique_ptr<Game_object>()>&& create_new_empty_game_obj_callback_fn)
-    : m_create_new_empty_game_obj_callback_fn{ std::move(create_new_empty_game_obj_callback_fn) }
 {
+    m_create_new_empty_game_obj_callback_fn = std::move(create_new_empty_game_obj_callback_fn);
 }
 
 BT::UUID BT::Game_object_pool::emplace(unique_ptr<Game_object>&& game_object)
@@ -373,7 +388,6 @@ void BT::Game_object_pool::remove(UUID key)
     if (m_game_objects.at(key)->get_parent_uuid().is_nil())
         remove_root_level_status(key);
 
-    m_game_objects.at(key)->set_assigned_pool(nullptr);
     m_game_objects.erase(key);
     unblock();
 }
@@ -396,7 +410,11 @@ vector<BT::Game_object*> const BT::Game_object_pool::checkout_all_as_list()
 BT::Game_object* BT::Game_object_pool::checkout_one(UUID uuid)
 {
     wait_until_free_then_block();
+    return get_one_no_lock(uuid);
+}
 
+BT::Game_object* BT::Game_object_pool::get_one_no_lock(UUID uuid)
+{
     if (m_game_objects.find(uuid) == m_game_objects.end())
     {
         logger::printef(logger::ERROR, "UUID was invalid: %s", UUID_helper::to_pretty_repr(uuid).c_str());
@@ -690,7 +708,6 @@ BT::UUID BT::Game_object_pool::emplace_no_lock(unique_ptr<Game_object>&& game_ob
         m_root_level_game_objects_ordering.emplace_back(uuid);
     }
 
-    game_object->set_assigned_pool(this);
     m_game_objects.emplace(uuid, std::move(game_object));
 
     return uuid;

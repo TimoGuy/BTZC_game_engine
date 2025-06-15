@@ -443,6 +443,9 @@ void BT::Camera::update_frontend_follow_orbit(Renderer& renderer,
 
     vec3 mvt_velocity{ 0.0f, 0.0f, 0.0f };
 
+    // @TODO: @NOCHECKIN: @THEA
+    #define TODO_THEA_REFACTOR_THE_CAM_FOLLOWING_STUFF 0
+    #if TODO_THEA_REFACTOR_THE_CAM_FOLLOWING_STUFF
     auto rend_objs{
         renderer.get_render_object_pool().checkout_render_obj_by_key({ fo.render_object_ref }) };
     if (!rend_objs.empty())
@@ -459,6 +462,7 @@ void BT::Camera::update_frontend_follow_orbit(Renderer& renderer,
         glm_vec3_scale(mvt_velocity, 1.0f / delta_time, mvt_velocity);
     }
     renderer.get_render_object_pool().return_render_objs(std::move(rend_objs));
+    #endif  // TODO_THEA_REFACTOR_THE_CAM_FOLLOWING_STUFF
 
     float_t auto_turn_delta{ 0.0f };
     mvt_velocity[1] = 0.0f;

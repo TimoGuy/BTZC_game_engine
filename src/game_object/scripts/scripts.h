@@ -22,6 +22,7 @@ namespace BT
 class Input_handler;
 class Physics_engine;
 class Renderer;
+class Game_object_pool;
 
 namespace Scripts
 {
@@ -81,7 +82,7 @@ inline Script_type get_script_type_from_name(string const& name)
 
 namespace Factory_impl_funcs
 {
-#define X(name)  unique_ptr<Script_ifc> create_script_ ## name ## _from_serialized_datas(Input_handler* input_handler, Physics_engine* phys_engine, Renderer* renderer, json const& node_ref);
+#define X(name)  unique_ptr<Script_ifc> create_script_ ## name ## _from_serialized_datas(Input_handler* input_handler, Physics_engine* phys_engine, Renderer* renderer, Game_object_pool* game_obj_pool, json const& node_ref);
 LIST_OF_SCRIPTS
 #undef X
 } // namespace Factory_impl_funcs
@@ -90,11 +91,12 @@ inline unique_ptr<Script_ifc> create_script_from_serialized_datas(
     Input_handler* input_handler,
     Physics_engine* phys_engine,
     Renderer* renderer,
+    Game_object_pool* game_obj_pool,
     json const& node_ref)
 {
     switch (Helper_funcs::get_script_type_from_name(node_ref["script_type"]))
     {
-        #define X(name)  case SCRIPT_TYPE_ ## name: return Factory_impl_funcs::create_script_ ## name ## _from_serialized_datas(input_handler, phys_engine, renderer, node_ref["script_datas"]);
+        #define X(name)  case SCRIPT_TYPE_ ## name: return Factory_impl_funcs::create_script_ ## name ## _from_serialized_datas(input_handler, phys_engine, renderer, game_obj_pool, node_ref["script_datas"]);
         LIST_OF_SCRIPTS
         #undef X
 

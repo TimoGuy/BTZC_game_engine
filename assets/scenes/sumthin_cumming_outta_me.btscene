@@ -28,34 +28,7 @@
         "render_obj": {
             "guid": "fa2a0c0c-cfd4-47a7-b4e7-01dbbd3b3537",
             "model_name": "box_0.5_2",
-            "render_layer": 1,
-            "tethered_phys_obj": "08743552-fff6-49d2-ad15-efbd121ab773",
-            "transform": [
-                [
-                    1.0,
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                [
-                    0.0,
-                    1.0,
-                    0.0,
-                    0.0
-                ],
-                [
-                    0.0,
-                    0.0,
-                    1.0,
-                    0.0
-                ],
-                [
-                    0.0,
-                    0.0,
-                    0.0,
-                    1.0
-                ]
-            ]
+            "render_layer": 1
         },
         "scripts": [
             {
@@ -66,10 +39,50 @@
             },
             {
                 "script_datas": {
-                    "rend_obj_key": "fa2a0c0c-cfd4-47a7-b4e7-01dbbd3b3537"
+                    "game_obj_key": "aae5ebfb-7c2b-49a8-bcb9-658fdea987af"
                 },
                 "script_type": "script_apply_physics_transform_to_render_object"
             }
-        ]
+        ],
+        "transform": {
+            "global": null,
+            "local": null
+        }
+    },
+    {
+        "children": [],
+        "guid": "aae5ebfb-7c2b-49a8-bcb9-658fdea987ae",
+        "name": "Static ground geometry",
+        "parent": null,
+        "physics_obj": {
+            "guid": "08743552-fff6-49d2-ad15-efbd121ab772",
+            "initial_transform": [
+                [
+                    0.0,
+                    1.0,
+                    0.0
+                ],
+                [
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0
+                ]
+            ],
+            "interpolate_transform": false,
+            "model_name": "probuilder_example",
+            "motion_type": 0,
+            "type": "triangle_mesh"
+        },
+        "render_obj": {
+            "guid": "fa2a0c0c-cfd4-47a7-b4e7-01dbbd3b3538",
+            "model_name": "probuilder_example",
+            "render_layer": 1
+        },
+        "scripts": [],
+        "transform": {
+            "global": null,
+            "local": null
+        }
     }
 ]

@@ -37,12 +37,9 @@ class Render_object : public Scene_serialization_ifc, public UUID_ifc
 public:
     Render_object(Game_object& game_obj,
                   Model const* model,
-                  Render_layer layer,
-                  UUID tethered_phys_obj = UUID());
+                  Render_layer layer);
 
     void render(Render_layer active_layers);
-
-    inline UUID get_tethered_phys_obj_key() const { return m_tethered_phys_obj; }
 
     // Scene_serialization_ifc.
     void scene_serialize(Scene_serialization_mode mode, json& node_ref) override;
@@ -51,9 +48,6 @@ private:
     Game_object& m_game_obj;
     Model const* m_model;
     Render_layer m_layer;
-
-    // (Optional) Tethered physics object.
-    UUID m_tethered_phys_obj;
 };
 
 // @COPYPASTA: Not quite copypasta. It's a little bit different.

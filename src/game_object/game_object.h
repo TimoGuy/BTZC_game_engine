@@ -35,7 +35,7 @@ struct Transform_data : public Scene_serialization_ifc
 {
     rvec3  position{ 0.0, 0.0, 0.0 };
     versor rotation = GLM_QUAT_IDENTITY_INIT;
-    vec3   scale{ 0.0f, 0.0f, 0.0f };
+    vec3   scale{ 1.0f, 1.0f, 1.0f };
 
     // Scene_serialization_ifc.
     void scene_serialize(Scene_serialization_mode mode, json& node_ref) override;
@@ -134,15 +134,16 @@ class Game_object : public Scene_serialization_ifc, public UUID_ifc
 public:
     Game_object(Input_handler& input_handler,
                 Physics_engine& phys_engine,
-                Renderer& renderer);
-
-    void set_assigned_pool(Game_object_pool* pool);
+                Renderer& renderer,
+                Game_object_pool& obj_pool);
 
     void run_pre_physics_scripts(float_t physics_delta_time);
     void run_pre_render_scripts(float_t delta_time);
 
     void set_name(string&& name);
     string get_name();
+    UUID get_phys_obj_key();
+    UUID get_rend_obj_key();
     UUID get_parent_uuid();
     vector<UUID> get_children_uuids();
     void insert_child(Game_object& new_child, size_t position = 0);
@@ -158,7 +159,7 @@ private:
     Input_handler& m_input_handler;
     Physics_engine& m_phys_engine;
     Renderer& m_renderer;
-    Game_object_pool* m_assigned_pool{ nullptr };
+    Game_object_pool& m_obj_pool;
 
     Game_object_transform m_transform;
 
@@ -176,7 +177,7 @@ private:
 class Game_object_pool : public Scene_serialization_ifc
 {
 public:
-    Game_object_pool(function<unique_ptr<Game_object>()>&& create_new_empty_game_obj_callback_fn);
+    void set_callback_fn(function<unique_ptr<Game_object>()>&& create_new_empty_game_obj_callback_fn);
 
     UUID emplace(unique_ptr<Game_object>&& game_object);
     void remove(UUID key);
