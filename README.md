@@ -255,7 +255,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - I don't think that the renderer should be in charge of ImGui stuff. It kinda doesn't make sense. The renderer should just be in charge of rendering render objects, and ImGui is a system that touches everything, so it shouldn't be part of the renderer at all. Just a `render_imgui()` function callout and that's it.
         - It doesn't need to be a callout but idk, it's weird how this just kinda happens and it shouldn't.
         - Maybe create a class that does touch everything, and the renderer just holds a reference to it and calls `render_imgui()` from there. That way it's like a callout but the renderer doesn't have to have its hands in every single system it wants to touch.
-        - [ ] Yeah, this change needs to be made. DO IT.
+        - [x] Yeah, this change needs to be made. DO IT.
 
 1. Debug views.
     - [ ] Controlling the transform of objects.

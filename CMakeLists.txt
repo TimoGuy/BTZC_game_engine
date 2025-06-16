@@ -86,6 +86,8 @@ add_executable(${PROJECT_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/camera_read_ifc.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/camera.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/camera.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/imgui_renderer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/imgui_renderer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/material_impl_opaque_shaded.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/material_impl_opaque_shaded.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/material_impl_opaque_texture_shaded.cpp

@@ -2,6 +2,7 @@
 
 #include "../input_handler/input_handler.h"
 #include "camera_read_ifc.h"
+#include "imgui_renderer.h"
 #include "render_object.h"
 #include <memory>
 #include <string>
@@ -13,13 +14,12 @@ namespace BT
 {
 
 class Camera;
-class Game_object_pool;
 
 class Renderer : public Camera_read_ifc
 {
 public:
     // Setup and teardown renderer.
-    Renderer(Input_handler& input_handler, string const& title);
+    Renderer(Input_handler& input_handler, ImGui_renderer& imgui_renderer, string const& title);
     ~Renderer();
 
     bool get_requesting_close();
@@ -47,13 +47,12 @@ public:
 
     // Create image texture.
 
-    // ImGui.
-    void imgui_set_game_obj_pool_ref(Game_object_pool* pool) { m_game_obj_pool = pool; }
+    // Imgui.
+    void render_imgui_game_view();
 
     class Impl;
 
 private:
-    Game_object_pool* m_game_obj_pool{ nullptr };
     std::unique_ptr<Impl> m_pimpl;
 };
 

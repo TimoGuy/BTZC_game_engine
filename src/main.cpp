@@ -11,6 +11,7 @@
 #include "logger/logger.h"
 #include "physics_engine/physics_engine.h"
 #include "physics_engine/physics_object.h"
+#include "renderer/imgui_renderer.h"  // @DEBUG
 #include "renderer/material.h"  // @DEBUG
 #include "renderer/material_impl_opaque_shaded.h"  // @DEBUG
 #include "renderer/material_impl_opaque_texture_shaded.h"  // @DEBUG
@@ -37,7 +38,9 @@ int32_t main()
     BT::Watchdog_timer main_watchdog;
 
     BT::Input_handler main_input_handler;
+    BT::ImGui_renderer main_renderer_imgui_renderer;
     BT::Renderer main_renderer{ main_input_handler,
+                                main_renderer_imgui_renderer,
                                 "No Train No Game" };
     BT::Physics_engine main_physics_engine;
 
@@ -145,7 +148,10 @@ int32_t main()
         return new_game_obj;
     });
 
-    main_renderer.imgui_set_game_obj_pool_ref(&game_object_pool);  // @NOCHECKIN: Idk if this is the best...
+    // Setup imgui renderer.
+    main_renderer_imgui_renderer.set_game_obj_pool_ref(&game_object_pool);
+    main_renderer_imgui_renderer.set_camera_ref(main_renderer.get_camera_obj());
+    main_renderer_imgui_renderer.set_renderer_ref(&main_renderer);
 
     json scene_as_json =
         R"([

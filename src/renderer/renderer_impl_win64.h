@@ -3,6 +3,7 @@
 #include "../input_handler/input_handler.h"
 #include "camera.h"
 #include "cglm/cglm.h"
+#include "imgui_renderer.h"
 #include "render_object.h"
 #include "renderer.h"
 #include <cstdint>
@@ -17,7 +18,7 @@ namespace BT
 class Renderer::Impl
 {
 public:
-    Impl(Renderer& renderer, Input_handler& input_handler, string const& title);
+    Impl(Renderer& renderer, ImGui_renderer& imgui_renderer, Input_handler& input_handler, string const& title);
     ~Impl();
 
     bool get_requesting_close();
@@ -35,8 +36,11 @@ public:
 
     Render_object_pool& get_render_object_pool();
 
+    void render_imgui_game_view();
+
 private:
     Renderer& m_renderer;
+    ImGui_renderer& m_imgui_renderer;
 
     void setup_glfw_and_opengl46_hints();
     

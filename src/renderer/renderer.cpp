@@ -8,8 +8,8 @@
 using std::string;
 
 
-BT::Renderer::Renderer(Input_handler& input_handler, string const& title)
-    : m_pimpl{ std::make_unique<Impl>(*this, input_handler, title) }
+BT::Renderer::Renderer(Input_handler& input_handler, ImGui_renderer& imgui_renderer, string const& title)
+    : m_pimpl{ std::make_unique<Impl>(*this, imgui_renderer, input_handler, title) }
 {
 }
 
@@ -47,4 +47,10 @@ BT::Camera* BT::Renderer::get_camera_obj()
 BT::Render_object_pool& BT::Renderer::get_render_object_pool()
 {
     return m_pimpl->get_render_object_pool();
+}
+
+// Imgui.
+void BT::Renderer::render_imgui_game_view()
+{
+    m_pimpl->render_imgui_game_view();
 }
