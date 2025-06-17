@@ -100,6 +100,18 @@ public:
     #undef BT_GAME_OBJECT_TRANSFORM_SET_ROTATION_CONTENTS
     #undef BT_GAME_OBJECT_TRANSFORM_SET_SCALE_CONTENTS
 
+    void get_local_transform_decomposed_data(rvec3& out_position,
+                                             versor& out_rotation,
+                                             vec3& out_scale)
+    {
+        assert(m_dirty_flag == k_not_dirty);
+        out_position[0] = m_local_transform.position[0];
+        out_position[1] = m_local_transform.position[1];
+        out_position[2] = m_local_transform.position[2];
+        glm_quat_copy(m_local_transform.rotation, out_rotation);
+        glm_vec3_copy(m_local_transform.scale, out_scale);
+    }
+
     void get_transform_as_mat4(mat4& out_transform)
     {
         assert(m_dirty_flag == k_not_dirty);
@@ -154,6 +166,8 @@ public:
 
     // Scene_serialization_ifc.
     void scene_serialize(Scene_serialization_mode mode, json& node_ref) override;
+
+    void render_imgui_local_transform();
 
 private:
     Input_handler& m_input_handler;

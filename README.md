@@ -215,7 +215,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
     - [x] Add a simple icon to exe and window.
         - [x] Leave instructions for how to create the icon and exe.
 
-1. IN PROGRESS: Refactor?
+1. DONE: Refactor?
     - Thoughts:
         - I need somewhere to create a new empty gameobject!!!
         - [x] Create a callback function.

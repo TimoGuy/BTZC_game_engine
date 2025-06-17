@@ -3,6 +3,8 @@
 #include "../input_handler/input_handler.h"
 #include "../physics_engine/physics_engine.h"
 #include "../renderer/renderer.h"
+#include "cglm/euler.h"
+#include "cglm/mat4.h"
 #include "cglm/quat.h"
 #include "cglm/vec3.h"
 #include "imgui.h"
@@ -359,6 +361,63 @@ void BT::Game_object::scene_serialize(Scene_serialization_mode mode, json& node_
     }
 }
 
+void BT::Game_object::render_imgui_local_transform()
+{
+    rvec3 pos;
+    versor rot;
+    vec3 sca;
+    m_transform.get_local_transform_decomposed_data(pos, rot, sca);
+
+    bool changed{ false };
+
+    if (ImGui::DragScalarN("Position",
+                           (sizeof(pos[0]) == sizeof(float_t) ?
+                                ImGuiDataType_Float :
+                                ImGuiDataType_Double),
+                           pos,
+                           3))
+    {
+        // Apply position.
+        m_transform.set_local_pos(pos);
+        changed = true;
+    }
+
+    mat4 rot_mat;
+    glm_quat_mat4(rot, rot_mat);
+    vec3 euler_angles;
+    glm_euler_angles(rot_mat, euler_angles);
+    euler_angles[0] = glm_deg(euler_angles[0]);
+    euler_angles[1] = glm_deg(euler_angles[1]);
+    euler_angles[2] = glm_deg(euler_angles[2]);
+    if (ImGui::DragFloat3("Rotation", euler_angles))
+    {
+        // Apply rotation.
+        euler_angles[0] = glm_rad(euler_angles[0]);
+        euler_angles[1] = glm_rad(euler_angles[1]);
+        euler_angles[2] = glm_rad(euler_angles[2]);
+        mat4 rot_mat_apply;
+        // glm_euler_zyx(euler_angles, rot_mat_apply);
+        glm_euler_xyz(euler_angles, rot_mat_apply);
+        versor rot_quat_apply;
+        glm_mat4_quat(rot_mat_apply, rot_quat_apply);
+        m_transform.set_local_rot(rot_quat_apply);
+        changed = true;
+    }
+
+    if (ImGui::DragFloat3("Scale", sca))
+    {
+        // Apply scale.
+        m_transform.set_local_sca(sca);
+        changed = true;
+    }
+
+    if (changed)
+    {
+        // Update dirty transform.
+        propagate_transform_changes();
+    }
+}
+
 
 void BT::Game_object_pool::set_callback_fn(
     function<unique_ptr<Game_object>()>&& create_new_empty_game_obj_callback_fn)
@@ -572,7 +631,10 @@ void BT::Game_object_pool::render_imgui_scene_hierarchy()
 
         ImGui::Text("UUID: %s", UUID_helper::to_pretty_repr(game_obj->get_uuid()).c_str());
 
-        // @TODO: Add more like transform and stuff.
+        if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            game_obj->render_imgui_local_transform();
+        }
     }
     else
     {
