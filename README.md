@@ -262,13 +262,13 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - [ ] Add local transform editing in imgui inspector.
             - [x] Initial.
             - [ ] Fix rotation issues.
-        - [ ] Add imguizmo on selected object.
+        - [x] Add imguizmo on selected object.
             - [x] Initial.
             - [x] Fix the upside down issue.
             - [x] Fix not-being-able-to-click issue.
                 - Perhaps I could just change it so
                 - SOLUTION: There's a provided accept-inputs-from-here function `ImGuizmo::SetAlternateWindow()`
-            - [ ] Add changing the transform space of the gizmo.
+            - [x] Add changing the transform space of the gizmo.
                 - Keep it universal tho.
         - [ ] @TEST: The local and global object transform hierarchy stuff!
     - [ ] Collision represented as green wireframe triangles.
@@ -286,6 +286,9 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
     - [ ] @FUTURE: ~~Follow path for player character.~~
         - Select a character and enable follow path debug view.
         - Over the past 500 moved/active physics steps, draw a cube that represents the collision shape and transform of where the character was.
+    - [ ] Ch ch ch changes.
+        - [ ] Only expand hierarchy tree when double click or use arrow.
+        - [ ] Remove the between hidden buttons for rearranging until rearranging mode. That way arrow key navigation isn't weird.
 
 1. Lower priority refactor?
     - Thoughts on phys obj creation system:

@@ -149,6 +149,8 @@ public:
                 Renderer& renderer,
                 Game_object_pool& obj_pool);
 
+    static void set_imgui_gizmo_trans_space(int32_t trans_space) { s_imgui_gizmo_trans_space = trans_space; }
+
     void run_pre_physics_scripts(float_t physics_delta_time);
     void run_pre_render_scripts(float_t delta_time);
 
@@ -175,6 +177,8 @@ private:
     Physics_engine& m_phys_engine;
     Renderer& m_renderer;
     Game_object_pool& m_obj_pool;
+
+    inline static int32_t s_imgui_gizmo_trans_space{ 0 };
 
     Game_object_transform m_transform;
 
