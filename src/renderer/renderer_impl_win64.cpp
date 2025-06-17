@@ -6,6 +6,7 @@
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
+#include "ImGuizmo.h"
 
 // @NOTE: Must be imported in this order
 #include "glad/glad.h"
@@ -284,6 +285,11 @@ void BT::Renderer::Impl::render_imgui_game_view()
         m_main_viewport_wanted_dims.width = content_size.x;
         m_main_viewport_wanted_dims.height = content_size.y;
     }
+
+    // Set ImGuizmo draw bounds.
+    auto rect_min{ ImGui::GetItemRectMin() };
+    auto rect_size{ ImGui::GetItemRectSize() };
+    ImGuizmo::SetRect(rect_min.x, rect_min.y, rect_size.x, rect_size.y);
 }
 
 void BT::Renderer::Impl::setup_glfw_and_opengl46_hints()
@@ -492,6 +498,10 @@ void BT::Renderer::Impl::render_imgui()
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
+
+    // Start ImGuizmo frame.
+    ImGuizmo::SetOrthographic(false);
+    ImGuizmo::BeginFrame();
 
     // Render imgui stuff.
     m_imgui_renderer.render_imgui();

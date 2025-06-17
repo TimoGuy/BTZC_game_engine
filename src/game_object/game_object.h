@@ -168,6 +168,7 @@ public:
     void scene_serialize(Scene_serialization_mode mode, json& node_ref) override;
 
     void render_imgui_local_transform();
+    void render_imgui_transform_gizmo();
 
 private:
     Input_handler& m_input_handler;

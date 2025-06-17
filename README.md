@@ -261,6 +261,10 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
     - [ ] Controlling the transform of objects.
         - [ ] Add local transform editing in imgui inspector.
         - [ ] Add imguizmo on selected object.
+            - [x] Initial.
+            - [x] Fix the upside down issue.
+            - [ ] Fix not-being-able-to-click issue.
+                - Perhaps I could just change it so
         - [ ] @TEST: The local and global object transform hierarchy stuff!
     - [ ] Collision represented as green wireframe triangles.
         - Depth test enabled.

@@ -40,6 +40,7 @@ set(DEPENDENCY_INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glad/include
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glfw/include
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/imgui  # Header only.
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/ImGuizmo
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/JoltPhysics
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/json/include
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/stb  # Header only (essentially).
@@ -142,6 +143,10 @@ add_executable(${PROJECT_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/imgui/imstb_truetype.h
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/imgui/misc/cpp/imgui_stdlib.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/imgui/misc/cpp/imgui_stdlib.h
+
+    # ImGuizmo source files.
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/ImGuizmo/ImGuizmo.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/ImGuizmo/ImGuizmo.h
 
     # stb header files.
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/stb/stb_image.h

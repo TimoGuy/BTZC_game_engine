@@ -2,12 +2,15 @@
 
 #include "../input_handler/input_handler.h"
 #include "../physics_engine/physics_engine.h"
+#include "../renderer/camera.h"
 #include "../renderer/renderer.h"
+#include "cglm/affine.h"
 #include "cglm/euler.h"
 #include "cglm/mat4.h"
 #include "cglm/quat.h"
 #include "cglm/vec3.h"
 #include "imgui.h"
+#include "ImGuizmo.h"
 #include "imgui_internal.h"
 #include "logger.h"
 #include "misc/cpp/imgui_stdlib.h"
@@ -395,9 +398,17 @@ void BT::Game_object::render_imgui_local_transform()
         euler_angles[0] = glm_rad(euler_angles[0]);
         euler_angles[1] = glm_rad(euler_angles[1]);
         euler_angles[2] = glm_rad(euler_angles[2]);
+        mat4 rot_mat_apply_x;
+        glm_rotate_make(rot_mat_apply_x, euler_angles[0], vec3{ 1.0f, 0.0f, 0.0f });
+        mat4 rot_mat_apply_y;
+        glm_rotate_make(rot_mat_apply_y, euler_angles[1], vec3{ 0.0f, 1.0f, 0.0f });
+        mat4 rot_mat_apply_z;
+        glm_rotate_make(rot_mat_apply_z, euler_angles[2], vec3{ 0.0f, 0.0f, 1.0f });
         mat4 rot_mat_apply;
+        glm_mat4_mul(rot_mat_apply_x, rot_mat_apply_y, rot_mat_apply);
+        glm_mat4_mul(rot_mat_apply, rot_mat_apply_z, rot_mat_apply);
         // glm_euler_zyx(euler_angles, rot_mat_apply);
-        glm_euler_xyz(euler_angles, rot_mat_apply);
+        // glm_euler_xyz(euler_angles, rot_mat_apply);
         versor rot_quat_apply;
         glm_mat4_quat(rot_mat_apply, rot_quat_apply);
         m_transform.set_local_rot(rot_quat_apply);
@@ -414,6 +425,50 @@ void BT::Game_object::render_imgui_local_transform()
     if (changed)
     {
         // Update dirty transform.
+        propagate_transform_changes();
+    }
+}
+
+void BT::Game_object::render_imgui_transform_gizmo()
+{
+    mat4 proj;
+    mat4 view;
+    mat4 proj_view;
+    m_renderer.get_camera_obj()->fetch_calculated_camera_matrices(proj, view, proj_view);
+    proj[1][1] *= -1.0f;  // Fix neg-Y issue.
+
+    mat4 render_mat;
+    m_transform.get_transform_as_mat4(render_mat);
+
+    mat4 delta_mat;
+    if (ImGuizmo::Manipulate(&view[0][0],
+                             &proj[0][0],
+                             ImGuizmo::TRANSLATE,
+                             ImGuizmo::LOCAL,
+                             &render_mat[0][0],
+                             &delta_mat[0][0]))
+    {
+        vec4 tra;
+        mat4 rot;
+        vec3 sca;
+        glm_decompose(delta_mat, tra, rot, sca);
+
+        versor rot_v;
+        glm_mat4_quat(rot, rot_v);
+
+        rvec3  local_pos;
+        versor local_rot;
+        vec3   local_sca;
+        m_transform.get_local_transform_decomposed_data(local_pos, local_rot, local_sca);
+
+        local_pos[0] += tra[0];
+        local_pos[1] += tra[1];
+        local_pos[2] += tra[2];
+        glm_quat_mul(rot_v, local_rot, local_rot);
+        glm_vec3_mul(local_sca, sca, local_sca);
+
+        m_transform.set_local_pos_rot_sca(local_pos, local_rot, local_sca);
+
         propagate_transform_changes();
     }
 }
@@ -635,6 +690,8 @@ void BT::Game_object_pool::render_imgui_scene_hierarchy()
         {
             game_obj->render_imgui_local_transform();
         }
+
+        game_obj->render_imgui_transform_gizmo();
     }
     else
     {
