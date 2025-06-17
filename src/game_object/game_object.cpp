@@ -404,7 +404,7 @@ void BT::Game_object::render_imgui_local_transform()
         changed = true;
     }
 
-    if (ImGui::DragFloat3("Scale", sca))
+    if (ImGui::DragFloat3("Scale", sca, 0.1f))
     {
         // Apply scale.
         m_transform.set_local_sca(sca);
