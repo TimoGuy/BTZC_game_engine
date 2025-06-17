@@ -260,6 +260,8 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
 1. Debug views.
     - [ ] Controlling the transform of objects.
         - [ ] Add local transform editing in imgui inspector.
+            - [x] Initial.
+            - [ ] Fix rotation issues.
         - [ ] Add imguizmo on selected object.
             - [x] Initial.
             - [x] Fix the upside down issue.
