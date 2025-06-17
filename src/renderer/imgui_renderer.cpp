@@ -3,6 +3,8 @@
 #include "../game_object/game_object.h"
 #include "camera.h"
 #include "imgui.h"
+#include "ImGuizmo.h"
+#include "imgui_internal.h"
 
 
 void BT::ImGui_renderer::render_imgui()
@@ -90,6 +92,9 @@ void BT::ImGui_renderer::render_imgui()
 
             // Image of game view.
             m_renderer->render_imgui_game_view();
+
+            // Allow ImGuizmo to accept inputs from this window.
+            ImGuizmo::SetAlternativeWindow(ImGui::GetCurrentWindow());
         }
         ImGui::End();
         ImGui::PopStyleVar();

@@ -272,9 +272,10 @@ void BT::Renderer::Impl::render_imgui_game_view()
     ImVec2 content_size{ ImGui::GetContentRegionAvail() };
     ImGui::ImageWithBg(m_ldr_color_texture, content_size);
 
-    m_camera.set_hovering_over_game_viewport(ImGui::IsItemHovered());
+    bool is_item_hovered{ ImGui::IsItemHovered() };
+    m_camera.set_hovering_over_game_viewport(is_item_hovered);
 
-    if (ImGui::IsItemHovered() || m_camera.is_mouse_captured())
+    if (is_item_hovered || m_camera.is_mouse_captured())
     {
         // Communicate that no capture mouse wanted when hovering over this viewport.
         ImGui::SetNextFrameWantCaptureMouse(false);
@@ -287,6 +288,7 @@ void BT::Renderer::Impl::render_imgui_game_view()
     }
 
     // Set ImGuizmo draw bounds.
+    ImGuizmo::SetDrawlist(ImGui::GetForegroundDrawList());
     auto rect_min{ ImGui::GetItemRectMin() };
     auto rect_size{ ImGui::GetItemRectSize() };
     ImGuizmo::SetRect(rect_min.x, rect_min.y, rect_size.x, rect_size.y);

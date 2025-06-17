@@ -440,11 +440,14 @@ void BT::Game_object::render_imgui_transform_gizmo()
     mat4 render_mat;
     m_transform.get_transform_as_mat4(render_mat);
 
+    static ImGuizmo::OPERATION s_current_gizmo_operation{ ImGuizmo::UNIVERSAL };
+    static ImGuizmo::MODE s_current_gizmo_mode{ ImGuizmo::WORLD };
+
     mat4 delta_mat;
     if (ImGuizmo::Manipulate(&view[0][0],
                              &proj[0][0],
-                             ImGuizmo::TRANSLATE,
-                             ImGuizmo::LOCAL,
+                             s_current_gizmo_operation,
+                             s_current_gizmo_mode,
                              &render_mat[0][0],
                              &delta_mat[0][0]))
     {

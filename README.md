@@ -265,8 +265,11 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - [ ] Add imguizmo on selected object.
             - [x] Initial.
             - [x] Fix the upside down issue.
-            - [ ] Fix not-being-able-to-click issue.
+            - [x] Fix not-being-able-to-click issue.
                 - Perhaps I could just change it so
+                - SOLUTION: There's a provided accept-inputs-from-here function `ImGuizmo::SetAlternateWindow()`
+            - [ ] Add changing the transform space of the gizmo.
+                - Keep it universal tho.
         - [ ] @TEST: The local and global object transform hierarchy stuff!
     - [ ] Collision represented as green wireframe triangles.
         - Depth test enabled.
