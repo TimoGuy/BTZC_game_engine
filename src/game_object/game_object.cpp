@@ -458,6 +458,8 @@ void BT::Game_object::render_imgui_local_transform()
 
 void BT::Game_object::render_imgui_transform_gizmo()
 {
+    ImGuizmo::Enable(!m_renderer.get_camera_obj()->is_mouse_captured());
+
     mat4 proj;
     mat4 view;
     mat4 proj_view;

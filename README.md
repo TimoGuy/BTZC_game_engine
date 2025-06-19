@@ -285,6 +285,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
                 - Scale and position work fine, but rotation is odd.
                 - Turns out it was the `glm_quat_mul()` order issue w/ p and q.
             - [ ] Fix parenting and local transforms not getting automatically changed correctly.
+        - [x] @BUGFIX: Can still interact w gizmo even when mouse is captured.
     - [ ] Collision represented as green wireframe triangles.
         - Depth test enabled.
         - Drawn after postprocessing step that tonemaps hdr->ldr.
