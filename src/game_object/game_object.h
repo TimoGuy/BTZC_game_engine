@@ -123,7 +123,7 @@ public:
         glm_scale(out_transform, m_global_transform.scale);
     }
 
-    void mark_dirty() { m_dirty_flag.store(true); }
+    void mark_dirty() { m_dirty_flag.store(k_propagation_dirty); }
     bool update_to_clean(Game_object_transform* parent_transform);
 
     // Scene_serialization_ifc.
@@ -133,6 +133,7 @@ private:
     static constexpr uint8_t k_not_dirty          = 0;
     static constexpr uint8_t k_global_trans_dirty = 1;
     static constexpr uint8_t k_local_trans_dirty  = 2;
+    static constexpr uint8_t k_propagation_dirty  = 3;
     atomic_uint8_t m_dirty_flag{ k_not_dirty };
 
     Transform_data m_global_transform;
@@ -150,6 +151,7 @@ public:
                 Game_object_pool& obj_pool);
 
     static void set_imgui_gizmo_trans_space(int32_t trans_space) { s_imgui_gizmo_trans_space = trans_space; }
+    static int32_t get_imgui_gizmo_trans_space() { return s_imgui_gizmo_trans_space; }
 
     void run_pre_physics_scripts(float_t physics_delta_time);
     void run_pre_render_scripts(float_t delta_time);
@@ -178,7 +180,7 @@ private:
     Renderer& m_renderer;
     Game_object_pool& m_obj_pool;
 
-    inline static int32_t s_imgui_gizmo_trans_space{ 0 };
+    inline static int32_t s_imgui_gizmo_trans_space{ 1 };
 
     Game_object_transform m_transform;
 

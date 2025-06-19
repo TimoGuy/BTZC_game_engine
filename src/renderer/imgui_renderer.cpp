@@ -87,7 +87,8 @@ void BT::ImGui_renderer::render_imgui()
                 {
                     ImGui::Checkbox("Auto switch to player cam on play.", &s_on_play_switch_to_player_camera);
 
-                    static int32_t s_gizmo_trans_space_selection{ 1 };
+                    int32_t s_gizmo_trans_space_selection{
+                        Game_object::get_imgui_gizmo_trans_space() };
                     if (ImGui::Combo("Gizmo transform space",
                                      &s_gizmo_trans_space_selection,
                                      "World space\0Local space\0"))

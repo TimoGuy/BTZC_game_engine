@@ -130,6 +130,7 @@ bool BT::Game_object_transform::update_to_clean(Game_object_transform* parent_tr
             break;
 
         case k_local_trans_dirty:
+        case k_propagation_dirty:
             // Update global transform.
             m_global_transform = (parent_transform == nullptr ?
                                   m_local_transform :
