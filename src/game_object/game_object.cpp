@@ -474,45 +474,40 @@ void BT::Game_object::render_imgui_transform_gizmo()
     mat4 transform_mat;
     m_transform.get_transform_as_mat4(transform_mat);
 
-    vec4 orig_tra;
-    glm_vec4_copy(transform_mat[3], orig_tra);
+    vec3 orig_tra;
+    glm_vec3(transform_mat[3], orig_tra);
 
     static ImGuizmo::OPERATION s_current_gizmo_operation{ ImGuizmo::UNIVERSAL };
     ImGuizmo::MODE current_gizmo_mode{ s_imgui_gizmo_trans_space == 0 ?
                                        ImGuizmo::WORLD :
                                        ImGuizmo::LOCAL };
 
-    mat4 delta_mat;
     if (ImGuizmo::Manipulate(&view[0][0],
                              &proj[0][0],
                              s_current_gizmo_operation,
                              current_gizmo_mode,
-                             &transform_mat[0][0],
-                             &delta_mat[0][0]))
+                             &transform_mat[0][0]))
     {
         vec4 tra;
         mat4 rot;
         vec3 sca;
-        glm_decompose(delta_mat, tra, rot, sca);
+        glm_decompose(transform_mat, tra, rot, sca);
 
-        // @NOTE: The position vector gets messed up inside the delta matrix, so
+        // @NOTE: The position vector is already changed in the mat4 matrix, so
         //   here is just manually calculating the world pos delta.
-        glm_vec4_copy(transform_mat[3], tra);
-        glm_vec4_sub(tra, orig_tra, tra);
-
-        versor rot_v;
-        glm_mat4_quat(rot, rot_v);
+        vec3 delta_tra;
+        glm_vec3_sub(tra, orig_tra, delta_tra);
 
         rvec3  local_pos;
         versor local_rot;
         vec3   local_sca;
         m_transform.get_global_transform_decomposed_data(local_pos, local_rot, local_sca);
 
-        local_pos[0] += tra[0];
-        local_pos[1] += tra[1];
-        local_pos[2] += tra[2];
-        glm_quat_mul(local_rot, rot_v, local_rot);
-        glm_vec3_mul(local_sca, sca, local_sca);
+        local_pos[0] += delta_tra[0];
+        local_pos[1] += delta_tra[1];
+        local_pos[2] += delta_tra[2];
+        glm_mat4_quat(rot, local_rot);
+        glm_vec3_copy(sca, local_sca);
 
         m_transform.set_global_pos_rot_sca(local_pos, local_rot, local_sca);
 
