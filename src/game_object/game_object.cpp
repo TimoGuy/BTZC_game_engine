@@ -364,6 +364,13 @@ void BT::Game_object::scene_serialize(Scene_serialization_mode mode, json& node_
     }
 }
 
+namespace
+{
+
+static bool s_imgui_trans_gizmo_used{ false };
+
+}  // namespace
+
 void BT::Game_object::render_imgui_local_transform()
 {
     rvec3 pos;
@@ -395,7 +402,7 @@ void BT::Game_object::render_imgui_local_transform()
     }
 
     static vec3 euler_angles;
-    if (recalc_euler_angles)
+    if (recalc_euler_angles || s_imgui_trans_gizmo_used)
     {
         // @NOTE: Due to instability of euler angles when dealing with extracting
         //   euler angles, just extracting them once when first entering the editing
@@ -406,6 +413,8 @@ void BT::Game_object::render_imgui_local_transform()
         euler_angles[0] = glm_deg(euler_angles[0]);
         euler_angles[1] = glm_deg(euler_angles[1]);
         euler_angles[2] = glm_deg(euler_angles[2]);
+
+        s_imgui_trans_gizmo_used = false;
     }
 
     if (ImGui::DragFloat3("Rotation", euler_angles))
@@ -492,6 +501,8 @@ void BT::Game_object::render_imgui_transform_gizmo()
         m_transform.set_local_pos_rot_sca(local_pos, local_rot, local_sca);
 
         propagate_transform_changes();
+
+        s_imgui_trans_gizmo_used = true;
     }
 }
 

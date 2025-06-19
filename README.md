@@ -259,12 +259,12 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
 
 1. Debug views.
     - [ ] Controlling the transform of objects.
-        - [ ] Add local transform editing in imgui inspector.
+        - [x] Add local transform editing in imgui inspector.
             - [x] Initial.
-            - [ ] Fix rotation issues.
+            - [x] Fix rotation issues.
                 - Maybe there needs to be a specific euler angles thing that goes on?
                 - [x] If the uuid is different from the previous one, then recalculate the euler angles thing.
-                - [ ] Force `recalc_euler_angles` if transform gizmo is used.
+                - [x] Force `recalc_euler_angles` if transform gizmo is used.
         - [x] Add imguizmo on selected object.
             - [x] Initial.
             - [x] Fix the upside down issue.
