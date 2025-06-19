@@ -128,7 +128,8 @@ public:
         glm_scale(out_transform, m_global_transform.scale);
     }
 
-    void mark_dirty() { m_dirty_flag.store(k_propagation_dirty); }
+    void mark_propagation_dirty() { m_dirty_flag.store(k_propagation_dirty); }
+    void mark_new_child_dirty() { m_dirty_flag.store(k_new_child_dirty); }
     bool update_to_clean(Game_object_transform* parent_transform);
 
     // Scene_serialization_ifc.
@@ -139,6 +140,7 @@ private:
     static constexpr uint8_t k_global_trans_dirty = 1;
     static constexpr uint8_t k_local_trans_dirty  = 2;
     static constexpr uint8_t k_propagation_dirty  = 3;
+    static constexpr uint8_t k_new_child_dirty    = 4;
     atomic_uint8_t m_dirty_flag{ k_not_dirty };
 
     Transform_data m_global_transform;

@@ -120,6 +120,7 @@ bool BT::Game_object_transform::update_to_clean(Game_object_transform* parent_tr
             break;
 
         case k_global_trans_dirty:
+        case k_new_child_dirty:
             // Update local transform.
             m_local_transform = (parent_transform == nullptr ?
                                  m_global_transform :
@@ -211,6 +212,10 @@ void BT::Game_object::insert_child(Game_object& new_child, size_t position /*= 0
 {
     new_child.m_parent = get_uuid();
     m_children.insert(m_children.begin() + position, new_child.get_uuid());
+
+    // Adjust transform of child.
+    new_child.m_transform.mark_new_child_dirty();
+    new_child.propagate_transform_changes(this);
 }
 
 void BT::Game_object::remove_child(Game_object& remove_child)
@@ -247,7 +252,7 @@ void BT::Game_object::propagate_transform_changes(Game_object* parent_game_objec
     {
         auto child_go{ m_obj_pool.get_one_no_lock(child) };
         if (propagate_dirty)
-            child_go->m_transform.mark_dirty();
+            child_go->m_transform.mark_propagation_dirty();
         child_go->propagate_transform_changes(this);
     }
 }
