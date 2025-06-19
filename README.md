@@ -262,6 +262,9 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - [ ] Add local transform editing in imgui inspector.
             - [x] Initial.
             - [ ] Fix rotation issues.
+                - Maybe there needs to be a specific euler angles thing that goes on?
+                - [x] If the uuid is different from the previous one, then recalculate the euler angles thing.
+                - [ ] Force `recalc_euler_angles` if transform gizmo is used.
         - [x] Add imguizmo on selected object.
             - [x] Initial.
             - [x] Fix the upside down issue.
@@ -270,7 +273,11 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
                 - SOLUTION: There's a provided accept-inputs-from-here function `ImGuizmo::SetAlternateWindow()`
             - [x] Add changing the transform space of the gizmo.
                 - Keep it universal tho.
+        - [ ] @BUGFIX: Transform gizmo starts in world space even tho dropdown starts in local space. Decide on one!
         - [ ] @TEST: The local and global object transform hierarchy stuff!
+            - Doesn't work atm for some reason.
+            - Ok it looks like it's trying to work but it's failing miserably.
+                - It doesn't update when 
     - [ ] Collision represented as green wireframe triangles.
         - Depth test enabled.
         - Drawn after postprocessing step that tonemaps hdr->ldr.

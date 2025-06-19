@@ -385,30 +385,47 @@ void BT::Game_object::render_imgui_local_transform()
         changed = true;
     }
 
-    mat4 rot_mat;
-    glm_quat_mat4(rot, rot_mat);
-    vec3 euler_angles;
-    glm_euler_angles(rot_mat, euler_angles);
-    euler_angles[0] = glm_deg(euler_angles[0]);
-    euler_angles[1] = glm_deg(euler_angles[1]);
-    euler_angles[2] = glm_deg(euler_angles[2]);
+    static UUID s_current_uuid;
+    bool recalc_euler_angles{ false };
+    if (s_current_uuid != get_uuid())
+    {
+        // Flag recalculation of euler angles.
+        recalc_euler_angles = true;
+        s_current_uuid = get_uuid();
+    }
+
+    static vec3 euler_angles;
+    if (recalc_euler_angles)
+    {
+        // @NOTE: Due to instability of euler angles when dealing with extracting
+        //   euler angles, just extracting them once when first entering the editing
+        //   mode of a game obj would make the most sense I think.  -Thea 2025/06/18
+        mat4 rot_mat;
+        glm_quat_mat4(rot, rot_mat);
+        glm_euler_angles(rot_mat, euler_angles);
+        euler_angles[0] = glm_deg(euler_angles[0]);
+        euler_angles[1] = glm_deg(euler_angles[1]);
+        euler_angles[2] = glm_deg(euler_angles[2]);
+    }
+
     if (ImGui::DragFloat3("Rotation", euler_angles))
     {
         // Apply rotation.
-        euler_angles[0] = glm_rad(euler_angles[0]);
-        euler_angles[1] = glm_rad(euler_angles[1]);
-        euler_angles[2] = glm_rad(euler_angles[2]);
+        vec3 euler_angles_as_radians{
+            glm_rad(euler_angles[0]),
+            glm_rad(euler_angles[1]),
+            glm_rad(euler_angles[2]) };
         mat4 rot_mat_apply_x;
-        glm_rotate_make(rot_mat_apply_x, euler_angles[0], vec3{ 1.0f, 0.0f, 0.0f });
+        glm_rotate_make(rot_mat_apply_x, euler_angles_as_radians[0], vec3{ 1.0f, 0.0f, 0.0f });
         mat4 rot_mat_apply_y;
-        glm_rotate_make(rot_mat_apply_y, euler_angles[1], vec3{ 0.0f, 1.0f, 0.0f });
+        glm_rotate_make(rot_mat_apply_y, euler_angles_as_radians[1], vec3{ 0.0f, 1.0f, 0.0f });
         mat4 rot_mat_apply_z;
-        glm_rotate_make(rot_mat_apply_z, euler_angles[2], vec3{ 0.0f, 0.0f, 1.0f });
+        glm_rotate_make(rot_mat_apply_z, euler_angles_as_radians[2], vec3{ 0.0f, 0.0f, 1.0f });
         mat4 rot_mat_apply;
         glm_mat4_mul(rot_mat_apply_x, rot_mat_apply_y, rot_mat_apply);
         glm_mat4_mul(rot_mat_apply, rot_mat_apply_z, rot_mat_apply);
-        // glm_euler_zyx(euler_angles, rot_mat_apply);
-        // glm_euler_xyz(euler_angles, rot_mat_apply);
+        // glm_euler_zyx(euler_angles_as_radians, rot_mat_apply);
+        // glm_euler_xyz(euler_angles_as_radians, rot_mat_apply);
         versor rot_quat_apply;
         glm_mat4_quat(rot_mat_apply, rot_quat_apply);
         m_transform.set_local_rot(rot_quat_apply);
