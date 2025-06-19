@@ -100,17 +100,22 @@ public:
     #undef BT_GAME_OBJECT_TRANSFORM_SET_ROTATION_CONTENTS
     #undef BT_GAME_OBJECT_TRANSFORM_SET_SCALE_CONTENTS
 
-    void get_local_transform_decomposed_data(rvec3& out_position,
-                                             versor& out_rotation,
-                                             vec3& out_scale)
-    {
-        assert(m_dirty_flag == k_not_dirty);
-        out_position[0] = m_local_transform.position[0];
-        out_position[1] = m_local_transform.position[1];
-        out_position[2] = m_local_transform.position[2];
-        glm_quat_copy(m_local_transform.rotation, out_rotation);
-        glm_vec3_copy(m_local_transform.scale, out_scale);
+    #define BT_GAME_OBJECT_TRANSFORM_GET_DECOMPOSED_FUNC(x)                     \
+    void get_##x##_transform_decomposed_data(rvec3& out_position,               \
+                                             versor& out_rotation,              \
+                                             vec3& out_scale)                   \
+    {                                                                           \
+        assert(m_dirty_flag == k_not_dirty);                                    \
+        out_position[0] = m_##x##_transform.position[0];                        \
+        out_position[1] = m_##x##_transform.position[1];                        \
+        out_position[2] = m_##x##_transform.position[2];                        \
+        glm_quat_copy(m_##x##_transform.rotation, out_rotation);                \
+        glm_vec3_copy(m_##x##_transform.scale, out_scale);                      \
     }
+
+    BT_GAME_OBJECT_TRANSFORM_GET_DECOMPOSED_FUNC(global)
+    BT_GAME_OBJECT_TRANSFORM_GET_DECOMPOSED_FUNC(local)
+    #undef BT_GAME_OBJECT_TRANSFORM_GET_DECOMPOSED_FUNC
 
     void get_transform_as_mat4(mat4& out_transform)
     {

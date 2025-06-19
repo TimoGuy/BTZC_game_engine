@@ -86,9 +86,9 @@ BT::Transform_data BT::Transform_data::append_transform(Transform_data next)
     GLM_MAT3_MUL_RVEC3(my_rot_mat3, result.position, result.position);
     GLM_RVEC3_ADD(position, result.position, result.position);
 
-    glm_quat_mul(next.rotation, rotation, result.rotation);  // @NOTE: p is the rotation after q.
+    glm_quat_mul(rotation, next.rotation, result.rotation);
 
-    glm_vec3_mul(next.scale, scale, result.scale);
+    glm_vec3_mul(scale, next.scale, result.scale);
 
     #undef GLM_RVEC3_SCALE_V3
     #undef GLM_MAT3_MUL_RVEC3
@@ -464,8 +464,11 @@ void BT::Game_object::render_imgui_transform_gizmo()
     m_renderer.get_camera_obj()->fetch_calculated_camera_matrices(proj, view, proj_view);
     proj[1][1] *= -1.0f;  // Fix neg-Y issue.
 
-    mat4 render_mat;
-    m_transform.get_transform_as_mat4(render_mat);
+    mat4 transform_mat;
+    m_transform.get_transform_as_mat4(transform_mat);
+
+    vec4 orig_tra;
+    glm_vec4_copy(transform_mat[3], orig_tra);
 
     static ImGuizmo::OPERATION s_current_gizmo_operation{ ImGuizmo::UNIVERSAL };
     ImGuizmo::MODE current_gizmo_mode{ s_imgui_gizmo_trans_space == 0 ?
@@ -477,7 +480,7 @@ void BT::Game_object::render_imgui_transform_gizmo()
                              &proj[0][0],
                              s_current_gizmo_operation,
                              current_gizmo_mode,
-                             &render_mat[0][0],
+                             &transform_mat[0][0],
                              &delta_mat[0][0]))
     {
         vec4 tra;
@@ -485,21 +488,26 @@ void BT::Game_object::render_imgui_transform_gizmo()
         vec3 sca;
         glm_decompose(delta_mat, tra, rot, sca);
 
+        // @NOTE: The position vector gets messed up inside the delta matrix, so
+        //   here is just manually calculating the world pos delta.
+        glm_vec4_copy(transform_mat[3], tra);
+        glm_vec4_sub(tra, orig_tra, tra);
+
         versor rot_v;
         glm_mat4_quat(rot, rot_v);
 
         rvec3  local_pos;
         versor local_rot;
         vec3   local_sca;
-        m_transform.get_local_transform_decomposed_data(local_pos, local_rot, local_sca);
+        m_transform.get_global_transform_decomposed_data(local_pos, local_rot, local_sca);
 
         local_pos[0] += tra[0];
         local_pos[1] += tra[1];
         local_pos[2] += tra[2];
-        glm_quat_mul(rot_v, local_rot, local_rot);
+        glm_quat_mul(local_rot, rot_v, local_rot);
         glm_vec3_mul(local_sca, sca, local_sca);
 
-        m_transform.set_local_pos_rot_sca(local_pos, local_rot, local_sca);
+        m_transform.set_global_pos_rot_sca(local_pos, local_rot, local_sca);
 
         propagate_transform_changes();
 

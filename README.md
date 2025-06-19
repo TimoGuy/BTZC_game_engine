@@ -273,11 +273,18 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
                 - SOLUTION: There's a provided accept-inputs-from-here function `ImGuizmo::SetAlternateWindow()`
             - [x] Add changing the transform space of the gizmo.
                 - Keep it universal tho.
-        - [ ] @BUGFIX: Transform gizmo starts in world space even tho dropdown starts in local space. Decide on one!
+        - [x] @BUGFIX: Transform gizmo starts in world space even tho dropdown starts in local space. Decide on one!
         - [ ] @TEST: The local and global object transform hierarchy stuff!
             - Doesn't work atm for some reason.
             - Ok it looks like it's trying to work but it's failing miserably.
-                - It doesn't update when 
+                - It doesn't update when
+            - [x] Works w position and scale.
+            - [x] Works w rotation?
+                - Just use the delta matrix for rotations but not for positions (bc that should be delta pos calculated manually).
+            - [x] Fix rotation being funky for children.
+                - Scale and position work fine, but rotation is odd.
+                - Turns out it was the `glm_quat_mul()` order issue w/ p and q.
+            - [ ] Fix parenting and local transforms not getting automatically changed correctly.
     - [ ] Collision represented as green wireframe triangles.
         - Depth test enabled.
         - Drawn after postprocessing step that tonemaps hdr->ldr.
