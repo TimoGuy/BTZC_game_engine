@@ -258,7 +258,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - [x] Yeah, this change needs to be made. DO IT.
 
 1. Debug views.
-    - [ ] Controlling the transform of objects.
+    - [x] Controlling the transform of objects.
         - [x] Add local transform editing in imgui inspector.
             - [x] Initial.
             - [x] Fix rotation issues.
@@ -274,7 +274,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
             - [x] Add changing the transform space of the gizmo.
                 - Keep it universal tho.
         - [x] @BUGFIX: Transform gizmo starts in world space even tho dropdown starts in local space. Decide on one!
-        - [ ] @TEST: The local and global object transform hierarchy stuff!
+        - [x] @TEST: The local and global object transform hierarchy stuff!
             - Doesn't work atm for some reason.
             - Ok it looks like it's trying to work but it's failing miserably.
                 - It doesn't update when
@@ -287,7 +287,11 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
             - [x] Fix parenting and local transforms not getting automatically changed correctly.
             - [x] Fix weird rotation issues w parent gameobj.
                 - Ope it's just anywhere.
-            - [ ] Fix scaling issues.
+            - [ ] ~~Fix scaling issues.~~
+                - Seems like this is really only an issue once there's 
+                - @NOTE: This scaling issue is due to the nature/artifact of the transform hierarchy setup. https://gabormakesgames.com/blog_transforms_transforms.html
+            - [x] Fix the position discrepency between the parent and the child gizmos.
+                - `calc_inverse()` for the transform didn't take into account the rotation. Which it needs to is what I just found out! Hahahha.
         - [x] @BUGFIX: Can still interact w gizmo even when mouse is captured.
     - [ ] Collision represented as green wireframe triangles.
         - Depth test enabled.

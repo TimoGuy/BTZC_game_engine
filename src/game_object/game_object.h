@@ -128,8 +128,8 @@ public:
         glm_scale(out_transform, m_global_transform.scale);
     }
 
-    void mark_propagation_dirty() { m_dirty_flag.store(k_propagation_dirty); }
-    void mark_new_child_dirty() { m_dirty_flag.store(k_new_child_dirty); }
+    void mark_propagation_dirty() { assert(m_dirty_flag.load() == k_not_dirty); m_dirty_flag.store(k_propagation_dirty); }
+    void mark_new_child_dirty() { assert(m_dirty_flag.load() == k_not_dirty); m_dirty_flag.store(k_new_child_dirty); }
     bool update_to_clean(Game_object_transform* parent_transform);
 
     // Scene_serialization_ifc.

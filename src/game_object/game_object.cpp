@@ -86,9 +86,10 @@ BT::Transform_data BT::Transform_data::append_transform(Transform_data next)
     GLM_MAT3_MUL_RVEC3(my_rot_mat3, result.position, result.position);
     GLM_RVEC3_ADD(position, result.position, result.position);
 
+    // @NOTE: Quaternions multiply in reverse.
     glm_quat_mul(rotation, next.rotation, result.rotation);
 
-    glm_vec3_mul(scale, next.scale, result.scale);
+    glm_vec3_mul(next.scale, scale, result.scale);
 
     #undef GLM_RVEC3_SCALE_V3
     #undef GLM_MAT3_MUL_RVEC3
@@ -100,10 +101,17 @@ BT::Transform_data BT::Transform_data::append_transform(Transform_data next)
 BT::Transform_data BT::Transform_data::calc_inverse()
 {
     Transform_data result;
-    result.position[0] = -position[0];
-    result.position[1] = -position[1];
-    result.position[2] = -position[2];
-    glm_quat_inv(rotation, result.rotation);
+    glm_quat_conjugate(rotation, result.rotation);
+
+    mat3 conj_rot;
+    glm_quat_mat3(result.rotation, conj_rot);
+
+    // @NOTE: Inverting the matrix requires that the position (which has rotation applied)
+    //   is also undone, so instead of just inversing it needs to be multiplied by
+    //   the conjugate of the rotation quat.  -Thea 2025/06/19
+    glm_mat3_mulv(conj_rot, position, result.position);
+    glm_vec3_inv(result.position);
+
     result.scale[0] = 1.0f / scale[0];
     result.scale[1] = 1.0f / scale[1];
     result.scale[2] = 1.0f / scale[2];
@@ -498,18 +506,18 @@ void BT::Game_object::render_imgui_transform_gizmo()
         vec3 delta_tra;
         glm_vec3_sub(tra, orig_tra, delta_tra);
 
-        rvec3  local_pos;
-        versor local_rot;
-        vec3   local_sca;
-        m_transform.get_global_transform_decomposed_data(local_pos, local_rot, local_sca);
+        rvec3  global_pos;
+        versor global_rot;
+        vec3   global_sca;
+        m_transform.get_global_transform_decomposed_data(global_pos, global_rot, global_sca);
 
-        local_pos[0] += delta_tra[0];
-        local_pos[1] += delta_tra[1];
-        local_pos[2] += delta_tra[2];
-        glm_mat4_quat(rot, local_rot);
-        glm_vec3_copy(sca, local_sca);
+        global_pos[0] += delta_tra[0];
+        global_pos[1] += delta_tra[1];
+        global_pos[2] += delta_tra[2];
+        glm_mat4_quat(rot, global_rot);
+        glm_vec3_copy(sca, global_sca);
 
-        m_transform.set_global_pos_rot_sca(local_pos, local_rot, local_sca);
+        m_transform.set_global_pos_rot_sca(global_pos, global_rot, global_sca);
 
         propagate_transform_changes();
 
