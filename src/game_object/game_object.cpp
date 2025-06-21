@@ -701,13 +701,18 @@ void BT::Game_object_pool::render_imgui_scene_hierarchy()
         render_imgui_scene_hierarchy_node_recursive(root_node, modify_action, next_id);
     }
 
+    // Some helper macros.
+    #define IMGUI_DRAGDROP_ACTIVE_DISABLE_BLOCK_BEGIN  bool __hawsoo_is_dragdropactive = ImGui::IsDragDropActive(); if (!__hawsoo_is_dragdropactive) ImGui::BeginDisabled()
+    #define IMGUI_DRAGDROP_ACTIVE_DISABLE_BLOCK_END    if (!__hawsoo_is_dragdropactive) ImGui::EndDisabled()
+
     // Draw final after node.
+    IMGUI_DRAGDROP_ACTIVE_DISABLE_BLOCK_BEGIN;
     ImGui::PushStyleColor(ImGuiCol_Button, 0x00000000);
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, 0x00000000);
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, 0x00000000);
     ImGui::ButtonEx(("##between_node_button__" + std::to_string(next_id)).c_str(),
                     ImVec2(ImGui::GetContentRegionAvail().x,
-                           max(6.0f, ImGui::GetContentRegionAvail().y)),
+                        max(6.0f, ImGui::GetContentRegionAvail().y)),
                     ImGuiButtonFlags_NoNavFocus);
     ImGui::PopStyleColor(3);
     if (ImGui::BeginDragDropTarget())
@@ -721,6 +726,7 @@ void BT::Game_object_pool::render_imgui_scene_hierarchy()
         }
         ImGui::EndDragDropTarget();
     }
+    IMGUI_DRAGDROP_ACTIVE_DISABLE_BLOCK_END;
 
     ImGui::PopStyleVar();
 
@@ -901,6 +907,8 @@ void BT::Game_object_pool::render_imgui_scene_hierarchy_node_recursive(void* nod
 
     constexpr ImGuiTreeNodeFlags k_base_flags{ ImGuiTreeNodeFlags_SpanAvailWidth |
                                                ImGuiTreeNodeFlags_DrawLinesToNodes |
+                                               ImGuiTreeNodeFlags_OpenOnDoubleClick |
+                                               ImGuiTreeNodeFlags_OpenOnArrow |
                                                ImGuiTreeNodeFlags_DefaultOpen };
     ImGuiTreeNodeFlags node_flags{ k_base_flags };
 
@@ -914,6 +922,7 @@ void BT::Game_object_pool::render_imgui_scene_hierarchy_node_recursive(void* nod
         node_flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
 
     // Draw between/before node.
+    IMGUI_DRAGDROP_ACTIVE_DISABLE_BLOCK_BEGIN;
     ImGui::PushStyleColor(ImGuiCol_Button, 0x00000000);
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, 0x00000000);
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, 0x00000000);
@@ -933,6 +942,7 @@ void BT::Game_object_pool::render_imgui_scene_hierarchy_node_recursive(void* nod
         }
         ImGui::EndDragDropTarget();
     }
+    IMGUI_DRAGDROP_ACTIVE_DISABLE_BLOCK_END;
 
     // Draw my node.
     bool tree_node_open = ImGui::TreeNodeEx(reinterpret_cast<void*>(next_id),

@@ -293,6 +293,9 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
             - [x] Fix the position discrepency between the parent and the child gizmos.
                 - `calc_inverse()` for the transform didn't take into account the rotation. Which it needs to is what I just found out! Hahahha.
         - [x] @BUGFIX: Can still interact w gizmo even when mouse is captured.
+    - [x] Ch ch ch changes.
+        - [x] Only expand hierarchy tree when double click or use arrow.
+        - [x] Remove the between hidden buttons for rearranging until rearranging mode. That way arrow key navigation isn't weird.
     - [ ] Collision represented as green wireframe triangles.
         - Depth test enabled.
         - Drawn after postprocessing step that tonemaps hdr->ldr.
@@ -308,9 +311,6 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
     - [ ] @FUTURE: ~~Follow path for player character.~~
         - Select a character and enable follow path debug view.
         - Over the past 500 moved/active physics steps, draw a cube that represents the collision shape and transform of where the character was.
-    - [ ] Ch ch ch changes.
-        - [ ] Only expand hierarchy tree when double click or use arrow.
-        - [ ] Remove the between hidden buttons for rearranging until rearranging mode. That way arrow key navigation isn't weird.
 
 1. Lower priority refactor?
     - Thoughts on phys obj creation system:
