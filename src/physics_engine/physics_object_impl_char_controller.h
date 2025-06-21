@@ -15,6 +15,8 @@ using std::vector;
 namespace BT
 {
 
+class Model;
+
 class Phys_obj_impl_char_controller : public Physics_object_type_impl_ifc, public JPH::CharacterContactListener
 {
 public:
@@ -43,6 +45,7 @@ public:
     bool get_cc_stance() override;
     void on_pre_update(float_t physics_delta_time) override;
     Physics_transform read_transform() override;
+    void debug_render_representation() override;
 
     // Scene_serialization_ifc.
     void scene_serialize(Scene_serialization_mode mode, json& node_ref) override;
@@ -109,6 +112,9 @@ private:
     JPH::Ref<JPH::CharacterVirtual>  m_character;
     bool m_is_crouched;
     bool m_allow_sliding{ false };  // True when want to move.
+
+    // Debug rendering model.
+    Model const* m_debug_model;
 };
 
 }  // namespace BT

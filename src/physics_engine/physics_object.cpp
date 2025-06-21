@@ -110,9 +110,9 @@ unique_ptr<BT::Physics_object> BT::Physics_object::create_triangle_mesh(Game_obj
 {
     auto tri_mesh =
         make_unique<Phys_obj_impl_tri_mesh>(phys_engine,
-                                                 model,
-                                                 motion_type,
-                                                 std::move(init_transform));
+                                            model,
+                                            motion_type,
+                                            std::move(init_transform));
     return unique_ptr<Physics_object>(
         new Physics_object(game_obj, &phys_engine, interpolate_transform, std::move(tri_mesh)));
 }

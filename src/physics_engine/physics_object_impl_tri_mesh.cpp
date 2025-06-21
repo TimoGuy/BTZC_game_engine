@@ -1,20 +1,21 @@
 #include "physics_object_impl_tri_mesh.h"
 
 #include "../renderer/mesh.h"
+#include "../renderer/render_object.h"
+#include "Jolt/Jolt.h"
 #include "Jolt/Geometry/IndexedTriangle.h"
 #include "Jolt/Geometry/Triangle.h"
-#include "Jolt/Jolt.h"
 #include "Jolt/Math/Float3.h"
 #include "Jolt/Physics/Body/BodyCreationSettings.h"
 #include "Jolt/Physics/Body/BodyInterface.h"
 #include "Jolt/Physics/Body/MotionType.h"
 #include "Jolt/Physics/Collision/Shape/MeshShape.h"
 #include "Jolt/Physics/EActivation.h"
+#include "cglm/affine.h"
 #include "logger.h"
 #include "physics_engine.h"
 #include "physics_engine_impl_layers.h"
 #include <cassert>
-#include <iostream> // @NOCHECKIN!!!
 
 
 BT::Phys_obj_impl_tri_mesh::Phys_obj_impl_tri_mesh(Physics_engine& phys_engine,
@@ -107,6 +108,21 @@ BT::Physics_transform BT::Phys_obj_impl_tri_mesh::read_transform()
 {
     return { m_phys_body_ifc.GetCenterOfMassPosition(m_body_id),
              m_phys_body_ifc.GetRotation(m_body_id) };
+}
+
+void BT::Phys_obj_impl_tri_mesh::debug_render_representation()
+{
+    auto current_trans{ read_transform() };
+    
+    mat4 graphic_trans;
+    glm_translate_make(graphic_trans, vec3{ current_trans.position.GetX(),
+                                            current_trans.position.GetY(),
+                                            current_trans.position.GetZ() });
+    glm_quat_rotate(graphic_trans, versor{ current_trans.rotation.GetX(),
+                                           current_trans.rotation.GetY(),
+                                           current_trans.rotation.GetZ(),
+                                           current_trans.rotation.GetW() }, graphic_trans);
+    m_model->render_model(graphic_trans);
 }
 
 // Scene_serialization_ifc.

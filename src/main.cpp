@@ -85,6 +85,10 @@ int32_t main()
 
     // Models.
     BT::Model_bank::emplace_model(
+        "unit_box",
+        make_unique<BT::Model>(BTZC_GAME_ENGINE_ASSET_MODEL_PATH "unit_box.obj",
+                               "color_material"));
+    BT::Model_bank::emplace_model(
         "box_0.5_2",
         make_unique<BT::Model>(BTZC_GAME_ENGINE_ASSET_MODEL_PATH "box_0.5_2.obj",
                                "color_material"));

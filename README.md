@@ -332,6 +332,11 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - Hmmm, also seems like there needs to be a `scene_serialize()` thing for the impl of the thingies.
         - [ ] Think about these thoughts ^^
             - I think that this kinda change would be good. Like changing the `create_char_controller()` thing to be more of a decorator function and creating an abstract form physics thing that has no impl would be good.
+    - Thoughts on including the model system with the debug rendering stuff.
+        - This honestly kinda just sucks, ngl.
+        - There needs to be the ability to render out custom materials.
+            - THIS ^^
+            - Separate models and materials. Maybe when doing `render_model()` add a param to insert your own material set. Or maybe the model and material can have the material sets be coupled but just include that as an alternate set or something!
 
 1. Good pause point.
     - [ ] Release v0.1.0-develop.1

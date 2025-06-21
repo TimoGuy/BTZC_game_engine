@@ -65,6 +65,7 @@ public:
     virtual bool get_cc_stance() { assert(false); return false; }
     virtual void on_pre_update(float_t physics_delta_time) { }
     virtual Physics_transform read_transform() = 0;
+    virtual void debug_render_representation() = 0;
 };
 
 class Physics_engine;

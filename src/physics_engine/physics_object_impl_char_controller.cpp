@@ -1,5 +1,6 @@
 #include "physics_object_impl_char_controller.h"
 
+#include "../renderer/mesh.h"
 #include "Jolt/Jolt.h"
 #include "Jolt/Core/TempAllocator.h"
 #include "Jolt/Physics/Character/CharacterVirtual.h"
@@ -21,6 +22,7 @@ BT::Phys_obj_impl_char_controller::Phys_obj_impl_char_controller(Physics_engine&
     , m_height{ height - 2.0f * radius }
     , m_crouch_height{ crouch_height }
     , m_is_crouched{ false }
+    , m_debug_model{ Model_bank::get_model("unit_box") }
 {
     assert(m_height >= 0.0f);
 
@@ -184,6 +186,26 @@ void BT::Phys_obj_impl_char_controller::on_pre_update(float_t physics_delta_time
 BT::Physics_transform BT::Phys_obj_impl_char_controller::read_transform()
 {
     return { m_character->GetPosition(), m_character->GetRotation() };
+}
+
+void BT::Phys_obj_impl_char_controller::debug_render_representation()
+{
+    // @COPYPASTA: See `physics_object_impl_tri_mesh.cpp`.
+    auto current_trans{ read_transform() };
+    current_trans.position += m_character->GetShapeOffset();
+    
+    mat4 graphic_trans;
+    glm_translate_make(graphic_trans, vec3{ current_trans.position.GetX(),
+                                            current_trans.position.GetY(),
+                                            current_trans.position.GetZ() });
+    glm_quat_rotate(graphic_trans, versor{ current_trans.rotation.GetX(),
+                                           current_trans.rotation.GetY(),
+                                           current_trans.rotation.GetZ(),
+                                           current_trans.rotation.GetW() }, graphic_trans);
+    glm_scale(graphic_trans, vec3{ m_radius,
+                                   m_is_crouched ? m_crouch_height : m_height,
+                                   m_radius });
+    m_model->render_model(graphic_trans);
 }
 
 // Scene_serialization_ifc.
