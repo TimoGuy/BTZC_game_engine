@@ -94,6 +94,16 @@ int32_t main()
             new BT::Material_opaque_color_unlit(vec3{ 0.1f, 0.475f, 0.15f },
                                                 BT::k_depth_test_mode_back)));
     BT::Material_bank::emplace_material(
+        "debug_selected_wireframe_fore_material",
+        unique_ptr<BT::Material_ifc>(
+            new BT::Material_opaque_color_unlit(vec3{ 0.95f, 0.3f, 0.95f },
+                                                BT::k_depth_test_mode_front)));
+    BT::Material_bank::emplace_material(
+        "debug_selected_wireframe_back_material",
+        unique_ptr<BT::Material_ifc>(
+            new BT::Material_opaque_color_unlit(vec3{ 0.475f, 0.15f, 0.475f },
+                                                BT::k_depth_test_mode_back)));
+    BT::Material_bank::emplace_material(
         "post_process",
         unique_ptr<BT::Material_ifc>(
             new BT::Material_impl_post_process(1.0f)));
@@ -301,12 +311,36 @@ int32_t main()
             }
 
             main_renderer.render(delta_time, [&]() {
+                // Render physics objs.
                 auto all_phys_objs = main_physics_engine.checkout_all_physics_objects();
                 for (auto phys_obj : all_phys_objs)
                 {
                     phys_obj->get_impl()->debug_render_representation();
                 }
                 main_physics_engine.return_physics_objects(std::move(all_phys_objs));
+
+                // Render selected game obj.
+                auto selected_game_obj{ game_object_pool.get_selected_game_obj() };
+                if (!selected_game_obj.is_nil())
+                {
+                    auto game_obj = game_object_pool.get_one_no_lock(selected_game_obj);
+                    auto rend_obj_key{ game_obj->get_rend_obj_key() };
+                    if (!rend_obj_key.is_nil())
+                    {
+                        auto rend_obj =
+                            main_renderer.get_render_object_pool()
+                                .checkout_render_obj_by_key({ rend_obj_key })[0];
+
+                        static auto s_material_fore{
+                            BT::Material_bank::get_material("debug_selected_wireframe_fore_material") };
+                        static auto s_material_back{
+                            BT::Material_bank::get_material("debug_selected_wireframe_back_material") };
+                        rend_obj->render(BT::Render_layer::RENDER_LAYER_ALL, s_material_fore);
+                        rend_obj->render(BT::Render_layer::RENDER_LAYER_ALL, s_material_back);
+
+                        main_renderer.get_render_object_pool().return_render_objs({ rend_obj });
+                    }
+                }
             });
         }
 

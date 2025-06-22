@@ -4,6 +4,7 @@
 #include "../scene/scene_serialization_ifc.h"
 #include "../uuid/uuid_ifc.h"
 #include "cglm/cglm.h"
+#include "material.h"
 #include "mesh.h"
 #include <atomic>
 #include <string>
@@ -22,12 +23,12 @@ class Game_object;
 
 enum Render_layer : uint8_t
 {
-    RENDER_LAYER_ALL                = 0b11111111,
-    RENDER_LAYER_NONE               = 0b00000000,
+    RENDER_LAYER_ALL          = 0b11111111,
+    RENDER_LAYER_NONE         = 0b00000000,
 
-    RENDER_LAYER_DEFAULT            = 0b00000001,
-    RENDER_LAYER_INVISIBLE          = 0b00000010,
-    RENDER_LAYER_LEVEL_EDITOR       = 0b00000100,
+    RENDER_LAYER_DEFAULT      = 0b00000001,
+    RENDER_LAYER_INVISIBLE    = 0b00000010,
+    RENDER_LAYER_LEVEL_EDITOR = 0b00000100,
 };
 
 class Physics_object;
@@ -39,7 +40,8 @@ public:
                   Model const* model,
                   Render_layer layer);
 
-    void render(Render_layer active_layers);
+    void render(Render_layer active_layers,
+                Material_ifc* override_material = nullptr);
 
     // Scene_serialization_ifc.
     void scene_serialize(Scene_serialization_mode mode, json& node_ref) override;

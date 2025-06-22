@@ -220,6 +220,7 @@ public:
 
     // Debug ImGui.
     void render_imgui_scene_hierarchy();
+    UUID get_selected_game_obj() { return m_selected_game_obj; }
 
 private:
     UUID emplace_no_lock(unique_ptr<Game_object>&& game_object);

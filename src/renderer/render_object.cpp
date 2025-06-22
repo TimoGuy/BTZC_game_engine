@@ -39,13 +39,14 @@ BT::Render_object::Render_object(Game_object& game_obj,
     }
 }
 
-void BT::Render_object::render(Render_layer active_layers)
+void BT::Render_object::render(Render_layer active_layers,
+                               Material_ifc* override_material /*= nullptr*/)
 {
     if (m_layer & active_layers)
     {
         mat4 transform;
         m_game_obj.get_transform_handle().get_transform_as_mat4(transform);
-        m_model->render_model(transform);
+        m_model->render_model(transform, override_material);
     }
 }
 
