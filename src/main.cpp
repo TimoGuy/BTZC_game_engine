@@ -13,6 +13,7 @@
 #include "physics_engine/physics_object.h"
 #include "renderer/imgui_renderer.h"  // @DEBUG
 #include "renderer/material.h"  // @DEBUG
+#include "renderer/material_impl_opaque_color_unlit.h"  // @DEBUG
 #include "renderer/material_impl_opaque_shaded.h"  // @DEBUG
 #include "renderer/material_impl_opaque_texture_shaded.h"  // @DEBUG
 #include "renderer/material_impl_post_process.h"  // @DEBUG
@@ -48,6 +49,10 @@ int32_t main()
 
     // Shaders.
     BT::Shader_bank::emplace_shader(
+        "color_unlit",
+        make_unique<BT::Shader>(BTZC_GAME_ENGINE_ASSET_SHADER_PATH "color_unlit.vert",
+                                BTZC_GAME_ENGINE_ASSET_SHADER_PATH "color_unlit.frag"));
+    BT::Shader_bank::emplace_shader(
         "color_shaded",
         make_unique<BT::Shader>(BTZC_GAME_ENGINE_ASSET_SHADER_PATH "color_shaded.vert",
                                 BTZC_GAME_ENGINE_ASSET_SHADER_PATH "color_shaded.frag"));
@@ -78,6 +83,16 @@ int32_t main()
                                                    vec3{ 0.0f, 0.2f, 0.5f },
                                                    vec3{ 0.5f, 0.2f, 0.1f },
                                                    45.0f)));
+    BT::Material_bank::emplace_material(
+        "debug_physics_wireframe_fore_material",
+        unique_ptr<BT::Material_ifc>(
+            new BT::Material_opaque_color_unlit(vec3{ 0.2f, 0.95f, 0.3f },
+                                                BT::k_depth_test_mode_front)));
+    BT::Material_bank::emplace_material(
+        "debug_physics_wireframe_back_material",
+        unique_ptr<BT::Material_ifc>(
+            new BT::Material_opaque_color_unlit(vec3{ 0.1f, 0.475f, 0.15f },
+                                                BT::k_depth_test_mode_back)));
     BT::Material_bank::emplace_material(
         "post_process",
         unique_ptr<BT::Material_ifc>(
@@ -285,7 +300,14 @@ int32_t main()
                 game_obj->run_pre_render_scripts(delta_time);
             }
 
-            main_renderer.render(delta_time);
+            main_renderer.render(delta_time, [&]() {
+                auto all_phys_objs = main_physics_engine.checkout_all_physics_objects();
+                for (auto phys_obj : all_phys_objs)
+                {
+                    phys_obj->get_impl()->debug_render_representation();
+                }
+                main_physics_engine.return_physics_objects(std::move(all_phys_objs));
+            });
         }
 
         game_object_pool.return_list(std::move(all_game_objs));

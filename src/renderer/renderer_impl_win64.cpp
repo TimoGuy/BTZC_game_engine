@@ -200,7 +200,7 @@ void BT::Renderer::Impl::poll_events()
     glfwPollEvents();
 }
 
-void BT::Renderer::Impl::render(float_t delta_time)
+void BT::Renderer::Impl::render(float_t delta_time, function<void()>&& debug_views_render_fn)
 {
     if (m_main_viewport_wanted_dims.width != m_main_viewport_dims.width ||
         m_main_viewport_wanted_dims.height != m_main_viewport_dims.height)
@@ -221,6 +221,7 @@ void BT::Renderer::Impl::render(float_t delta_time)
     begin_new_display_frame();
     render_scene_to_hdr_framebuffer();
     render_hdr_color_to_ldr_framebuffer();
+    render_debug_views_to_ldr_framebuffer(std::move(debug_views_render_fn));
     render_imgui();
 
     present_display_frame();
@@ -616,6 +617,35 @@ void BT::Renderer::Impl::render_hdr_color_to_ldr_framebuffer()
     }
 }
 
+void BT::Renderer::Impl::render_debug_views_to_ldr_framebuffer(function<void()>&& debug_views_render_fn)
+{
+    glEnable(GL_DEPTH_TEST);
+
+    if (m_render_to_ldr)
+    {
+        // Assign ldr fbo.
+        glBindFramebuffer(GL_FRAMEBUFFER, m_ldr_fbo);
+    }
+
+    // Copy depth buffer of hdr buffer over.
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, m_hdr_fbo);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_render_to_ldr ? m_ldr_fbo : 0);
+    glBlitFramebuffer(0, 0, m_main_viewport_dims.width, m_main_viewport_dims.height,
+                      0, 0, m_main_viewport_dims.width, m_main_viewport_dims.height,
+                      GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+
+    // Render debug views.
+    debug_views_render_fn();
+
+    if (m_render_to_ldr)
+    {
+        // Unassign ldr fbo.
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
+
+    glDisable(GL_DEPTH_TEST);
+}
+
 void BT::Renderer::Impl::present_display_frame()
 {
     glfwSwapBuffers(reinterpret_cast<GLFWwindow*>(m_window_handle));
@@ -682,8 +712,10 @@ void BT::Renderer::Impl::create_hdr_fbo()  // @COPYPASTA.
 }
 
 void BT::Renderer::Impl::render_scene_to_hdr_framebuffer()
-{    
+{
     glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
+    glDepthMask(GL_TRUE);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     glFrontFace(GL_CW);

@@ -25,9 +25,9 @@ void BT::Renderer::poll_events()
     m_pimpl->poll_events();
 }
 
-void BT::Renderer::render(float_t delta_time)
+void BT::Renderer::render(float_t delta_time, function<void()>&& debug_views_render_fn)
 {
-    m_pimpl->render(delta_time);
+    m_pimpl->render(delta_time, std::move(debug_views_render_fn));
 }
 
 // Camera read.

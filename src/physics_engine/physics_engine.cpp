@@ -2,6 +2,7 @@
 
 #include "logger.h"
 #include "physics_engine_impl.h"
+#include "physics_object.h"
 #include <algorithm>
 #include <cassert>
 #include <memory>
@@ -139,9 +140,29 @@ BT::Physics_object* BT::Physics_engine::checkout_physics_object(UUID key)
     return m_physics_objects.at(key).get();
 }
 
+vector<BT::Physics_object*> BT::Physics_engine::checkout_all_physics_objects()
+{
+    phys_obj_pool_wait_until_free_then_block();
+
+    vector<Physics_object*> all_phys_objs;
+    all_phys_objs.reserve(m_physics_objects.size());
+    for (auto& phys_obj : m_physics_objects)
+    {
+        all_phys_objs.emplace_back(phys_obj.second.get());
+    }
+
+    return all_phys_objs;
+}
+
 void BT::Physics_engine::return_physics_object(Physics_object* phys_obj)
 {
     (void)phys_obj;
+    phys_obj_pool_unblock();
+}
+
+void BT::Physics_engine::return_physics_objects(vector<Physics_object*>&& phys_objs)
+{
+    (void)phys_objs;
     phys_obj_pool_unblock();
 }
 

@@ -4,9 +4,11 @@
 #include "camera_read_ifc.h"
 #include "imgui_renderer.h"
 #include "render_object.h"
+#include <functional>
 #include <memory>
 #include <string>
 
+using std::function;
 using std::string;
 
 
@@ -24,7 +26,7 @@ public:
 
     bool get_requesting_close();
     void poll_events();
-    void render(float_t delta_time);
+    void render(float_t delta_time, function<void()>&& debug_views_render_fn);
 
     // Camera read.
     void fetch_camera_matrices(mat4& out_projection,

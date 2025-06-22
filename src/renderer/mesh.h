@@ -36,7 +36,7 @@ public:
     Mesh(vector<uint32_t>&& indices, string const& material_name);
     ~Mesh();
 
-    void render_mesh(mat4 transform) const;
+    void render_mesh(mat4 transform, Material_ifc* override_material = nullptr) const;
 
     vector<uint32_t> const& get_indices() const;
 
@@ -59,7 +59,7 @@ public:
     Model& operator=(Model&&)      = delete;
     ~Model();
 
-    void render_model(mat4 transform) const;
+    void render_model(mat4 transform, Material_ifc* override_material = nullptr) const;
 
     pair<vector<Vertex> const&, vector<uint32_t>> get_all_vertices_and_indices() const;
 

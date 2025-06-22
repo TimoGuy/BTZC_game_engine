@@ -112,9 +112,6 @@ private:
     JPH::Ref<JPH::CharacterVirtual>  m_character;
     bool m_is_crouched;
     bool m_allow_sliding{ false };  // True when want to move.
-
-    // Debug rendering model.
-    Model const* m_debug_model;
 };
 
 }  // namespace BT

@@ -296,9 +296,10 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
     - [x] Ch ch ch changes.
         - [x] Only expand hierarchy tree when double click or use arrow.
         - [x] Remove the between hidden buttons for rearranging until rearranging mode. That way arrow key navigation isn't weird.
-    - [ ] Collision represented as green wireframe triangles.
-        - [ ] Blit hdr depthbuffer over to ldr depthbuffer.
-        - [ ] @THINK: How to organize the draw calls for the debug view?
+    - [x] Collision represented as green wireframe triangles.
+        - [x] Blit hdr depthbuffer over to ldr depthbuffer.
+            - I thiiiink it's working??
+        - [x] @THINK: How to organize the draw calls for the debug view?
             - Perhaps have a debug draw list?
                 - A model
                 - And a foreground & background color.
@@ -337,6 +338,9 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - There needs to be the ability to render out custom materials.
             - THIS ^^
             - Separate models and materials. Maybe when doing `render_model()` add a param to insert your own material set. Or maybe the model and material can have the material sets be coupled but just include that as an alternate set or something!
+            - Mmmmm but then it'll be more memory associated w each model.
+            - Maybe there could just be a bank of material sets and then the debug ones are just one material. The size is okay to be off, it'll just keep looping (so one material in the debug and it'll use just the one material the whole time).
+            - [ ] I want this refactor to have material sets ^^
 
 1. Good pause point.
     - [ ] Release v0.1.0-develop.1

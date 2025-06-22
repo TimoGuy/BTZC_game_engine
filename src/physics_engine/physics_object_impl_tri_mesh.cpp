@@ -1,5 +1,6 @@
 #include "physics_object_impl_tri_mesh.h"
 
+#include "../renderer/material.h"
 #include "../renderer/mesh.h"
 #include "../renderer/render_object.h"
 #include "Jolt/Jolt.h"
@@ -122,7 +123,12 @@ void BT::Phys_obj_impl_tri_mesh::debug_render_representation()
                                            current_trans.rotation.GetY(),
                                            current_trans.rotation.GetZ(),
                                            current_trans.rotation.GetW() }, graphic_trans);
-    m_model->render_model(graphic_trans);
+    static auto s_material_fore{
+        Material_bank::get_material("debug_physics_wireframe_fore_material") };
+    static auto s_material_back{
+        Material_bank::get_material("debug_physics_wireframe_back_material") };
+    m_model->render_model(graphic_trans, s_material_fore);
+    m_model->render_model(graphic_trans, s_material_back);
 }
 
 // Scene_serialization_ifc.

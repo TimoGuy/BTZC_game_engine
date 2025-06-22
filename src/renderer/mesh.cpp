@@ -57,15 +57,20 @@ BT::Mesh::~Mesh()
     glDeleteBuffers(1, &m_mesh_index_ebo);
 }
 
-void BT::Mesh::render_mesh(mat4 transform) const
+void BT::Mesh::render_mesh(mat4 transform, Material_ifc* override_material /*= nullptr*/) const
 {
     // @NOTE: All meshes share vertices, so they are stored and bound at the model level.
     // @TODO: @CHECK: Perhaps this method will mess with driver stuff. We'll see.
     // @TODO: @CHECK: I think that the element array buffer should be included here. idk.
+    if (override_material == nullptr)
+    {
+        override_material = m_material;
+    }
+
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_mesh_index_ebo);
-    m_material->bind_material(transform);
+    override_material->bind_material(transform);
     glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, reinterpret_cast<void*>(0));
-    m_material->unbind_material();
+    override_material->unbind_material();
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
@@ -85,14 +90,14 @@ BT::Model::~Model()
     glDeleteVertexArrays(1, &m_model_vertex_vao);
 }
 
-void BT::Model::render_model(mat4 transform) const
+void BT::Model::render_model(mat4 transform, Material_ifc* override_material /*= nullptr*/) const
 {
     // @NOTE: All meshes share the same vertices, just use different indices.
     glBindVertexArray(m_model_vertex_vao);
 
     for (auto& mesh : m_meshes)
     {
-        mesh.render_mesh(transform);
+        mesh.render_mesh(transform, override_material);
     }
 
     glBindVertexArray(0);

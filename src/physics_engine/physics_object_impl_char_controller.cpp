@@ -1,5 +1,6 @@
 #include "physics_object_impl_char_controller.h"
 
+#include "../renderer/material.h"
 #include "../renderer/mesh.h"
 #include "Jolt/Jolt.h"
 #include "Jolt/Core/TempAllocator.h"
@@ -22,7 +23,6 @@ BT::Phys_obj_impl_char_controller::Phys_obj_impl_char_controller(Physics_engine&
     , m_height{ height - 2.0f * radius }
     , m_crouch_height{ crouch_height }
     , m_is_crouched{ false }
-    , m_debug_model{ Model_bank::get_model("unit_box") }
 {
     assert(m_height >= 0.0f);
 
@@ -205,7 +205,13 @@ void BT::Phys_obj_impl_char_controller::debug_render_representation()
     glm_scale(graphic_trans, vec3{ m_radius,
                                    m_is_crouched ? m_crouch_height : m_height,
                                    m_radius });
-    m_model->render_model(graphic_trans);
+    static auto s_material_fore{
+        Material_bank::get_material("debug_physics_wireframe_fore_material") };
+    static auto s_material_back{
+        Material_bank::get_material("debug_physics_wireframe_back_material") };
+    static auto s_debug_model{ Model_bank::get_model("unit_box") };
+    s_debug_model->render_model(graphic_trans, s_material_fore);
+    s_debug_model->render_model(graphic_trans, s_material_back);
 }
 
 // Scene_serialization_ifc.

@@ -42,7 +42,9 @@ public:
     UUID emplace_physics_object(unique_ptr<Physics_object>&& phys_obj);
     void remove_physics_object(UUID key);
     Physics_object* checkout_physics_object(UUID key);
+    vector<Physics_object*> checkout_all_physics_objects();
     void return_physics_object(Physics_object* phys_obj);
+    void return_physics_objects(vector<Physics_object*>&& phys_objs);
 
 private:
     static constexpr float_t k_accumulate_delta_time_limit{ k_simulation_delta_time * 3 };

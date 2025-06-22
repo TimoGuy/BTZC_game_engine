@@ -7,8 +7,10 @@
 #include "render_object.h"
 #include "renderer.h"
 #include <cstdint>
+#include <functional>
 #include <string>
 
+using std::function;
 using std::string;
 
 
@@ -23,7 +25,7 @@ public:
 
     bool get_requesting_close();
     void poll_events();
-    void render(float_t delta_time);
+    void render(float_t delta_time, function<void()>&& debug_views_render_fn);
 
     inline Input_handler& get_input_handler() { return m_input_handler; }
 
@@ -82,6 +84,7 @@ private:
 
     void begin_new_display_frame();
     void render_hdr_color_to_ldr_framebuffer();
+    void render_debug_views_to_ldr_framebuffer(function<void()>&& debug_views_render_fn);
     void present_display_frame();
 
     // HDR rendering.
