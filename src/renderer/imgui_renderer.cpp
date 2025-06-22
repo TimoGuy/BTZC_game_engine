@@ -7,6 +7,11 @@
 #include "imgui_internal.h"
 
 
+void BT::ImGui_renderer::set_selected_game_obj(Game_object* game_obj)
+{
+    m_game_obj_pool->set_selected_game_obj(game_obj);
+}
+
 void BT::ImGui_renderer::render_imgui()
 {
     // @NOCHECKIN: @TEMP

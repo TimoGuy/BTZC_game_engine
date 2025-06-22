@@ -220,6 +220,12 @@ public:
 
     // Debug ImGui.
     void render_imgui_scene_hierarchy();
+
+    void set_selected_game_obj(Game_object* game_object)
+    {
+        m_selected_game_obj = game_object->get_uuid();
+    }
+
     UUID get_selected_game_obj() { return m_selected_game_obj; }
 
 private:

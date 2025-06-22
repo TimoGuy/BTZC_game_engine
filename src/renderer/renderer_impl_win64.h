@@ -83,9 +83,13 @@ private:
     bool m_render_to_ldr{ true };
 
     void begin_new_display_frame();
+    bool is_requesting_picking();
+    void render_scene_to_picking_framebuffer();
     void render_hdr_color_to_ldr_framebuffer();
     void render_debug_views_to_ldr_framebuffer(function<void()>&& debug_views_render_fn);
     void present_display_frame();
+    Render_object* read_picking_framebuffer_for_picked_render_obj();
+    void find_owning_game_obj_and_set_as_selected(Render_object* render_object);
 
     // HDR rendering.
     uint32_t m_hdr_fbo{ 0 };

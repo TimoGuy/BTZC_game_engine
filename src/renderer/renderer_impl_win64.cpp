@@ -220,11 +220,21 @@ void BT::Renderer::Impl::render(float_t delta_time, function<void()>&& debug_vie
     // Render new frame.
     begin_new_display_frame();
     render_scene_to_hdr_framebuffer();
+    if (is_requesting_picking())
+    {
+        render_scene_to_picking_framebuffer();
+    }
     render_hdr_color_to_ldr_framebuffer();
     render_debug_views_to_ldr_framebuffer(std::move(debug_views_render_fn));
     render_imgui();
 
     present_display_frame();
+
+    if (is_requesting_picking())
+    {
+        find_owning_game_obj_and_set_as_selected(
+            read_picking_framebuffer_for_picked_render_obj());
+    }
 
     m_input_handler.clear_look_delta();
     // m_input_handler.clear_ui_scroll_delta();  @UNSURE
@@ -649,6 +659,18 @@ void BT::Renderer::Impl::render_debug_views_to_ldr_framebuffer(function<void()>&
 void BT::Renderer::Impl::present_display_frame()
 {
     glfwSwapBuffers(reinterpret_cast<GLFWwindow*>(m_window_handle));
+}
+
+void BT::Renderer::Impl::find_owning_game_obj_and_set_as_selected(Render_object* render_object)
+{
+    Game_object* selected_game_obj{ nullptr };
+
+    if (render_object)
+    {
+        selected_game_obj = &render_object->get_owning_game_obj();
+    }
+
+    m_imgui_renderer.set_selected_game_obj(selected_game_obj);
 }
 
 // HDR rendering.

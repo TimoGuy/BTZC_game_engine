@@ -9,6 +9,7 @@ namespace BT
 {
 
 class Camera;
+class Game_object;
 class Game_object_pool;
 class Renderer;
 
@@ -20,6 +21,7 @@ public:
     void set_renderer_ref(Renderer* renderer) { m_renderer = renderer; }
     void set_callbacks(function<void()>&& asdfasdf);
 
+    void set_selected_game_obj(Game_object* game_obj);
     void render_imgui();
 
 private:

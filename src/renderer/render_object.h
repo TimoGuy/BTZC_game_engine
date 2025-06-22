@@ -40,6 +40,8 @@ public:
                   Model const* model,
                   Render_layer layer);
 
+    Game_object& get_owning_game_obj() { return m_game_obj; }
+
     void render(Render_layer active_layers,
                 Material_ifc* override_material = nullptr);
 
