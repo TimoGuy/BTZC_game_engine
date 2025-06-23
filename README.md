@@ -12,32 +12,18 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
 
 ### Adds
 
-- Backface culling.
-- 10 second async watchdog (for crashing the program if it falls into an infinite loop).
-- Game object serialization/deserialization.
-- .exe and window icons.
 - TODO vv
-- Transform hierarchy for both rendering and physics steps.
 - Job system (for fast transform hierarchy updating for now).
-- Debug view for collision.
-- Render object picking.
 
 ### Changes
 
-- Grid shader now displays standable and non-standable surfaces.
-- Scripts are now unified, instead of having a list of physics and render scripts.
-- Script data is now held by an actual class, extending a new script interface.
-- `serialization.h` is deprecated (or rather I don't think it's being used, but this may be useful for a binary data saver?)
-- Implementation of render obj, physics obj, and game obj keys are via UUID.
 - TODO vv
 - Physics objs when created are dummy phys objs and using the deserialize or other creation methods do they actually do something in the physics world.
-- ImGui is its own section of the application now.
-    - Current plan is to ship it with the final application as well.
 
 ### Fixes
 
-- Logger failing format string.
-- Not being able to delete render objects.
+- TODO vv
+- World Peace.
 
 
 ## Todo List.
