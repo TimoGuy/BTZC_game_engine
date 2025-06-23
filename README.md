@@ -8,7 +8,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
 *Simple OBJ loader with hacky lighting and a flying camera. (2025/05/22)*
 
 
-## 0.1.0-develop.1 (NEXT VERSION, WIP)
+## 0.1.0-develop.2 (NEXT VERSION, WIP)
 
 ### Adds
 
@@ -342,30 +342,57 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
     - [ ] @FUTURE: ~~Change `main_renderer.render();` to have a separate `set_debug_views_render_fn_callback();` so that the lambda doesn't have to be created every single render loop.~~
         - This is a super quick change for something I'm not even sure will operate like this in the future.
 
-1. Good pause point.
-    - [ ] Release v0.1.0-develop.1
+1. DONE: Good pause point.
+    - [x] Release v0.1.0-develop.1
 
 1. Unity to this engine migration.
     - @TODO.
 
 1. Level authoring tools.
-    - [ ] Create, duplicate, delete game objects.
-        - Duplicating copies the serialization of the game object, nullifies the guid, then recreates the object.
-    - [ ] In-scene object picker.
-        - Render object to the corresponding gameobject.
-    - [ ] Prefab creator.
-    - [ ] Grid alignment.
-    - [ ] Transform gizmos.
-        - Use Imguizmo.
-        - Also allow for G for translate, R for rotate, and S for scale.
-        - Also (while not using the gizmo) allow for W,E,R to change to 
+    - [ ] Think about wanted level authoring tools
+        - Maybe a top-down grid based level editor?
+            - And then it generates a .obj file that's the collision mesh?
+            - And you can have collision pillars and stuff like that?
+        - Or a different method?
+            1. Block out all the rooms with the top down grid based level editor.
+                - Each room gets its own grid system. It can either align with all the other grid systems or it can turn in all sorts of different angles.
+                - @FORNOW: block out the rooms in blender and have all the gradations and terraces align with the grid. Have that room be its own game object and place/child all other game objects into that room.
+            1. Connect the rooms with corridor pieces.
+                - This part is gonna need math. A lot of it. But it should connect the rooms together so they don't need to worry about odd grid systems.
     - [ ] Orthographic view.
+        - Hold shift while using gizmo to activate.
         - 4-pane view kinda like what maya has.
             - 1st, main pane is colored, full view
-            - 2-4 are wireframe, colored-by-id views that are orthographic.
+            - 2-4 are wireframe, ~~colored-by-id views~~ colored r,g,b depending on the axis (with exception of selected object which is the selected color) that are orthographic.
         - Wherever the moving gizmo is is the focus point.
         - Use scroll wheel to adjust before/after depth for each axis.
+        - Use ctrl + scroll wheel to adjust the size of the orthographic view.
         - Display the camera view axes as boxes showing the depth of each capture.
+    - [ ] Grid alignment.
+        - Press ctrl while using gizmo to toggle.
+        - Options in the editor options menu on delta pos, rot, and sca.
+    - [ ] Right click menu.
+        - [ ] Duplicate game object.
+            - Duplicating copies the serialization of the game object, nullifies the guid, then recreates the object.
+        - [ ] @FUTURE: ~~Copy game object.~~
+        - [ ] @FUTURE: ~~Paste game object.~~
+        - [ ] Delete game object.
+        - [ ] Make game object a prefab.
+    - [ ] Prefab editor.
+    - [x] ~~In-scene object picker.~~
+        - Render object to the corresponding gameobject.
+    - [x] Transform gizmos.
+        - Use Imguizmo.
+        - ~~Also allow for G for translate, R for rotate, and S for scale.~~
+        - ~~Also (while not using the gizmo) allow for W,E,R to change to ~~
+
+1. Work on movement and gameplay stuff (not really engine related for this)!
+    - Base movement principles from a hat in time.
+    - Use animations to really show the movement stuff.
+    - @TODO.
+
+1. Good pause point.
+    - [ ] Release v0.1.0-develop.2
 
 1. Add cascaded shadow maps to renderer.
     - @TODO.
@@ -378,14 +405,6 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - 1 per skinned mesh thingy.
     - [ ] Add support for GLTF2 filetype for models.
     - [ ] IK legs.
-    - @TODO.
-
-1. Good pause point.
-    - [ ] Release v0.1.0-develop.2
-
-1. Work on movement and gameplay stuff (not really engine related for this)!
-    - Base movement principles from a hat in time.
-    - Use animations to really show the movement stuff.
     - @TODO.
 
 1. Good pause point.
