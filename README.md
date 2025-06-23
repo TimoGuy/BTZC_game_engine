@@ -345,6 +345,12 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
 1. DONE: Good pause point.
     - [x] Release v0.1.0-develop.1
 
+1. Gameplay work (not engine work rly).
+    - [ ] Base movement principles from a hat in time.
+        - Velocity/inertia.
+        - Turning.
+        - Turning around.
+
 1. Unity to this engine migration.
     - @TODO.
 
@@ -385,11 +391,6 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - Use Imguizmo.
         - ~~Also allow for G for translate, R for rotate, and S for scale.~~
         - ~~Also (while not using the gizmo) allow for W,E,R to change to ~~
-
-1. Work on movement and gameplay stuff (not really engine related for this)!
-    - Base movement principles from a hat in time.
-    - Use animations to really show the movement stuff.
-    - @TODO.
 
 1. Good pause point.
     - [ ] Release v0.1.0-develop.2
