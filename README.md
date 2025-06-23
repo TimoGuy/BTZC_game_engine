@@ -257,7 +257,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - Maybe create a class that does touch everything, and the renderer just holds a reference to it and calls `render_imgui()` from there. That way it's like a callout but the renderer doesn't have to have its hands in every single system it wants to touch.
         - [x] Yeah, this change needs to be made. DO IT.
 
-1. Debug views.
+1. DONE: Debug views.
     - [x] Controlling the transform of objects.
         - [x] Add local transform editing in imgui inspector.
             - [x] Initial.
@@ -316,14 +316,14 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - New drawlist for the selected object(s).
         - Reset pulsing timing every time the selected object count changes.
             - Actually, I honestly just feel too lazy for the pulsing. It's so twisty and knotty.
-    - [ ] Object picking.
+    - [x] Object picking.
         - [x] Get required functions stubbed out.
         - [x] Define `set_selected_game_obj()`
-        - [ ] Define the click detection func.
+        - [x] Define the click detection func.
             - [x] 一応
-            - [ ] Test it when everything else is working.
-        - [ ] Define the render obj render func.
-        - [ ] Define the render obj flush/reading func.
+            - [x] Test it when everything else is working.
+        - [x] Define the render obj render func.
+        - [x] Define the render obj flush/reading func.
         - Read from picking buffer and use id to select the certain game object.
         - [x] Only highlight that gameobject as the selected one. That's all this has to do.
             - Only function stubs, but it is intending to work.

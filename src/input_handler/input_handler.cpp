@@ -97,8 +97,17 @@ void BT::Input_handler::report_mouse_button_input_change(int32_t button_code, bo
     }
 }
 
+void BT::Input_handler::report_mouse_position_offset(float_t x_offset, float_t y_offset)
+{
+    m_mouse_pos_offset_x = x_offset;
+    m_mouse_pos_offset_y = y_offset;
+}
+
 void BT::Input_handler::report_mouse_position_change(float_t x, float_t y)
 {
+    x -= m_mouse_pos_offset_x;
+    y -= m_mouse_pos_offset_y;
+
     // @HARDCODE.
     // Use ui_cursor_pos as prev state.
     m_state.look_delta.x.val += (x - m_state.ui_cursor_pos.x.val);

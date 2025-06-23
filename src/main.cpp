@@ -7,12 +7,13 @@
 #include "input_handler/input_handler.h"
 #include "Jolt/Jolt.h"  // @DEBUG
 #include "Jolt/Math/Real.h"  // @DEBUG
-#include "Jolt/Math/Quat.h"
+#include "Jolt/Math/Quat.h"  // @DEBUG
 #include "logger/logger.h"
 #include "physics_engine/physics_engine.h"
 #include "physics_engine/physics_object.h"
 #include "renderer/imgui_renderer.h"  // @DEBUG
 #include "renderer/material.h"  // @DEBUG
+#include "renderer/material_impl_debug_picking.h"  // @DEBUG
 #include "renderer/material_impl_opaque_color_unlit.h"  // @DEBUG
 #include "renderer/material_impl_opaque_shaded.h"  // @DEBUG
 #include "renderer/material_impl_opaque_texture_shaded.h"  // @DEBUG
@@ -103,6 +104,9 @@ int32_t main()
         unique_ptr<BT::Material_ifc>(
             new BT::Material_opaque_color_unlit(vec3{ 0.475f, 0.15f, 0.475f },
                                                 BT::k_depth_test_mode_back)));
+    BT::Material_bank::emplace_material(
+        "debug_picking_material",
+        unique_ptr<BT::Material_ifc>(new BT::Material_debug_picking()));
     BT::Material_bank::emplace_material(
         "post_process",
         unique_ptr<BT::Material_ifc>(

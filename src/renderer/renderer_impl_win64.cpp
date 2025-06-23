@@ -18,6 +18,7 @@
 #include "../game_object/game_object.h"
 #include "logger.h"
 #include "material.h"
+#include "material_impl_debug_picking.h"
 #include "render_object.h"
 #include "renderer.h"
 #include "stb_image.h"
@@ -161,6 +162,7 @@ BT::Renderer::Impl::Impl(Renderer& renderer, ImGui_renderer& imgui_renderer, Inp
     setup_imgui();
     create_ldr_fbo();
     create_hdr_fbo();
+    create_picking_fbo();
 
     m_camera.set_callbacks(
         [&](bool lock) {
@@ -210,6 +212,7 @@ void BT::Renderer::Impl::render(float_t delta_time, function<void()>&& debug_vie
         m_main_viewport_dims = m_main_viewport_wanted_dims;
         create_ldr_fbo();
         create_hdr_fbo();
+        create_picking_fbo();
         m_camera.set_aspect_ratio(m_main_viewport_dims.width,
                                   m_main_viewport_dims.height);
     }
@@ -223,7 +226,6 @@ void BT::Renderer::Impl::render(float_t delta_time, function<void()>&& debug_vie
     render_scene_to_hdr_framebuffer();
     if (is_requesting_picking())
     {
-        std::cout << "HELLO JAMMO\n" << std::endl;
         render_scene_to_picking_framebuffer();
     }
     render_hdr_color_to_ldr_framebuffer();
@@ -231,12 +233,6 @@ void BT::Renderer::Impl::render(float_t delta_time, function<void()>&& debug_vie
     render_imgui();
 
     present_display_frame();
-
-    if (is_requesting_picking())
-    {
-        find_owning_game_obj_and_set_as_selected(
-            read_picking_framebuffer_for_picked_render_obj());
-    }
 
     m_input_handler.clear_look_delta();
     // m_input_handler.clear_ui_scroll_delta();  @UNSURE
@@ -305,6 +301,10 @@ void BT::Renderer::Impl::render_imgui_game_view()
     auto rect_min{ ImGui::GetItemRectMin() };
     auto rect_size{ ImGui::GetItemRectSize() };
     ImGuizmo::SetRect(rect_min.x, rect_min.y, rect_size.x, rect_size.y);
+
+    // Set input cursor position offset.
+    m_input_handler.report_mouse_position_offset(rect_min.x - ImGui::GetWindowViewport()->Pos.x,
+                                                 rect_min.y - ImGui::GetWindowViewport()->Pos.y);
 }
 
 void BT::Renderer::Impl::setup_glfw_and_opengl46_hints()
@@ -601,7 +601,8 @@ void BT::Renderer::Impl::begin_new_display_frame()
 {
     // Configure main render target.
     glViewport(0, 0, m_window_dims.width, m_window_dims.height);
-    glClearColor(0.063f, 0.129f, 0.063f, 1.0f);
+    // glClearColor(0.063f, 0.129f, 0.063f, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
@@ -643,6 +644,77 @@ bool BT::Renderer::Impl::is_requesting_picking()
             !m_camera.is_mouse_captured() &&
             !ImGuizmo::IsOver() &&
             !ImGuizmo::IsUsing());
+}
+
+void BT::Renderer::Impl::render_scene_to_picking_framebuffer()
+{
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
+    glDepthMask(GL_TRUE);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CW);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, m_picking_fbo);
+    glViewport(0, 0, m_main_viewport_dims.width, m_main_viewport_dims.height);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    auto rend_objs{ m_rend_obj_pool.checkout_all_render_objs() };
+
+    // Render scene.
+    for (size_t i = 0; i < rend_objs.size(); i++)
+    {
+        auto rend_obj{ rend_objs[i] };
+        static Material_debug_picking* s_picking_material{
+            static_cast<Material_debug_picking*>(
+                BT::Material_bank::get_material("debug_picking_material")) };
+
+        vec3 encoded_color;
+        picking_idx_to_rgb_chans(i, encoded_color);
+        s_picking_material->set_color(encoded_color);
+
+        rend_obj->render(m_active_render_layers, s_picking_material);
+    }
+
+    // Read pixel under cursor.
+    glFlush();
+    glFinish();
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    uint8_t pixel_data[4];
+    glReadPixels(m_input_handler.get_input_state().ui_cursor_pos.x.val,
+                 /*m_main_viewport_dims.height -*/ m_input_handler.get_input_state().ui_cursor_pos.y.val,
+                 1,
+                 1,
+                 GL_RGBA,
+                 GL_UNSIGNED_BYTE,
+                 pixel_data);
+    uint32_t picked_idx{ rgb_chans_to_picking_idx(pixel_data) };
+
+    // Set picked game object.
+    Render_object* picked_rend_obj{ nullptr };
+    if (picked_idx != (uint32_t)-1)
+    {
+        picked_rend_obj = rend_objs[picked_idx];
+    }
+    find_owning_game_obj_and_set_as_selected(picked_rend_obj);
+
+    m_rend_obj_pool.return_render_objs(std::move(rend_objs));
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glDisable(GL_CULL_FACE);
+    glDisable(GL_DEPTH_TEST);
+}
+
+void BT::Renderer::Impl::find_owning_game_obj_and_set_as_selected(Render_object* render_object)
+{
+    Game_object* selected_game_obj{ nullptr };
+
+    if (render_object)
+    {
+        selected_game_obj = &render_object->get_owning_game_obj();
+    }
+
+    m_imgui_renderer.set_selected_game_obj(selected_game_obj);
 }
 
 void BT::Renderer::Impl::render_hdr_color_to_ldr_framebuffer()
@@ -703,18 +775,6 @@ void BT::Renderer::Impl::present_display_frame()
     glfwSwapBuffers(reinterpret_cast<GLFWwindow*>(m_window_handle));
 }
 
-void BT::Renderer::Impl::find_owning_game_obj_and_set_as_selected(Render_object* render_object)
-{
-    Game_object* selected_game_obj{ nullptr };
-
-    if (render_object)
-    {
-        selected_game_obj = &render_object->get_owning_game_obj();
-    }
-
-    m_imgui_renderer.set_selected_game_obj(selected_game_obj);
-}
-
 // HDR rendering.
 void BT::Renderer::Impl::create_hdr_fbo()  // @COPYPASTA.
 {
@@ -773,6 +833,91 @@ void BT::Renderer::Impl::create_hdr_fbo()  // @COPYPASTA.
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     Texture_bank::emplace_texture_2d("hdr_color_texture", m_hdr_color_texture, true);
+}
+
+// Picking rendering.
+void BT::Renderer::Impl::picking_idx_to_rgb_chans(uint32_t idx, vec3& out_rgb)
+{
+    idx++;
+    assert(idx != 0);  // 0 is the background color.
+
+    out_rgb[0] = ((idx & 0x000000ff) >> 0) / 255.0f;
+    out_rgb[1] = ((idx & 0x0000ff00) >> 8) / 255.0f;
+    out_rgb[2] = ((idx & 0x00ff0000) >> 16) / 255.0f;
+}
+
+uint32_t BT::Renderer::Impl::rgb_chans_to_picking_idx(uint8_t* rgb_chans)
+{
+    uint32_t picked_idx{ rgb_chans[0] +
+                         rgb_chans[1] * 256u +
+                         rgb_chans[2] * 256u * 256u };
+    if (picked_idx == 0)
+    {
+        return (uint32_t)-1;
+    }
+    else
+    {
+        return (picked_idx - 1);
+    }
+}
+
+void BT::Renderer::Impl::create_picking_fbo()  // @COPYPASTA.
+{
+    if (m_picking_fbo != 0 || m_picking_color_texture != 0 || m_picking_depth_rbo != 0)
+    {
+        // Double check that everything is fully created prior to deleting to recreate.
+        assert(m_picking_fbo != 0 && m_picking_color_texture != 0 && m_picking_depth_rbo != 0);
+
+        // Delete to recreate.
+        glDeleteFramebuffers(1, &m_picking_fbo);
+        glDeleteTextures(1, &m_picking_color_texture);
+        glDeleteRenderbuffers(1, &m_picking_depth_rbo);
+    }
+
+    // Create color texture.
+    glGenTextures(1, &m_picking_color_texture);
+    glBindTexture(GL_TEXTURE_2D, m_picking_color_texture);
+    glTexImage2D(GL_TEXTURE_2D,
+                 0,
+                 GL_RGBA8,
+                 m_main_viewport_dims.width,
+                 m_main_viewport_dims.height,
+                 0,
+                 GL_RGBA,
+                 GL_FLOAT,
+                 nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // Create depth renderbuffer.
+    glGenRenderbuffers(1, &m_picking_depth_rbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, m_picking_depth_rbo);
+    glRenderbufferStorage(GL_RENDERBUFFER,
+                          GL_DEPTH_COMPONENT,
+                          m_main_viewport_dims.width,
+                          m_main_viewport_dims.height);
+
+    // Create framebuffer.
+    glGenFramebuffers(1, &m_picking_fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, m_picking_fbo);
+    glFramebufferTexture2D(GL_FRAMEBUFFER,
+                           GL_COLOR_ATTACHMENT0,
+                           GL_TEXTURE_2D,
+                           m_picking_color_texture,
+                           0);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER,
+                              GL_DEPTH_ATTACHMENT,
+                              GL_RENDERBUFFER,
+                              m_picking_depth_rbo);
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+    {
+        logger::printef(logger::ERROR, "Framebuffer incomplete.");
+        assert(false);
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    Texture_bank::emplace_texture_2d("picking_color_texture", m_picking_color_texture, true);
 }
 
 // Helper functions.

@@ -86,17 +86,24 @@ private:
     void render_scene_to_hdr_framebuffer();
     bool is_requesting_picking();
     void render_scene_to_picking_framebuffer();
+    void find_owning_game_obj_and_set_as_selected(Render_object* render_object);
     void render_hdr_color_to_ldr_framebuffer();
     void render_debug_views_to_ldr_framebuffer(function<void()>&& debug_views_render_fn);
     void present_display_frame();
-    Render_object* read_picking_framebuffer_for_picked_render_obj();
-    void find_owning_game_obj_and_set_as_selected(Render_object* render_object);
 
     // HDR rendering.
     uint32_t m_hdr_fbo{ 0 };
     uint32_t m_hdr_color_texture{ 0 };
     uint32_t m_hdr_depth_rbo{ 0 };
     void create_hdr_fbo();
+
+    // Picking rendering.
+    uint32_t m_picking_fbo{ 0 };
+    uint32_t m_picking_color_texture{ 0 };
+    uint32_t m_picking_depth_rbo{ 0 };
+    void picking_idx_to_rgb_chans(uint32_t idx, vec3& out_rgb);
+    uint32_t rgb_chans_to_picking_idx(uint8_t* rgb_chans);
+    void create_picking_fbo();
 
     // Helper functions.
     void render_ndc_cube();

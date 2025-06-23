@@ -89,6 +89,8 @@ add_executable(${PROJECT_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/camera.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/imgui_renderer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/imgui_renderer.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/material_impl_debug_picking.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/material_impl_debug_picking.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/material_impl_opaque_color_unlit.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/material_impl_opaque_color_unlit.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/material_impl_opaque_shaded.cpp

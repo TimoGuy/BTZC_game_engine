@@ -11,6 +11,7 @@ class Input_handler
 public:
     void report_keyboard_input_change(int32_t key_code, bool pressed);
     void report_mouse_button_input_change(int32_t button_code, bool pressed);
+    void report_mouse_position_offset(float_t x_offset, float_t y_offset);
     void report_mouse_position_change(float_t x, float_t y);
     void report_mouse_scroll_input_change(float_t dx, float_t dy);
 
@@ -65,6 +66,8 @@ public:
 
 private:
     State m_state;
+    float_t m_mouse_pos_offset_x{ 0 };
+    float_t m_mouse_pos_offset_y{ 0 };
 };
 
 }  // namespace BT
