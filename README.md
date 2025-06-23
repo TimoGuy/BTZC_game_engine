@@ -341,8 +341,9 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - Idk. Pre-packing defaults for the physics objects does seem like a bit of a hassle ngl. (i.e. thinking about writing static json premade thingies for every new type you got). Tho honestly that might just be a fine way of doing things ig. idk!
             - Also, maybe creating the physics objects doesn't need to happen immediately anyway, bc the physics objects will just be created when the game is starting to be played anyway, not during level authoring time.
         - Hmmm, also seems like there needs to be a `scene_serialize()` thing for the impl of the thingies.
-        - [ ] Think about these thoughts ^^
+        - [x] Think about these thoughts ^^
             - I think that this kinda change would be good. Like changing the `create_char_controller()` thing to be more of a decorator function and creating an abstract form physics thing that has no impl would be good.
+    - [x] Fix char controller debug repr sizing issues.
     - [ ] Thoughts on including the model system with the debug rendering stuff.
         - This honestly kinda just sucks, ngl.
         - There needs to be the ability to render out custom materials.

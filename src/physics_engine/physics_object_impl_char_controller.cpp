@@ -9,6 +9,7 @@
 #include "Jolt/Physics/Collision/Shape/RotatedTranslatedShape.h"
 #include "Jolt/Physics/PhysicsSystem.h"
 #include "physics_engine_impl_layers.h"
+#include <iostream>  // @NOCHECKIN
 
 
 BT::Phys_obj_impl_char_controller::Phys_obj_impl_char_controller(Physics_engine& phys_engine,
@@ -21,10 +22,11 @@ BT::Phys_obj_impl_char_controller::Phys_obj_impl_char_controller(Physics_engine&
     , m_phys_temp_allocator{ *reinterpret_cast<JPH::TempAllocator*>(m_phys_engine.get_physics_temp_allocator_ptr()) }
     , m_radius{ radius }
     , m_height{ height - 2.0f * radius }
-    , m_crouch_height{ crouch_height }
+    , m_crouch_height{ crouch_height - 2.0f * radius }
     , m_is_crouched{ false }
 {
     assert(m_height >= 0.0f);
+    assert(m_crouch_height >= 0.0f);
 
     // @NOTE: Before the cylinder collider was used to get round sides and a flat
     //   bottom, however, the side collisions of the cylinder became so erratic that
@@ -193,6 +195,11 @@ void BT::Phys_obj_impl_char_controller::debug_render_representation()
     // @COPYPASTA: See `physics_object_impl_tri_mesh.cpp`.
     auto current_trans{ read_transform() };
     current_trans.position += m_character->GetShapeOffset();
+
+    float_t height{ m_is_crouched ? m_crouch_height : m_height };
+    std::cout << "isccccc " << height << std::endl;
+    current_trans.position.SetY(
+        current_trans.position.GetY() + 0.5f * height + m_radius);
     
     mat4 graphic_trans;
     glm_translate_make(graphic_trans, vec3{ current_trans.position.GetX(),
@@ -203,7 +210,7 @@ void BT::Phys_obj_impl_char_controller::debug_render_representation()
                                            current_trans.rotation.GetZ(),
                                            current_trans.rotation.GetW() }, graphic_trans);
     glm_scale(graphic_trans, vec3{ m_radius,
-                                   m_is_crouched ? m_crouch_height : m_height,
+                                   0.5f * height + m_radius,
                                    m_radius });
     static auto s_material_fore{
         Material_bank::get_material("debug_physics_wireframe_fore_material") };

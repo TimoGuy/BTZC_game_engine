@@ -682,7 +682,7 @@ void BT::Renderer::Impl::render_scene_to_picking_framebuffer()
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     uint8_t pixel_data[4];
     glReadPixels(m_input_handler.get_input_state().ui_cursor_pos.x.val,
-                 /*m_main_viewport_dims.height -*/ m_input_handler.get_input_state().ui_cursor_pos.y.val,
+                 m_input_handler.get_input_state().ui_cursor_pos.y.val,
                  1,
                  1,
                  GL_RGBA,
