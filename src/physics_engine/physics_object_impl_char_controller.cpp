@@ -9,7 +9,6 @@
 #include "Jolt/Physics/Collision/Shape/RotatedTranslatedShape.h"
 #include "Jolt/Physics/PhysicsSystem.h"
 #include "physics_engine_impl_layers.h"
-#include <iostream>  // @NOCHECKIN
 
 
 BT::Phys_obj_impl_char_controller::Phys_obj_impl_char_controller(Physics_engine& phys_engine,
@@ -197,7 +196,6 @@ void BT::Phys_obj_impl_char_controller::debug_render_representation()
     current_trans.position += m_character->GetShapeOffset();
 
     float_t height{ m_is_crouched ? m_crouch_height : m_height };
-    std::cout << "isccccc " << height << std::endl;
     current_trans.position.SetY(
         current_trans.position.GetY() + 0.5f * height + m_radius);
     
