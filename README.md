@@ -334,7 +334,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - Select a character and enable follow path debug view.
         - Over the past 500 moved/active physics steps, draw a cube that represents the collision shape and transform of where the character was.
 
-1. Lower priority refactor?
+1. DEFERRED: Lower priority refactor?
     - [ ] @FUTURE: @DEFER: ~~Thoughts on phys obj creation system:~~
         - Forcing that assymetrical phys obj creation method (w/ `create_physics_object_from_serialization()`) really sucks.
         - I think that you should be able to create a physics object that's empty, and then after that do `scene_serialize()` and create a default physics object in the type you're looking for, or something bc this really ain't it.
@@ -344,7 +344,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - [x] Think about these thoughts ^^
             - I think that this kinda change would be good. Like changing the `create_char_controller()` thing to be more of a decorator function and creating an abstract form physics thing that has no impl would be good.
     - [x] Fix char controller debug repr sizing issues.
-    - [ ] Thoughts on including the model system with the debug rendering stuff.
+    - [ ] @FUTURE: ~~Thoughts on including the model system with the debug rendering stuff.~~
         - This honestly kinda just sucks, ngl.
         - There needs to be the ability to render out custom materials.
             - THIS ^^
@@ -352,7 +352,9 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
             - Mmmmm but then it'll be more memory associated w each model.
             - Maybe there could just be a bank of material sets and then the debug ones are just one material. The size is okay to be off, it'll just keep looping (so one material in the debug and it'll use just the one material the whole time).
             - [ ] I want this refactor to have material sets ^^
-    - [ ] Change `main_renderer.render();` to have a separate `set_debug_views_render_fn_callback();` so that the lambda doesn't have to be created every single render loop.
+            - @AMEND: Honestly, there needs to be more thought into this. Make a more robust plan when this rendering stuff comes up again.
+    - [ ] @FUTURE: ~~Change `main_renderer.render();` to have a separate `set_debug_views_render_fn_callback();` so that the lambda doesn't have to be created every single render loop.~~
+        - This is a super quick change for something I'm not even sure will operate like this in the future.
 
 1. Good pause point.
     - [ ] Release v0.1.0-develop.1
