@@ -83,6 +83,7 @@ private:
     bool m_render_to_ldr{ true };
 
     void begin_new_display_frame();
+    void render_scene_to_hdr_framebuffer();
     bool is_requesting_picking();
     void render_scene_to_picking_framebuffer();
     void render_hdr_color_to_ldr_framebuffer();
@@ -96,7 +97,6 @@ private:
     uint32_t m_hdr_color_texture{ 0 };
     uint32_t m_hdr_depth_rbo{ 0 };
     void create_hdr_fbo();
-    void render_scene_to_hdr_framebuffer();
 
     // Helper functions.
     void render_ndc_cube();

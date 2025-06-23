@@ -320,6 +320,8 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - [x] Get required functions stubbed out.
         - [x] Define `set_selected_game_obj()`
         - [ ] Define the click detection func.
+            - [x] 一応
+            - [ ] Test it when everything else is working.
         - [ ] Define the render obj render func.
         - [ ] Define the render obj flush/reading func.
         - Read from picking buffer and use id to select the certain game object.

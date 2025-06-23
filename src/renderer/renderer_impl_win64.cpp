@@ -30,6 +30,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <iostream>  // @NOCHECKIN
 
 using std::mutex;
 using std::lock_guard;
@@ -222,6 +223,7 @@ void BT::Renderer::Impl::render(float_t delta_time, function<void()>&& debug_vie
     render_scene_to_hdr_framebuffer();
     if (is_requesting_picking())
     {
+        std::cout << "HELLO JAMMO\n" << std::endl;
         render_scene_to_picking_framebuffer();
     }
     render_hdr_color_to_ldr_framebuffer();
@@ -603,6 +605,46 @@ void BT::Renderer::Impl::begin_new_display_frame()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
+void BT::Renderer::Impl::render_scene_to_hdr_framebuffer()
+{
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
+    glDepthMask(GL_TRUE);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CW);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, m_hdr_fbo);
+    glViewport(0, 0, m_main_viewport_dims.width, m_main_viewport_dims.height);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // Render scene.
+    auto rend_objs{ m_rend_obj_pool.checkout_all_render_objs() };
+    for (auto rend_obj : rend_objs)
+    {
+        rend_obj->render(m_active_render_layers);
+    }
+    m_rend_obj_pool.return_render_objs(std::move(rend_objs));
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glDisable(GL_CULL_FACE);
+    glDisable(GL_DEPTH_TEST);
+}
+
+bool BT::Renderer::Impl::is_requesting_picking()
+{
+    static bool s_prev_le_select_val{ false };
+    bool curr_le_select_val{ m_input_handler.get_input_state().le_select.val };
+    bool on_le_select_val_pressed{ !s_prev_le_select_val && curr_le_select_val };
+    s_prev_le_select_val = curr_le_select_val;
+
+    return (on_le_select_val_pressed &&
+            !ImGui::GetIO().WantCaptureMouse &&
+            !m_camera.is_mouse_captured() &&
+            !ImGuizmo::IsOver() &&
+            !ImGuizmo::IsUsing());
+}
+
 void BT::Renderer::Impl::render_hdr_color_to_ldr_framebuffer()
 {
     if (m_render_to_ldr)
@@ -731,32 +773,6 @@ void BT::Renderer::Impl::create_hdr_fbo()  // @COPYPASTA.
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     Texture_bank::emplace_texture_2d("hdr_color_texture", m_hdr_color_texture, true);
-}
-
-void BT::Renderer::Impl::render_scene_to_hdr_framebuffer()
-{
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LEQUAL);
-    glDepthMask(GL_TRUE);
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-    glFrontFace(GL_CW);
-
-    glBindFramebuffer(GL_FRAMEBUFFER, m_hdr_fbo);
-    glViewport(0, 0, m_main_viewport_dims.width, m_main_viewport_dims.height);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    // Render scene.
-    auto rend_objs{ m_rend_obj_pool.checkout_all_render_objs() };
-    for (auto rend_obj : rend_objs)
-    {
-        rend_obj->render(m_active_render_layers);
-    }
-    m_rend_obj_pool.return_render_objs(std::move(rend_objs));
-
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glDisable(GL_CULL_FACE);
-    glDisable(GL_DEPTH_TEST);
 }
 
 // Helper functions.
