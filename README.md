@@ -350,9 +350,11 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - Make the char controller the follow camera thingy.
     - [x] Fix follow camera. Actually have ti use the reference.
     - [ ] Base movement principles from a hat in time.
-        - Velocity/inertia.
-        - Turning.
-        - Turning around.
+        - [x] Velocity/inertia.
+        - [x] Turning.
+        - [ ] Turning around.
+        - [ ] Airborne just being simple additions to velocity.
+            - [ ] Grounded and airborne modes inherit velocity from each other.
     - [ ] Swordplay combat.
         - Cutting.
         - Deflecting.

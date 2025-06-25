@@ -1,3 +1,4 @@
+#include "cglm/util.h"
 #include "scripts.h"
 
 #include "../input_handler/input_handler.h"
@@ -6,9 +7,12 @@
 #include "../renderer/renderer.h"
 #include "cglm/vec3.h"
 #include "Jolt/Jolt.h"
+#include "Jolt/Math/Vec3.h"
 #include "Jolt/Physics/PhysicsSystem.h"
+#include <array>
 #include <memory>
 
+using std::array;
 using std::unique_ptr;
 
 
@@ -36,6 +40,18 @@ public:
     bool m_prev_jump_pressed{ false };
     bool m_prev_crouch_pressed{ false };
 
+    enum Movement_state
+    {
+        GROUNDED = 0,
+        AIRBORNE,
+    } m_current_state{ Movement_state(0) };
+
+    struct Grounded_state
+    {
+        float_t speed{ 0.0f };
+        float_t facing_angle{ 0.0f };
+    } m_grounded_state;
+
     // Script_ifc.
     Script_type get_type() override
     {
@@ -48,6 +64,28 @@ public:
     }
 
     void on_pre_physics(float_t physics_delta_time) override;
+
+    // Helper funcs.
+    void apply_grounded_linear_speed(JPH::Vec3Arg input_velocity, float_t physics_delta_time);
+    float_t find_grounded_turn_speed(float_t linear_speed);
+    void apply_grounded_facing_angle(JPH::Vec3Arg input_velocity, float_t physics_delta_time);
+
+private:
+    struct Settings
+    {
+        float_t grounded_acceleration{ 80.0f };
+        float_t grounded_deceleration{ 120.0f };
+
+        struct Contextual_turn_speed
+        {
+            float_t turn_speed;
+            float_t max_speed_of_context;
+        };
+        array<Contextual_turn_speed, 3> grounded_turn_speeds{
+            Contextual_turn_speed{ 1000000.0f,  0.1f },
+            Contextual_turn_speed{      10.0f, 10.0f },
+            Contextual_turn_speed{       5.0f, 50.0f } };
+    } m_settings;
 };
 
 }  // namespace BT
@@ -113,12 +151,13 @@ void BT::Scripts::Script_player_character_movement::on_pre_physics(float_t physi
     vec3 move_input_world = GLM_VEC3_ZERO_INIT;
     glm_vec3_muladds(cam_right, input_state.move.x.val, move_input_world);
     glm_vec3_muladds(cam_forward, input_state.move.y.val, move_input_world);
-    if (camera->is_capture_fly())
+
+    if (!camera->is_follow_orbit())
+        // Remove all input if not the orbit camera mode.
         glm_vec3_zero(move_input_world);
     else if (glm_vec3_norm2(move_input_world) > 1.0f)
+        // Clamp top input amount.
         glm_vec3_normalize(move_input_world);
-
-    character_impl->set_cc_allow_sliding(glm_vec3_norm2(move_input_world) > 1e-6f * 1e-6f);
 
     // Change input into desired velocity.
     constexpr float_t k_standing_speed{ 15.0f };
@@ -174,14 +213,40 @@ void BT::Scripts::Script_player_character_movement::on_pre_physics(float_t physi
     // Gravity.
     new_velocity += (up_rotation * phys_system->GetGravity()) * physics_delta_time;
 
-    // Input velocity.
-    new_velocity += desired_velocity;
+    // Desired velocity.
+    if (is_grounded)
+    {
+        if (glm_vec3_norm2(move_input_world) > 1e-6f * 1e-6f)
+            apply_grounded_facing_angle(desired_velocity, physics_delta_time);
+        apply_grounded_linear_speed(desired_velocity, physics_delta_time);
+        new_velocity +=
+            JPH::Vec3{ sinf(m_grounded_state.facing_angle) * m_grounded_state.speed,
+                       0.0f,
+                       cosf(m_grounded_state.facing_angle) * m_grounded_state.speed };
+    }
+    else
+    {
+        // @TODO: Move towards desired velocity.
+        new_velocity += desired_velocity;
+    }
 
-    // Set input velocity.
+    // Apply to character.
+    character_impl->set_cc_allow_sliding(is_grounded && (m_grounded_state.speed > 1e-6f));
     character_impl->set_cc_velocity(new_velocity);
 
     // Finish.
     m_phys_engine.return_physics_object(phys_obj);
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -265,4 +330,61 @@ void BT::Scripts::Script_player_character_movement::on_pre_physics(float_t physi
         }
     }
 #endif // 0
+}
+
+
+// Helper funcs.
+void BT::Scripts::Script_player_character_movement::apply_grounded_linear_speed(
+    JPH::Vec3Arg input_velocity,
+    float_t physics_delta_time)
+{
+    float_t desired_speed{ glm_vec2_norm(vec2{ input_velocity.GetX(), input_velocity.GetZ() }) };
+
+    float_t delta_speed{ desired_speed - m_grounded_state.speed };
+    float_t acceleration{ delta_speed < 0.0f ?
+                          -m_settings.grounded_deceleration * physics_delta_time :
+                          m_settings.grounded_acceleration * physics_delta_time };
+    if (abs(delta_speed) > abs(acceleration))
+    {
+        // Limit delta speed to acceleration.
+        delta_speed = acceleration;
+    }
+
+    // Apply new linear speed.
+    m_grounded_state.speed += delta_speed;
+}
+
+float_t BT::Scripts::Script_player_character_movement::find_grounded_turn_speed(float_t linear_speed)
+{
+    float_t turn_speed{ 0.0f };
+    for (auto& context : m_settings.grounded_turn_speeds)
+        if (linear_speed <= context.max_speed_of_context)
+        {
+            turn_speed = context.turn_speed;
+            break;
+        }
+
+    return turn_speed;
+}
+
+void BT::Scripts::Script_player_character_movement::apply_grounded_facing_angle(
+    JPH::Vec3Arg input_velocity,
+    float_t physics_delta_time)
+{
+    float_t desired_facing_angle{ atan2f(input_velocity.GetX(), input_velocity.GetZ()) };
+
+    float_t delta_direction{ desired_facing_angle - m_grounded_state.facing_angle };
+    while (delta_direction > glm_rad(180.0f)) delta_direction -= glm_rad(360.0f);
+    while (delta_direction <= glm_rad(-180.0f)) delta_direction += glm_rad(360.0f);
+
+    float_t turn_speed{
+        find_grounded_turn_speed(m_grounded_state.speed) * physics_delta_time };
+    if (abs(delta_direction) > turn_speed)
+    {
+        // Limit turn speed.
+        delta_direction = turn_speed * glm_signf(delta_direction);
+    }
+
+    // Apply new facing angle.
+    m_grounded_state.facing_angle += delta_direction;
 }
