@@ -4,7 +4,7 @@
 // Soooo, deprecate???  -Thea 2025/06/01 (Happy Pride Month!!!)
 #if 0
 
-#include "../../uuid/uuid_ifc.h"
+#include "../../uuid/uuid.h"
 #include "cglm/cglm.h"
 #include "logger.h"
 #include <cassert>

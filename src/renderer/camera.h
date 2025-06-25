@@ -1,8 +1,8 @@
 #pragma once
 
+#include "../uuid/uuid.h"
 #include "../input_handler/input_handler.h"
 #include "cglm/cglm.h"
-#include "renderer.h"
 #include <cmath>
 #include <functional>
 #include <memory>
@@ -14,6 +14,8 @@ using std::unique_ptr;
 namespace BT
 {
 
+class Game_object_pool;
+
 class Camera
 {
 public:
@@ -22,6 +24,7 @@ public:
 
     // Callbacks.
     void set_callbacks(function<void(bool)>&& cursor_lock_fn);
+    void set_game_object_pool(Game_object_pool& pool);
 
     // GPU camera.
     void set_fov(float_t fov);  // `fov` in radians.
@@ -35,11 +38,11 @@ public:
     void get_view_direction(vec3& out_view_direction);
 
     // Camera frontend.
-    void set_follow_object(UUID render_object_ref);
+    void set_follow_object(UUID game_object_ref);
     void request_follow_orbit();
     bool is_capture_fly();
     bool is_follow_orbit();
-    void update_frontend(Renderer& renderer, Input_handler::State const& input_state, float_t delta_time);
+    void update_frontend(Input_handler::State const& input_state, float_t delta_time);
     bool is_mouse_captured();
 
     // ImGui.
@@ -59,8 +62,7 @@ private:
     void update_frontend_capture_fly(Input_handler::State const& input_state,
                                      float_t delta_time,
                                      bool on_release_le_rclick_cam);
-    void update_frontend_follow_orbit(Renderer& renderer,
-                                      Input_handler::State const& input_state,
+    void update_frontend_follow_orbit(Input_handler::State const& input_state,
                                       float_t delta_time,
                                       bool on_press_le_f1,
                                       bool first);

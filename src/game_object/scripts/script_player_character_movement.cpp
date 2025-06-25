@@ -3,6 +3,7 @@
 #include "../input_handler/input_handler.h"
 #include "../physics_engine/physics_engine.h"
 #include "../renderer/camera.h"
+#include "../renderer/renderer.h"
 #include "cglm/vec3.h"
 #include "Jolt/Jolt.h"
 #include "Jolt/Physics/PhysicsSystem.h"

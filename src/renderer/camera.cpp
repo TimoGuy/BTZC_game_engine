@@ -1,5 +1,6 @@
 #include "camera.h"
 
+#include "../game_object/game_object.h"
 #include "../input_handler/input_handler.h"
 #include "cglm/cglm.h"
 #include "cglm/euler.h"
@@ -9,7 +10,6 @@
 #include "cglm/vec3.h"
 #include "imgui.h"
 #include "logger.h"
-#include "renderer.h"
 #include <array>
 #include <cmath>
 #include <memory>
@@ -85,7 +85,8 @@ struct Camera::Data
             float_t follow_offset_y{ 1.0f };
 
             // Internal state.
-            UUID render_object_ref{ UUID() };
+            Game_object_pool* game_object_pool{ nullptr };
+            UUID game_object_ref{ UUID() };
             vec3 current_follow_pos{ 0.0f, 3.0f, 0.0f };
             vec2 orbits{ glm_rad(0.0f), glm_rad(30.0f) };
             float_t max_orbit_y{ glm_rad(89.0f) };
@@ -117,6 +118,11 @@ BT::Camera::~Camera() = default;  // For smart pimpl.
 void BT::Camera::set_callbacks(function<void(bool)>&& cursor_lock_fn)
 {
     m_data->cursor_lock_fn = std::move(cursor_lock_fn);
+}
+
+void BT::Camera::set_game_object_pool(Game_object_pool& pool)
+{
+    m_data->frontend.follow_orbit.game_object_pool = &pool;
 }
 
 // GPU camera.
@@ -185,9 +191,9 @@ void BT::Camera::get_view_direction(vec3& out_view_direction)
 }
 
 // Camera frontend.
-void BT::Camera::set_follow_object(UUID render_object_ref)
+void BT::Camera::set_follow_object(UUID game_object_ref)
 {
-    m_data->frontend.follow_orbit.render_object_ref = render_object_ref;
+    m_data->frontend.follow_orbit.game_object_ref = game_object_ref;
 }
 
 void BT::Camera::request_follow_orbit()
@@ -205,7 +211,8 @@ bool BT::Camera::is_follow_orbit()
     return (m_data->frontend.state == Data::Frontend::FRONTEND_CAMERA_STATE_FOLLOW_ORBIT);
 }
 
-void BT::Camera::update_frontend(Renderer& renderer, Input_handler::State const& input_state, float_t delta_time)
+void BT::Camera::update_frontend(Input_handler::State const& input_state,
+                                 float_t delta_time)
 {
     auto& frontend{ m_data->frontend };
 
@@ -235,7 +242,7 @@ void BT::Camera::update_frontend(Renderer& renderer, Input_handler::State const&
                 break;
 
             case Data::Frontend::FRONTEND_CAMERA_STATE_FOLLOW_ORBIT:
-                update_frontend_follow_orbit(renderer, input_state, delta_time, on_press_le_f1, first);
+                update_frontend_follow_orbit(input_state, delta_time, on_press_le_f1, first);
                 break;
 
             default:
@@ -432,8 +439,7 @@ void BT::Camera::update_frontend_capture_fly(Input_handler::State const& input_s
     }
 }
 
-void BT::Camera::update_frontend_follow_orbit(Renderer& renderer,
-                                              Input_handler::State const& input_state,
+void BT::Camera::update_frontend_follow_orbit(Input_handler::State const& input_state,
                                               float_t delta_time,
                                               bool on_press_le_f1,
                                               bool first)
@@ -443,26 +449,22 @@ void BT::Camera::update_frontend_follow_orbit(Renderer& renderer,
 
     vec3 mvt_velocity{ 0.0f, 0.0f, 0.0f };
 
-    // @TODO: @NOCHECKIN: @THEA
-    #define TODO_THEA_REFACTOR_THE_CAM_FOLLOWING_STUFF 0
-    #if TODO_THEA_REFACTOR_THE_CAM_FOLLOWING_STUFF
-    auto rend_objs{
-        renderer.get_render_object_pool().checkout_render_obj_by_key({ fo.render_object_ref }) };
-    if (!rend_objs.empty())
-    {
+    if (!fo.game_object_ref.is_nil())
+    {   // Follow game object with camera.
+        auto game_obj{ fo.game_object_pool->get_one_no_lock(fo.game_object_ref) };
+        assert(game_obj != nullptr);
+
         // Copy prev follow position.
         vec3 from_follow_pos;
         glm_vec3_copy(fo.current_follow_pos, from_follow_pos);
 
         // Update follow position.
-        rend_objs[0]->get_position(fo.current_follow_pos);
+        game_obj->get_transform_handle().get_position(fo.current_follow_pos);
 
         // Calc mvt velocity (@NOTE: deltatime independant).
         glm_vec3_sub(fo.current_follow_pos, from_follow_pos, mvt_velocity);
         glm_vec3_scale(mvt_velocity, 1.0f / delta_time, mvt_velocity);
     }
-    renderer.get_render_object_pool().return_render_objs(std::move(rend_objs));
-    #endif  // TODO_THEA_REFACTOR_THE_CAM_FOLLOWING_STUFF
 
     float_t auto_turn_delta{ 0.0f };
     mvt_velocity[1] = 0.0f;

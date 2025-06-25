@@ -117,6 +117,13 @@ public:
     BT_GAME_OBJECT_TRANSFORM_GET_DECOMPOSED_FUNC(local)
     #undef BT_GAME_OBJECT_TRANSFORM_GET_DECOMPOSED_FUNC
 
+    void get_position(vec3& out_position)
+    {
+        out_position[0] = m_global_transform.position[0];
+        out_position[1] = m_global_transform.position[1];
+        out_position[2] = m_global_transform.position[2];
+    }
+
     void get_transform_as_mat4(mat4& out_transform)
     {
         assert(m_dirty_flag == k_not_dirty);

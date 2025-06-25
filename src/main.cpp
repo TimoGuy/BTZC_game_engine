@@ -26,7 +26,7 @@
 #include "scene/scene_serialization_ifc.h"
 #include "timer/timer.h"
 #include "timer/watchdog_timer.h"
-#include "uuid/uuid_ifc.h"
+#include "uuid/uuid.h"
 #include <cstdint>
 #include <memory>
 #include <fstream>  // @DEBUG
@@ -181,76 +181,83 @@ int32_t main()
         return new_game_obj;
     });
 
+    main_renderer.get_camera_obj()->set_game_object_pool(game_object_pool);
+
     // Setup imgui renderer.
     main_renderer_imgui_renderer.set_game_obj_pool_ref(&game_object_pool);
     main_renderer_imgui_renderer.set_camera_ref(main_renderer.get_camera_obj());
     main_renderer_imgui_renderer.set_renderer_ref(&main_renderer);
 
-    json scene_as_json =
-        R"([
-            {
-                "children": [],
-                "guid": "aae5ebfb-7c2b-49a8-bcb9-658fdea987af",
-                "name": "My Gay object",
-                "scripts": [
-                    {
-                        "script_datas": {
-                            "phys_obj_key": "08743552-fff6-49d2-ad15-efbd121ab773"
+    static json s_scene_as_json =
+        R"({
+            "cam_following_game_obj": "aae5ebfb-7c2b-49a8-bcb9-658fdea987af",
+            "game_objects": [
+                {
+                    "children": [],
+                    "guid": "aae5ebfb-7c2b-49a8-bcb9-658fdea987af",
+                    "name": "My Gay object",
+                    "scripts": [
+                        {
+                            "script_datas": {
+                                "phys_obj_key": "08743552-fff6-49d2-ad15-efbd121ab773"
+                            },
+                            "script_type": "script_player_character_movement"
                         },
-                        "script_type": "script_player_character_movement"
+                        {
+                            "script_datas": {
+                                "game_obj_key": "aae5ebfb-7c2b-49a8-bcb9-658fdea987af"
+                            },
+                            "script_type": "script_apply_physics_transform_to_render_object"
+                        }
+                    ],
+                    "render_obj": {
+                        "guid": "fa2a0c0c-cfd4-47a7-b4e7-01dbbd3b3537",
+                        "model_name": "box_0.5_2",
+                        "render_layer": 1,
+                        "transform": [[1.0, 0.0, 0.0, 0.0],
+                                    [0.0, 1.0, 0.0, 0.0],
+                                    [0.0, 0.0, 1.0, 0.0],
+                                    [0.0, 0.0, 0.0, 1.0]]
                     },
-                    {
-                        "script_datas": {
-                            "game_obj_key": "aae5ebfb-7c2b-49a8-bcb9-658fdea987af"
-                        },
-                        "script_type": "script_apply_physics_transform_to_render_object"
+                    "physics_obj": {
+                        "guid": "08743552-fff6-49d2-ad15-efbd121ab773",
+                        "type": "character_controller",
+                        "interpolate_transform": true,
+                        "radius": 0.5,
+                        "height": 2.0,
+                        "crouch_height": 1.0,
+                        "init_transform": [[0.0, 5.1, 0.0],
+                                        [0.0, 0.0, 0.0, 1.0]]
                     }
-                ],
-                "render_obj": {
-                    "guid": "fa2a0c0c-cfd4-47a7-b4e7-01dbbd3b3537",
-                    "model_name": "box_0.5_2",
-                    "render_layer": 1,
-                    "transform": [[1.0, 0.0, 0.0, 0.0],
-                                  [0.0, 1.0, 0.0, 0.0],
-                                  [0.0, 0.0, 1.0, 0.0],
-                                  [0.0, 0.0, 0.0, 1.0]]
                 },
-                "physics_obj": {
-                    "guid": "08743552-fff6-49d2-ad15-efbd121ab773",
-                    "type": "character_controller",
-                    "interpolate_transform": true,
-                    "radius": 0.5,
-                    "height": 2.0,
-                    "crouch_height": 1.0,
-                    "init_transform": [[0.0, 5.1, 0.0],
-                                       [0.0, 0.0, 0.0, 1.0]]
+                {
+                    "children": [],
+                    "guid": "aae5ebfb-7c2b-49a8-bcb9-658fdea987ae",
+                    "name": "Static ground geometry",
+                    "render_obj": {
+                        "guid": "fa2a0c0c-cfd4-47a7-b4e7-01dbbd3b3538",
+                        "model_name": "probuilder_example",
+                        "render_layer": 1,
+                        "transform": [[1.0, 0.0, 0.0, 0.0],
+                                    [0.0, 1.0, 0.0, 0.0],
+                                    [0.0, 0.0, 1.0, 0.0],
+                                    [0.0, 0.0, 0.0, 1.0]]
+                    },
+                    "physics_obj": {
+                        "guid": "08743552-fff6-49d2-ad15-efbd121ab772",
+                        "type": "triangle_mesh",
+                        "interpolate_transform": false,
+                        "model_name": "probuilder_example",
+                        "motion_type": 0,
+                        "init_transform": [[0.0, 0.0, 0.0],
+                                        [0.0, 0.0, 0.0, 1.0]]
+                    }
                 }
-            },
-            {
-                "children": [],
-                "guid": "aae5ebfb-7c2b-49a8-bcb9-658fdea987ae",
-                "name": "Static ground geometry",
-                "render_obj": {
-                    "guid": "fa2a0c0c-cfd4-47a7-b4e7-01dbbd3b3538",
-                    "model_name": "probuilder_example",
-                    "render_layer": 1,
-                    "transform": [[1.0, 0.0, 0.0, 0.0],
-                                  [0.0, 1.0, 0.0, 0.0],
-                                  [0.0, 0.0, 1.0, 0.0],
-                                  [0.0, 0.0, 0.0, 1.0]]
-                },
-                "physics_obj": {
-                    "guid": "08743552-fff6-49d2-ad15-efbd121ab772",
-                    "type": "triangle_mesh",
-                    "interpolate_transform": false,
-                    "model_name": "probuilder_example",
-                    "motion_type": 0,
-                    "init_transform": [[0.0, 0.0, 0.0],
-                                       [0.0, 0.0, 0.0, 1.0]]
-                }
-            }
-        ])"_json;
-    for (auto& game_obj_node : scene_as_json)
+            ]
+        })"_json;
+
+    assert(s_scene_as_json["game_objects"].is_array());
+    for (auto& game_obj_node : s_scene_as_json["game_objects"])
     {
         unique_ptr<BT::Game_object> new_game_obj{
             new BT::Game_object(main_input_handler,
@@ -260,6 +267,10 @@ int32_t main()
         new_game_obj->scene_serialize(BT::SCENE_SERIAL_MODE_DESERIALIZE, game_obj_node);
         game_object_pool.emplace(std::move(new_game_obj));
     }
+
+    assert(s_scene_as_json["cam_following_game_obj"].is_string());
+    main_renderer.get_camera_obj()->set_follow_object(
+        BT::UUID_helper::to_UUID(s_scene_as_json["cam_following_game_obj"]));
 
     {   // @TODO: @NOCHECKIN: @DEBUG
         // Serialize scene.

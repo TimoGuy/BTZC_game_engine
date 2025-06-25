@@ -217,7 +217,7 @@ void BT::Renderer::Impl::render(float_t delta_time, function<void()>&& debug_vie
     }
 
     // Update camera.
-    m_camera.update_frontend(m_renderer, m_input_handler.get_input_state(), delta_time);
+    m_camera.update_frontend(m_input_handler.get_input_state(), delta_time);
     m_camera.update_camera_matrices();
 
     // Render new frame.
