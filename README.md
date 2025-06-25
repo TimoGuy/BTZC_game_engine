@@ -346,7 +346,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
     - [x] Release v0.1.0-develop.1
 
 1. Gameplay work (not engine work rly).
-    - [ ] Add some level settings to the load level json.
+    - [x] Add some level settings to the load level json.
         - Make the char controller the follow camera thingy.
     - [ ] Fix follow camera. Actually have ti use the reference.
     - [ ] Base movement principles from a hat in time.
