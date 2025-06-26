@@ -352,9 +352,9 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
     - [ ] Base movement principles from a hat in time.
         - [x] Velocity/inertia.
         - [x] Turning.
+        - [x] Airborne just being simple additions to velocity.
+            - [x] Grounded and airborne modes inherit velocity from each other.
         - [ ] Turning around.
-        - [ ] Airborne just being simple additions to velocity.
-            - [ ] Grounded and airborne modes inherit velocity from each other.
     - [ ] Swordplay combat.
         - Cutting.
         - Deflecting.

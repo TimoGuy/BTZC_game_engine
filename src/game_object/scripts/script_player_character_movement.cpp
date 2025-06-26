@@ -40,11 +40,11 @@ public:
     bool m_prev_jump_pressed{ false };
     bool m_prev_crouch_pressed{ false };
 
-    enum Movement_state
-    {
-        GROUNDED = 0,
-        AIRBORNE,
-    } m_current_state{ Movement_state(0) };
+    // enum Movement_state
+    // {
+    //     GROUNDED = 0,
+    //     AIRBORNE,
+    // } m_current_state{ Movement_state(0) };
 
     struct Grounded_state
     {
@@ -73,6 +73,9 @@ public:
 private:
     struct Settings
     {
+        float_t crouched_speed{ 5.0f };
+        float_t standing_speed{ 15.0f };
+
         float_t grounded_acceleration{ 80.0f };
         float_t grounded_deceleration{ 120.0f };
 
@@ -82,9 +85,11 @@ private:
             float_t max_speed_of_context;
         };
         array<Contextual_turn_speed, 3> grounded_turn_speeds{
-            Contextual_turn_speed{ 1000000.0f,  0.1f },
-            Contextual_turn_speed{      10.0f, 10.0f },
-            Contextual_turn_speed{       5.0f, 50.0f } };
+            Contextual_turn_speed{ 1000000.0f, crouched_speed + 0.1f },
+            Contextual_turn_speed{ 10.0f, standing_speed + 0.1f },
+            Contextual_turn_speed{ 5.0f, 50.0f } };
+
+        float_t airborne_acceleration{ 60.0f };
     } m_settings;
 };
 
@@ -151,6 +156,7 @@ void BT::Scripts::Script_player_character_movement::on_pre_physics(float_t physi
     vec3 move_input_world = GLM_VEC3_ZERO_INIT;
     glm_vec3_muladds(cam_right, input_state.move.x.val, move_input_world);
     glm_vec3_muladds(cam_forward, input_state.move.y.val, move_input_world);
+    move_input_world[1] = 0.0f;
 
     if (!camera->is_follow_orbit())
         // Remove all input if not the orbit camera mode.
@@ -160,14 +166,12 @@ void BT::Scripts::Script_player_character_movement::on_pre_physics(float_t physi
         glm_vec3_normalize(move_input_world);
 
     // Change input into desired velocity.
-    constexpr float_t k_standing_speed{ 15.0f };
-    constexpr float_t k_crouched_speed{ 5.0f };
     JPH::Vec3 desired_velocity{ move_input_world[0],
-                                move_input_world[1],
+                                0.0f,
                                 move_input_world[2] };
     desired_velocity *= (character_impl->get_cc_stance() ?
-                             k_crouched_speed :
-                             k_standing_speed);
+                             m_settings.crouched_speed :
+                             m_settings.standing_speed);
 
     // Extra input checks.
     bool on_jump_press{ input_state.jump.val && !m_prev_jump_pressed };
@@ -176,15 +180,17 @@ void BT::Scripts::Script_player_character_movement::on_pre_physics(float_t physi
     bool on_crouch_press{ input_state.crouch.val && !m_prev_crouch_pressed };
     m_prev_crouch_pressed = input_state.crouch.val;
 
-    // Determine new basic velocity.
+    // Find movement state.
     JPH::Vec3 current_vertical_velocity = linear_velocity.Dot(up_direction) * up_direction;
-    JPH::Vec3 new_velocity;
     bool is_grounded{ ground_state == JPH::CharacterVirtual::EGroundState::OnGround &&
                       (current_vertical_velocity.GetY() - ground_velocity.GetY()) < 0.1f &&
                       !character_impl->is_cc_slope_too_steep(ground_normal) };
+
+    // Calc and apply desired velocity.
+    JPH::Vec3 new_velocity;
     if (is_grounded)
     {
-        // Assume velocity of ground.
+        // Grounded.
         new_velocity = ground_velocity;
 
         if (on_crouch_press || (character_impl->get_cc_stance() && on_jump_press))
@@ -202,7 +208,7 @@ void BT::Scripts::Script_player_character_movement::on_pre_physics(float_t physi
     {
         if (character_impl->get_cc_stance())
         {
-            // Leave crouching stance.
+            // Leave crouching stance automatically.
             character_impl->set_cc_stance(false);
         }
 
@@ -210,12 +216,10 @@ void BT::Scripts::Script_player_character_movement::on_pre_physics(float_t physi
         new_velocity = current_vertical_velocity;
     }
 
-    // Gravity.
-    new_velocity += (up_rotation * phys_system->GetGravity()) * physics_delta_time;
-
     // Desired velocity.
     if (is_grounded)
     {
+        // @TODO: Add turning around. Idk how I'm gonna do this yet.
         if (glm_vec3_norm2(move_input_world) > 1e-6f * 1e-6f)
             apply_grounded_facing_angle(desired_velocity, physics_delta_time);
         apply_grounded_linear_speed(desired_velocity, physics_delta_time);
@@ -226,11 +230,29 @@ void BT::Scripts::Script_player_character_movement::on_pre_physics(float_t physi
     }
     else
     {
-        // @TODO: Move towards desired velocity.
-        new_velocity += desired_velocity;
+        // Move towards desired velocity.
+        JPH::Vec3 flat_linear_velo{ linear_velocity.GetX(),
+                                    0.0f,
+                                    linear_velocity.GetZ() };
+        JPH::Vec3 delta_velocity{ desired_velocity - flat_linear_velo };
+
+        float_t airborne_accel{ m_settings.airborne_acceleration * physics_delta_time };
+        if (delta_velocity.LengthSq() > airborne_accel * airborne_accel)
+        {
+            delta_velocity = delta_velocity.Normalized() * airborne_accel;
+        }
+
+        JPH::Vec3 effective_velocity{ flat_linear_velo + delta_velocity };
+        new_velocity += effective_velocity;
+
+        // Keep turn & speed version up to date.
+        m_grounded_state.speed = effective_velocity.Length();
+        if (!effective_velocity.IsNearZero())
+            m_grounded_state.facing_angle = atan2f(effective_velocity.GetX(), effective_velocity.GetZ());
     }
 
     // Apply to character.
+    new_velocity += (up_rotation * phys_system->GetGravity()) * physics_delta_time;
     character_impl->set_cc_allow_sliding(is_grounded && (m_grounded_state.speed > 1e-6f));
     character_impl->set_cc_velocity(new_velocity);
 
