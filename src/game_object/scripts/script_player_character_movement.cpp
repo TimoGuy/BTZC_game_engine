@@ -50,6 +50,7 @@ public:
     {
         float_t speed{ 0.0f };
         float_t facing_angle{ 0.0f };
+        bool    turnaround_enabled{ false };
     } m_grounded_state;
 
     // Script_ifc.
@@ -66,9 +67,9 @@ public:
     void on_pre_physics(float_t physics_delta_time) override;
 
     // Helper funcs.
-    void apply_grounded_linear_speed(JPH::Vec3Arg input_velocity, float_t physics_delta_time);
     float_t find_grounded_turn_speed(float_t linear_speed);
     void apply_grounded_facing_angle(JPH::Vec3Arg input_velocity, float_t physics_delta_time);
+    void apply_grounded_linear_speed(JPH::Vec3Arg input_velocity, float_t physics_delta_time);
 
 private:
     struct Settings
@@ -219,7 +220,7 @@ void BT::Scripts::Script_player_character_movement::on_pre_physics(float_t physi
     // Desired velocity.
     if (is_grounded)
     {
-        // @TODO: Add turning around. Idk how I'm gonna do this yet.
+        // Grounded turn & speed movement.
         if (glm_vec3_norm2(move_input_world) > 1e-6f * 1e-6f)
             apply_grounded_facing_angle(desired_velocity, physics_delta_time);
         apply_grounded_linear_speed(desired_velocity, physics_delta_time);
@@ -249,6 +250,7 @@ void BT::Scripts::Script_player_character_movement::on_pre_physics(float_t physi
         m_grounded_state.speed = effective_velocity.Length();
         if (!effective_velocity.IsNearZero())
             m_grounded_state.facing_angle = atan2f(effective_velocity.GetX(), effective_velocity.GetZ());
+        m_grounded_state.turnaround_enabled = false;
     }
 
     // Apply to character.
@@ -356,26 +358,6 @@ void BT::Scripts::Script_player_character_movement::on_pre_physics(float_t physi
 
 
 // Helper funcs.
-void BT::Scripts::Script_player_character_movement::apply_grounded_linear_speed(
-    JPH::Vec3Arg input_velocity,
-    float_t physics_delta_time)
-{
-    float_t desired_speed{ glm_vec2_norm(vec2{ input_velocity.GetX(), input_velocity.GetZ() }) };
-
-    float_t delta_speed{ desired_speed - m_grounded_state.speed };
-    float_t acceleration{ delta_speed < 0.0f ?
-                          -m_settings.grounded_deceleration * physics_delta_time :
-                          m_settings.grounded_acceleration * physics_delta_time };
-    if (abs(delta_speed) > abs(acceleration))
-    {
-        // Limit delta speed to acceleration.
-        delta_speed = acceleration;
-    }
-
-    // Apply new linear speed.
-    m_grounded_state.speed += delta_speed;
-}
-
 float_t BT::Scripts::Script_player_character_movement::find_grounded_turn_speed(float_t linear_speed)
 {
     float_t turn_speed{ 0.0f };
@@ -399,14 +381,61 @@ void BT::Scripts::Script_player_character_movement::apply_grounded_facing_angle(
     while (delta_direction > glm_rad(180.0f)) delta_direction -= glm_rad(360.0f);
     while (delta_direction <= glm_rad(-180.0f)) delta_direction += glm_rad(360.0f);
 
-    float_t turn_speed{
-        find_grounded_turn_speed(m_grounded_state.speed) * physics_delta_time };
-    if (abs(delta_direction) > turn_speed)
+    float_t turn_speed{ find_grounded_turn_speed(m_grounded_state.speed) };
+    bool is_quick_turn_speed{ turn_speed > 1000.0f };  // Idk just some number.
+
+    if (is_quick_turn_speed)
     {
-        // Limit turn speed.
-        delta_direction = turn_speed * glm_signf(delta_direction);
+        // Disable turnaround mode.
+        m_grounded_state.turnaround_enabled = false;
     }
 
-    // Apply new facing angle.
-    m_grounded_state.facing_angle += delta_direction;
+    constexpr float_t k_turn_around_back_angle{ 45.0f };
+    bool turnaround_mode{ m_grounded_state.turnaround_enabled ||
+                          (!is_quick_turn_speed &&
+                           abs(delta_direction) >
+                               glm_rad(180.0f - (k_turn_around_back_angle * 0.5f))) };
+    if (turnaround_mode)
+    {
+        // Lock in turnaround.
+        m_grounded_state.turnaround_enabled = true;
+    }
+    else
+    {
+        // Process grounded turning.
+        float_t turn_delta{ turn_speed * physics_delta_time };
+        if (abs(delta_direction) > turn_delta)
+        {
+            // Limit turn speed.
+            delta_direction = turn_delta * glm_signf(delta_direction);
+        }
+
+        // Apply new facing angle.
+        m_grounded_state.facing_angle += delta_direction;
+    }
+}
+
+void BT::Scripts::Script_player_character_movement::apply_grounded_linear_speed(
+    JPH::Vec3Arg input_velocity,
+    float_t physics_delta_time)
+{
+    float_t desired_speed{ glm_vec2_norm(vec2{ input_velocity.GetX(), input_velocity.GetZ() }) };
+
+    if (m_grounded_state.turnaround_enabled)
+    {   // Zero desired speed if doing turnaround.
+        desired_speed = 0.0f;
+    }
+
+    float_t delta_speed{ desired_speed - m_grounded_state.speed };
+    float_t acceleration{ delta_speed < 0.0f ?
+                          -m_settings.grounded_deceleration * physics_delta_time :
+                          m_settings.grounded_acceleration * physics_delta_time };
+    if (abs(delta_speed) > abs(acceleration))
+    {
+        // Limit delta speed to acceleration.
+        delta_speed = acceleration;
+    }
+
+    // Apply new linear speed.
+    m_grounded_state.speed += delta_speed;
 }

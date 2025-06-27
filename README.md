@@ -354,7 +354,9 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - [x] Turning.
         - [x] Airborne just being simple additions to velocity.
             - [x] Grounded and airborne modes inherit velocity from each other.
-        - [ ] Turning around.
+        - [x] Turning around.
+            - It works by simply forcing the player to completely come to a stop until it gets to less than crouched speed, then unlocks, thus allowing immediate turning.
+        - [ ] When hitting head against ceiling-like surface, stop y velocity.
     - [ ] Swordplay combat.
         - Cutting.
         - Deflecting.
