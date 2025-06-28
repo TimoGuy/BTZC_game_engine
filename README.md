@@ -356,7 +356,9 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
             - [x] Grounded and airborne modes inherit velocity from each other.
         - [x] Turning around.
             - It works by simply forcing the player to completely come to a stop until it gets to less than crouched speed, then unlocks, thus allowing immediate turning.
-        - [ ] When hitting head against ceiling-like surface, stop y velocity.
+        - [x] When hitting head against ceiling-like surface, stop y velocity.
+            - Okay, so I tried adding a state var, but then I realized that the physics object has no access to the state var.
+            - SOLUTION: Set the actual character linear velocity (has to use a const cast).
     - [ ] Swordplay combat.
         - Cutting.
         - Deflecting.

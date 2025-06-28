@@ -4,6 +4,7 @@
 #include "../renderer/mesh.h"
 #include "Jolt/Jolt.h"
 #include "Jolt/Core/TempAllocator.h"
+#include "Jolt/Physics/Character/Character.h"
 #include "Jolt/Physics/Character/CharacterVirtual.h"
 #include "Jolt/Physics/Collision/Shape/BoxShape.h"
 #include "Jolt/Physics/Collision/Shape/RotatedTranslatedShape.h"
@@ -198,7 +199,7 @@ void BT::Phys_obj_impl_char_controller::debug_render_representation()
     float_t height{ m_is_crouched ? m_crouch_height : m_height };
     current_trans.position.SetY(
         current_trans.position.GetY() + 0.5f * height + m_radius);
-    
+
     mat4 graphic_trans;
     glm_translate_make(graphic_trans, vec3{ current_trans.position.GetX(),
                                             current_trans.position.GetY(),
@@ -323,9 +324,14 @@ void BT::Phys_obj_impl_char_controller::OnContactSolve(JPH::CharacterVirtual con
     {
         // Set velocity to 0 up when hitting ceiling.
             // @NOTE: These changes to `io_new_character_velocity` only changes the result but doesn't change the linear velocity. :(
-        io_new_character_velocity = JPH::Vec3::sZero();
-        // io_new_character_velocity = in_character_velocity -
-        //                                 in_character->GetUp() *
-        //                                     in_character_velocity.Dot(in_character->GetUp());
+        // io_new_character_velocity = JPH::Vec3::sZero();
+        
+        io_new_character_velocity = in_character_velocity -
+                                        in_character->GetUp() *
+                                            in_character_velocity.Dot(in_character->GetUp());
+
+        // Set the character's velocity to this new velocity.
+        const_cast<JPH::CharacterVirtual*>(in_character)
+            ->SetLinearVelocity(io_new_character_velocity);
     }
 }
