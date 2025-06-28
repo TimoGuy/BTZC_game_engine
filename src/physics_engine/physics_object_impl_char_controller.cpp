@@ -323,9 +323,6 @@ void BT::Phys_obj_impl_char_controller::OnContactSolve(JPH::CharacterVirtual con
     else if (in_contact_normal.Dot(-in_character->GetUp()) > sinf(glm_rad(45.0f)))
     {
         // Set velocity to 0 up when hitting ceiling.
-            // @NOTE: These changes to `io_new_character_velocity` only changes the result but doesn't change the linear velocity. :(
-        // io_new_character_velocity = JPH::Vec3::sZero();
-        
         io_new_character_velocity = in_character_velocity -
                                         in_character->GetUp() *
                                             in_character_velocity.Dot(in_character->GetUp());

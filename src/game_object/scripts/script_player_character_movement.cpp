@@ -55,7 +55,6 @@ public:
 
     struct Airborne_state
     {
-        bool prev_ceiling_hit{ false };
     } m_airborne_state;
 
     // Script_ifc.
@@ -233,19 +232,9 @@ void BT::Scripts::Script_player_character_movement::on_pre_physics(float_t physi
             JPH::Vec3{ sinf(m_grounded_state.facing_angle) * m_grounded_state.speed,
                        0.0f,
                        cosf(m_grounded_state.facing_angle) * m_grounded_state.speed };
-
-        // Keep airborne state up to date.
-        m_airborne_state.prev_ceiling_hit = false;
     }
     else
     {
-        if (m_airborne_state.prev_ceiling_hit &&
-            new_velocity.GetY() > 0.0f)
-        {
-            // Stop vertical movement if ceiling hit previously.
-            new_velocity.SetY(0.0f);
-        }
-
         // Move towards desired velocity.
         JPH::Vec3 flat_linear_velo{ linear_velocity.GetX(),
                                     0.0f,
@@ -260,9 +249,6 @@ void BT::Scripts::Script_player_character_movement::on_pre_physics(float_t physi
 
         JPH::Vec3 effective_velocity{ flat_linear_velo + delta_velocity };
         new_velocity += effective_velocity;
-
-        // Clear state.
-        m_airborne_state.prev_ceiling_hit = false;
 
         // Keep grounded state up to date.
         m_grounded_state.speed = effective_velocity.Length();
