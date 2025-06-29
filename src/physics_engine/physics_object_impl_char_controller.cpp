@@ -144,6 +144,23 @@ bool BT::Phys_obj_impl_char_controller::get_cc_stance()
     return is_crouching;
 }
 
+bool BT::Phys_obj_impl_char_controller::has_cc_wall_contact()
+{
+    bool found_wall_contact{ false };
+    for (auto& contact : m_character->GetActiveContacts())
+    {
+        if (m_character->IsSlopeTooSteep(contact.mContactNormal) &&
+            // @NOTE: vvBELOWvv is @COPYPASTA from `OnContactSolve()` ceiling logic.
+            contact.mContactNormal.Dot(-m_character->GetUp()) <= sinf(glm_rad(45.0f)))
+        {
+            found_wall_contact = true;
+            break;
+        }
+    }
+
+    return found_wall_contact;
+}
+
 void BT::Phys_obj_impl_char_controller::on_pre_update(float_t physics_delta_time)
 {
     // Settings for our update function.

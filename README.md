@@ -359,6 +359,10 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - [x] When hitting head against ceiling-like surface, stop y velocity.
             - Okay, so I tried adding a state var, but then I realized that the physics object has no access to the state var.
             - SOLUTION: Set the actual character linear velocity (has to use a const cast).
+        - [ ] Wall jump up (like nightreign and sekiro).
+            - The active contacts version isn't working. See what's going on.
+            - Perhaps try @CHECK if a shape overlap version could work (like w/ a cube).
+        - [ ] Ledge climb up (like nightreign).
     - [ ] Swordplay combat.
         - Cutting.
         - Deflecting.

@@ -217,6 +217,14 @@ void BT::Scripts::Script_player_character_movement::on_pre_physics(float_t physi
             character_impl->set_cc_stance(false);
         }
 
+        if (current_vertical_velocity.GetY() < 0.0f &&
+            character_impl->has_cc_wall_contact() &&
+            on_jump_press)
+        {
+            // Wall jump.
+            new_velocity += 35.0f * up_direction;
+        }
+
         // Keep previous tick velocity.
         new_velocity = current_vertical_velocity;
     }
