@@ -64,6 +64,8 @@ public:
     virtual bool set_cc_stance(bool is_crouching) { assert(false); return false; }
     virtual bool get_cc_stance() { assert(false); return false; }
     virtual bool has_cc_wall_contact() { assert(false); return false; }
+    virtual float_t get_cc_radius() { assert(false); return 0.0f; }
+    virtual float_t get_cc_height() { assert(false); return 0.0f; }
     virtual void on_pre_update(float_t physics_delta_time) { }
     virtual Physics_transform read_transform() = 0;
     virtual void debug_render_representation() = 0;

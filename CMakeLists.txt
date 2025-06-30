@@ -83,6 +83,8 @@ add_executable(${PROJECT_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_object_impl_tri_mesh.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_object.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_object.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/raycast_helper.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/raycast_helper.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/rvec3.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/camera_read_ifc.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/camera.cpp

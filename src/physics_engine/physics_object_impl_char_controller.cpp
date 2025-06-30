@@ -161,6 +161,16 @@ bool BT::Phys_obj_impl_char_controller::has_cc_wall_contact()
     return found_wall_contact;
 }
 
+float_t BT::Phys_obj_impl_char_controller::get_cc_radius()
+{
+    return m_radius;
+}
+
+float_t BT::Phys_obj_impl_char_controller::get_cc_height()
+{
+    return m_height + 2.0f * m_radius;
+}
+
 void BT::Phys_obj_impl_char_controller::on_pre_update(float_t physics_delta_time)
 {
     // Settings for our update function.

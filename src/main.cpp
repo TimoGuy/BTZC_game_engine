@@ -11,6 +11,7 @@
 #include "logger/logger.h"
 #include "physics_engine/physics_engine.h"
 #include "physics_engine/physics_object.h"
+#include "physics_engine/raycast_helper.h"
 #include "renderer/imgui_renderer.h"  // @DEBUG
 #include "renderer/material.h"  // @DEBUG
 #include "renderer/material_impl_debug_picking.h"  // @DEBUG
@@ -46,6 +47,7 @@ int32_t main()
                                 "No Train No Game" };
     BT::Physics_engine main_physics_engine;
 
+    BT::Raycast_helper::set_physics_engine(main_physics_engine);
     BT::Material_bank::set_camera_read_ifc(&main_renderer);
 
     // Shaders.

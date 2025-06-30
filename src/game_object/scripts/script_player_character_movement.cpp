@@ -1,14 +1,17 @@
-#include "cglm/util.h"
 #include "scripts.h"
 
 #include "../input_handler/input_handler.h"
 #include "../physics_engine/physics_engine.h"
+#include "../physics_engine/raycast_helper.h"
 #include "../renderer/camera.h"
 #include "../renderer/renderer.h"
+#include "cglm/util.h"
 #include "cglm/vec3.h"
 #include "Jolt/Jolt.h"
+#include "Jolt/Math/Real.h"
 #include "Jolt/Math/Vec3.h"
 #include "Jolt/Physics/PhysicsSystem.h"
+#include "logger.h"
 #include <array>
 #include <memory>
 
@@ -95,6 +98,7 @@ private:
             Contextual_turn_speed{ 5.0f, 50.0f } };
 
         float_t airborne_acceleration{ 60.0f };
+        float_t jump_speed{ 30.0f };
     } m_settings;
 };
 
@@ -206,27 +210,143 @@ void BT::Scripts::Script_player_character_movement::on_pre_physics(float_t physi
         else if (!character_impl->get_cc_stance() && on_jump_press)
         {
             // Jump.
-            new_velocity += 35.0f * up_direction;
+            new_velocity += m_settings.jump_speed * up_direction;
         }
     }
     else
     {
+        // Start with previous tick velocity.
+        new_velocity = current_vertical_velocity;
+
         if (character_impl->get_cc_stance())
         {
             // Leave crouching stance automatically.
             character_impl->set_cc_stance(false);
         }
 
-        if (current_vertical_velocity.GetY() < 0.0f &&
-            character_impl->has_cc_wall_contact() &&
-            on_jump_press)
+        if (on_jump_press)
         {
-            // Wall jump.
-            new_velocity += 35.0f * up_direction;
+            // Wall interactions.
+            // @NOTE: Check for a ledge climb first, and then check for a wall
+            //   jump if the ledge climb fails.
+
+            #define REFACTOR_WALL_INTERACTIONS 1
+            #if REFACTOR_WALL_INTERACTIONS
+            bool ledge_climb_failed{ false };
+
+            float_t char_con_radius{ character_impl->get_cc_radius() };
+
+            // Calc check origin point (since char collider is a cube).
+            JPH::Vec3 flat_input_dir{ move_input_world[0], 0.0f, move_input_world[2] };
+            float_t cancel_ratio{ char_con_radius
+                                  / std::max(abs(flat_input_dir.GetX()),
+                                             abs(flat_input_dir.GetZ())) };
+            JPH::Vec3 resized_to_radius_box_velo{ flat_input_dir * cancel_ratio };
+
+            JPH::RVec3 check_origin_point{ character_impl->read_transform().position
+                                           + resized_to_radius_box_velo };
+            ///////////////////////////////////////////////////////////
+
+            // Check for ledge climb.
+            float_t max_ledge_search_length{ 1.5f };
+            float_t min_ledge_search_length{ char_con_radius };
+            assert(max_ledge_search_length > min_ledge_search_length);
+            assert(max_ledge_search_length > 0.0f);
+            assert(min_ledge_search_length > 0.0f);
+            
+            bool passed_reach_empty_test{ false };
+            float_t rea_emp_test_passed_check_reach_height;
+            JPH::RVec3 rea_emp_test_passed_check_origin;
+
+            float_t char_con_height{ character_impl->get_cc_height() };
+            JPH::Vec3 flat_normal_input_dir{ flat_input_dir.Normalized() };
+            float_t reach_distance{ char_con_radius };
+
+            for (auto reach_extra_height : { 0.0f, 0.5f, 1.0f, 1.5f })
+            {
+                JPH::RVec3 top_check_origin_point{
+                    check_origin_point
+                    + JPH::Vec3{ 0.0f,
+                                 (char_con_height * 0.5f) + reach_extra_height,
+                                 0.0f } };
+                auto data{ Raycast_helper::raycast(top_check_origin_point,
+                                                   flat_normal_input_dir * max_ledge_search_length) };
+                if (!data.success ||
+                    data.hit_distance > min_ledge_search_length)
+                {
+                    // Empty space found, reach-empty test passed!
+                    passed_reach_empty_test = true;
+                    rea_emp_test_passed_check_reach_height = reach_extra_height;
+                    rea_emp_test_passed_check_origin = top_check_origin_point;
+                    break;
+                }
+            }
+
+            bool passed_ledge_search_test{ false };
+            JPH::RVec3 led_sea_test_passed_target_pos;
+
+            if (passed_reach_empty_test)
+            {
+                float_t search_dist{ max_ledge_search_length - min_ledge_search_length };
+
+                for (auto search_depth : { min_ledge_search_length + 0.0f * search_dist,
+                                           min_ledge_search_length + 0.333f * search_dist,
+                                           min_ledge_search_length + 0.667f * search_dist,
+                                           min_ledge_search_length + 1.0f * search_dist })
+                {
+                    JPH::RVec3 ledge_check_origin_point{ rea_emp_test_passed_check_origin
+                                                         + search_depth * flat_normal_input_dir };
+                    auto data{ Raycast_helper::raycast(ledge_check_origin_point,
+                                                       JPH::Vec3{ 0.0f,
+                                                                  -(rea_emp_test_passed_check_reach_height
+                                                                         + char_con_height),
+                                                                  0.0f }) };
+                    if (data.success)
+                    {
+                        passed_ledge_search_test = true;
+                        led_sea_test_passed_target_pos = data.hit_point
+                                                         - resized_to_radius_box_velo;
+                    }
+                }
+            }
+
+            if (passed_reach_empty_test && passed_ledge_search_test)
+            {
+                // Commit to ledge climb.
+                assert(false);
+            }
+            else
+            {
+                ledge_climb_failed = true;
+            }
+            ////////////////////////
+
+            if (ledge_climb_failed && current_vertical_velocity.GetY() <= 0.0f)
+            {
+                // Try wall jump.
+                auto data{ Raycast_helper::raycast(check_origin_point,
+                                                   1.5f * flat_normal_input_dir) };
+                if (data.success)
+                {
+                    // Commit to wall jump.
+                    JPH::Vec3 curr_up_velo{ up_direction * up_direction.Dot(new_velocity) };
+                    new_velocity += -curr_up_velo + m_settings.jump_speed * up_direction;
+                }
+            }
+
+            #endif  // REFACTOR_WALL_INTERACTIONS
         }
 
-        // Keep previous tick velocity.
-        new_velocity = current_vertical_velocity;
+
+
+        // logger::printef(logger::TRACE, "HAS WC: %s", std::to_string(character_impl->has_cc_wall_contact()).c_str());
+
+        // if (current_vertical_velocity.GetY() < 0.0f &&
+        //     character_impl->has_cc_wall_contact() &&
+        //     on_jump_press)
+        // {
+        //     // Wall jump.
+        // }
     }
 
     // Desired velocity.

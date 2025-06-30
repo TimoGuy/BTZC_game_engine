@@ -362,7 +362,15 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - [ ] Wall jump up (like nightreign and sekiro).
             - The active contacts version isn't working. See what's going on.
             - Perhaps try @CHECK if a shape overlap version could work (like w/ a cube).
+            - [x] Initially works (raycasting solution).
+            - [ ] @FIX: Make it so that the current facing direction is stored even when hitting a wall, so that that can be used for testing the raycasting solution even when no direction is input.
         - [ ] Ledge climb up (like nightreign).
+            - [x] Raycast checks to find where to move character work.
+            - [ ] Move character to the point.
+                - Probably some kind of pre-scripted set of velocities would work I think.
+                - Perhaps an animation of some kind using velocities?
+                - Or target points and using the velocities to try to get to those target points?
+                    - And then at the end just move the char con to that point if it "didn't make it".
     - [ ] Swordplay combat.
         - Cutting.
         - Deflecting.
