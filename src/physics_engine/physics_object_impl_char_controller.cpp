@@ -78,8 +78,6 @@ BT::Phys_obj_impl_char_controller::~Phys_obj_impl_char_controller()
 void BT::Phys_obj_impl_char_controller::move_kinematic(Physics_transform&& new_transform)
 {
     m_character->SetPosition(new_transform.position);
-    // @CHECK: Make sure that this works! UNTESTED!!!!!
-    assert(false);
 }
 
 void BT::Phys_obj_impl_char_controller::tick_fetch_cc_status(JPH::Vec3& out_ground_velocity,

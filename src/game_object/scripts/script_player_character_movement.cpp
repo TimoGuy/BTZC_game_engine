@@ -554,7 +554,10 @@ void BT::Scripts::Script_player_character_movement::process_midair_jump_interact
     if (passed_reach_empty_test && passed_ledge_search_test)
     {
         // Commit to ledge climb.
-        assert(false);
+        // @TEMPORARY: I think in the future a simple timed animation could be good here.
+        character_impl->move_kinematic({ led_sea_test_passed_target_pos,
+                                         character_impl->read_transform().rotation });
+        new_velocity = JPH::Vec3::sZero();
     }
     else
     {
@@ -570,6 +573,7 @@ void BT::Scripts::Script_player_character_movement::process_midair_jump_interact
         if (data.success)
         {
             // Commit to wall jump.
+            // @TEMPORARY: I think holding the player to the wall for just a little bit would be good to help the animation.
             JPH::Vec3 curr_up_velo{ up_direction * up_direction.Dot(new_velocity) };
             new_velocity += -curr_up_velo + m_settings.jump_speed * up_direction;
         }
