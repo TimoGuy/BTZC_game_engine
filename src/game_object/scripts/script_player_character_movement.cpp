@@ -1,5 +1,7 @@
+#include "cglm/quat.h"
 #include "scripts.h"
 
+#include "../game_object.h"
 #include "../input_handler/input_handler.h"
 #include "../physics_engine/physics_engine.h"
 #include "../physics_engine/raycast_helper.h"
@@ -14,8 +16,11 @@
 #include "logger.h"
 #include <array>
 #include <memory>
+#include <mutex>
 
 using std::array;
+using std::lock_guard;
+using std::mutex;
 using std::unique_ptr;
 
 
@@ -28,18 +33,24 @@ public:
     Script_player_character_movement(Input_handler const& input_handler,
                                      Physics_engine& phys_engine,
                                      Renderer& renderer,
-                                     UUID phys_obj_key)
+                                     Game_object_pool& game_obj_pool,
+                                     UUID phys_obj_key,
+                                     UUID apply_facing_angle_game_obj_key)
         : m_input_handler{ input_handler }
         , m_phys_engine{ phys_engine }
         , m_renderer{ renderer }
+        , m_game_obj_pool{ game_obj_pool }
         , m_phys_obj_key{ phys_obj_key }
+        , m_apply_facing_angle_game_obj_key{ apply_facing_angle_game_obj_key }
     {
     }
 
     Input_handler const& m_input_handler;
     Physics_engine& m_phys_engine;
     Renderer& m_renderer;
+    Game_object_pool& m_game_obj_pool;
     UUID m_phys_obj_key;
+    UUID m_apply_facing_angle_game_obj_key;
     bool m_prev_jump_pressed{ false };
     bool m_prev_crouch_pressed{ false };
 
@@ -60,6 +71,17 @@ public:
     {
     } m_airborne_state;
 
+    struct Rendering_state
+    {
+        // @NOTE: This structure may be used in a lot of places perhaps.
+        //   Especially w/ multithreaded applications.
+        mutex access_mutex;
+        array<float_t, 3> facing_angle_render_triple_buffer{ 0.0f, 0.0f, 0.0f };
+        uint8_t read_a_pos{ 0 };
+        uint8_t read_b_pos{ 1 };
+        uint8_t write_pos{ 2 };
+    } m_rendering_state;
+
     // Script_ifc.
     Script_type get_type() override
     {
@@ -69,9 +91,11 @@ public:
     void serialize_datas(json& node_ref) override
     {
         node_ref["phys_obj_key"] = UUID_helper::to_pretty_repr(m_phys_obj_key);
+        node_ref["apply_facing_angle_game_obj_key"] = UUID_helper::to_pretty_repr(m_apply_facing_angle_game_obj_key);
     }
 
     void on_pre_physics(float_t physics_delta_time) override;
+    void on_pre_render(float_t delta_time) override;
 
     // Helper funcs.
     float_t find_grounded_turn_speed(float_t linear_speed);
@@ -123,7 +147,9 @@ BT::Scripts::Factory_impl_funcs
         new Script_player_character_movement{ *input_handler,
                                               *phys_engine,
                                               *renderer,
-                                              UUID_helper::to_UUID(node_ref["phys_obj_key"]) });
+                                              *game_obj_pool,
+                                              UUID_helper::to_UUID(node_ref["phys_obj_key"]),
+                                              UUID_helper::to_UUID(node_ref["apply_facing_angle_game_obj_key"]) });
 }
 
 
@@ -282,6 +308,17 @@ void BT::Scripts::Script_player_character_movement::on_pre_physics(float_t physi
     // Finish.
     m_phys_engine.return_physics_object(phys_obj);
 
+    {   // Write new facing direction.
+        auto& rs{ m_rendering_state };
+        lock_guard<mutex> lock{ rs.access_mutex };
+        rs.facing_angle_render_triple_buffer[rs.write_pos] = m_grounded_state.facing_angle;
+
+        auto temp{ rs.read_a_pos };
+        rs.read_a_pos = rs.read_b_pos;
+        rs.read_b_pos = rs.write_pos;
+        rs.write_pos = temp;
+    }
+
 
 
 
@@ -375,6 +412,34 @@ void BT::Scripts::Script_player_character_movement::on_pre_physics(float_t physi
         }
     }
 #endif // 0
+}
+
+void BT::Scripts::Script_player_character_movement::on_pre_render(float_t delta_time)
+{
+    // Read facing angles.
+    float_t facing_angles[2];
+    {
+        lock_guard<mutex> lock{ m_rendering_state.access_mutex };
+        facing_angles[0] = m_rendering_state.facing_angle_render_triple_buffer[m_rendering_state.read_a_pos];
+        facing_angles[1] = m_rendering_state.facing_angle_render_triple_buffer[m_rendering_state.read_b_pos];
+    }
+
+    // Lerp angle.
+    float_t delta_facing_angle{ facing_angles[1] - facing_angles[0] };
+    while (delta_facing_angle > glm_rad(180.0f)) delta_facing_angle -= glm_rad(360.0f);
+    while (delta_facing_angle <= glm_rad(-180.0f)) delta_facing_angle += glm_rad(360.0f);
+
+    float_t lerped_facing_angle{
+        facing_angles[0] +
+            delta_facing_angle * m_phys_engine.get_interpolation_alpha() };
+
+    // Write angle to game object.
+    versor new_rot;
+    glm_quat(new_rot, lerped_facing_angle + glm_rad(180.0f), 0.0f, 1.0f, 0.0f);
+
+    auto game_obj{ m_game_obj_pool.get_one_no_lock(m_apply_facing_angle_game_obj_key) };
+    game_obj->get_transform_handle().set_local_rot(new_rot);
+    game_obj->propagate_transform_changes();
 }
 
 

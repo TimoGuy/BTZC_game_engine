@@ -1,6 +1,8 @@
 [
     {
-        "children": [],
+        "children": [
+            "d33f01dc-b0b5-4954-9771-71a1c42e5209"
+        ],
         "guid": "aae5ebfb-7c2b-49a8-bcb9-658fdea987af",
         "name": "My Gay object",
         "parent": null,
@@ -11,7 +13,7 @@
             "initial_transform": [
                 [
                     0.0,
-                    5.099999904632568,
+                    2.980232238769531e-07,
                     0.0
                 ],
                 [
@@ -27,7 +29,7 @@
         },
         "render_obj": {
             "guid": "fa2a0c0c-cfd4-47a7-b4e7-01dbbd3b3537",
-            "model_name": "box_0.5_2",
+            "model_name": "player_model_0.5_2",
             "render_layer": 1
         },
         "scripts": [
@@ -45,8 +47,42 @@
             }
         ],
         "transform": {
-            "global": null,
-            "local": null
+            "global": {
+                "position": [
+                    0.0,
+                    2.980232238769531e-07,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "local": {
+                "position": [
+                    0.0,
+                    2.980232238769531e-07,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            }
         }
     },
     {
@@ -81,8 +117,89 @@
         },
         "scripts": [],
         "transform": {
-            "global": null,
-            "local": null
+            "global": {
+                "position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "local": {
+                "position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            }
+        }
+    },
+    {
+        "children": [],
+        "guid": "d33f01dc-b0b5-4954-9771-71a1c42e5209",
+        "name": "Character repr",
+        "parent": "aae5ebfb-7c2b-49a8-bcb9-658fdea987af",
+        "physics_obj": null,
+        "render_obj": null,
+        "scripts": [],
+        "transform": {
+            "global": {
+                "position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "local": {
+                "position": [
+                    0.0,
+                    -2.980232238769531e-07,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            }
         }
     }
 ]

@@ -60,7 +60,7 @@ BT::Physics_engine::Phys_impl::Phys_impl()
 
     // @HARDCODE: From previous project.  -Thea 2025/03/13 (2023/09/29)
     // m_physics_system->SetGravity(JPH::Vec3{ 0.0f, -37.5f, 0.0f });
-    m_physics_system->SetGravity(JPH::Vec3{ 0.0f, -50.0f, 0.0f });
+    m_physics_system->SetGravity(JPH::Vec3{ 0.0f, -98.0f, 0.0f });
 
     m_physics_system->OptimizeBroadPhase();
 }

@@ -26,7 +26,7 @@ using std::max;
 void BT::Transform_data::scene_serialize(Scene_serialization_mode mode,
                                          json& node_ref)
 {
-    if (mode == SCENE_SERIAL_MODE_DESERIALIZE)
+    if (mode == SCENE_SERIAL_MODE_SERIALIZE)
     {
         node_ref["position"][0] = position[0];
         node_ref["position"][1] = position[1];
@@ -561,7 +561,11 @@ void BT::Game_object_pool::remove(UUID key)
 vector<BT::Game_object*> const BT::Game_object_pool::checkout_all_as_list()
 {
     wait_until_free_then_block();
+    return get_all_as_list_no_lock();
+}
 
+vector<BT::Game_object*> const BT::Game_object_pool::get_all_as_list_no_lock()
+{
     vector<Game_object*> all_game_objs;
     all_game_objs.reserve(m_game_objects.size());
 

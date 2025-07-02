@@ -370,7 +370,10 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
                 - Perhaps an animation of some kind using velocities?
                 - Or target points and using the velocities to try to get to those target points?
                     - And then at the end just move the char con to that point if it "didn't make it".
-        - [ ] Make a simple char model that indicates facing direction and use it to debug `facing_angle`.
+        - [x] Make a simple char model that indicates facing direction and use it to debug `facing_angle`.
+            - [x] Create and import the actual character model.
+            - [x] Edit script to change the actual orientation of the char model.
+        - [ ] @PLEASE: Add checkbox to toggle showing physics object wireframe.
         - [ ] @FIX: Make it so that `facing_angle` is used (the current facing direction is stored even when hitting a wall), so that that can be used for testing the raycasting solution even when no direction is input.
     - [ ] Swordplay combat.
         - Cutting.

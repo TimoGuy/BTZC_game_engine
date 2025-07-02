@@ -218,6 +218,7 @@ public:
     void remove(UUID key);
 
     vector<Game_object*> const checkout_all_as_list();
+    vector<Game_object*> const get_all_as_list_no_lock();
     Game_object* checkout_one(UUID key);
     Game_object* get_one_no_lock(UUID key);
     void return_list(vector<Game_object*> const&& all_as_list);

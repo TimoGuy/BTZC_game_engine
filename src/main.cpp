@@ -124,6 +124,10 @@ int32_t main()
         make_unique<BT::Model>(BTZC_GAME_ENGINE_ASSET_MODEL_PATH "box_0.5_2.obj",
                                "color_material"));
     BT::Model_bank::emplace_model(
+        "player_model_0.5_2",
+        make_unique<BT::Model>(BTZC_GAME_ENGINE_ASSET_MODEL_PATH "player_model_0.5_2.obj",
+                               "color_material"));
+    BT::Model_bank::emplace_model(
         "probuilder_example",
         make_unique<BT::Model>(BTZC_GAME_ENGINE_ASSET_MODEL_PATH "probuilder_example.obj",
                                "textured_material"));
@@ -195,13 +199,14 @@ int32_t main()
             "cam_following_game_obj": "aae5ebfb-7c2b-49a8-bcb9-658fdea987af",
             "game_objects": [
                 {
-                    "children": [],
+                    "children": ["d33f01dc-b0b5-4954-9771-71a1c42e5209"],
                     "guid": "aae5ebfb-7c2b-49a8-bcb9-658fdea987af",
                     "name": "My Gay object",
                     "scripts": [
                         {
                             "script_datas": {
-                                "phys_obj_key": "08743552-fff6-49d2-ad15-efbd121ab773"
+                                "phys_obj_key": "08743552-fff6-49d2-ad15-efbd121ab773",
+                                "apply_facing_angle_game_obj_key": "d33f01dc-b0b5-4954-9771-71a1c42e5209"
                             },
                             "script_type": "script_player_character_movement"
                         },
@@ -212,15 +217,6 @@ int32_t main()
                             "script_type": "script_apply_physics_transform_to_render_object"
                         }
                     ],
-                    "render_obj": {
-                        "guid": "fa2a0c0c-cfd4-47a7-b4e7-01dbbd3b3537",
-                        "model_name": "box_0.5_2",
-                        "render_layer": 1,
-                        "transform": [[1.0, 0.0, 0.0, 0.0],
-                                    [0.0, 1.0, 0.0, 0.0],
-                                    [0.0, 0.0, 1.0, 0.0],
-                                    [0.0, 0.0, 0.0, 1.0]]
-                    },
                     "physics_obj": {
                         "guid": "08743552-fff6-49d2-ad15-efbd121ab773",
                         "type": "character_controller",
@@ -229,7 +225,19 @@ int32_t main()
                         "height": 2.0,
                         "crouch_height": 1.0,
                         "init_transform": [[0.0, 5.1, 0.0],
-                                        [0.0, 0.0, 0.0, 1.0]]
+                                           [0.0, 0.0, 0.0, 1.0]]
+                    },
+                    "transform": {
+                        "global": {
+                            "position": [0.0, 0.0, 0.0],
+                            "rotation": [0.0, 0.0, 0.0, 1.0],
+                            "scale": [1.0, 1.0, 1.0]
+                        },
+                        "local": {
+                            "position": [0.0, 0.0, 0.0],
+                            "rotation": [0.0, 0.0, 0.0, 1.0],
+                            "scale": [1.0, 1.0, 1.0]
+                        }
                     }
                 },
                 {
@@ -253,6 +261,43 @@ int32_t main()
                         "motion_type": 0,
                         "init_transform": [[0.0, 0.0, 0.0],
                                         [0.0, 0.0, 0.0, 1.0]]
+                    },
+                    "transform": {
+                        "global": {
+                            "position": [0.0, 0.0, 0.0],
+                            "rotation": [0.0, 0.0, 0.0, 1.0],
+                            "scale":    [1.0, 1.0, 1.0]
+                        },
+                        "local": {
+                            "position": [0.0, 0.0, 0.0],
+                            "rotation": [0.0, 0.0, 0.0, 1.0],
+                            "scale":    [1.0, 1.0, 1.0]
+                        }
+                    }
+                },
+                {
+                    "children": [],
+                    "guid": "d33f01dc-b0b5-4954-9771-71a1c42e5209",
+                    "name": "Character repr",
+                    "parent": "aae5ebfb-7c2b-49a8-bcb9-658fdea987af",
+                    "physics_obj": null,
+                    "render_obj": {
+                        "guid": "fa2a0c0c-cfd4-47a7-b4e7-01dbbd3b3537",
+                        "model_name": "player_model_0.5_2",
+                        "render_layer": 1
+                    },
+                    "scripts": [],
+                    "transform": {
+                        "global": {
+                            "position": [0.0, 0.0, 0.0],
+                            "rotation": [0.0, 0.0, 0.0, 1.0],
+                            "scale":    [1.0, 1.0, 1.0]
+                        },
+                        "local": {
+                            "position": [0.0, -2.980232238769531e-07, 0.0],
+                            "rotation": [0.0, 0.0, 0.0, 1.0],
+                            "scale":    [1.0, 1.0, 1.0]
+                        }
                     }
                 }
             ]
@@ -274,21 +319,21 @@ int32_t main()
     main_renderer.get_camera_obj()->set_follow_object(
         BT::UUID_helper::to_UUID(s_scene_as_json["cam_following_game_obj"]));
 
-    {   // @TODO: @NOCHECKIN: @DEBUG
-        // Serialize scene.
-        json root = {};
-        size_t game_obj_idx{ 0 };
-        auto const game_objs{ game_object_pool.checkout_all_as_list() };
-        for (auto game_obj : game_objs)
-        {
-            game_obj->scene_serialize(BT::SCENE_SERIAL_MODE_SERIALIZE, root[game_obj_idx++]);
-        }
-        game_object_pool.return_list(std::move(game_objs));
+    // {   // @TODO: @NOCHECKIN: @DEBUG
+    //     // Serialize scene.
+    //     json root = {};
+    //     size_t game_obj_idx{ 0 };
+    //     auto const game_objs{ game_object_pool.checkout_all_as_list() };
+    //     for (auto game_obj : game_objs)
+    //     {
+    //         game_obj->scene_serialize(BT::SCENE_SERIAL_MODE_SERIALIZE, root[game_obj_idx++]);
+    //     }
+    //     game_object_pool.return_list(std::move(game_objs));
 
-        // Save to disk.
-        std::ofstream f{ BTZC_GAME_ENGINE_ASSET_SCENE_PATH "sumthin_cumming_outta_me.btscene" };
-        f << root.dump(4);
-    }
+    //     // Save to disk.
+    //     std::ofstream f{ BTZC_GAME_ENGINE_ASSET_SCENE_PATH "sumthin_cumming_outta_me.btscene" };
+    //     f << root.dump(4);
+    // }
 
     // Timer.
     BT::Timer main_timer;

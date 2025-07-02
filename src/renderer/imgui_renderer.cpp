@@ -1,10 +1,12 @@
 #include "imgui_renderer.h"
 
+#include "../btzc_game_engine.h"
 #include "../game_object/game_object.h"
 #include "camera.h"
 #include "imgui.h"
 #include "ImGuizmo.h"
 #include "imgui_internal.h"
+#include <fstream>
 
 
 void BT::ImGui_renderer::set_selected_game_obj(Game_object* game_obj)
@@ -29,6 +31,21 @@ void BT::ImGui_renderer::render_imgui()
         if (ImGui::BeginMenu("Menu"))
         {
             if (ImGui::MenuItem("New")) {}
+            if (ImGui::MenuItem("Save"))
+            {   // @TODO: @NOCHECKIN: @DEBUG
+                // Serialize scene.
+                json root = {};
+                size_t game_obj_idx{ 0 };
+                auto const game_objs{ m_game_obj_pool->get_all_as_list_no_lock() };
+                for (auto game_obj : game_objs)
+                {
+                    game_obj->scene_serialize(BT::SCENE_SERIAL_MODE_SERIALIZE, root[game_obj_idx++]);
+                }
+
+                // Save to disk.
+                std::ofstream f{ BTZC_GAME_ENGINE_ASSET_SCENE_PATH "sumthin_cumming_outta_me.btscene" };
+                f << root.dump(4);
+            }
             ImGui::EndMenu();
         }
 
