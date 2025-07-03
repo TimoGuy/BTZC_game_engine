@@ -349,7 +349,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
     - [x] Add some level settings to the load level json.
         - Make the char controller the follow camera thingy.
     - [x] Fix follow camera. Actually have ti use the reference.
-    - [ ] Base movement principles from a hat in time.
+    - [x] Base movement principles from a hat in time.
         - [x] Velocity/inertia.
         - [x] Turning.
         - [x] Airborne just being simple additions to velocity.
@@ -374,7 +374,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
             - [x] Create and import the actual character model.
             - [x] Edit script to change the actual orientation of the char model.
         - [x] @FIX: Make it so that `facing_angle` is used (the current facing direction is stored even when hitting a wall), so that that can be used for testing the raycasting solution even when no direction is input.
-        - [ ] Change Wall jump is omnidirectional instead of facing direction (keep ledge climb to facing direction tho).
+        - [x] Change Wall jump is omnidirectional instead of facing direction (keep ledge climb to facing direction tho).
     - [ ] Swordplay combat.
         - Cutting.
         - Deflecting.

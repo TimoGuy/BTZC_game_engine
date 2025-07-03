@@ -568,14 +568,26 @@ void BT::Scripts::Script_player_character_movement::process_midair_jump_interact
     if (ledge_climb_failed && new_velocity.GetY() <= 0.0f)
     {
         // Try wall jump.
-        auto data{ Raycast_helper::raycast(check_origin_point,
-                                           1.5f * flat_normal_input_dir) };
-        if (data.success)
+        constexpr uint32_t k_num_circle_raycasts{ 9 };
+
+        JPH::Quat iter_rot_quat{ JPH::Quat::sRotation({ 0.0f, 1.0f, 0.0f },
+                                                      glm_rad(360.0f) / k_num_circle_raycasts) };
+        JPH::Vec3 flat_normal_input_dir_copy{ flat_normal_input_dir };
+
+        for (uint32_t i = 0; i < k_num_circle_raycasts; i++)
         {
-            // Commit to wall jump.
-            // @TEMPORARY: I think holding the player to the wall for just a little bit would be good to help the animation.
-            JPH::Vec3 curr_up_velo{ up_direction * up_direction.Dot(new_velocity) };
-            new_velocity += -curr_up_velo + m_settings.jump_speed * up_direction;
+            auto data{ Raycast_helper::raycast(check_origin_point,
+                                               1.5f * flat_normal_input_dir_copy) };
+            if (data.success)
+            {
+                // Commit to wall jump.
+                // @TEMPORARY: I think holding the player to the wall for just a little bit would be good to help the animation.
+                JPH::Vec3 curr_up_velo{ up_direction * up_direction.Dot(new_velocity) };
+                new_velocity += -curr_up_velo + m_settings.jump_speed * up_direction;
+                break;
+            }
+
+            flat_normal_input_dir_copy = (iter_rot_quat * flat_normal_input_dir_copy);
         }
     }
 
