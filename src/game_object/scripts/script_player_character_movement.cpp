@@ -69,6 +69,7 @@ public:
 
     struct Airborne_state
     {
+        float_t input_facing_angle{ 0.0f };
     } m_airborne_state;
 
     struct Rendering_state
@@ -103,7 +104,6 @@ public:
     void apply_grounded_linear_speed(JPH::Vec3Arg input_velocity, float_t physics_delta_time);
 
     void process_midair_jump_interactions(Physics_object_type_impl_ifc* character_impl,
-                                          vec3 move_input_world,
                                           JPH::Vec3 up_direction,
                                           JPH::Vec3& new_velocity);
 
@@ -127,6 +127,7 @@ private:
             Contextual_turn_speed{ 5.0f, 50.0f } };
 
         float_t airborne_acceleration{ 60.0f };
+        float_t airborne_turn_speed{ 7.5f };
         float_t jump_speed{ 30.0f };
     } m_settings;
 };
@@ -258,13 +259,13 @@ void BT::Scripts::Script_player_character_movement::on_pre_physics(float_t physi
         if (on_jump_press)
         {
             process_midair_jump_interactions(character_impl,
-                                             move_input_world,
                                              up_direction,
                                              new_velocity);
         }
     }
 
     // Desired velocity.
+    float_t display_facing_angle;
     if (is_grounded)
     {
         // Grounded turn & speed movement.
@@ -275,6 +276,11 @@ void BT::Scripts::Script_player_character_movement::on_pre_physics(float_t physi
             JPH::Vec3{ sinf(m_grounded_state.facing_angle) * m_grounded_state.speed,
                        0.0f,
                        cosf(m_grounded_state.facing_angle) * m_grounded_state.speed };
+
+        // Keep airborne state up to date.
+        m_airborne_state.input_facing_angle = m_grounded_state.facing_angle;
+
+        display_facing_angle = m_grounded_state.facing_angle;
     }
     else
     {
@@ -293,11 +299,33 @@ void BT::Scripts::Script_player_character_movement::on_pre_physics(float_t physi
         JPH::Vec3 effective_velocity{ flat_linear_velo + delta_velocity };
         new_velocity += effective_velocity;
 
+        if (glm_vec3_norm2(move_input_world) > 1e-6f * 1e-6f)
+        {
+            // Move towards input angle.
+            float_t desired_facing_angle{ atan2f(move_input_world[0], move_input_world[2]) };
+            float_t delta_direction{ desired_facing_angle - m_airborne_state.input_facing_angle };
+            while (delta_direction > glm_rad(180.0f)) delta_direction -= glm_rad(360.0f);
+            while (delta_direction <= glm_rad(-180.0f)) delta_direction += glm_rad(360.0f);
+
+            float_t max_turn_delta{ m_settings.airborne_turn_speed * physics_delta_time };
+            if (abs(delta_direction) > max_turn_delta)
+            {
+                // Limit turn speed.
+                delta_direction = max_turn_delta * glm_signf(delta_direction);
+            }
+
+            m_airborne_state.input_facing_angle += delta_direction;
+        }
+
         // Keep grounded state up to date.
         m_grounded_state.speed = effective_velocity.Length();
-        if (!effective_velocity.IsNearZero())
+        if (effective_velocity.IsNearZero())
+            m_grounded_state.facing_angle = m_airborne_state.input_facing_angle;
+        else
             m_grounded_state.facing_angle = atan2f(effective_velocity.GetX(), effective_velocity.GetZ());
         m_grounded_state.turnaround_enabled = false;
+
+        display_facing_angle = m_airborne_state.input_facing_angle;
     }
 
     // Apply to character.
@@ -311,7 +339,7 @@ void BT::Scripts::Script_player_character_movement::on_pre_physics(float_t physi
     {   // Write new facing direction.
         auto& rs{ m_rendering_state };
         lock_guard<mutex> lock{ rs.access_mutex };
-        rs.facing_angle_render_triple_buffer[rs.write_pos] = m_grounded_state.facing_angle;
+        rs.facing_angle_render_triple_buffer[rs.write_pos] = display_facing_angle;
 
         auto temp{ rs.read_a_pos };
         rs.read_a_pos = rs.read_b_pos;
@@ -489,11 +517,11 @@ void BT::Scripts::Script_player_character_movement::apply_grounded_facing_angle(
     else
     {
         // Process grounded turning.
-        float_t turn_delta{ turn_speed * physics_delta_time };
-        if (abs(delta_direction) > turn_delta)
+        float_t max_turn_delta{ turn_speed * physics_delta_time };
+        if (abs(delta_direction) > max_turn_delta)
         {
             // Limit turn speed.
-            delta_direction = turn_delta * glm_signf(delta_direction);
+            delta_direction = max_turn_delta * glm_signf(delta_direction);
         }
 
         // Apply new facing angle.
@@ -528,7 +556,6 @@ void BT::Scripts::Script_player_character_movement::apply_grounded_linear_speed(
 
 void BT::Scripts::Script_player_character_movement::process_midair_jump_interactions(
     Physics_object_type_impl_ifc* character_impl,
-    vec3 move_input_world,
     JPH::Vec3 up_direction,
     JPH::Vec3& new_velocity)
 {
@@ -543,7 +570,9 @@ void BT::Scripts::Script_player_character_movement::process_midair_jump_interact
     float_t char_con_radius{ character_impl->get_cc_radius() };
 
     // Calc check origin point (since char collider is a cube).
-    JPH::Vec3 flat_input_dir{ move_input_world[0], 0.0f, move_input_world[2] };
+    JPH::Vec3 flat_input_dir{ sinf(m_airborne_state.input_facing_angle),
+                              0.0f,
+                              cosf(m_airborne_state.input_facing_angle) };
     float_t cancel_ratio{ char_con_radius
                           / std::max(abs(flat_input_dir.GetX()),
                                      abs(flat_input_dir.GetZ())) };

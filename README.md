@@ -373,17 +373,19 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - [x] Make a simple char model that indicates facing direction and use it to debug `facing_angle`.
             - [x] Create and import the actual character model.
             - [x] Edit script to change the actual orientation of the char model.
-        - [ ] @PLEASE: Add checkbox to toggle showing physics object wireframe.
-            - [ ] Move the debug views render function.
-                - Perhaps actually keep it in the same spot but restructure it so that "jobs" are written into the debug draw views buffer?
-                    - Maybe these jobs could have a stop time? So after that time they're erased.
-                    - And then it could be extended to include lines for things like gizmos and raycast representations.
-        - [ ] @FIX: Make it so that `facing_angle` is used (the current facing direction is stored even when hitting a wall), so that that can be used for testing the raycasting solution even when no direction is input.
+        - [x] @FIX: Make it so that `facing_angle` is used (the current facing direction is stored even when hitting a wall), so that that can be used for testing the raycasting solution even when no direction is input.
+        - [ ] Change Wall jump is omnidirectional instead of facing direction (keep ledge climb to facing direction tho).
     - [ ] Swordplay combat.
         - Cutting.
         - Deflecting.
         - Jumping/stomping.
         - Dodging.
+    - [ ] Engine stuff.
+        - [ ] @PLEASE: Add checkbox to toggle showing physics object wireframe.
+            - [ ] Move the debug views render function and turn it into a job submitting thing.
+                - Perhaps actually keep it in the same spot but restructure it so that "jobs" are written into the debug draw views buffer?
+                    - Maybe these jobs could have a stop time? So after that time they're erased.
+                    - And then it could be extended to include lines for things like gizmos and raycast representations.
 
 1. Unity to this engine migration.
     - @TODO.

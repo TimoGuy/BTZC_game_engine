@@ -373,6 +373,8 @@ int32_t main()
             }
 
             main_renderer.render(delta_time, [&]() {
+                #define TODO_THEA_GET_BETTER_DEBUG_DRAW 0
+                #if TODO_THEA_GET_BETTER_DEBUG_DRAW
                 // Render physics objs.
                 auto all_phys_objs = main_physics_engine.checkout_all_physics_objects();
                 for (auto phys_obj : all_phys_objs)
@@ -380,6 +382,7 @@ int32_t main()
                     phys_obj->get_impl()->debug_render_representation();
                 }
                 main_physics_engine.return_physics_objects(std::move(all_phys_objs));
+                #endif  // TODO_THEA_GET_BETTER_DEBUG_DRAW
 
                 // Render selected game obj.
                 auto selected_game_obj{ game_object_pool.get_selected_game_obj() };
