@@ -56,6 +56,10 @@ int32_t main()
         make_unique<BT::Shader>(BTZC_GAME_ENGINE_ASSET_SHADER_PATH "color_unlit.vert",
                                 BTZC_GAME_ENGINE_ASSET_SHADER_PATH "color_unlit.frag"));
     BT::Shader_bank::emplace_shader(
+        "color_unlit_lines",
+        make_unique<BT::Shader>(BTZC_GAME_ENGINE_ASSET_SHADER_PATH "color_unlit_lines.vert",
+                                BTZC_GAME_ENGINE_ASSET_SHADER_PATH "color_unlit_lines.frag"));
+    BT::Shader_bank::emplace_shader(
         "color_shaded",
         make_unique<BT::Shader>(BTZC_GAME_ENGINE_ASSET_SHADER_PATH "color_shaded.vert",
                                 BTZC_GAME_ENGINE_ASSET_SHADER_PATH "color_shaded.frag"));
@@ -103,6 +107,16 @@ int32_t main()
                                                 BT::k_depth_test_mode_front)));
     BT::Material_bank::emplace_material(
         "debug_selected_wireframe_back_material",
+        unique_ptr<BT::Material_ifc>(
+            new BT::Material_opaque_color_unlit(vec3{ 0.475f, 0.15f, 0.475f },
+                                                BT::k_depth_test_mode_back)));
+    BT::Material_bank::emplace_material(  // @INCOMPLETE @TODO
+        "debug_lines_fore_material",
+        unique_ptr<BT::Material_ifc>(
+            new BT::Material_opaque_color_unlit(vec3{ 0.95f, 0.3f, 0.95f },
+                                                BT::k_depth_test_mode_front)));
+    BT::Material_bank::emplace_material(
+        "debug_lines_back_material",
         unique_ptr<BT::Material_ifc>(
             new BT::Material_opaque_color_unlit(vec3{ 0.475f, 0.15f, 0.475f },
                                                 BT::k_depth_test_mode_back)));

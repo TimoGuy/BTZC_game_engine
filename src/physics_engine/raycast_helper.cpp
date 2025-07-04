@@ -1,6 +1,8 @@
 #include "raycast_helper.h"
 
+#include "../renderer/debug_render_job.h"
 #include "physics_engine_impl_layers.h"
+#include "Jolt/Math/Real.h"
 #include "Jolt/Physics/Collision/CastResult.h"
 #include "Jolt/Physics/Collision/RayCast.h"
 #include "Jolt/Physics/PhysicsSystem.h"
@@ -26,6 +28,14 @@ BT::Raycast_helper::raycast(JPH::RVec3Arg origin, JPH::Vec3Arg direction_and_mag
 
     auto& physics_system{
         *reinterpret_cast<JPH::PhysicsSystem*>(s_physics_engine->get_physics_system_ptr()) };
+
+    // Draw debug line in raycast.
+    JPH::RVec3 pos_2{ origin + direction_and_magnitude };
+    get_main_debug_line_pool()
+        .emplace_debug_line({ { origin.GetX(), origin.GetY(), origin.GetZ() },
+                              { pos_2.GetX(), pos_2.GetY(), pos_2.GetZ() },
+                              { 1.0f, 0.0f, 0.0f, 1.0f },
+                              { 0.85f, 0.85f, 0.85f, 1.0f} });
 
     JPH::RRayCast ray{ origin, direction_and_magnitude };
     JPH::RayCastResult ray_result;

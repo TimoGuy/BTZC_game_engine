@@ -16,12 +16,15 @@
 #include "../btzc_game_engine.h"
 #include "../input_handler/input_handler.h"
 #include "../game_object/game_object.h"
+#include "debug_render_job.h"
 #include "logger.h"
 #include "material.h"
 #include "material_impl_debug_picking.h"
+#include "material_impl_debug_lines.h"
 #include "render_object.h"
 #include "renderer.h"
 #include "stb_image.h"
+#include <memory>
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
 #include "stb_image_resize2.h"
 #include "texture.h"
@@ -179,6 +182,8 @@ BT::Renderer::Impl::Impl(Renderer& renderer, ImGui_renderer& imgui_renderer, Inp
     s_main_window = reinterpret_cast<GLFWwindow*>(m_window_handle);
     s_main_renderer = this;
 
+    set_main_debug_line_pool(std::make_unique<Debug_line_pool>());
+
     s_created = true;
 }
 
@@ -228,7 +233,7 @@ void BT::Renderer::Impl::render(float_t delta_time, function<void()>&& debug_vie
         render_scene_to_picking_framebuffer();
     }
     render_hdr_color_to_ldr_framebuffer();
-    render_debug_views_to_ldr_framebuffer(std::move(debug_views_render_fn));
+    render_debug_views_to_ldr_framebuffer(delta_time, std::move(debug_views_render_fn));
     render_imgui();
 
     present_display_frame();
@@ -740,7 +745,7 @@ void BT::Renderer::Impl::render_hdr_color_to_ldr_framebuffer()
     }
 }
 
-void BT::Renderer::Impl::render_debug_views_to_ldr_framebuffer(function<void()>&& debug_views_render_fn)
+void BT::Renderer::Impl::render_debug_views_to_ldr_framebuffer(float_t delta_time, function<void()>&& debug_views_render_fn)
 {
     glEnable(GL_DEPTH_TEST);
 
@@ -759,6 +764,15 @@ void BT::Renderer::Impl::render_debug_views_to_ldr_framebuffer(function<void()>&
 
     // Render debug views.
     debug_views_render_fn();
+
+    // Render debug lines.
+    auto lines_render_data{ get_main_debug_line_pool().calc_render_data(delta_time) };
+    static Material_ifc* s_debug_lines_material{ Material_bank::get_material("debug_lines") };
+    static_cast<Material_debug_lines*>(s_debug_lines_material)
+        ->set_lines_ssbo(lines_render_data.ssbo);
+    s_debug_lines_material->bind_material(GLM_MAT4_ZERO);
+    glDrawArraysInstanced(GL_LINES, 0, 2, lines_render_data.num_lines_to_render);
+    s_debug_lines_material->unbind_material();
 
     if (m_render_to_ldr)
     {
