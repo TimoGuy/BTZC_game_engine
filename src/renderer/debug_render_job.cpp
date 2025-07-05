@@ -4,7 +4,6 @@
 #include <cassert>
 #include <memory>
 #include <mutex>
-#include <iostream>
 
 
 BT::Debug_line_pool::Debug_line_pool()
@@ -62,12 +61,6 @@ BT::Debug_line_pool::Render_data BT::Debug_line_pool::calc_render_data(float_t d
         for (uint32_t idx : m_active_indices)
         {
             jobs.emplace_back(m_lines[idx].dbg_line);
-        }
-
-        std::cout << "--------------------------------------" << std::endl;
-        for (auto& job : jobs)
-        {
-            std::cout << job.pos1[0] << "\t" << job.pos1[1] << "\t" << job.pos1[2] << "\t" << std::endl;
         }
 
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_ssbo);

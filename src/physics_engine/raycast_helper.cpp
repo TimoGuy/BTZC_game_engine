@@ -1,6 +1,7 @@
 #include "raycast_helper.h"
 
 #include "../renderer/debug_render_job.h"
+#include "Jolt/Physics/Collision/BackFaceMode.h"
 #include "physics_engine_impl_layers.h"
 #include "Jolt/Math/Real.h"
 #include "Jolt/Physics/Collision/CastResult.h"
@@ -21,6 +22,59 @@ void BT::Raycast_helper::set_physics_engine(Physics_engine& physics_engine)
     s_physics_engine = &physics_engine;
 }
 
+namespace
+{
+
+class BTCollector : public JPH::CastRayCollector
+{
+public:
+    BTCollector(JPH::PhysicsSystem& in_physics_system,
+                JPH::RRayCast& in_ray)
+        : m_physics_system{ in_physics_system }
+        , m_ray{ in_ray }
+    {
+    }
+
+    virtual void AddHit(JPH::RayCastResult const& in_result) override
+    {
+        // Test if this collision is closer than the previous one.
+        if (in_result.mFraction < GetEarlyOutFraction())
+        {
+            // Lock the body.
+            JPH::BodyLockRead lock(m_physics_system.GetBodyLockInterfaceNoLock(), in_result.mBodyID);
+            JPH_ASSERT(lock.Succeeded()); // When this runs all bodies are locked so this should not fail
+            JPH::Body const* body = &lock.GetBody();
+
+            if (body->IsSensor())
+                return;
+
+            JPH::RVec3 contact_pos = m_ray.GetPointOnRay(in_result.mFraction);
+            JPH::Vec3 normal = body->GetWorldSpaceSurfaceNormal(in_result.mSubShapeID2, contact_pos);
+
+            // Update early out fraction to this hit.
+            UpdateEarlyOutFraction(in_result.mFraction);
+
+            // Get the contact properties.
+            m_body = body;
+            m_sub_shape_id2 = in_result.mSubShapeID2;
+            m_contact_position = contact_pos;
+            m_contact_normal = normal;
+        }
+    }
+
+    // Configuration.
+    JPH::PhysicsSystem& m_physics_system;
+    JPH::RRayCast       m_ray;
+
+    // Resulting closest collision.
+    JPH::Body const* m_body{ nullptr };
+    JPH::SubShapeID  m_sub_shape_id2;
+    JPH::RVec3       m_contact_position;
+    JPH::Vec3        m_contact_normal;
+};
+
+}  // namespace
+
 BT::Raycast_helper::Raycast_result
 BT::Raycast_helper::raycast(JPH::RVec3Arg origin, JPH::Vec3Arg direction_and_magnitude)
 {
@@ -38,20 +92,25 @@ BT::Raycast_helper::raycast(JPH::RVec3Arg origin, JPH::Vec3Arg direction_and_mag
                               { 0.85f, 0.85f, 0.85f, 1.0f} });
 
     JPH::RRayCast ray{ origin, direction_and_magnitude };
-    JPH::RayCastResult ray_result;
-    if (physics_system.GetNarrowPhaseQuery().CastRay(
+
+    JPH::RayCastSettings cast_settings;
+    cast_settings.SetBackFaceMode(JPH::EBackFaceMode::IgnoreBackFaces);
+
+    BTCollector ray_collector{ physics_system, ray };
+
+    physics_system.GetNarrowPhaseQuery().CastRay(
         ray,
-        ray_result,
+        cast_settings,
+        ray_collector,
         JPH::SpecifiedBroadPhaseLayerFilter(Broad_phase_layers::NON_MOVING),
-        JPH::SpecifiedObjectLayerFilter(Layers::NON_MOVING)))
+        JPH::SpecifiedObjectLayerFilter(Layers::NON_MOVING));
+
+    if (ray_collector.GetEarlyOutFraction() <= 1.0f)
     {
         return_result.success      = true;
-        return_result.hit_distance = ray.mDirection.Length() * ray_result.GetEarlyOutFraction();
-        return_result.hit_point    = ray.GetPointOnRay(ray_result.GetEarlyOutFraction());
-        return_result.hit_normal   = physics_system.GetBodyInterface()
-                                         .GetTransformedShape(ray_result.mBodyID)
-                                         .GetWorldSpaceSurfaceNormal(ray_result.mSubShapeID2,
-                                                                     return_result.hit_point);
+        return_result.hit_distance = ray.mDirection.Length() * ray_collector.GetEarlyOutFraction();
+        return_result.hit_point    = ray_collector.m_contact_position;
+        return_result.hit_normal   = ray_collector.m_contact_normal;
     }
 
     return return_result;

@@ -568,6 +568,9 @@ void BT::Scripts::Script_player_character_movement::process_midair_jump_interact
     if (ledge_climb_failed && new_velocity.GetY() <= 0.0f)
     {
         // Try wall jump.
+        // @NOTE: This block may not execute if the player is not falling. Especially
+        //   if looking at the debug lines and it doesn't seem right, check if the player
+        //   is falling when pressing the jump btn again.  -Thea 2025/07/04
         constexpr uint32_t k_num_circle_raycasts{ 9 };
         for (uint32_t i = 0; i < k_num_circle_raycasts; i++)
         {

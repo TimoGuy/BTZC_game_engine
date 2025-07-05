@@ -376,8 +376,11 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - [x] @FIX: Make it so that `facing_angle` is used (the current facing direction is stored even when hitting a wall), so that that can be used for testing the raycasting solution even when no direction is input.
         - [x] Change Wall jump is omnidirectional instead of facing direction (keep ledge climb to facing direction tho).
         - [x] @FIX omnidirectional wall jump raycasts.
-        - [ ] @FIX ledge grab raycasts succeeding???
-    - [ ] Engine stuff.
+        - [ ] ~~@FIX ledge grab raycasts succeeding???~~
+            - Unnecessary. It turns out it was because of falling that would cause the wall climb to not try.
+            - @NOTE: DO NOT FORGET THIS!!!
+                - [x] Put note if someone's confused (i.e. future me).
+    - [x] Engine stuff.
         - [x] Basic addition to debug drawing system. Lines!
             - [x] Create this data structure.
                 - vec4 position1
@@ -389,6 +392,8 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
                 - But it's not working???
                 - [x] Fix writing to SSBO
                 - [x] Fix vertices being 0 for some reason.
+    - [x] @FIX: Make raycasts not interact with triangle backfaces by default.
+        - Had to write a ray collector for the raycasts!!! Hahahah
 
     - [ ] Swordplay combat.
         - Cutting.
