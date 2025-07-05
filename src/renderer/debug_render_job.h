@@ -36,9 +36,14 @@ public:
 
     void render_all_meshes();
 
+    bool get_visible() { return m_visible.load(); }
+    void set_visible(bool flag) { m_visible.store(flag); }
+
 private:
     std::mutex m_meshes_mutex;
     std::unordered_map<UUID, Debug_mesh> m_meshes;
+
+    std::atomic_bool m_visible{ false };
 };
 
 Debug_mesh_pool& set_main_debug_mesh_pool(std::unique_ptr<Debug_mesh_pool>&& dbg_mesh_pool);
@@ -69,6 +74,9 @@ public:
     };
     Render_data calc_render_data(float_t delta_time);
 
+    bool get_visible() { return m_visible.load(); }
+    void set_visible(bool flag) { m_visible.store(flag); }
+
 private:
     struct Debug_line_with_timeout
     {
@@ -88,6 +96,8 @@ private:
     bool m_is_dirty{ false };
 
     uint32_t m_ssbo{ (uint32_t)-1 };
+
+    std::atomic_bool m_visible{ true };
 };
 
 Debug_line_pool& set_main_debug_line_pool(std::unique_ptr<Debug_line_pool>&& dbg_line_pool);

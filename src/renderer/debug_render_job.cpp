@@ -61,6 +61,9 @@ void BT::Debug_mesh_pool::remove_debug_mesh(UUID key)
 
 void BT::Debug_mesh_pool::render_all_meshes()
 {
+    if (!get_visible())
+        return;
+
     std::lock_guard<std::mutex> lock{ m_meshes_mutex };
 
     for (auto& mesh_job : m_meshes)
@@ -162,7 +165,7 @@ BT::Debug_line_pool::Render_data BT::Debug_line_pool::calc_render_data(float_t d
     }
 
     Render_data data;
-    data.num_lines_to_render = m_active_indices.size();
+    data.num_lines_to_render = (get_visible() ? m_active_indices.size() : 0);
     data.ssbo = m_ssbo;
     return data;
 }

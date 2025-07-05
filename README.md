@@ -345,7 +345,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
 1. DONE: Good pause point.
     - [x] Release v0.1.0-develop.1
 
-1. Gameplay work (not engine work rly).
+1. DONE: Gameplay work (not engine work rly).
     - [x] Add some level settings to the load level json.
         - Make the char controller the follow camera thingy.
     - [x] Fix follow camera. Actually have ti use the reference.
@@ -396,12 +396,13 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - Had to write a ray collector for the raycasts!!! Hahahah
     - [ ] ~~Swordplay combat.~~
         - Moved/deferred to its own section
-    - [ ] Engine stuff.
+    - [x] Engine stuff.
         - [x] Move the debug views render function and turn it into a job submitting thing.
             - Perhaps actually keep it in the same spot but restructure it so that "jobs" are written into the debug draw views buffer?
                 - Maybe these jobs could have a stop time? So after that time they're erased.
                 - And then it could be extended to include lines for things like gizmos and raycast representations.
-        - [ ] @PLEASE: Add checkbox to toggle showing physics object wireframe.
+                    - [x] Raycast representations implemented automatically!
+        - [x] @PLEASE: Add checkbox to toggle showing physics object wireframe.
 
 1. Skeletal animations using compute shaders.
     - [ ] See `@IQHEWRIHDFKNAXI` for levels of detail and round-robin system.

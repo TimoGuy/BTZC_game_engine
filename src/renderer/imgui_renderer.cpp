@@ -3,6 +3,7 @@
 #include "../btzc_game_engine.h"
 #include "../game_object/game_object.h"
 #include "camera.h"
+#include "debug_render_job.h"
 #include "imgui.h"
 #include "ImGuizmo.h"
 #include "imgui_internal.h"
@@ -22,7 +23,7 @@ void BT::ImGui_renderer::render_imgui()
     static bool s_show_camera_props{ true };
     static bool s_show_console{ true };
     static bool s_show_gameobj_palette{ true };
-    static bool show_demo_window = true;
+    static bool s_show_demo_window{ false };
     static ImGuiIO& io = ImGui::GetIO();
 
     // Main menu bar.
@@ -46,6 +47,21 @@ void BT::ImGui_renderer::render_imgui()
                 std::ofstream f{ BTZC_GAME_ENGINE_ASSET_SCENE_PATH "sumthin_cumming_outta_me.btscene" };
                 f << root.dump(4);
             }
+
+            ImGui::Separator();
+
+            ImGui::MenuItem("Show ImGui demo window", nullptr, &s_show_demo_window);
+
+            if (ImGui::MenuItem("Show debug meshes", nullptr, get_main_debug_mesh_pool().get_visible()))
+            {
+                get_main_debug_mesh_pool().set_visible(!get_main_debug_mesh_pool().get_visible());
+            }
+
+            if (ImGui::MenuItem("Show debug lines", nullptr, get_main_debug_line_pool().get_visible()))
+            {
+                get_main_debug_line_pool().set_visible(!get_main_debug_line_pool().get_visible());
+            }
+
             ImGui::EndMenu();
         }
 
@@ -164,6 +180,6 @@ void BT::ImGui_renderer::render_imgui()
         ImGui::End();
     }
 
-    if (show_demo_window)
-        ImGui::ShowDemoWindow(&show_demo_window);
+    if (s_show_demo_window)
+        ImGui::ShowDemoWindow(&s_show_demo_window);
 }
