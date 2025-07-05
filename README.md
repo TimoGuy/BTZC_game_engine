@@ -403,6 +403,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
                 - And then it could be extended to include lines for things like gizmos and raycast representations.
                     - [x] Raycast representations implemented automatically!
         - [x] @PLEASE: Add checkbox to toggle showing physics object wireframe.
+        - [x] Toggle showing imgui demo window as well.
 
 1. Skeletal animations using compute shaders.
     - [ ] See `@IQHEWRIHDFKNAXI` for levels of detail and round-robin system.
