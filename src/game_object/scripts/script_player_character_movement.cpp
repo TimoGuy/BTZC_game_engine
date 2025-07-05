@@ -106,6 +106,14 @@ public:
     void process_midair_jump_interactions(Physics_object_type_impl_ifc* character_impl,
                                           JPH::Vec3 up_direction,
                                           JPH::Vec3& new_velocity);
+    struct Origin_offset_and_input_dir
+    {
+        JPH::Vec3 origin_offset;
+        JPH::Vec3 input_dir;
+    };
+    static Origin_offset_and_input_dir calc_check_origin_point_and_input_dir(
+        float_t facing_angle,
+        float_t char_con_radius);
 
 private:
     struct Settings
@@ -476,17 +484,10 @@ void BT::Scripts::Script_player_character_movement::process_midair_jump_interact
     float_t char_con_radius{ character_impl->get_cc_radius() };
 
     // Calc check origin point (since char collider is a cube).
-    JPH::Vec3 flat_input_dir{ sinf(m_airborne_state.input_facing_angle),
-                              0.0f,
-                              cosf(m_airborne_state.input_facing_angle) };
-    float_t cancel_ratio{ char_con_radius
-                          / std::max(abs(flat_input_dir.GetX()),
-                                     abs(flat_input_dir.GetZ())) };
-    JPH::Vec3 resized_to_radius_box_velo{ flat_input_dir * cancel_ratio };
-
-    JPH::RVec3 check_origin_point{ character_impl->read_transform().position
-                                   + resized_to_radius_box_velo };
-    ///////////////////////////////////////////////////////////
+    auto opaid{ calc_check_origin_point_and_input_dir(m_airborne_state.input_facing_angle,
+                                                      char_con_radius) };
+    JPH::RVec3 check_origin_point{ character_impl->read_transform().position + opaid.origin_offset };
+    JPH::Vec3 flat_input_dir{ opaid.input_dir };
 
     // Check for ledge climb.
     float_t max_ledge_search_length{ 1.5f };
@@ -545,8 +546,7 @@ void BT::Scripts::Script_player_character_movement::process_midair_jump_interact
             if (data.success)
             {
                 passed_ledge_search_test = true;
-                led_sea_test_passed_target_pos = data.hit_point
-                                                     - resized_to_radius_box_velo;
+                led_sea_test_passed_target_pos = (data.hit_point - opaid.origin_offset);
             }
         }
     }
@@ -569,15 +569,15 @@ void BT::Scripts::Script_player_character_movement::process_midair_jump_interact
     {
         // Try wall jump.
         constexpr uint32_t k_num_circle_raycasts{ 9 };
-
-        JPH::Quat iter_rot_quat{ JPH::Quat::sRotation({ 0.0f, 1.0f, 0.0f },
-                                                      glm_rad(360.0f) / k_num_circle_raycasts) };
-        JPH::Vec3 flat_normal_input_dir_copy{ flat_normal_input_dir };
-
         for (uint32_t i = 0; i < k_num_circle_raycasts; i++)
         {
-            auto data{ Raycast_helper::raycast(check_origin_point,
-                                               1.5f * flat_normal_input_dir_copy) };
+            auto opaid{
+                calc_check_origin_point_and_input_dir(m_airborne_state.input_facing_angle
+                                                          + (i * glm_rad(360.0f) / k_num_circle_raycasts),
+                                                      char_con_radius) };
+
+            auto data{ Raycast_helper::raycast(character_impl->read_transform().position + opaid.origin_offset,
+                                               1.5f * opaid.input_dir) };
             if (data.success)
             {
                 // Commit to wall jump.
@@ -586,10 +586,24 @@ void BT::Scripts::Script_player_character_movement::process_midair_jump_interact
                 new_velocity += -curr_up_velo + m_settings.jump_speed * up_direction;
                 break;
             }
-
-            flat_normal_input_dir_copy = (iter_rot_quat * flat_normal_input_dir_copy);
         }
     }
 
     #endif  // REFACTOR_WALL_INTERACTIONS
+}
+
+BT::Scripts::Script_player_character_movement::Origin_offset_and_input_dir
+BT::Scripts::Script_player_character_movement
+    ::calc_check_origin_point_and_input_dir(float_t facing_angle,
+                                            float_t char_con_radius)
+{
+    JPH::Vec3 flat_input_dir{ sinf(facing_angle),
+                              0.0f,
+                              cosf(facing_angle) };
+    float_t cancel_ratio{ char_con_radius
+                          / std::max(abs(flat_input_dir.GetX()),
+                                     abs(flat_input_dir.GetZ())) };
+    JPH::Vec3 resized_to_radius_box_velo{ flat_input_dir * cancel_ratio };
+
+    return { resized_to_radius_box_velo, flat_input_dir };
 }
