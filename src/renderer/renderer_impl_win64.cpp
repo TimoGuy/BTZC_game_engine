@@ -767,12 +767,18 @@ void BT::Renderer::Impl::render_debug_views_to_ldr_framebuffer(float_t delta_tim
 
     // Render debug lines.
     auto lines_render_data{ get_main_debug_line_pool().calc_render_data(delta_time) };
-    static Material_ifc* s_debug_lines_material{ Material_bank::get_material("debug_lines") };
-    static_cast<Material_debug_lines*>(s_debug_lines_material)
-        ->set_lines_ssbo(lines_render_data.ssbo);
-    s_debug_lines_material->bind_material(GLM_MAT4_ZERO);
-    glDrawArraysInstanced(GL_LINES, 0, 2, lines_render_data.num_lines_to_render);
-    s_debug_lines_material->unbind_material();
+    static Material_ifc* s_debug_lines_fore_material{
+        Material_bank::get_material("debug_lines_fore_material") };
+    static Material_ifc* s_debug_lines_back_material{
+        Material_bank::get_material("debug_lines_back_material") };
+    for (auto material : { s_debug_lines_fore_material, s_debug_lines_back_material})
+    {
+        static_cast<Material_debug_lines*>(material)
+            ->set_lines_ssbo(lines_render_data.ssbo);
+        material->bind_material(GLM_MAT4_ZERO);
+        glDrawArraysInstanced(GL_LINES, 0, 2, lines_render_data.num_lines_to_render);
+        material->unbind_material();
+    }
 
     if (m_render_to_ldr)
     {

@@ -376,14 +376,17 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - [x] @FIX: Make it so that `facing_angle` is used (the current facing direction is stored even when hitting a wall), so that that can be used for testing the raycasting solution even when no direction is input.
         - [x] Change Wall jump is omnidirectional instead of facing direction (keep ledge climb to facing direction tho).
     - [ ] Engine stuff.
-        - [ ] Basic addition to debug drawing system. Lines!
-            - [ ] Create this data structure.
+        - [x] Basic addition to debug drawing system. Lines!
+            - [x] Create this data structure.
                 - vec4 position1
                 - vec4 position2
                 - vec4 color1
                 - vec4 color2
                 - float remaining_time  // Use delta_time to cut down.
-            - [ ] When the data structure changes, then rebuild the drawing buffer.
+            - [x] When the data structure changes, then rebuild the drawing buffer.
+                - But it's not working???
+                - [x] Fix writing to SSBO
+                - [x] Fix vertices being 0 for some reason.
 
     - [ ] Swordplay combat.
         - Cutting.

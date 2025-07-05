@@ -47,6 +47,8 @@ private:
     std::array<Debug_line_with_timeout, k_num_lines> m_lines;
     std::atomic_uint32_t m_next_write_idx{ 0 };
 
+    // std::array<Debug_line, k_num_lines> m_huhidkwtd;
+
     std::mutex m_active_indices_mutex;
     std::vector<uint32_t> m_active_indices;
     bool m_is_dirty{ false };

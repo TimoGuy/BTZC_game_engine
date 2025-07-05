@@ -14,6 +14,7 @@
 #include "physics_engine/raycast_helper.h"
 #include "renderer/imgui_renderer.h"  // @DEBUG
 #include "renderer/material.h"  // @DEBUG
+#include "renderer/material_impl_debug_lines.h"  // @DEBUG
 #include "renderer/material_impl_debug_picking.h"  // @DEBUG
 #include "renderer/material_impl_opaque_color_unlit.h"  // @DEBUG
 #include "renderer/material_impl_opaque_shaded.h"  // @DEBUG
@@ -112,14 +113,10 @@ int32_t main()
                                                 BT::k_depth_test_mode_back)));
     BT::Material_bank::emplace_material(  // @INCOMPLETE @TODO
         "debug_lines_fore_material",
-        unique_ptr<BT::Material_ifc>(
-            new BT::Material_opaque_color_unlit(vec3{ 0.95f, 0.3f, 0.95f },
-                                                BT::k_depth_test_mode_front)));
+        unique_ptr<BT::Material_ifc>(new BT::Material_debug_lines(true)));
     BT::Material_bank::emplace_material(
         "debug_lines_back_material",
-        unique_ptr<BT::Material_ifc>(
-            new BT::Material_opaque_color_unlit(vec3{ 0.475f, 0.15f, 0.475f },
-                                                BT::k_depth_test_mode_back)));
+        unique_ptr<BT::Material_ifc>(new BT::Material_debug_lines(false)));
     BT::Material_bank::emplace_material(
         "debug_picking_material",
         unique_ptr<BT::Material_ifc>(new BT::Material_debug_picking()));

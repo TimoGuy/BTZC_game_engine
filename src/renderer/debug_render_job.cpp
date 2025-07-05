@@ -4,6 +4,7 @@
 #include <cassert>
 #include <memory>
 #include <mutex>
+#include <iostream>
 
 
 BT::Debug_line_pool::Debug_line_pool()
@@ -12,8 +13,8 @@ BT::Debug_line_pool::Debug_line_pool()
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_ssbo);
     glBufferData(GL_SHADER_STORAGE_BUFFER,
                  sizeof(Debug_line) * k_num_lines,
-                 nullptr,
-                 GL_DYNAMIC_STORAGE_BIT);
+                 nullptr,  //  m_huhidkwtd.data(),
+                 GL_DYNAMIC_COPY);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
 
@@ -63,12 +64,23 @@ BT::Debug_line_pool::Render_data BT::Debug_line_pool::calc_render_data(float_t d
             jobs.emplace_back(m_lines[idx].dbg_line);
         }
 
+        std::cout << "--------------------------------------" << std::endl;
+        for (auto& job : jobs)
+        {
+            std::cout << job.pos1[0] << "\t" << job.pos1[1] << "\t" << job.pos1[2] << "\t" << std::endl;
+        }
+
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_ssbo);
-        glBufferSubData(GL_SHADER_STORAGE_BUFFER,
-                        0,
-                        sizeof(Debug_line) * m_active_indices.size(),
-                        jobs.data());
+        GLvoid* data = glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_WRITE_ONLY);
+        memcpy(data, jobs.data(), sizeof(Debug_line) * jobs.size());
+        // glBufferSubData(GL_SHADER_STORAGE_BUFFER,
+        //                 0,
+        //                 sizeof(Debug_line) * jobs.size(),
+        //                 jobs.data());
+        glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+        m_is_dirty = false;
     }
 
     Render_data data;

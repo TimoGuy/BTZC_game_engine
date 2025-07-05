@@ -9,12 +9,11 @@ struct Line_data {
     vec4 col2;
 };
 
-layout (binding = 0, std430) readonly buffer Line_ssbo {
+layout (binding = 3, std430) readonly buffer Line_ssbo {  // Binding 3 to avoid 0-2 vert attribs.
     Line_data lines[];
 };
 
 uniform mat4 camera_projection_view;
-uniform mat4 model_transform;
 
 
 void main()
@@ -23,6 +22,6 @@ void main()
     vec3 pos = (gl_VertexID == 0 ? line_data.pos1 : line_data.pos2).xyz;
     vec4 col = (gl_VertexID == 0 ? line_data.col1 : line_data.col2);
 
-    gl_Position = camera_projection_view * model_transform * vec4(pos, 1.0);
+    gl_Position = camera_projection_view * vec4(pos, 1.0);
     out_color = col;
 }

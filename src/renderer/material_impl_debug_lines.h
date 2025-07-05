@@ -10,7 +10,7 @@ namespace BT
 class Material_debug_lines : public Material_ifc
 {
 public:
-    Material_debug_lines();
+    Material_debug_lines(bool foreground);
 
     void set_lines_ssbo(uint32_t ssbo);
 
@@ -18,6 +18,7 @@ public:
     virtual void unbind_material() override;
 
 private:
+    bool m_foreground;
     uint32_t m_ssbo;
 };
 
