@@ -126,6 +126,7 @@ add_executable(${PROJECT_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/src/timer/watchdog_timer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/uuid/uuid_ifc.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/uuid/uuid_ifc.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/uuid/uuid.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/uuid/uuid.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/btzc_game_engine.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp

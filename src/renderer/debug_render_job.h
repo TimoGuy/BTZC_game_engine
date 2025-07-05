@@ -1,17 +1,51 @@
 #pragma once
 
+#include "../uuid/uuid.h"
+#include "cglm/mat4.h"
 #include "cglm/types.h"
 #include <array>
 #include <atomic>
 #include <cstdint>
 #include <memory>
 #include <mutex>
+#include <unordered_map>
 #include <vector>
 
 
 namespace BT
 {
 
+class Model;
+class Material_ifc;
+
+// Debug mesh.
+struct Debug_mesh
+{
+    Model const& model;
+    Material_ifc* foreground_material{ nullptr };
+    Material_ifc* background_material{ nullptr };
+    mat4 transform = GLM_MAT4_IDENTITY_INIT;
+};
+
+class Debug_mesh_pool
+{
+public:
+    UUID emplace_debug_mesh(Debug_mesh&& dbg_mesh);
+    Debug_mesh& get_debug_mesh_volatile_handle(UUID key);
+    void remove_debug_mesh(UUID key);
+
+    void render_all_meshes();
+
+private:
+    std::mutex m_meshes_mutex;
+    std::unordered_map<UUID, Debug_mesh> m_meshes;
+};
+
+Debug_mesh_pool& set_main_debug_mesh_pool(std::unique_ptr<Debug_mesh_pool>&& dbg_mesh_pool);
+Debug_mesh_pool& get_main_debug_mesh_pool();
+
+
+// Debug line.
 struct Debug_line
 {
     vec4 pos1;

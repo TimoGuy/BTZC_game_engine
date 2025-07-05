@@ -68,7 +68,7 @@ public:
     virtual float_t get_cc_height() { assert(false); return 0.0f; }
     virtual void on_pre_update(float_t physics_delta_time) { }
     virtual Physics_transform read_transform() = 0;
-    virtual void debug_render_representation() = 0;
+    virtual void update_debug_mesh() = 0;
 };
 
 class Physics_engine;

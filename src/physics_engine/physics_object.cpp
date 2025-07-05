@@ -149,6 +149,7 @@ BT::Physics_object::Physics_object(Game_object& game_obj,
 void BT::Physics_object::read_and_store_new_transform()
 {
     auto phys_transform{ m_type_pimpl->read_transform() };
+    m_type_pimpl->update_debug_mesh();
 
     // Write to triple buffer then increment offset.
     size_t trip_buf_offset{ m_trip_buf_offset.load() };

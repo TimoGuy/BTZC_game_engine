@@ -1,5 +1,6 @@
 #include "physics_object_impl_char_controller.h"
 
+#include "../renderer/debug_render_job.h"
 #include "../renderer/material.h"
 #include "../renderer/mesh.h"
 #include "Jolt/Jolt.h"
@@ -68,10 +69,19 @@ BT::Phys_obj_impl_char_controller::Phys_obj_impl_char_controller(Physics_engine&
 
     // Install contact listener.
     m_character->SetListener(this);
+
+    // Create debug render job.
+    static auto s_debug_model{ Model_bank::get_model("unit_box") };
+    m_debug_mesh_id =
+        get_main_debug_mesh_pool().emplace_debug_mesh({
+            *s_debug_model,
+            Material_bank::get_material("debug_physics_wireframe_fore_material"),
+            Material_bank::get_material("debug_physics_wireframe_back_material") });
 }
 
 BT::Phys_obj_impl_char_controller::~Phys_obj_impl_char_controller()
 {
+    get_main_debug_mesh_pool().remove_debug_mesh(m_debug_mesh_id);
 }
 
 // Phys obj impl ifc.
@@ -215,7 +225,7 @@ BT::Physics_transform BT::Phys_obj_impl_char_controller::read_transform()
     return { m_character->GetPosition(), m_character->GetRotation() };
 }
 
-void BT::Phys_obj_impl_char_controller::debug_render_representation()
+void BT::Phys_obj_impl_char_controller::update_debug_mesh()
 {
     // @COPYPASTA: See `physics_object_impl_tri_mesh.cpp`.
     auto current_trans{ read_transform() };
@@ -236,13 +246,9 @@ void BT::Phys_obj_impl_char_controller::debug_render_representation()
     glm_scale(graphic_trans, vec3{ m_radius,
                                    0.5f * height + m_radius,
                                    m_radius });
-    static auto s_material_fore{
-        Material_bank::get_material("debug_physics_wireframe_fore_material") };
-    static auto s_material_back{
-        Material_bank::get_material("debug_physics_wireframe_back_material") };
-    static auto s_debug_model{ Model_bank::get_model("unit_box") };
-    s_debug_model->render_model(graphic_trans, s_material_fore);
-    s_debug_model->render_model(graphic_trans, s_material_back);
+    glm_mat4_copy(graphic_trans,
+                  get_main_debug_mesh_pool()
+                      .get_debug_mesh_volatile_handle(m_debug_mesh_id).transform);
 }
 
 // Scene_serialization_ifc.

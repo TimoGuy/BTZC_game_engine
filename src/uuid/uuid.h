@@ -17,6 +17,8 @@ using UUID = uuids::uuid;
 namespace UUID_helper
 {
 
+UUID generate_uuid();
+
 inline static string to_pretty_repr(UUID const& my_uuid)
 {
     return uuids::to_string(my_uuid);

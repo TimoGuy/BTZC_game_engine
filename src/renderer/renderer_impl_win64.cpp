@@ -182,6 +182,7 @@ BT::Renderer::Impl::Impl(Renderer& renderer, ImGui_renderer& imgui_renderer, Inp
     s_main_window = reinterpret_cast<GLFWwindow*>(m_window_handle);
     s_main_renderer = this;
 
+    set_main_debug_mesh_pool(std::make_unique<Debug_mesh_pool>());
     set_main_debug_line_pool(std::make_unique<Debug_line_pool>());
 
     s_created = true;
@@ -764,6 +765,9 @@ void BT::Renderer::Impl::render_debug_views_to_ldr_framebuffer(float_t delta_tim
 
     // Render debug views.
     debug_views_render_fn();
+
+    // Render debug meshes.
+    get_main_debug_mesh_pool().render_all_meshes();
 
     // Render debug lines.
     auto lines_render_data{ get_main_debug_line_pool().calc_render_data(delta_time) };

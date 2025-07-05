@@ -1,11 +1,100 @@
 #include "debug_render_job.h"
 
+#include "../uuid/uuid.h"
+#include "../renderer/mesh.h"
 #include "glad/glad.h"
+#include "logger.h"
 #include <cassert>
 #include <memory>
 #include <mutex>
 
 
+// Debug mesh.
+BT::UUID BT::Debug_mesh_pool::emplace_debug_mesh(Debug_mesh&& dbg_mesh)
+{
+    std::lock_guard<std::mutex> lock{ m_meshes_mutex };
+
+    UUID uuid{ UUID_helper::generate_uuid() };
+    if (uuid.is_nil())
+    {
+        logger::printe(logger::ERROR, "Invalid UUID generated... somehow.");
+        assert(false);
+    }
+
+    m_meshes.emplace(uuid, std::move(dbg_mesh));
+
+    return uuid;
+}
+
+BT::Debug_mesh& BT::Debug_mesh_pool::get_debug_mesh_volatile_handle(UUID key)
+{
+    std::lock_guard<std::mutex> lock{ m_meshes_mutex };
+
+    if (m_meshes.find(key) == m_meshes.end())
+    {
+        // Fail bc key was invalid.
+        logger::printef(logger::ERROR, "Mesh key %s does not exist", UUID_helper::to_pretty_repr(key).c_str());
+        assert(false);
+        abort();
+
+        // In case abort and assert don't crash program. Just force program to spin forever.
+        while (false) {}
+    }
+
+    return m_meshes.at(key);
+}
+
+void BT::Debug_mesh_pool::remove_debug_mesh(UUID key)
+{
+    std::lock_guard<std::mutex> lock{ m_meshes_mutex };
+
+    if (m_meshes.find(key) == m_meshes.end())
+    {
+        // Fail bc key was invalid.
+        logger::printef(logger::ERROR, "Mesh key %s does not exist", UUID_helper::to_pretty_repr(key).c_str());
+        assert(false);
+        return;
+    }
+
+    m_meshes.erase(key);
+}
+
+void BT::Debug_mesh_pool::render_all_meshes()
+{
+    std::lock_guard<std::mutex> lock{ m_meshes_mutex };
+
+    for (auto& mesh_job : m_meshes)
+    {
+        // Render foreground first so that foreground doesn't overwrite background material.
+        if (mesh_job.second.foreground_material != nullptr)
+            mesh_job.second.model.render_model(mesh_job.second.transform,
+                                               mesh_job.second.foreground_material);
+        if (mesh_job.second.background_material != nullptr)
+            mesh_job.second.model.render_model(mesh_job.second.transform,
+                                               mesh_job.second.background_material);
+    }
+}
+
+namespace
+{
+
+std::unique_ptr<BT::Debug_mesh_pool> s_debug_mesh_pool{ nullptr };
+
+}  // namespace
+
+BT::Debug_mesh_pool& BT::set_main_debug_mesh_pool(std::unique_ptr<Debug_mesh_pool>&& dbg_mesh_pool)
+{
+    s_debug_mesh_pool = std::move(dbg_mesh_pool);
+    return *s_debug_mesh_pool;
+}
+
+BT::Debug_mesh_pool& BT::get_main_debug_mesh_pool()
+{
+    return *s_debug_mesh_pool;
+}
+
+
+// Debug line.
 BT::Debug_line_pool::Debug_line_pool()
 {
     glGenBuffers(1, &m_ssbo);

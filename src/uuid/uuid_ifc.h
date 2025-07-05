@@ -13,7 +13,7 @@ class UUID_ifc
 {
 public:
     void assign_uuid(string const& pretty_uuid, bool generate_if_nil);
-    void generate_uuid();
+    void assign_generated_uuid();
     UUID get_uuid() const;
 
 private:

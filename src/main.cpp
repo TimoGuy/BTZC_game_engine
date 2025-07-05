@@ -153,7 +153,7 @@ int32_t main()
     //                                                     1.0f,
     //                                                     { JPH::RVec3(0.0f, 5.1f, 0.0f),
     //                                                       JPH::Quat::sIdentity() }) };
-    // player_char_phys_obj->generate_uuid();
+    // player_char_phys_obj->assign_generated_uuid();
     // auto player_char_phys_obj_key =
     //     main_physics_engine.emplace_physics_object(std::move(player_char_phys_obj));
 
@@ -164,7 +164,7 @@ int32_t main()
     //                                              JPH::EMotionType::Static,
     //                                              { JPH::RVec3(0.0f, 1.0f, 0.0f),
     //                                                JPH::Quat::sIdentity() }) };
-    // static_level_terrain_phys_obj->generate_uuid();
+    // static_level_terrain_phys_obj->assign_generated_uuid();
     // main_physics_engine.emplace_physics_object(std::move(static_level_terrain_phys_obj));
 
     // Render objects.
@@ -175,14 +175,14 @@ int32_t main()
     //     BT::Render_layer::RENDER_LAYER_DEFAULT,
     //     GLM_MAT4_IDENTITY,
     //     player_char_phys_obj_key };
-    // player_char_rend_obj.generate_uuid();
+    // player_char_rend_obj.assign_generated_uuid();
     // auto player_char_rend_obj_key = render_object_pool.emplace(std::move(player_char_rend_obj));
 
     // BT::Render_object static_level_terrain_rend_obj{
     //     BT::Model_bank::get_model("probuilder_example"),
     //     BT::Render_layer::RENDER_LAYER_DEFAULT,
     //     GLM_MAT4_IDENTITY };
-    // static_level_terrain_rend_obj.generate_uuid();
+    // static_level_terrain_rend_obj.assign_generated_uuid();
     // render_object_pool.emplace(std::move(static_level_terrain_rend_obj));
 
     // Game objects.
@@ -194,7 +194,7 @@ int32_t main()
                                 main_renderer,
                                 game_object_pool) };
         new_game_obj->set_name("New Game Object");
-        new_game_obj->generate_uuid();
+        new_game_obj->assign_generated_uuid();
         return new_game_obj;
     });
 
@@ -384,17 +384,6 @@ int32_t main()
             }
 
             main_renderer.render(delta_time, [&]() {
-                #define TODO_THEA_GET_BETTER_DEBUG_DRAW 0
-                #if TODO_THEA_GET_BETTER_DEBUG_DRAW
-                // Render physics objs.
-                auto all_phys_objs = main_physics_engine.checkout_all_physics_objects();
-                for (auto phys_obj : all_phys_objs)
-                {
-                    phys_obj->get_impl()->debug_render_representation();
-                }
-                main_physics_engine.return_physics_objects(std::move(all_phys_objs));
-                #endif  // TODO_THEA_GET_BETTER_DEBUG_DRAW
-
                 // Render selected game obj.
                 auto selected_game_obj{ game_object_pool.get_selected_game_obj() };
                 if (!selected_game_obj.is_nil())

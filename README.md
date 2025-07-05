@@ -397,11 +397,11 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
     - [ ] ~~Swordplay combat.~~
         - Moved/deferred to its own section
     - [ ] Engine stuff.
+        - [x] Move the debug views render function and turn it into a job submitting thing.
+            - Perhaps actually keep it in the same spot but restructure it so that "jobs" are written into the debug draw views buffer?
+                - Maybe these jobs could have a stop time? So after that time they're erased.
+                - And then it could be extended to include lines for things like gizmos and raycast representations.
         - [ ] @PLEASE: Add checkbox to toggle showing physics object wireframe.
-            - [ ] Move the debug views render function and turn it into a job submitting thing.
-                - Perhaps actually keep it in the same spot but restructure it so that "jobs" are written into the debug draw views buffer?
-                    - Maybe these jobs could have a stop time? So after that time they're erased.
-                    - And then it could be extended to include lines for things like gizmos and raycast representations.
 
 1. Skeletal animations using compute shaders.
     - [ ] See `@IQHEWRIHDFKNAXI` for levels of detail and round-robin system.
@@ -410,6 +410,11 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
     - [ ] Add support for GLTF2 filetype for models.
     - [ ] IK legs.
     - @TODO.
+
+1. Small concerns.
+    - @THOUGHT: I think that trying to ledge grab the sphere isn't quite working correctly for some reason.
+        - It seems not quite right. Maybe...
+            - [ ] Figure out why there's weird ledge grab behavior on the smooth sphere.
 
 1. Swordplay combat.
     - [ ] @PREREQUISITE: Skeletal animations.

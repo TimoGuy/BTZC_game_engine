@@ -1,5 +1,6 @@
 #include "physics_object_impl_tri_mesh.h"
 
+#include "../renderer/debug_render_job.h"
 #include "../renderer/material.h"
 #include "../renderer/mesh.h"
 #include "../renderer/render_object.h"
@@ -85,11 +86,19 @@ BT::Phys_obj_impl_tri_mesh::Phys_obj_impl_tri_mesh(Physics_engine& phys_engine,
                                                  motion_type,
                                                  (m_can_move ? Layers::MOVING : Layers::NON_MOVING));
     m_body_id = m_phys_body_ifc.CreateAndAddBody(mesh_body_settings, JPH::EActivation::DontActivate);
+
+    // Create debug render job.
+    m_debug_mesh_id =
+        get_main_debug_mesh_pool().emplace_debug_mesh({
+            *m_model,
+            Material_bank::get_material("debug_physics_wireframe_fore_material"),
+            Material_bank::get_material("debug_physics_wireframe_back_material") });
 }
 
 BT::Phys_obj_impl_tri_mesh::~Phys_obj_impl_tri_mesh()
 {
     m_phys_body_ifc.RemoveBody(m_body_id);
+    get_main_debug_mesh_pool().remove_debug_mesh(m_debug_mesh_id);
 }
 
 void BT::Phys_obj_impl_tri_mesh::move_kinematic(Physics_transform&& new_transform)
@@ -111,10 +120,10 @@ BT::Physics_transform BT::Phys_obj_impl_tri_mesh::read_transform()
              m_phys_body_ifc.GetRotation(m_body_id) };
 }
 
-void BT::Phys_obj_impl_tri_mesh::debug_render_representation()
+void BT::Phys_obj_impl_tri_mesh::update_debug_mesh()
 {
     auto current_trans{ read_transform() };
-    
+
     mat4 graphic_trans;
     glm_translate_make(graphic_trans, vec3{ current_trans.position.GetX(),
                                             current_trans.position.GetY(),
@@ -123,12 +132,9 @@ void BT::Phys_obj_impl_tri_mesh::debug_render_representation()
                                            current_trans.rotation.GetY(),
                                            current_trans.rotation.GetZ(),
                                            current_trans.rotation.GetW() }, graphic_trans);
-    static auto s_material_fore{
-        Material_bank::get_material("debug_physics_wireframe_fore_material") };
-    static auto s_material_back{
-        Material_bank::get_material("debug_physics_wireframe_back_material") };
-    m_model->render_model(graphic_trans, s_material_fore);
-    m_model->render_model(graphic_trans, s_material_back);
+    glm_mat4_copy(graphic_trans,
+                  get_main_debug_mesh_pool()
+                      .get_debug_mesh_volatile_handle(m_debug_mesh_id).transform);
 }
 
 // Scene_serialization_ifc.

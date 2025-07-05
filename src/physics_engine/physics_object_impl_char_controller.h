@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../uuid/uuid.h"
 #include "Jolt/Jolt.h"
 #include "Jolt/Core/TempAllocator.h"
 #include "Jolt/Math/Real.h"
@@ -48,7 +49,7 @@ public:
     float_t get_cc_height() override;
     void on_pre_update(float_t physics_delta_time) override;
     Physics_transform read_transform() override;
-    void debug_render_representation() override;
+    void update_debug_mesh() override;
 
     // Scene_serialization_ifc.
     void scene_serialize(Scene_serialization_mode mode, json& node_ref) override;
@@ -115,6 +116,8 @@ private:
     JPH::Ref<JPH::CharacterVirtual>  m_character;
     bool m_is_crouched;
     bool m_allow_sliding{ false };  // True when want to move.
+
+    UUID m_debug_mesh_id;
 };
 
 }  // namespace BT
