@@ -394,18 +394,32 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
                 - [x] Fix vertices being 0 for some reason.
     - [x] @FIX: Make raycasts not interact with triangle backfaces by default.
         - Had to write a ray collector for the raycasts!!! Hahahah
-
-    - [ ] Swordplay combat.
-        - Cutting.
-        - Deflecting.
-        - Jumping/stomping.
-        - Dodging.
+    - [ ] ~~Swordplay combat.~~
+        - Moved/deferred to its own section
     - [ ] Engine stuff.
         - [ ] @PLEASE: Add checkbox to toggle showing physics object wireframe.
             - [ ] Move the debug views render function and turn it into a job submitting thing.
                 - Perhaps actually keep it in the same spot but restructure it so that "jobs" are written into the debug draw views buffer?
                     - Maybe these jobs could have a stop time? So after that time they're erased.
                     - And then it could be extended to include lines for things like gizmos and raycast representations.
+
+1. Skeletal animations using compute shaders.
+    - [ ] See `@IQHEWRIHDFKNAXI` for levels of detail and round-robin system.
+    - [ ] Create buffers to store the deformed models.
+        - 1 per skinned mesh thingy.
+    - [ ] Add support for GLTF2 filetype for models.
+    - [ ] IK legs.
+    - @TODO.
+
+1. Swordplay combat.
+    - [ ] @PREREQUISITE: Skeletal animations.
+    - Cutting.
+    - Deflecting.
+    - Jumping/stomping.
+    - Dodging.
+    - [ ] Figure out how to create sensors.
+        - [ ] Research shape stuff.
+        - [ ] Oh wait... @PREREQUISITE: Need to have skeletal 
 
 1. Unity to this engine migration.
     - @TODO.
@@ -455,14 +469,6 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
     - @TODO.
     - [ ] Add player shadow as well, but using a different camera setup.
         - Drop shadow.
-
-1. Skeletal animations using compute shaders.
-    - [ ] See `@IQHEWRIHDFKNAXI` for levels of detail and round-robin system.
-    - [ ] Create buffers to store the deformed models.
-        - 1 per skinned mesh thingy.
-    - [ ] Add support for GLTF2 filetype for models.
-    - [ ] IK legs.
-    - @TODO.
 
 1. Good pause point.
     - [ ] Release v0.1.0
