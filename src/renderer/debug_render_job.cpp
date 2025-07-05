@@ -66,10 +66,6 @@ BT::Debug_line_pool::Render_data BT::Debug_line_pool::calc_render_data(float_t d
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_ssbo);
         GLvoid* data = glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_WRITE_ONLY);
         memcpy(data, jobs.data(), sizeof(Debug_line) * jobs.size());
-        // glBufferSubData(GL_SHADER_STORAGE_BUFFER,
-        //                 0,
-        //                 sizeof(Debug_line) * jobs.size(),
-        //                 jobs.data());
         glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
