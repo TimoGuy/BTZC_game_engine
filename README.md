@@ -418,12 +418,15 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
                     - ~~Idk even if this will be created by the render object or passed in in the future.~~
                     - ~~Ehhhh probably passed in.~~
             - An animator (@FOR NOW: Just have animator play animation 0.) will be passed in rval ref.
-        - [ ] Define `Deformed_model`
-        - [ ] Create deform compute shader.
-            - Add it to `main.cpp` in shader loading step too.
+        - [x] Define `Deformed_model`
+            - Minus the compute dispatch 😅
         - [ ] Define `Model_joint_animation`
         - [ ] Define `Model_animator`
         - [ ] Define `load_gltf2_as_meshes()`
+        - [ ] Create deform compute shader.
+            - [ ] Write shader.
+            - [ ] Add the dispatch to `Deformed_model`
+            - [ ] Add it to `main.cpp` in shader loading step too.
         - [ ] Add unique ptr of `Deformed_model` to `Render_object`.
         - [ ] Add unique ptr of `Model_animator` to `Render_object`.
             - Technically `Model_animator` and `Deformed_model` can be combined. However, I think there are niche applications of separating them. Like if multiple copies of ppl are in the crowd and animating them all the same would be good.

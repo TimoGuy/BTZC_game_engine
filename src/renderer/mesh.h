@@ -92,6 +92,8 @@ private:
 
     void load_obj_as_meshes(string const& fname, string const& material_name);
     void load_gltf2_as_meshes(string const& fname, string const& material_name);
+
+    friend class Deformed_model;
 };
 
 class Deformed_model
@@ -102,7 +104,7 @@ public:
 
     void dispatch_compute_deform(vector<mat4s>&& joint_matrices);
 
-    inline uint32_t get_vao() { return m_deform_vertex_vao; }
+    inline uint32_t get_vao() const { return m_deform_vertex_vao; }
 
 private:
     Model const& m_model;

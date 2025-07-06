@@ -33,6 +33,7 @@ void BT::AA_bounding_box::feed_position(vec3 position)
     glm_vec3_maxv(max, position, max);
 }
 
+
 BT::Mesh::Mesh(vector<uint32_t>&& indices, string const& material_name)
     : m_indices(std::move(indices))
 {
@@ -78,6 +79,7 @@ vector<uint32_t> const& BT::Mesh::get_indices() const
 {
     return m_indices;
 }
+
 
 BT::Model::Model(string const& fname, string const& material_name)
 {
@@ -274,14 +276,59 @@ void BT::Model::load_obj_as_meshes(string const& fname, string const& material_n
                           sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, normal)));
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE,
                           sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, tex_coord)));
+
+    // Unbind.
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
 }
 
-// @TODO: @HERE: Deformed_model
+
+// @TODO: Deformed_model vvv
 // Takes `Model` const ref and uses its vertex buffer and skin datas buffer as input for deforming compute shader.
 // Then outputs result into the `m_deform_vertex_vbo`.
 // A memory barrier waits for all of these vbo's to be written.
 // When connected to a render object, the render object will take a `unique_ptr` of the deformed model, and if it exists,
 // it will get the `m_deform_vertex_vao` and call `render_model()` with the `override_vao` param set.
+BT::Deformed_model::Deformed_model(Model const& model)
+    : m_model{ model }
+{
+    // Create empty buffer for resulting deformed vertices.
+    glGenVertexArrays(1, &m_deform_vertex_vao);
+    glGenBuffers(1, &m_deform_vertex_vbo);
+
+    glBindVertexArray(m_deform_vertex_vao);
+    glBindBuffer(GL_ARRAY_BUFFER, m_deform_vertex_vbo);
+    glBufferData(GL_ARRAY_BUFFER, m_model.m_vertices.size() * sizeof(Vertex), nullptr, GL_STATIC_DRAW);
+
+    // Register vertex attributes.
+    // @COPYPASTA.
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
+                          sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, position)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
+                          sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, normal)));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE,
+                          sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, tex_coord)));
+
+    // Unbind.
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+
+BT::Deformed_model::~Deformed_model()
+{
+    glDeleteBuffers(1, &m_deform_vertex_vbo);
+    glDeleteVertexArrays(1, &m_deform_vertex_vao);
+}
+
+void BT::Deformed_model::dispatch_compute_deform(vector<mat4s>&& joint_matrices)
+{
+    // @TODO: Figure out how to do compute shaders!!!
+    assert(false);
+}
+
 
 void BT::Model_bank::emplace_model(string const& name, unique_ptr<Model>&& model)
 {
