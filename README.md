@@ -405,13 +405,28 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - [x] @PLEASE: Add checkbox to toggle showing physics object wireframe.
         - [x] Toggle showing imgui demo window as well.
 
-1. Skeletal animations using compute shaders.
-    - [ ] See `@IQHEWRIHDFKNAXI` for levels of detail and round-robin system.
-    - [ ] Create buffers to store the deformed models.
+1. IN PROG: Skeletal animations using compute shaders.
+    - [ ] @FUTURE: ~~See `@IQHEWRIHDFKNAXI` for levels of detail and round-robin system.~~
+        - [ ] For first iter, just do all skeletal animations computed.
+    - [ ] Create vertex buffers to store the deformed models.
         - 1 per skinned mesh thingy.
+        - If `animated` == true:
+            - If the set model cannot be animated then `animated = false;` and a warning emitted.
+            - The `Deformed_model` will be stored as an optional unique ptr in a `Render_object`.
+            - ~~An animator will be created for the render object.~~
+                - ~~@FOR NOW: It will simply play animation0.~~
+                    - ~~Idk even if this will be created by the render object or passed in in the future.~~
+                    - ~~Ehhhh probably passed in.~~
+            - An animator (@FOR NOW: Just have animator play animation 0.) will be passed in rval ref.
     - [ ] Add support for GLTF2 filetype for models.
     - [ ] IK legs.
     - @TODO.
+
+1. Refactor: materials attached to mesh -> material set system.
+    - @NOTE: The number of materials in the material set and the model can be different, rather, the material set will loop back to the beginning for the material set.
+    - [ ] Pull out the material name.
+    - [ ] Pull out the material override.
+        - Make it material set override.
 
 1. Small concerns.
     - @THOUGHT: I think that trying to ledge grab the sphere isn't quite working correctly for some reason.
@@ -426,7 +441,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
     - Dodging.
     - [ ] Figure out how to create sensors.
         - [ ] Research shape stuff.
-        - [ ] Oh wait... @PREREQUISITE: Need to have skeletal 
+        - @REF: https://jrouwe.github.io/JoltPhysics/index.html#sensors
 
 1. Unity to this engine migration.
     - @TODO.

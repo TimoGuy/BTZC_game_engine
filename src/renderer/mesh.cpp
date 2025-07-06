@@ -276,6 +276,13 @@ void BT::Model::load_obj_as_meshes(string const& fname, string const& material_n
                           sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, tex_coord)));
 }
 
+// @TODO: @HERE: Deformed_model
+// Takes `Model` const ref and uses its vertex buffer and skin datas buffer as input for deforming compute shader.
+// Then outputs result into the `m_deform_vertex_vbo`.
+// A memory barrier waits for all of these vbo's to be written.
+// When connected to a render object, the render object will take a `unique_ptr` of the deformed model, and if it exists,
+// it will get the `m_deform_vertex_vao` and call `render_model()` with the `override_vao` param set.
+
 void BT::Model_bank::emplace_model(string const& name, unique_ptr<Model>&& model)
 {
     if (get_model(name) != nullptr)
