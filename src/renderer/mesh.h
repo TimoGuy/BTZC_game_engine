@@ -3,13 +3,15 @@
 #include "cglm/cglm.h"
 #include "cglm/struct.h"
 #include "material.h"
-#include <memory>
+#include "model_animator.h"
 #include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
 using std::pair;
 using std::string;
+using std::unordered_map;
 using std::vector;
 
 
@@ -75,17 +77,21 @@ private:
     // @NOTE: These meshes should have some kind of offset inside them, but just
     //   apply all the transforms of the meshes inside of the model during loading
     //   so that the meshes are on the same transform as model.
-    vector<Mesh>             m_meshes;
-    vector<Vertex>           m_vertices;
-    vector<Vertex_skin_data> m_vert_skin_datas;
-    AA_bounding_box          m_model_aabb;
+    vector<Mesh>    m_meshes;
+    vector<Vertex>  m_vertices;
+    AA_bounding_box m_model_aabb;
 
     uint32_t m_model_vertex_vao;
     uint32_t m_model_vertex_vbo;
 
-    uint32_t m_model_vertex_skin_datas_buffer{ 0 };  // 0 if no skin data.
+    vector<Vertex_skin_data> m_vert_skin_datas;
+    unordered_map<string, uint32_t> m_joint_name_to_idx;
+    vector<Model_joint_animation> m_animations;
+    
+    uint32_t m_model_vertex_skin_datas_buffer{ 0 };  // 0 if no vertex skin data.
 
     void load_obj_as_meshes(string const& fname, string const& material_name);
+    void load_gltf2_as_meshes(string const& fname, string const& material_name);
 };
 
 class Deformed_model
@@ -94,15 +100,12 @@ public:
     Deformed_model(Model const& model);
     ~Deformed_model();
 
-    void calc_joint_matrices(vector<mat4s> const& local_joint_matrices);
-    void dispatch_compute_deform();
+    void dispatch_compute_deform(vector<mat4s>&& joint_matrices);
 
     inline uint32_t get_vao() { return m_deform_vertex_vao; }
 
 private:
     Model const& m_model;
-
-    vector<mat4s> m_joint_matrices;
 
     uint32_t m_deform_vertex_vao;
     uint32_t m_deform_vertex_vbo;
