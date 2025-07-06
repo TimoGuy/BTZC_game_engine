@@ -85,7 +85,7 @@ private:
     uint32_t m_model_vertex_vbo;
 
     vector<Vertex_skin_data> m_vert_skin_datas;
-    unordered_map<string, uint32_t> m_joint_name_to_idx;
+    Model_skin m_model_skin;
     vector<Model_joint_animation> m_animations;
     
     uint32_t m_model_vertex_skin_datas_buffer{ 0 };  // 0 if no vertex skin data.

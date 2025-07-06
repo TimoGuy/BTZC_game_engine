@@ -420,7 +420,9 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
             - An animator (@FOR NOW: Just have animator play animation 0.) will be passed in rval ref.
         - [x] Define `Deformed_model`
             - Minus the compute dispatch 😅
-        - [ ] Define `Model_joint_animation`
+        - [x] Define `Model_joint_animation`
+            - @NOTE: The inverse bind matrices is for each joint, however, the `inverse(globalTransform)` is the inverse of the *skeleton root node* transform (i.e. the inverse of the transform of the node that contains the mesh and the skin).
+            - Minus the `get_joint_matrices_at_frame()` func 😅
         - [ ] Define `Model_animator`
         - [ ] Define `load_gltf2_as_meshes()`
         - [ ] Create deform compute shader.

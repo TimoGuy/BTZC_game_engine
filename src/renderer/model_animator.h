@@ -1,21 +1,60 @@
 #pragma once
 
+#include "cglm/mat4.h"
 #include "cglm/types-struct.h"
 #include "cglm/types.h"
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 
 namespace BT
 {
 
+struct Model_joint;
+
+struct Model_skin
+{
+    mat4 inverse_global_transform = GLM_MAT4_IDENTITY_INIT;
+    std::unordered_map<std::string, uint32_t> joint_name_to_idx;
+    std::vector<Model_joint> joints_sorted_breadth_first;
+};
+
+struct Model_joint
+{
+    std::string name;
+    mat4 inverse_bind_matrix;
+    uint32_t parent_idx{ (uint32_t)-1 };
+    std::vector<Model_joint*> children;
+};
+
+struct Model_joint_animation_frame
+{
+    struct Joint_local_transform
+    {
+        vec3 position;
+        versor rotation;
+        vec3 scale;
+
+        Joint_local_transform interpolate_fast(Joint_local_transform const& other,
+                                               float_t t) const;
+    };
+    std::vector<Joint_local_transform> joint_transforms_in_order;
+};
+
 class Model_joint_animation
 {
 public:
+    Model_joint_animation(Model_skin const& skin,
+                          std::string name,
+                          std::vector<Model_joint_animation_frame>&& animation_frames);
+
     void calc_joint_matrices(float_t time, std::vector<mat4s>& out_joint_matrices) const;
     void get_joint_matrices_at_frame(uint32_t frame_idx, std::vector<mat4s>& out_joint_matrices) const;
 
 private:
+    Model_skin const& m_model_skin;
+
     std::string m_name;
 
     enum Interpolation_type
@@ -24,16 +63,9 @@ private:
         INTERP_TYPE_STEP,
         NUM_INTERP_TYPES
     } m_interp_type;
+    std::vector<Model_joint_animation_frame> m_frames;
 
-    struct Animation_frame
-    {
-        vec3 position;
-        versor rotation;
-        vec3 scale;
-    };
-    std::vector<Animation_frame> m_frames;
-
-    float_t m_frames_per_second{ 50.0f };
+    static constexpr float_t k_frames_per_second{ 50.0f };
 };
 
 class Model;
