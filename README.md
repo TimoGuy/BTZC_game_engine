@@ -423,7 +423,9 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - [x] Define `Model_joint_animation`
             - @NOTE: The inverse bind matrices is for each joint, however, the `inverse(globalTransform)` is the inverse of the *skeleton root node* transform (i.e. the inverse of the transform of the node that contains the mesh and the skin).
             - Minus the `get_joint_matrices_at_frame()` func 😅
-        - [ ] Define `Model_animator`
+        - [x] Define `interpolate_fast()`
+        - [x] Define `Model_animator`
+        - [x] @BUGFIX: Have `debug_render_job::emplace_line()` (or whatever it is) loop the idx of insertion of the drawing line.
         - [ ] Define `load_gltf2_as_meshes()`
         - [ ] Create deform compute shader.
             - [ ] Write shader.

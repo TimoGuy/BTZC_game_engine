@@ -120,6 +120,7 @@ void BT::Debug_line_pool::emplace_debug_line(Debug_line&& dbg_line, float_t time
 
     // Add to pool.
     uint32_t write_idx{ m_next_write_idx++ };
+    write_idx = (write_idx % k_num_lines);
     m_lines[write_idx] = { timeout, std::move(dbg_line) };
 
     // Add to active indices.

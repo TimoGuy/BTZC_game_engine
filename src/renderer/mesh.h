@@ -94,6 +94,7 @@ private:
     void load_gltf2_as_meshes(string const& fname, string const& material_name);
 
     friend class Deformed_model;
+    friend class Model_animator;
 };
 
 class Deformed_model

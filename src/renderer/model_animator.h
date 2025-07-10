@@ -3,6 +3,7 @@
 #include "cglm/mat4.h"
 #include "cglm/types-struct.h"
 #include "cglm/types.h"
+#include <atomic>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -49,7 +50,9 @@ public:
                           std::string name,
                           std::vector<Model_joint_animation_frame>&& animation_frames);
 
-    void calc_joint_matrices(float_t time, std::vector<mat4s>& out_joint_matrices) const;
+    enum Rounding_func{ FLOOR, CEIL };
+    uint32_t calc_frame_idx(float_t time, bool loop, Rounding_func rounding) const;
+    void calc_joint_matrices(float_t time, bool loop, std::vector<mat4s>& out_joint_matrices) const;
     void get_joint_matrices_at_frame(uint32_t frame_idx, std::vector<mat4s>& out_joint_matrices) const;
 
 private:
@@ -83,14 +86,15 @@ public:
     };
     void configure_animator(std::vector<Animator_state>&& animator_states);
 
+    void change_state_idx(uint32_t to_state);
     void update(float_t delta_time);
     void calc_anim_pose(std::vector<mat4s>& out_joint_matrices) const;
-    void get_anim_frame_floored_pose(std::vector<mat4s>& out_joint_matrices) const;
+    void get_anim_floored_frame_pose(std::vector<mat4s>& out_joint_matrices) const;
 
 private:
     // @TEMP: Super simple animator right here for now.
-    uint32_t m_current_state_idx{ 0 };
-    float_t m_time{ 0.0f };
+    std::atomic_uint32_t m_current_state_idx{ 0 };
+    std::atomic<float_t> m_time{ 0.0f };
     ///////////////////////////////////////////////////
 
     std::vector<Animator_state> m_animator_states;

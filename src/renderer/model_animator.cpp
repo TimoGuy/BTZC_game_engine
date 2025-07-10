@@ -3,8 +3,33 @@
 #include "cglm/affine.h"
 #include "cglm/mat4.h"
 #include "cglm/quat.h"
+#include "cglm/vec3.h"
 #include "logger.h"
+#include "mesh.h"
+#include <algorithm>
 #include <cmath>
+
+
+BT::Model_joint_animation_frame::Joint_local_transform
+BT::Model_joint_animation_frame::Joint_local_transform::interpolate_fast(
+    Joint_local_transform const& other,
+    float_t t) const
+{
+    Joint_local_transform ret_trans;
+    glm_vec3_lerp(const_cast<float_t*>(position),
+                  const_cast<float_t*>(other.position),
+                  t,
+                  ret_trans.position);
+    glm_quat_nlerp(const_cast<float_t*>(rotation),
+                   const_cast<float_t*>(other.rotation),
+                   t,
+                   ret_trans.rotation);
+    glm_vec3_lerp(const_cast<float_t*>(scale),
+                  const_cast<float_t*>(other.scale),
+                  t,
+                  ret_trans.scale);
+    return ret_trans;
+}
 
 
 BT::Model_joint_animation::Model_joint_animation(
@@ -17,16 +42,53 @@ BT::Model_joint_animation::Model_joint_animation(
 {
 }
 
+uint32_t BT::Model_joint_animation::calc_frame_idx(float_t time,
+                                                   bool loop,
+                                                   Rounding_func rounding)
+{
+    assert(time >= 0.0f);
+    assert(m_frames.size() >= 1);
+
+    uint32_t frame_idx;
+    switch (rounding)
+    {
+        case FLOOR:
+            frame_idx = std::floor(time / k_frames_per_second);
+            break;
+
+        case CEIL:
+            frame_idx = std::ceil(time / k_frames_per_second);
+            break;
+
+        default:
+            // Incorrect value entered.
+            assert(false);
+            break;
+    }
+
+    if (loop)
+    {
+        // Loop keyframes.
+        frame_idx = (frame_idx % m_frames.size());
+    }
+    else
+    {
+        // Clamp keyframes to base frame.
+        frame_idx = std::min(frame_idx, static_cast<uint32_t>(m_frames.size()) - 1);
+    }
+
+    return frame_idx;
+}
+
 void BT::Model_joint_animation::calc_joint_matrices(float_t time,
+                                                    bool loop,
                                                     std::vector<mat4s>& out_joint_matrices) const
 {
-    uint32_t frame_idx_a = std::floor(time / k_frames_per_second);
-    uint32_t frame_idx_b = std::ceil(time / k_frames_per_second);
+    uint32_t frame_idx_a{ calc_frame_idx(time, loop, FLOOR) };
+    uint32_t frame_idx_b{ calc_frame_idx(time, loop, CEIL) };
 
-    float_t interp_t{ (time / k_frames_per_second) - frame_idx_a };
-
-    frame_idx_a = (frame_idx_a % m_frames.size());
-    frame_idx_b = (frame_idx_b % m_frames.size());
+    float_t interp_t{ (time / k_frames_per_second)
+                           - std::floor(time / k_frames_per_second) };
 
     if (m_interp_type == INTERP_TYPE_STEP ||
         frame_idx_a == frame_idx_b)
@@ -100,4 +162,50 @@ void BT::Model_joint_animation::get_joint_matrices_at_frame(
     {
         glm_mat4_identity(joint_matrix.raw);
     }
+}
+
+
+BT::Model_animator::Model_animator(Model const& model)
+    : m_model_animations{ model.m_animations }
+{
+}
+
+void BT::Model_animator::configure_animator(std::vector<Animator_state>&& animator_states)
+{
+    // Idk why I put this into a separate method instead of in the constructor but hey, here we are.
+    m_animator_states = std::move(animator_states);
+}
+
+void BT::Model_animator::change_state_idx(uint32_t to_state)
+{
+    uint32_t from_state_copy{ m_current_state_idx.load() };
+    if (m_current_state_idx.compare_exchange_strong(from_state_copy,
+                                                    to_state))
+    {
+        m_time = 0.0f;
+    }
+}
+
+void BT::Model_animator::update(float_t delta_time)
+{
+    m_time += delta_time * m_animator_states[m_current_state_idx].speed;
+}
+
+void BT::Model_animator::calc_anim_pose(std::vector<mat4s>& out_joint_matrices) const
+{
+    auto& anim_state{ m_animator_states[m_current_state_idx] };
+    m_model_animations[anim_state.animation_idx]
+        .calc_joint_matrices(m_time, anim_state.loop, out_joint_matrices);
+}
+
+void BT::Model_animator::get_anim_floored_frame_pose(std::vector<mat4s>& out_joint_matrices) const
+{
+    auto& anim_state{ m_animator_states[m_current_state_idx] };
+    uint32_t frame_idx{
+        m_model_animations[anim_state.animation_idx]
+            .calc_frame_idx(m_time,
+                            anim_state.loop,
+                            Model_joint_animation::FLOOR) };
+    m_model_animations[anim_state.animation_idx]
+        .get_joint_matrices_at_frame(frame_idx, out_joint_matrices);
 }
