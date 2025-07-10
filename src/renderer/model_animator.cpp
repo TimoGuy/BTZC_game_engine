@@ -44,7 +44,7 @@ BT::Model_joint_animation::Model_joint_animation(
 
 uint32_t BT::Model_joint_animation::calc_frame_idx(float_t time,
                                                    bool loop,
-                                                   Rounding_func rounding)
+                                                   Rounding_func rounding) const
 {
     assert(time >= 0.0f);
     assert(m_frames.size() >= 1);

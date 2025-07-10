@@ -3,6 +3,9 @@
 #include "cglm/vec2-ext.h"
 #include "cglm/vec3-ext.h"
 #include "cglm/vec3.h"
+#include "fastgltf/core.hpp"
+#include "fastgltf/types.hpp"
+#include "fastgltf/tools.hpp"
 #include "glad/glad.h"
 #include "logger.h"
 #include "material.h"
@@ -83,7 +86,22 @@ vector<uint32_t> const& BT::Mesh::get_indices() const
 
 BT::Model::Model(string const& fname, string const& material_name)
 {
-    load_obj_as_meshes(fname, material_name);
+    auto fname_ext{ std::filesystem::path{ fname }.extension().string() };
+    if (fname_ext == ".obj")
+    {
+        load_obj_as_meshes(fname, material_name);
+    }
+    else if (fname_ext == ".glb" || fname_ext == ".gltf")
+    {
+        load_gltf2_as_meshes(fname, material_name);
+    }
+    else
+    {
+        logger::printef(logger::ERROR,
+                        "Model fname extension not recognized: %s",
+                        fname_ext.c_str());
+        assert(false);
+    }
 }
 
 BT::Model::~Model()
@@ -280,6 +298,96 @@ void BT::Model::load_obj_as_meshes(string const& fname, string const& material_n
     // Unbind.
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+}
+
+void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material_name)
+{
+    if (!std::filesystem::exists(fname) ||
+        !std::filesystem::is_regular_file(fname))
+    {
+        // Exit early if this isn't a good fname.
+        logger::printef(logger::ERROR, "\"%s\" does not exist or is not a file.", fname.c_str());
+        assert(false);
+        return;
+    }
+
+    fastgltf::Asset asset;
+    {
+        // Parse gltf file into asset data structure.
+        fastgltf::Parser parser{ fastgltf::Extensions::None };
+
+        constexpr auto k_gltf_options{
+            fastgltf::Options::LoadExternalBuffers |
+            fastgltf::Options::GenerateMeshIndices };
+        
+        auto gltf_file{ fastgltf::MappedGltfFile::FromPath(fname) };
+        if (!bool(gltf_file))
+        {
+            logger::printef(logger::ERROR,
+                            "Failed to open glTF file: %s (err msg: %s)",
+                            fname.c_str(),
+                            fastgltf::getErrorMessage(gltf_file.error()));
+            assert(false);
+            return;
+        }
+
+        auto possible_asset{
+            parser.loadGltf(gltf_file.get(),
+                            std::filesystem::path{ fname }.parent_path(),
+                            k_gltf_options) };
+        if (possible_asset.error() != fastgltf::Error::None)
+        {
+            logger::printef(logger::ERROR,
+                            "Failed to load glTF asset from file: %s (err msg: %s)",
+                            fname.c_str(),
+                            fastgltf::getErrorMessage(possible_asset.error()));
+            assert(false);
+            return;
+        }
+
+        asset = std::move(possible_asset.get());
+    }
+
+    // Load meshes.
+    for (auto& mesh : asset.meshes)
+    {
+        
+    }
+
+    // Load skins.
+    if (asset.skins.size() > 1)
+    {
+        logger::printef(logger::WARN,
+                        "glTF asset has more than 1 skin when only 1 skin is supported. Skins: %lld",
+                        asset.skins.size());
+        assert(false);  // For debug purposes.
+    }
+    for (auto& skin : asset.skins)
+    if (!skin.joints.empty())
+    {
+        // Load joints.
+        auto& inv_bind_mats_accessor{
+            asset.accessors[skin.inverseBindMatrices.value()] };
+        for (auto element :
+                 fastgltf::iterateAccessor<fastgltf::math::fmat4x4>(asset,
+                                                                    inv_bind_mats_accessor))
+        {
+            // @HERE @TODO Copy in the inverse bind matrices.
+        }
+
+        for (auto joint_node_idx : skin.joints)
+        {
+            // @HERE @TODO Get the node indices and order them by iterating hierarchy order.
+        }
+
+        // @NOTE: Ignore the `skeleton` property in the `Skin` struct.
+    }
+
+    // Load animations.
+    for (auto& anim : asset.animations)
+    {
+        anim.
+    }
 }
 
 
