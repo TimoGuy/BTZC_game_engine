@@ -360,6 +360,7 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
         // If there is a skin associated with the model:
             // Joints.
             // Weights.
+        assert(false);
     }
 
     // Load skins.
@@ -382,7 +383,7 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
                                                                         inv_bind_mats_accessor))
             {
                 // @HERE @TODO Copy in the inverse bind matrices.
-                // @TODO: START HERE!!!!!
+                assert(false);
             }
         }
 
@@ -464,12 +465,34 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
         }
 
         // @NOTE: Ignore the `skeleton` property in the `Skin` struct.
+
+        // @TODO: @CHECK: That the above^^ is actually doing what it says it is.
+        assert(false);
     }
 
     // Load animations.
     for (auto& anim : asset.animations)
     {
-        anim.
+        // Set anim name.
+        std::string anim_name{ anim.name };
+        if (anim_name.empty())
+        {
+            anim_name = std::to_string(m_animations.size());
+        }
+
+        for (auto& sampler : anim.samplers)
+        {
+            if (sampler.interpolation == fastgltf::AnimationInterpolation::CubicSpline)
+            {
+                logger::printe(logger::ERROR,
+                               "`CubicSpline` animation interpolation type not supported.");
+                assert(false);
+                return;
+            }
+
+            // @TODO: Figure out how to turn the input/output accessor buffer thingies into animation frames.
+            //   Idk if that will slow things down a bunch, but it makes sense to my head? *shrug*
+        }
     }
 }
 
