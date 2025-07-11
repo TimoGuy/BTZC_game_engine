@@ -25,7 +25,7 @@ struct Model_joint
 {
     std::string name;
     mat4 inverse_bind_matrix;
-    uint32_t parent_idx{ (uint32_t)-1 };
+    uint32_t parent_idx{ (uint32_t)-1 };  // @NOTE: Idx instead of pointer for cache lookup.  -Thea 2025/07/10
     std::vector<Model_joint*> children;
 };
 

@@ -1,5 +1,6 @@
 #include "mesh.h"
 
+#include "cglm/mat4.h"
 #include "cglm/vec2-ext.h"
 #include "cglm/vec3-ext.h"
 #include "cglm/vec3.h"
@@ -14,6 +15,7 @@
 #include <cmath>
 #include <filesystem>
 #include <limits>
+#include <list>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -351,7 +353,13 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
     // Load meshes.
     for (auto& mesh : asset.meshes)
     {
-        
+        // Position.
+        // Normal.
+        // Tex coord.
+
+        // If there is a skin associated with the model:
+            // Joints.
+            // Weights.
     }
 
     // Load skins.
@@ -364,20 +372,95 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
     }
     for (auto& skin : asset.skins)
     if (!skin.joints.empty())
-    {
-        // Load joints.
-        auto& inv_bind_mats_accessor{
-            asset.accessors[skin.inverseBindMatrices.value()] };
-        for (auto element :
-                 fastgltf::iterateAccessor<fastgltf::math::fmat4x4>(asset,
-                                                                    inv_bind_mats_accessor))
-        {
-            // @HERE @TODO Copy in the inverse bind matrices.
+    {   // Load all joint data.
+        std::vector<mat4s> inv_bind_mats;
+        {   // Load all inverse bind matrices.
+            auto& inv_bind_mats_accessor{
+                asset.accessors[skin.inverseBindMatrices.value()] };
+            for (auto element :
+                     fastgltf::iterateAccessor<fastgltf::math::fmat4x4>(asset,
+                                                                        inv_bind_mats_accessor))
+            {
+                // @HERE @TODO Copy in the inverse bind matrices.
+                // @TODO: START HERE!!!!!
+            }
         }
 
-        for (auto joint_node_idx : skin.joints)
-        {
-            // @HERE @TODO Get the node indices and order them by iterating hierarchy order.
+        size_t root_node_idx;
+        std::unordered_map<size_t, size_t> node_idx_to_inv_bind_mat_idx_map;
+        {   // Build child-to-parent map and node-to-inverse_bind_matrices map.
+            std::unordered_map<size_t, size_t> child_to_parent_map;
+            size_t inv_bind_mat_idx{ 0 };
+            for (auto joint_node_idx : skin.joints)
+            {
+                node_idx_to_inv_bind_mat_idx_map.emplace(joint_node_idx, inv_bind_mat_idx);
+                for (auto child_node_idx : asset.nodes[joint_node_idx].children)
+                    child_to_parent_map.emplace(child_node_idx, joint_node_idx);
+            }
+
+            // Find root node.
+            root_node_idx = skin.joints.front();
+            while (child_to_parent_map.find(root_node_idx) != child_to_parent_map.end())
+                root_node_idx = child_to_parent_map.at(root_node_idx);
+        }
+
+        {   // Calc root node inverse global transform.
+            auto global_transform{
+                std::get<fastgltf::math::fmat4x4>(asset.nodes[root_node_idx].transform) };
+            glm_mat4_inv_precise(reinterpret_cast<vec4*>(global_transform.data()),
+                                 m_model_skin.inverse_global_transform);
+            // @TODO: Check if using fastgltf mat4 like this^^ works.
+            assert(false);
+        }
+
+        {   // Write model joints into model skin.
+            struct Node_process_job
+            {
+                size_t node_idx;
+                size_t inv_bind_mat_idx;
+            };
+            std::list<Node_process_job> process_jobs;
+
+            // Enter root job.
+            process_jobs.emplace_back(root_node_idx,
+                                      node_idx_to_inv_bind_mat_idx_map.at(root_node_idx));
+            
+            // Process jobs while adding more in a breadth-first way.
+            std::unordered_map<size_t, size_t> node_idx_to_model_joint_idx_map;
+            std::vector<size_t> node_index_insert_order;
+            while (!process_jobs.empty())
+            {
+                auto job{ process_jobs.front() };
+                process_jobs.pop_front();
+
+                node_idx_to_model_joint_idx_map.emplace(
+                    job.node_idx,
+                    m_model_skin.joints_sorted_breadth_first.size());
+
+                Model_joint new_model_joint{
+                    std::string(asset.nodes[job.node_idx].name), };
+                glm_mat4_copy(inv_bind_mats[job.inv_bind_mat_idx].raw,
+                              new_model_joint.inverse_bind_matrix);
+                // @NOTE: Add parent-child relation later.
+                m_model_skin.joints_sorted_breadth_first.emplace_back(new_model_joint);
+                node_index_insert_order.emplace_back(job.node_idx);
+            }
+
+            // Add parent-child relationships.
+            assert(m_model_skin.joints_sorted_breadth_first.size() == node_index_insert_order.size());
+            for (size_t node_idx : node_index_insert_order)
+                for (size_t child_idx : asset.nodes[node_idx].children)
+                {
+                    // Establish parent-child relation.
+                    size_t parent_model_joint_idx{ node_idx_to_model_joint_idx_map.at(node_idx) };
+                    size_t child_model_joint_idx{ node_idx_to_model_joint_idx_map.at(child_idx) };
+
+                    auto& parent_joint{ m_model_skin.joints_sorted_breadth_first[parent_model_joint_idx] };
+                    auto& child_joint{ m_model_skin.joints_sorted_breadth_first[child_model_joint_idx] };
+
+                    child_joint.parent_idx = parent_model_joint_idx;
+                    parent_joint.children.emplace_back(&child_joint);
+                }
         }
 
         // @NOTE: Ignore the `skeleton` property in the `Skin` struct.
