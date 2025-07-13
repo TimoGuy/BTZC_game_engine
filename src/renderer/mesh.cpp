@@ -352,17 +352,49 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
     }
 
     // Load meshes.
+    size_t vertex_count{ 0 };
+    m_model_aabb.reset();
     for (auto& mesh : asset.meshes)
-    {
-        // Position.
-        // Normal.
-        // Tex coord.
+        for (auto& primitive : mesh.primitives)
+        {
+            auto base_vertex_count{ vertex_count };
 
-        // If there is a skin associated with the model:
-            // Joints.
-            // Weights.
-        assert(false);
-    }
+            // Load all vertices.
+            auto pos_attribute{ primitive.findAttribute("POSITION") };
+            auto norm_attribute{ primitive.findAttribute("NORMAL") };
+            auto tex_coord_attribute{ primitive.findAttribute("TEXCOORD_0") };
+            auto joints_attribute{ primitive.findAttribute("JOINTS_0") };
+            auto weights_attribute{ primitive.findAttribute("WEIGHTS_0") };
+
+            assert(pos_attribute != nullptr);
+            assert(norm_attribute != nullptr);
+            assert(tex_coord_attribute != nullptr);
+            assert((joints_attribute != nullptr) == (weights_attribute != nullptr));
+
+            auto& pos_accessor{ asset.accessors[pos_attribute->accessorIndex] };
+            auto& norm_accessor{ asset.accessors[norm_attribute->accessorIndex] };
+            auto& tex_coord_accessor{ asset.accessors[tex_coord_attribute->accessorIndex] };
+            fastgltf::Accessor* joints_accessor{ nullptr };
+            fastgltf::Accessor* weights_accessor{ nullptr };
+
+            if (joints_attribute != nullptr && weights_attribute != nullptr)
+            {   // Include skinning accessors.
+                joints_accessor = &asset.accessors[joints_attribute->accessorIndex];
+                weights_accessor = &asset.accessors[weights_attribute->accessorIndex];
+            }
+
+            for (size_t i = 0; pos_accessor.count; i++)
+            {
+                fastgltf::iterateAccessorWithIndex<typename ElementType>(const Asset &asset, const Accessor &accessor, Functor &&func)
+
+
+            }
+            vertex_count += pos_accessor.count;
+
+            // Load all indices.
+            assert(primitive.indicesAccessor.has_value());
+            // @HERE: Use `base_vertex_count` to offset the indices.
+        }
 
     // Load skins.
     std::unordered_map<size_t, size_t> node_idx_to_model_joint_idx_map;  // @NOTE: Need for rest of loading procs.
