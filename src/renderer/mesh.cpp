@@ -10,6 +10,7 @@
 #include "glad/glad.h"
 #include "logger.h"
 #include "material.h"
+#include "model_animator.h"
 #include "tiny_obj_loader.h"
 #include <cassert>
 #include <cmath>
@@ -491,7 +492,7 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
         // Extract glTF-style animation data.
         struct Sampler_extracted_data
         {
-            fastgltf::AnimationInterpolation interp_type;
+            fastgltf::AnimationInterpolation interp_type;  // @NOTE: 永久に使われないかも。
             std::vector<float_t> times;
             std::vector<vec4s> trs_fragments;  // Could be trans, rot, or sca.
         };
@@ -500,7 +501,7 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
         struct Channel_extracted_data
         {
             Sampler_extracted_data* sampler{ nullptr };
-            Model_joint* target_joint{ nullptr };
+            size_t target_joint_idx;  // Idx in `joints_sorted_breadth_first`.
             fastgltf::AnimationPath trs_type;
         };
         std::vector<Channel_extracted_data> channel_datas;
@@ -513,6 +514,13 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
                 Sampler_extracted_data new_data;
 
                 new_data.interp_type = sampler.interpolation;
+                if (new_data.interp_type == fastgltf::AnimationInterpolation::Step)
+                {
+                    logger::printe(logger::WARN,
+                                   "`Step` animation interpolation type not supported. May be "
+                                   "supported in the future but for now it will just be imported as `Linear`.");
+                    assert(false);
+                }
                 if (new_data.interp_type == fastgltf::AnimationInterpolation::CubicSpline)
                 {
                     logger::printe(logger::ERROR,
@@ -589,15 +597,140 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
             for (auto& channel : anim.channels)
             {
                 channel_datas.emplace_back(&sampler_idx_to_data_map.at(channel.samplerIndex),
-                                           &m_model_skin.joints_sorted_breadth_first[
-                                               node_idx_to_model_joint_idx_map.at(
-                                                   channel.nodeIndex.value())],
+                                           node_idx_to_model_joint_idx_map.at(
+                                               channel.nodeIndex.value()),
                                            channel.path);
             }
         }
 
         // Convert glTF-style data to `Model_animator` data.
-        // @TODO: @HERE
+        float_t start_time{ std::numeric_limits<float_t>::max() };
+        uint32_t perceived_frames{ 0 };
+        {   // Find start/end times of all samplers.
+            float_t end_time{ std::numeric_limits<float_t>::min() };
+            for (auto& elem : sampler_idx_to_data_map)
+            {
+                auto& sampler{ elem.second };
+                for (float_t time : sampler.times)
+                {
+                    start_time = std::min(start_time, time);
+                    end_time = std::max(end_time, time);
+                }
+            }
+
+            // Calculate the frames between the times.
+            float_t num_frames_raw{ (end_time - start_time) / Model_joint_animation::k_frames_per_second };
+            float_t deviation{ num_frames_raw - std::roundf(num_frames_raw) };
+            if (abs(deviation) > 1e-6f)
+            {
+                logger::printef(logger::WARN,
+                                "Animation length does not match the %.3f hz animation cutting "
+                                "requirement (deviation: %0.6f). Will extend animation clip until "
+                                "the cutting requirement is fulfilled.",
+                                Model_joint_animation::k_frames_per_second,
+                                deviation);
+                assert(false);  // Idk if you want an assert on this but it's a heavier warning.
+            }
+
+            // Turn into perceived frames.
+            perceived_frames = std::ceilf(num_frames_raw);
+        }
+
+        std::vector<Model_joint_animation_frame> new_anim_frames;
+        new_anim_frames.reserve(perceived_frames);
+        {   // Record animation frames.
+            float_t curr_time{ start_time };
+            for (size_t _ = 0; _ < perceived_frames; _++)
+            {
+                // Get interpolation of current frame.
+                std::unordered_map<size_t, Model_joint_animation_frame::Joint_local_transform>
+                    joint_idx_to_local_trans_map;
+                for (auto const& channel : channel_datas)
+                {
+                    if (joint_idx_to_local_trans_map.find(channel.target_joint_idx)
+                            == joint_idx_to_local_trans_map.end())
+                    {   // @NOTE: Emplace in the beginning since channels only
+                        // sample one part of the TRS.
+                        joint_idx_to_local_trans_map.emplace(
+                            channel.target_joint_idx,
+                            Model_joint_animation_frame::Joint_local_transform{});
+                    }
+
+                    Model_joint_animation_frame::Joint_local_transform& joint_trans{
+                        joint_idx_to_local_trans_map.at(channel.target_joint_idx) };
+
+                    bool found_sample{ false };
+                    assert(channel.sampler->times.size() >= 2);
+                    for (size_t i = 0; i < channel.sampler->times.size() - 1; i++)
+                        if (curr_time >= channel.sampler->times[i] &&
+                            curr_time <= channel.sampler->times[i + 1])
+                        {
+                            float_t interp_t{ std::max(0.0f, curr_time - channel.sampler->times[i])
+                                                  / (channel.sampler->times[i + 1] - channel.sampler->times[i]) };
+                            auto const& output0{ channel.sampler->trs_fragments[i] };
+                            auto const& output1{ channel.sampler->trs_fragments[i + 1] };
+                            switch (channel.trs_type)
+                            {
+                                case fastgltf::AnimationPath::Translation:
+                                    glm_vec3_lerp(const_cast<float_t*>(output0.raw),
+                                                  const_cast<float_t*>(output1.raw),
+                                                  interp_t,
+                                                  joint_trans.position);
+                                    break;
+
+                                case fastgltf::AnimationPath::Rotation:
+                                    // @NOTE: Using `slerp()` for better accuracy than `nlerp()`.
+                                    //   This is fine since it's just the import stage, not actual
+                                    //   animation.
+                                    glm_quat_slerp(const_cast<float_t*>(output0.raw),
+                                                   const_cast<float_t*>(output1.raw),
+                                                   interp_t,
+                                                   joint_trans.rotation);
+                                    break;
+
+                                case fastgltf::AnimationPath::Scale:
+                                    glm_vec3_lerp(const_cast<float_t*>(output0.raw),
+                                                  const_cast<float_t*>(output1.raw),
+                                                  interp_t,
+                                                  joint_trans.scale);
+                                    break;
+
+                                case fastgltf::AnimationPath::Weights:
+                                    // Not supported.
+                                    assert(false);
+                                    break;
+
+                                default:
+                                    // Huh?
+                                    assert(false);
+                                    return;
+                            }
+
+                            found_sample = true;
+                            break;
+                        }
+                    assert(found_sample);
+                }
+
+                // Create animation frame from pose.
+                Model_joint_animation_frame new_frame;
+                new_frame.joint_transforms_in_order.reserve(
+                    m_model_skin.joints_sorted_breadth_first.size());
+                for (size_t i = 0; m_model_skin.joints_sorted_breadth_first.size(); i++)
+                {
+                    new_frame.joint_transforms_in_order.emplace_back(
+                        std::move(joint_idx_to_local_trans_map.at(i)));
+                }
+
+                // Tick next frame.
+                curr_time += Model_joint_animation::k_frames_per_second;
+            }
+        }
+
+        // Create animation.
+        m_animations.emplace_back(std::ref(m_model_skin),
+                                  anim_name,
+                                  std::move(new_anim_frames));
     }
 }
 

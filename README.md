@@ -428,9 +428,9 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - [x] @BUGFIX: Have `debug_render_job::emplace_line()` (or whatever it is) loop the idx of insertion of the drawing line.
         - [ ] Define `load_gltf2_as_meshes()`
             - [x] Init impl of skin loading.
-            - [ ] Init impl of animation loading.
-                - [ ] 
+            - [x] Init impl of animation loading.
             - [ ] Init impl of mesh w/ joint/weight attribs loading.
+            - [ ] Testing.
         - [ ] Create deform compute shader.
             - [ ] Write shader.
             - [ ] Add the dispatch to `Deformed_model`

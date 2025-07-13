@@ -37,12 +37,16 @@ struct Model_joint_animation_frame
         versor rotation;
         vec3 scale;
 
+#if 0  /* @NOTE: I really don't think I can handle step interpolation. It's too 細かい from gltf to use here. */
+        // (FOR NOW OR MAYBE FOREVER) interpolation type is ignored and only linear is used
+        // at least for skeletal animation.
         enum Interpolation_type
         {
             INTERP_TYPE_LINEAR = 0,
             INTERP_TYPE_STEP,
             NUM_INTERP_TYPES
         } interp_type;
+#endif  // 0
 
         Joint_local_transform interpolate_fast(Joint_local_transform const& other,
                                                float_t t) const;
@@ -62,13 +66,13 @@ public:
     void calc_joint_matrices(float_t time, bool loop, std::vector<mat4s>& out_joint_matrices) const;
     void get_joint_matrices_at_frame(uint32_t frame_idx, std::vector<mat4s>& out_joint_matrices) const;
 
+    static constexpr float_t k_frames_per_second{ 50.0f };
+
 private:
     Model_skin const& m_model_skin;
 
     std::string m_name;
     std::vector<Model_joint_animation_frame> m_frames;
-
-    static constexpr float_t k_frames_per_second{ 50.0f };
 };
 
 class Model;
