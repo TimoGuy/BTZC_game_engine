@@ -37,6 +37,13 @@ struct Model_joint_animation_frame
         versor rotation;
         vec3 scale;
 
+        enum Interpolation_type
+        {
+            INTERP_TYPE_LINEAR = 0,
+            INTERP_TYPE_STEP,
+            NUM_INTERP_TYPES
+        } interp_type;
+
         Joint_local_transform interpolate_fast(Joint_local_transform const& other,
                                                float_t t) const;
     };
@@ -59,13 +66,6 @@ private:
     Model_skin const& m_model_skin;
 
     std::string m_name;
-
-    enum Interpolation_type
-    {
-        INTERP_TYPE_LINEAR = 0,
-        INTERP_TYPE_STEP,
-        NUM_INTERP_TYPES
-    } m_interp_type;
     std::vector<Model_joint_animation_frame> m_frames;
 
     static constexpr float_t k_frames_per_second{ 50.0f };

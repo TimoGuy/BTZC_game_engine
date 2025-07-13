@@ -16,18 +16,38 @@ BT::Model_joint_animation_frame::Joint_local_transform::interpolate_fast(
     float_t t) const
 {
     Joint_local_transform ret_trans;
-    glm_vec3_lerp(const_cast<float_t*>(position),
-                  const_cast<float_t*>(other.position),
-                  t,
-                  ret_trans.position);
-    glm_quat_nlerp(const_cast<float_t*>(rotation),
-                   const_cast<float_t*>(other.rotation),
-                   t,
-                   ret_trans.rotation);
-    glm_vec3_lerp(const_cast<float_t*>(scale),
-                  const_cast<float_t*>(other.scale),
-                  t,
-                  ret_trans.scale);
+    switch (interp_type)
+    {
+        case INTERP_TYPE_LINEAR:
+            glm_vec3_lerp(const_cast<float_t*>(position),
+                          const_cast<float_t*>(other.position),
+                          t,
+                          ret_trans.position);
+            glm_quat_nlerp(const_cast<float_t*>(rotation),
+                           const_cast<float_t*>(other.rotation),
+                           t,
+                           ret_trans.rotation);
+            glm_vec3_lerp(const_cast<float_t*>(scale),
+                          const_cast<float_t*>(other.scale),
+                          t,
+                          ret_trans.scale);
+            ret_trans.interp_type = INTERP_TYPE_LINEAR;
+            break;
+
+        case INTERP_TYPE_STEP:
+            glm_vec3_copy(const_cast<float_t*>(position),
+                          ret_trans.position);
+            glm_quat_copy(const_cast<float_t*>(rotation),
+                          ret_trans.rotation);
+            glm_vec3_copy(const_cast<float_t*>(scale),
+                          ret_trans.scale);
+            ret_trans.interp_type = INTERP_TYPE_STEP;
+            break;
+
+        default:
+            assert(false);
+            break;
+    }
     return ret_trans;
 }
 
@@ -89,14 +109,6 @@ void BT::Model_joint_animation::calc_joint_matrices(float_t time,
 
     float_t interp_t{ (time / k_frames_per_second)
                            - std::floor(time / k_frames_per_second) };
-
-    if (m_interp_type == INTERP_TYPE_STEP ||
-        frame_idx_a == frame_idx_b)
-    {
-        // Just get current frame since no interp.
-        get_joint_matrices_at_frame(frame_idx_a, out_joint_matrices);
-        return;
-    }
 
     // Allocate calculation cache.
     std::vector<mat4s> joint_global_transform_cache;
@@ -162,6 +174,8 @@ void BT::Model_joint_animation::get_joint_matrices_at_frame(
     {
         glm_mat4_identity(joint_matrix.raw);
     }
+
+    assert(false);
 }
 
 

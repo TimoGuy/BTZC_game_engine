@@ -364,6 +364,8 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
     }
 
     // Load skins.
+    std::unordered_map<size_t, size_t> node_idx_to_model_joint_idx_map;  // @NOTE: Need for rest of loading procs.
+
     if (asset.skins.size() > 1)
     {
         logger::printef(logger::WARN,
@@ -371,9 +373,15 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
                         asset.skins.size());
         assert(false);  // For debug purposes.
     }
+
+    bool first_skin_w_joints{ true };
     for (auto& skin : asset.skins)
     if (!skin.joints.empty())
-    {   // Load all joint data.
+    {   // Ensure that only one skin is processed.
+        assert(first_skin_w_joints);
+        first_skin_w_joints = false;
+
+        // Load all joint data.
         std::vector<mat4s> inv_bind_mats;
         {   // Load all inverse bind matrices.
             auto& inv_bind_mats_accessor{
@@ -427,7 +435,7 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
                                       node_idx_to_inv_bind_mat_idx_map.at(root_node_idx));
             
             // Process jobs while adding more in a breadth-first way.
-            std::unordered_map<size_t, size_t> node_idx_to_model_joint_idx_map;
+            node_idx_to_model_joint_idx_map.clear();
             std::vector<size_t> node_index_insert_order;
             while (!process_jobs.empty())
             {
@@ -480,19 +488,116 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
             anim_name = std::to_string(m_animations.size());
         }
 
-        for (auto& sampler : anim.samplers)
+        // Extract glTF-style animation data.
+        struct Sampler_extracted_data
         {
-            if (sampler.interpolation == fastgltf::AnimationInterpolation::CubicSpline)
+            fastgltf::AnimationInterpolation interp_type;
+            std::vector<float_t> times;
+            std::vector<vec4s> trs_fragments;  // Could be trans, rot, or sca.
+        };
+        std::unordered_map<size_t, Sampler_extracted_data> sampler_idx_to_data_map;
+
+        struct Channel_extracted_data
+        {
+            Sampler_extracted_data* sampler{ nullptr };
+            Model_joint* target_joint{ nullptr };
+            fastgltf::AnimationPath trs_type;
+        };
+        std::vector<Channel_extracted_data> channel_datas;
+
+        {   // Organize samplers.
+            for (size_t i = 0; i < anim.samplers.size(); i++)
             {
-                logger::printe(logger::ERROR,
-                               "`CubicSpline` animation interpolation type not supported.");
-                assert(false);
-                return;
+                auto& sampler{ anim.samplers[i] };
+
+                Sampler_extracted_data new_data;
+
+                new_data.interp_type = sampler.interpolation;
+                if (new_data.interp_type == fastgltf::AnimationInterpolation::CubicSpline)
+                {
+                    logger::printe(logger::ERROR,
+                                   "`CubicSpline` animation interpolation type not supported.");
+                    assert(false);
+                    return;
+                }
+
+                {   // Get `.times` (sampler input).
+                    auto& input_accessor{ asset.accessors[sampler.inputAccessor] };
+                    assert(input_accessor.componentType == fastgltf::ComponentType::Float);
+                    for (float_t element :
+                         fastgltf::iterateAccessor<float_t>(asset, input_accessor))
+                    {
+                        new_data.times.emplace_back(element);
+                    }
+                }
+
+                {   // Get `.trs_fragments` (sampler output).
+                    auto& output_accessor{ asset.accessors[sampler.outputAccessor] };
+                    assert(output_accessor.componentType == fastgltf::ComponentType::Float);
+                    uint32_t xyzw_count{ 0 };
+                    uint32_t vec_len{ output_accessor.type == fastgltf::AccessorType::Vec4 ? 4u : 3u };
+                    for (float_t element :
+                         fastgltf::iterateAccessor<float_t>(asset, output_accessor))
+                    {
+                        if (xyzw_count == 0)
+                        {   // Create new vec4.
+                            new_data.trs_fragments.emplace_back();
+                        }
+
+                        new_data.trs_fragments.back().raw[xyzw_count] = element;
+
+                        if (vec_len == 3 && xyzw_count == 2)
+                        {   // Also insert `.w` but as 0.0f.
+                            new_data.trs_fragments.back().w = 0.0f;
+                        }
+
+                        xyzw_count = (xyzw_count + 1) % vec_len;
+                    }
+
+                    // Should be back to 0 by the end.
+                    // @NOTE: Please don't call me lazy but I just didn't want a big branch between
+                    //   two `for` loops that would look pretty much the same  >.<
+                    //     -Thea 2025/07/12 (I turned in my passport app w/ the correct gender today!
+                    //                       Hopefully I don't get struck down by the tyrants)
+                    assert(xyzw_count == 0);
+                }
+
+                // Emplace.
+                sampler_idx_to_data_map.emplace(i, new_data);
             }
 
-            // @TODO: Figure out how to turn the input/output accessor buffer thingies into animation frames.
-            //   Idk if that will slow things down a bunch, but it makes sense to my head? *shrug*
+            // Check for sampler times sorted.
+            for (auto& sampler : sampler_idx_to_data_map)
+            {
+                float_t prev_time{ std::numeric_limits<float_t>::min() };
+                for (float_t time : sampler.second.times)
+                {
+                    if (prev_time >= time)
+                    {
+                        logger::printef(logger::ERROR,
+                                        "Times are not sorted asc! prev: %.6f curr: %.6f",
+                                        prev_time,
+                                        time);
+                        assert(false);
+                        return;  // Abort loading.
+                    }
+                    prev_time = time;
+                }
+            }
+
+            // Organize channels.
+            for (auto& channel : anim.channels)
+            {
+                channel_datas.emplace_back(&sampler_idx_to_data_map.at(channel.samplerIndex),
+                                           &m_model_skin.joints_sorted_breadth_first[
+                                               node_idx_to_model_joint_idx_map.at(
+                                                   channel.nodeIndex.value())],
+                                           channel.path);
+            }
         }
+
+        // Convert glTF-style data to `Model_animator` data.
+        // @TODO: @HERE
     }
 }
 
