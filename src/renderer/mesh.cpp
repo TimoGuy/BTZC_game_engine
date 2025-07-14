@@ -835,9 +835,9 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
         constexpr float_t k_anim_frame_time{
             1.0f / Model_joint_animation::k_frames_per_second };
         float_t start_time{ std::numeric_limits<float_t>::max() };
+        float_t end_time{ std::numeric_limits<float_t>::lowest() };
         uint32_t perceived_frames{ 0 };
         {   // Find start/end times of all samplers.
-            float_t end_time{ std::numeric_limits<float_t>::lowest() };
             for (auto& elem : sampler_idx_to_data_map)
             {
                 auto& sampler{ elem.second };
@@ -952,8 +952,9 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
                         std::move(joint_idx_to_local_trans_map.at(i)));
                 }
 
-                // Tick next frame.
-                curr_time += k_anim_frame_time;
+                // Tick next frame (and clamp to end time for any possible extra frames).
+                curr_time = std::min(curr_time + k_anim_frame_time,
+                                     end_time);
             }
         }
 
