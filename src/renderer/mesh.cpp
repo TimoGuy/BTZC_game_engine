@@ -119,6 +119,9 @@ void BT::Model::render_model(mat4 transform, Material_ifc* override_material /*=
     // @NOTE: All meshes share the same vertices, just use different indices.
     glBindVertexArray(m_model_vertex_vao);
 
+    if (m_meshes.size() > 5)
+        int ian = 69;
+
     for (auto& mesh : m_meshes)
     {
         mesh.render_mesh(transform, override_material);
@@ -356,6 +359,14 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
     bool overall_has_skin{ !asset.skins.empty() };
     m_vertices.clear();
     m_model_aabb.reset();
+    
+    size_t num_meshes{ 0 };
+    for (auto& mesh : asset.meshes)
+        num_meshes += mesh.primitives.size();
+
+    m_meshes.clear();
+    m_meshes.reserve(num_meshes);  // @NOTE: Reserve prevents calling dtor() which messes up the meshes.
+
     for (auto& mesh : asset.meshes)
         for (auto& primitive : mesh.primitives)
         {   // Load vertices.
@@ -526,6 +537,8 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
         }
     }
 
+    return;
+
     // Load skins.
     std::unordered_map<size_t, size_t> node_idx_to_model_joint_idx_map;  // @NOTE: Need for rest of loading procs.
 
@@ -642,6 +655,8 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
     }
 
     // Load animations.
+    m_animations.clear();
+    m_animations.reserve(asset.animations.size());
     for (auto& anim : asset.animations)
     {
         // Set anim name.

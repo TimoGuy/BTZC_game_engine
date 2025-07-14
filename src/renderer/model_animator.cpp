@@ -16,9 +16,11 @@ BT::Model_joint_animation_frame::Joint_local_transform::interpolate_fast(
     float_t t) const
 {
     Joint_local_transform ret_trans;
+#if 0  /* I removed the `STEP` interpolation type since I figured that at least for skeletal animations I'm not gonna include it  -Thea 2025/07/13 */
     switch (interp_type)
     {
         case INTERP_TYPE_LINEAR:
+#endif  // 0
             glm_vec3_lerp(const_cast<float_t*>(position),
                           const_cast<float_t*>(other.position),
                           t,
@@ -31,6 +33,7 @@ BT::Model_joint_animation_frame::Joint_local_transform::interpolate_fast(
                           const_cast<float_t*>(other.scale),
                           t,
                           ret_trans.scale);
+#if 0
             ret_trans.interp_type = INTERP_TYPE_LINEAR;
             break;
 
@@ -48,6 +51,7 @@ BT::Model_joint_animation_frame::Joint_local_transform::interpolate_fast(
             assert(false);
             break;
     }
+#endif  // 0
     return ret_trans;
 }
 
