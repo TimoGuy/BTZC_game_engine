@@ -435,8 +435,10 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
                 - [x] Upload data to gpu.
             - [ ] Testing.
                 - [x] Vertex and index (meshes) are imported correctly.
-                - [ ] Skinning data is imported correctly.
+                - [x] Skinning data is imported correctly.
+                    - As far as I know (which is simply looking at the joint hierarchy).
                 - [ ] Animations are imported correctly.
+                    - [ ] Make the rerecorder actually stop at the final frame for the extra frame(s).
         - [ ] Create deform compute shader.
             - [ ] Write shader.
             - [ ] Add the dispatch to `Deformed_model`

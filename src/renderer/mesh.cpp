@@ -1,5 +1,6 @@
 #include "mesh.h"
 
+#include "cglm/affine.h"
 #include "cglm/mat4.h"
 #include "cglm/vec2-ext.h"
 #include "cglm/vec3-ext.h"
@@ -31,7 +32,7 @@ using std::vector;
 void BT::AA_bounding_box::reset()
 {
     min[0] = min[1] = min[2] = numeric_limits<float_t>::max();
-    max[0] = max[1] = max[2] = numeric_limits<float_t>::min();
+    max[0] = max[1] = max[2] = numeric_limits<float_t>::lowest();
 }
 
 void BT::AA_bounding_box::feed_position(vec3 position)
@@ -325,6 +326,7 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
 
         constexpr auto k_gltf_options{
             fastgltf::Options::LoadExternalBuffers |
+            fastgltf::Options::DecomposeNodeMatrices |  // To ensure node trans is TRS variant.
             fastgltf::Options::GenerateMeshIndices };
         
         auto gltf_file{ fastgltf::MappedGltfFile::FromPath(fname) };
@@ -491,12 +493,13 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
             std::vector<uint32_t> indices;
             indices.reserve(indices_accessor.count);
 
-            fastgltf::iterateAccessor<uint32_t>(asset, indices_accessor,
-                [&indices, base_vertex_idx](uint32_t ind) {
-                    // Offset indices to ensure they're referencing the correct
-                    // mesh.
-                    indices.emplace_back(base_vertex_idx + ind);
-                });
+            for (uint32_t ind :
+                     fastgltf::iterateAccessor<uint32_t>(asset, indices_accessor))
+            {
+                // Offset indices to ensure they're referencing the correct
+                // mesh.
+                indices.emplace_back(base_vertex_idx + ind);
+            }
 
             // Create mesh in model.
             m_meshes.emplace_back(std::move(indices), material_name);
@@ -537,8 +540,6 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
         }
     }
 
-    return;
-
     // Load skins.
     std::unordered_map<size_t, size_t> node_idx_to_model_joint_idx_map;  // @NOTE: Need for rest of loading procs.
 
@@ -566,8 +567,10 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
                      fastgltf::iterateAccessor<fastgltf::math::fmat4x4>(asset,
                                                                         inv_bind_mats_accessor))
             {
-                // @HERE @TODO Copy in the inverse bind matrices.
-                assert(false);
+                // @NOTE: `_ucopy()` is used instead of the normal copy to force no SIMD.
+                mat4s new_inv_bind_mat;
+                glm_mat4_ucopy(reinterpret_cast<vec4*>(element.data()), new_inv_bind_mat.raw);
+                inv_bind_mats.emplace_back(std::move(new_inv_bind_mat));
             }
         }
 
@@ -580,7 +583,16 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
             {
                 node_idx_to_inv_bind_mat_idx_map.emplace(joint_node_idx, inv_bind_mat_idx);
                 for (auto child_node_idx : asset.nodes[joint_node_idx].children)
+                {
+                    if (std::find(skin.joints.begin(), skin.joints.end(), child_node_idx)
+                        == skin.joints.end())
+                    {   // Child of the joint node is not a joint node.
+                        logger::printe(logger::ERROR, "Child of joint node is not a joint node.");
+                        assert(false);
+                        return;
+                    }
                     child_to_parent_map.emplace(child_node_idx, joint_node_idx);
+                }
             }
 
             // Find root node.
@@ -590,12 +602,34 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
         }
 
         {   // Calc root node inverse global transform.
-            auto global_transform{
-                std::get<fastgltf::math::fmat4x4>(asset.nodes[root_node_idx].transform) };
-            glm_mat4_inv_precise(reinterpret_cast<vec4*>(global_transform.data()),
+            mat4 global_transform;
+            {
+                auto global_trs{
+                    // `DecomposeNodeMatrices` should guarantee TRS variant.
+                    std::get<fastgltf::TRS>(asset.nodes[root_node_idx].transform) };
+
+                // Convert trs into mat4.
+                vec3 trans;
+                glm_vec3_copy(global_trs.translation.data(), trans);
+
+                versor rot;
+                // SIMD unable to be used here.
+                // glm_quat_copy(global_trs.rotation.value_ptr(), rot);
+                rot[0] = global_trs.rotation.x();
+                rot[1] = global_trs.rotation.y();
+                rot[2] = global_trs.rotation.z();
+                rot[3] = global_trs.rotation.w();
+
+                vec3 scale;
+                glm_vec3_copy(global_trs.scale.data(), scale);
+
+                glm_translate_make(global_transform, trans);
+                glm_quat_rotate(global_transform, rot, global_transform);
+                glm_scale(global_transform, scale);
+            }
+
+            glm_mat4_inv_precise(global_transform,
                                  m_model_skin.inverse_global_transform);
-            // @TODO: Check if using fastgltf mat4 like this^^ works.
-            assert(false);
         }
 
         {   // Write model joints into model skin.
@@ -627,8 +661,16 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
                 glm_mat4_copy(inv_bind_mats[job.inv_bind_mat_idx].raw,
                               new_model_joint.inverse_bind_matrix);
                 // @NOTE: Add parent-child relation later.
+
                 m_model_skin.joints_sorted_breadth_first.emplace_back(new_model_joint);
                 node_index_insert_order.emplace_back(job.node_idx);
+
+                for (auto child_node_idx : asset.nodes[job.node_idx].children)
+                {
+                    process_jobs.emplace_back(child_node_idx,
+                                              node_idx_to_inv_bind_mat_idx_map.at(
+                                                  root_node_idx));
+                }
             }
 
             // Add parent-child relationships.
@@ -649,9 +691,6 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
         }
 
         // @NOTE: Ignore the `skeleton` property in the `Skin` struct.
-
-        // @TODO: @CHECK: That the above^^ is actually doing what it says it is.
-        assert(false);
     }
 
     // Load animations.
@@ -719,32 +758,44 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
                 {   // Get `.trs_fragments` (sampler output).
                     auto& output_accessor{ asset.accessors[sampler.outputAccessor] };
                     assert(output_accessor.componentType == fastgltf::ComponentType::Float);
-                    uint32_t xyzw_count{ 0 };
-                    uint32_t vec_len{ output_accessor.type == fastgltf::AccessorType::Vec4 ? 4u : 3u };
-                    for (float_t element :
-                         fastgltf::iterateAccessor<float_t>(asset, output_accessor))
+
+                    switch (output_accessor.type)
                     {
-                        if (xyzw_count == 0)
-                        {   // Create new vec4.
-                            new_data.trs_fragments.emplace_back();
-                        }
+                        case fastgltf::AccessorType::Vec3:
+                            for (fastgltf::math::fvec3 element :
+                                 fastgltf::iterateAccessor<fastgltf::math::fvec3>(asset,
+                                                                                  output_accessor))
+                            {
+                                new_data.trs_fragments.emplace_back(vec4s{ element.x(),
+                                                                           element.y(),
+                                                                           element.z(),
+                                                                           0.0f });
+                            }
+                            break;
 
-                        new_data.trs_fragments.back().raw[xyzw_count] = element;
+                        case fastgltf::AccessorType::Vec4:
+                            for (fastgltf::math::fvec4 element :
+                                 fastgltf::iterateAccessor<fastgltf::math::fvec4>(asset,
+                                                                                  output_accessor))
+                            {
+                                new_data.trs_fragments.emplace_back(vec4s{ element.x(),
+                                                                           element.y(),
+                                                                           element.z(),
+                                                                           element.w() });
+                            }
+                            break;
 
-                        if (vec_len == 3 && xyzw_count == 2)
-                        {   // Also insert `.w` but as 0.0f.
-                            new_data.trs_fragments.back().w = 0.0f;
-                        }
-
-                        xyzw_count = (xyzw_count + 1) % vec_len;
+                        default:
+                            // Huh???
+                            assert(false);
+                            return;
                     }
-
-                    // Should be back to 0 by the end.
                     // @NOTE: Please don't call me lazy but I just didn't want a big branch between
                     //   two `for` loops that would look pretty much the same  >.<
                     //     -Thea 2025/07/12 (I turned in my passport app w/ the correct gender today!
                     //                       Hopefully I don't get struck down by the tyrants)
-                    assert(xyzw_count == 0);
+                    // @AMEND: Turns out that I had to split it between two branches bc `iterateAccessor`
+                    //   didn't like the `float_t` type for the accessor.  -Thea 2025/07/14
                 }
 
                 // Emplace.
@@ -754,7 +805,7 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
             // Check for sampler times sorted.
             for (auto& sampler : sampler_idx_to_data_map)
             {
-                float_t prev_time{ std::numeric_limits<float_t>::min() };
+                float_t prev_time{ std::numeric_limits<float_t>::lowest() };
                 for (float_t time : sampler.second.times)
                 {
                     if (prev_time >= time)
@@ -781,10 +832,12 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
         }
 
         // Convert glTF-style data to `Model_animator` data.
+        constexpr float_t k_anim_frame_time{
+            1.0f / Model_joint_animation::k_frames_per_second };
         float_t start_time{ std::numeric_limits<float_t>::max() };
         uint32_t perceived_frames{ 0 };
         {   // Find start/end times of all samplers.
-            float_t end_time{ std::numeric_limits<float_t>::min() };
+            float_t end_time{ std::numeric_limits<float_t>::lowest() };
             for (auto& elem : sampler_idx_to_data_map)
             {
                 auto& sampler{ elem.second };
@@ -796,7 +849,7 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
             }
 
             // Calculate the frames between the times.
-            float_t num_frames_raw{ (end_time - start_time) / Model_joint_animation::k_frames_per_second };
+            float_t num_frames_raw{ ((end_time - start_time) / k_anim_frame_time) + 1.0f };
             float_t deviation{ num_frames_raw - std::roundf(num_frames_raw) };
             if (abs(deviation) > 1e-6f)
             {
@@ -900,7 +953,7 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
                 }
 
                 // Tick next frame.
-                curr_time += Model_joint_animation::k_frames_per_second;
+                curr_time += k_anim_frame_time;
             }
         }
 
