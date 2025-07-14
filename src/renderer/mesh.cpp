@@ -270,6 +270,21 @@ void BT::Model::load_obj_as_meshes(string const& fname, string const& material_n
     glBindBuffer(GL_ARRAY_BUFFER, m_model_vertex_vbo);
     glBufferData(GL_ARRAY_BUFFER, m_vertices.size() * sizeof(Vertex), m_vertices.data(), GL_STATIC_DRAW);
 
+    // Register vertex attributes.
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
+                          sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, position)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
+                          sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, normal)));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE,
+                          sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, tex_coord)));
+
+    // Unbind.
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
     // Transform indices into mesh structures.
     m_meshes.clear();
     m_meshes.reserve(shapes.size());
@@ -287,21 +302,6 @@ void BT::Model::load_obj_as_meshes(string const& fname, string const& material_n
         // Create mesh.
         m_meshes.emplace_back(std::move(indices), material_name);
     }
-
-    // Register vertex attributes.
-    glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
-                          sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, position)));
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
-                          sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, normal)));
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE,
-                          sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, tex_coord)));
-
-    // Unbind.
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
 }
 
 void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material_name)
@@ -354,6 +354,7 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
 
     // Load meshes.
     bool overall_has_skin{ !asset.skins.empty() };
+    m_vertices.clear();
     m_model_aabb.reset();
     for (auto& mesh : asset.meshes)
         for (auto& primitive : mesh.primitives)
@@ -401,6 +402,7 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
             // Load data for new vertices.
             fastgltf::iterateAccessorWithIndex<fastgltf::math::fvec3>(asset, pos_accessor,
                 [this, base_vertex_idx](fastgltf::math::fvec3 v, size_t index) {
+                    m_model_aabb.feed_position(v.data());
                     glm_vec3_copy(v.data(),
                                   m_vertices[base_vertex_idx + index].position);
                 });
@@ -473,8 +475,56 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
 
             // Load all indices.
             assert(primitive.indicesAccessor.has_value());
-            // @HERE: Use `base_vertex_count` to offset the indices.
+            auto& indices_accessor{ asset.accessors[primitive.indicesAccessor.value()] };
+
+            std::vector<uint32_t> indices;
+            indices.reserve(indices_accessor.count);
+
+            fastgltf::iterateAccessor<uint32_t>(asset, indices_accessor,
+                [&indices, base_vertex_idx](uint32_t ind) {
+                    // Offset indices to ensure they're referencing the correct
+                    // mesh.
+                    indices.emplace_back(base_vertex_idx + ind);
+                });
+
+            // Create mesh in model.
+            m_meshes.emplace_back(std::move(indices), material_name);
         }
+
+    {   // Upload vertices to GPU.
+        glGenVertexArrays(1, &m_model_vertex_vao);
+        glGenBuffers(1, &m_model_vertex_vbo);
+
+        glBindVertexArray(m_model_vertex_vao);
+        glBindBuffer(GL_ARRAY_BUFFER, m_model_vertex_vbo);
+        glBufferData(GL_ARRAY_BUFFER, m_vertices.size() * sizeof(Vertex), m_vertices.data(), GL_STATIC_DRAW);
+
+        // Register vertex attributes.
+        glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
+                              sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, position)));
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
+                              sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, normal)));
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE,
+                              sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, tex_coord)));
+
+        // Unbind.
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+
+        if (overall_has_skin)
+        {   // Upload vertex skin datas to GPU as well.
+            glGenBuffers(1, &m_model_vertex_skin_datas_buffer);
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_model_vertex_skin_datas_buffer);
+            glBufferData(GL_SHADER_STORAGE_BUFFER,
+                         m_vert_skin_datas.size() * sizeof(Vertex_skin_data),
+                         m_vert_skin_datas.data(),
+                         GL_STATIC_READ);
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+        }
+    }
 
     // Load skins.
     std::unordered_map<size_t, size_t> node_idx_to_model_joint_idx_map;  // @NOTE: Need for rest of loading procs.
