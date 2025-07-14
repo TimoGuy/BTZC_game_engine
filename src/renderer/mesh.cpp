@@ -5,6 +5,7 @@
 #include "cglm/vec3-ext.h"
 #include "cglm/vec3.h"
 #include "fastgltf/core.hpp"
+#include "fastgltf/math.hpp"
 #include "fastgltf/types.hpp"
 #include "fastgltf/tools.hpp"
 #include "glad/glad.h"
@@ -352,21 +353,19 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
     }
 
     // Load meshes.
-    size_t vertex_count{ 0 };
+    bool overall_has_skin{ !asset.skins.empty() };
     m_model_aabb.reset();
     for (auto& mesh : asset.meshes)
         for (auto& primitive : mesh.primitives)
-        {
-            auto base_vertex_count{ vertex_count };
-
-            // Load all vertices.
+        {   // Load vertices.
+            // Find all wanted accessors.
             auto pos_attribute{ primitive.findAttribute("POSITION") };
             auto norm_attribute{ primitive.findAttribute("NORMAL") };
             auto tex_coord_attribute{ primitive.findAttribute("TEXCOORD_0") };
             auto joints_attribute{ primitive.findAttribute("JOINTS_0") };
             auto weights_attribute{ primitive.findAttribute("WEIGHTS_0") };
 
-            assert(pos_attribute != nullptr);
+            assert(pos_attribute != nullptr);  // POSITION is definitely required.
             assert(norm_attribute != nullptr);
             assert(tex_coord_attribute != nullptr);
             assert((joints_attribute != nullptr) == (weights_attribute != nullptr));
@@ -376,20 +375,101 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
             auto& tex_coord_accessor{ asset.accessors[tex_coord_attribute->accessorIndex] };
             fastgltf::Accessor* joints_accessor{ nullptr };
             fastgltf::Accessor* weights_accessor{ nullptr };
+            bool has_skin{ false };
 
             if (joints_attribute != nullptr && weights_attribute != nullptr)
             {   // Include skinning accessors.
                 joints_accessor = &asset.accessors[joints_attribute->accessorIndex];
                 weights_accessor = &asset.accessors[weights_attribute->accessorIndex];
+                has_skin = true;
             }
 
-            for (size_t i = 0; pos_accessor.count; i++)
-            {
-                fastgltf::iterateAccessorWithIndex<typename ElementType>(const Asset &asset, const Accessor &accessor, Functor &&func)
+            // Either all meshes must have/not have a skin, with the exception of
+            // overall meshes having skins but this one in particular doesn't.
+            // A dummy set of skin weights will be applied later for this exception.
+            assert(overall_has_skin == has_skin ||
+                   (overall_has_skin && !has_skin));
 
-
+            // Resize to include new vertices.
+            auto base_vertex_idx{ m_vertices.size() };
+            m_vertices.resize(base_vertex_idx + pos_accessor.count);
+            if (overall_has_skin)
+            {   // Include vertex skin data even if this mesh does not have skin.
+                m_vert_skin_datas.resize(base_vertex_idx + pos_accessor.count);
             }
-            vertex_count += pos_accessor.count;
+
+            // Load data for new vertices.
+            fastgltf::iterateAccessorWithIndex<fastgltf::math::fvec3>(asset, pos_accessor,
+                [this, base_vertex_idx](fastgltf::math::fvec3 v, size_t index) {
+                    glm_vec3_copy(v.data(),
+                                  m_vertices[base_vertex_idx + index].position);
+                });
+
+            fastgltf::iterateAccessorWithIndex<fastgltf::math::fvec3>(asset, norm_accessor,
+                [this, base_vertex_idx](fastgltf::math::fvec3 v, size_t index) {
+                    glm_vec3_copy(v.data(),
+                                  m_vertices[base_vertex_idx + index].normal);
+                });
+
+            fastgltf::iterateAccessorWithIndex<fastgltf::math::fvec2>(asset, tex_coord_accessor,
+                [this, base_vertex_idx](fastgltf::math::fvec2 v, size_t index) {
+                    glm_vec2_copy(v.data(),
+                                  m_vertices[base_vertex_idx + index].tex_coord);
+                });
+
+            if (has_skin)
+            {   // Joint indices.
+                switch (joints_accessor->componentType)
+                {
+                    case fastgltf::ComponentType::UnsignedByte:
+                        fastgltf::iterateAccessorWithIndex<fastgltf::math::u8vec4>(asset, *joints_accessor,
+                            [this, base_vertex_idx](fastgltf::math::u8vec4 v, size_t index) {
+                                m_vert_skin_datas[base_vertex_idx + index].joint_mat_idxs[0] = v.x();
+                                m_vert_skin_datas[base_vertex_idx + index].joint_mat_idxs[1] = v.y();
+                                m_vert_skin_datas[base_vertex_idx + index].joint_mat_idxs[2] = v.z();
+                                m_vert_skin_datas[base_vertex_idx + index].joint_mat_idxs[3] = v.w();
+                            });
+                        break;
+
+                    case fastgltf::ComponentType::UnsignedShort:
+                        fastgltf::iterateAccessorWithIndex<fastgltf::math::u16vec4>(asset, *joints_accessor,
+                            [this, base_vertex_idx](fastgltf::math::u16vec4 v, size_t index) {
+                                m_vert_skin_datas[base_vertex_idx + index].joint_mat_idxs[0] = v.x();
+                                m_vert_skin_datas[base_vertex_idx + index].joint_mat_idxs[1] = v.y();
+                                m_vert_skin_datas[base_vertex_idx + index].joint_mat_idxs[2] = v.z();
+                                m_vert_skin_datas[base_vertex_idx + index].joint_mat_idxs[3] = v.w();
+                            });
+                        break;
+
+                    default:
+                        // Component type for joint indices not supported.
+                        assert(false);
+                        return;
+                }
+
+                // Weights.
+                fastgltf::iterateAccessorWithIndex<fastgltf::math::fvec4>(asset, *weights_accessor,
+                    [this, base_vertex_idx](fastgltf::math::fvec4 v, size_t index) {
+                        glm_vec4_copy(v.data(),
+                                      m_vert_skin_datas[base_vertex_idx + index].weights);
+                    });
+            }
+            else if (overall_has_skin && !has_skin)
+            {   // Joint indices (dummy).
+                for (size_t index = 0; index < pos_accessor.count; index++)
+                {
+                    m_vert_skin_datas[base_vertex_idx + index].joint_mat_idxs[0] = 0;
+                    m_vert_skin_datas[base_vertex_idx + index].joint_mat_idxs[1] = 0;
+                    m_vert_skin_datas[base_vertex_idx + index].joint_mat_idxs[2] = 0;
+                    m_vert_skin_datas[base_vertex_idx + index].joint_mat_idxs[3] = 0;
+                }
+
+                // Weights (dummy).
+                for (size_t index = 0; index < pos_accessor.count; index++)
+                {
+                    glm_vec4_zero(m_vert_skin_datas[base_vertex_idx + index].weights);
+                }
+            }
 
             // Load all indices.
             assert(primitive.indicesAccessor.has_value());

@@ -430,6 +430,8 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
             - [x] Init impl of skin loading.
             - [x] Init impl of animation loading.
             - [ ] Init impl of mesh w/ joint/weight attribs loading.
+                - [x] Vertices.
+                - [ ] Indices.
             - [ ] Testing.
         - [ ] Create deform compute shader.
             - [ ] Write shader.
