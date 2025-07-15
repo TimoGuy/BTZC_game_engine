@@ -13,6 +13,7 @@
 #include "logger.h"
 #include "material.h"
 #include "model_animator.h"
+#include "shader.h"
 #include "tiny_obj_loader.h"
 #include <cassert>
 #include <cmath>
@@ -542,6 +543,7 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
 
     // Load skins.
     std::unordered_map<size_t, size_t> node_idx_to_model_joint_idx_map;  // @NOTE: Need for rest of loading procs.
+    std::vector<size_t> node_index_insert_order;  // @NOTE: Need for animation creation.
 
     if (asset.skins.size() > 1)
     {
@@ -646,7 +648,7 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
             
             // Process jobs while adding more in a breadth-first way.
             node_idx_to_model_joint_idx_map.clear();
-            std::vector<size_t> node_index_insert_order;
+            node_index_insert_order.clear();
             while (!process_jobs.empty())
             {
                 auto job{ process_jobs.front() };
@@ -859,7 +861,8 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
                                 "the cutting requirement is fulfilled.",
                                 Model_joint_animation::k_frames_per_second,
                                 deviation);
-                assert(false);  // Idk if you want an assert on this but it's a heavier warning.
+                // @NOCHECKIN: Don't assert on this warning for now.
+                // assert(false);  // Idk if you want an assert on this but it's a heavier warning.
             }
 
             // Turn into perceived frames.
@@ -946,10 +949,10 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
                 Model_joint_animation_frame new_frame;
                 new_frame.joint_transforms_in_order.reserve(
                     m_model_skin.joints_sorted_breadth_first.size());
-                for (size_t i = 0; m_model_skin.joints_sorted_breadth_first.size(); i++)
+                for (size_t joint_node_idx : node_index_insert_order)
                 {
                     new_frame.joint_transforms_in_order.emplace_back(
-                        std::move(joint_idx_to_local_trans_map.at(i)));
+                        std::move(joint_idx_to_local_trans_map.at(joint_node_idx)));
                 }
 
                 // Tick next frame (and clamp to end time for any possible extra frames).
@@ -1010,6 +1013,29 @@ void BT::Deformed_model::dispatch_compute_deform(vector<mat4s>&& joint_matrices)
 {
     // @TODO: Figure out how to do compute shaders!!!
     assert(false);
+
+    // @TODO: START HERE!!!! Get the correct buffers bound.
+    #if 0
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_input_vertex_buffer);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_input_vertex_buffer);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_input_vertex_skin_data_ssbo);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, m_input_vertex_skin_data_ssbo);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_mesh_joint_deform_data_ssbo);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, m_mesh_joint_deform_data_ssbo);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_output_vertex_buffer);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, m_output_vertex_buffer);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+    #endif
+
+    static auto& s_shader{ *Shader_bank::get_shader("skinned_mesh_compute") };
+    s_shader.bind();
+    size_t num_vertices{ m_model.m_vertices.size() };
+    s_shader.set_uint("num_vertices", num_vertices);
+    glDispatchCompute(std::ceilf(static_cast<float_t>(num_vertices)
+                                 / 256.0f),  // @NOTE: Must match compute shader `local_size_x`.
+                      1,
+                      1);
+    s_shader.unbind();
 }
 
 

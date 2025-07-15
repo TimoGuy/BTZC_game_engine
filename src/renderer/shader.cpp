@@ -85,6 +85,11 @@ void BT::Shader::set_int(string const& param_name, int32_t value) const
     glUniform1i(glGetUniformLocation(m_shader_program, param_name.c_str()), value);
 }
 
+void BT::Shader::set_uint(string const& param_name, uint32_t value) const
+{
+    glUniform1ui(glGetUniformLocation(m_shader_program, param_name.c_str()), value);
+}
+
 void BT::Shader::set_float(string const& param_name, float_t value) const
 {
     glUniform1f(glGetUniformLocation(m_shader_program, param_name.c_str()), value);

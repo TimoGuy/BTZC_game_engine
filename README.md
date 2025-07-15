@@ -442,8 +442,8 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
                     - Seems like it? Let's continue yah.
             - [x] Bugfixes.
                 - [x] Accidental move with meshes. Fixed by reserving correct number of meshes before emplacing.
-        - [ ] Create deform compute shader.
-            - [ ] Write shader.
+        - [x] Create deform compute shader.
+            - [x] Write shader.
             - [ ] Add the dispatch to `Deformed_model`
             - [ ] Add it to `main.cpp` in shader loading step too.
         - [ ] Add unique ptr of `Deformed_model` to `Render_object`.

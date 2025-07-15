@@ -25,6 +25,7 @@ public:
     static void unbind();
 
     void set_int(string const& param_name, int32_t value) const;
+    void set_uint(string const& param_name, uint32_t value) const;
     void set_float(string const& param_name, float_t value) const;
     void set_vec3(string const& param_name, vec3 value) const;
     void set_mat4(string const& param_name, mat4 value) const;
