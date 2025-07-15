@@ -9,7 +9,7 @@ struct Line_data {
     vec4 col2;
 };
 
-layout (binding = 3, std430) readonly buffer Line_ssbo {  // Binding 3 to avoid 0-2 vert attribs.  @CHECK: I think this isn't needed?????
+layout (binding = 0, std430) readonly buffer Line_ssbo {
     Line_data lines[];
 };
 

@@ -26,7 +26,7 @@ void BT::Material_debug_lines::bind_material(mat4 transform)
     glDepthFunc(m_foreground ? GL_LEQUAL : GL_GREATER);
 
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_ssbo);
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, m_ssbo);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_ssbo);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
     static auto& s_shader{ *Shader_bank::get_shader("color_unlit_lines") };
@@ -41,5 +41,5 @@ void BT::Material_debug_lines::unbind_material()
     // Reset depth test params.
     glDepthFunc(GL_LEQUAL);
 
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, 0);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, 0);
 }

@@ -1036,6 +1036,11 @@ void BT::Deformed_model::dispatch_compute_deform(vector<mat4s>&& joint_matrices)
                       1,
                       1);
     s_shader.unbind();
+
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, 0);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, 0);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, 0);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, 0);
 }
 
 
