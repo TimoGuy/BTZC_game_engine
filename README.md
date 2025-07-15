@@ -426,19 +426,22 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - [x] Define `interpolate_fast()`
         - [x] Define `Model_animator`
         - [x] @BUGFIX: Have `debug_render_job::emplace_line()` (or whatever it is) loop the idx of insertion of the drawing line.
-        - [ ] Define `load_gltf2_as_meshes()`
+        - [x] Define `load_gltf2_as_meshes()`
             - [x] Init impl of skin loading.
             - [x] Init impl of animation loading.
             - [x] Init impl of mesh w/ joint/weight attribs loading.
                 - [x] Vertices.
                 - [x] Indices.
                 - [x] Upload data to gpu.
-            - [ ] Testing.
+            - [x] Testing.
                 - [x] Vertex and index (meshes) are imported correctly.
                 - [x] Skinning data is imported correctly.
                     - As far as I know (which is simply looking at the joint hierarchy).
-                - [ ] Animations are imported correctly.
+                - [x] Animations are imported correctly.
                     - [x] Make the rerecorder actually stop at the final frame for the extra frame(s).
+                    - Seems like it? Let's continue yah.
+            - [x] Bugfixes.
+                - [x] Accidental move with meshes. Fixed by reserving correct number of meshes before emplacing.
         - [ ] Create deform compute shader.
             - [ ] Write shader.
             - [ ] Add the dispatch to `Deformed_model`
