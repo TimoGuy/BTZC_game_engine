@@ -8,11 +8,11 @@
 
 
 BT::Render_object::Render_object(Game_object& game_obj,
-                                 Model const* model,
-                                 Render_layer layer)
+                                 Render_layer layer,
+                                 Renderable_ifc const* renderable /*= nullptr*/)
     : m_game_obj(game_obj)
-    , m_model(model)
     , m_layer(layer)
+    , m_renderable(renderable)
 {
     // Check that the layer is a single layer, not an aggregate layer.
     constexpr uint32_t k_num_shifts{ sizeof(Render_layer) * 8 };
@@ -46,7 +46,7 @@ void BT::Render_object::render(Render_layer active_layers,
     {
         mat4 transform;
         m_game_obj.get_transform_handle().get_transform_as_mat4(transform);
-        m_model->render_model(transform, override_material);
+        m_renderable->render(transform, override_material);
     }
 }
 
@@ -56,13 +56,33 @@ void BT::Render_object::scene_serialize(Scene_serialization_mode mode, json& nod
     if (mode == SCENE_SERIAL_MODE_SERIALIZE)
     {
         node_ref["guid"] = UUID_helper::to_pretty_repr(get_uuid());
-        node_ref["model_name"] = Model_bank::get_model_name(m_model);
+
+        node_ref["renderable"]["type"] = m_renderable->get_type_str();
+        node_ref["renderable"]["model_name"] = m_renderable->get_model_name();
+
         node_ref["render_layer"] = static_cast<uint8_t>(m_layer);
     }
     else if (mode == SCENE_SERIAL_MODE_DESERIALIZE)
     {
         assign_uuid(node_ref["guid"], true);
-        m_model = Model_bank::get_model(node_ref["model_name"]);
+
+        std::string rend_type{ node_ref["renderable"]["type"] };
+        if (rend_type == "Model")
+        {
+            m_renderable = Model_bank::get_model(node_ref["model_name"]);
+        }
+        else if (rend_type == "Deformed_model")
+        {
+            set_deformed_model(
+                std::make_unique<Deformed_model>(
+                    *Model_bank::get_model(node_ref["model_name"])));
+        }
+        else
+        {   // Unsupported renderable type.
+            assert(false);
+            return;
+        }
+
         m_layer = Render_layer(static_cast<uint8_t>(node_ref["render_layer"]));
     }
 }

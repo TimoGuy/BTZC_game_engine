@@ -72,6 +72,10 @@ private:
     Render_layer m_active_render_layers{ Render_layer::RENDER_LAYER_DEFAULT |
                                          Render_layer::RENDER_LAYER_LEVEL_EDITOR };
 
+    // Skeletal animation compute.
+    bool compute_mesh_skinning_for_all_deformed_models();
+    void memory_barrier_for_mesh_skinning();
+
     // Display rendering.
     uint32_t m_ldr_fbo{ 0 };
     uint32_t m_ldr_color_texture{ 0 };

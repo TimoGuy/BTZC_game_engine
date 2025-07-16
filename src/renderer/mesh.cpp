@@ -116,13 +116,15 @@ BT::Model::~Model()
     glDeleteVertexArrays(1, &m_model_vertex_vao);
 }
 
-void BT::Model::render_model(mat4 transform, Material_ifc* override_material /*= nullptr*/) const
+std::string BT::Model::get_model_name() const
+{
+    return Model_bank::get_model_name(this);
+}
+
+void BT::Model::render(mat4 transform, Material_ifc* override_material /*= nullptr*/) const
 {
     // @NOTE: All meshes share the same vertices, just use different indices.
     glBindVertexArray(m_model_vertex_vao);
-
-    if (m_meshes.size() > 5)
-        int ian = 69;
 
     for (auto& mesh : m_meshes)
     {
@@ -1047,6 +1049,24 @@ void BT::Deformed_model::dispatch_compute_deform(vector<mat4s>&& joint_matrices)
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, 0);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, 0);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, 0);
+}
+
+std::string BT::Deformed_model::get_model_name() const
+{
+    return Model_bank::get_model_name(&m_model);
+}
+
+void BT::Deformed_model::render(mat4 transform, Material_ifc* override_material /*= nullptr*/) const
+{
+    // @NOTE: All meshes share the same vertices, just use different indices.
+    glBindVertexArray(m_deform_vertex_vao);
+
+    for (auto& mesh : m_model.m_meshes)  // Use the regular model index buffers.
+    {
+        mesh.render_mesh(transform, override_material);
+    }
+
+    glBindVertexArray(0);
 }
 
 

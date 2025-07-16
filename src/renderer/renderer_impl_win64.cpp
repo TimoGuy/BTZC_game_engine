@@ -227,15 +227,12 @@ void BT::Renderer::Impl::render(float_t delta_time, function<void()>&& debug_vie
     m_camera.update_camera_matrices();
 
     // Update skeletal animations.
-    bool compute_skeletal_animations{ get_deformed_models_exist() };
-    if (compute_skeletal_animations)
-    {
-        compute_mesh_skinning_for_all_deformed_models();
-    }
+    bool computed_skeletal_animations{
+        compute_mesh_skinning_for_all_deformed_models() };
 
     // Render new frame.
     begin_new_display_frame();
-    if (compute_skeletal_animations)
+    if (computed_skeletal_animations)
     {
         memory_barrier_for_mesh_skinning();
     }
@@ -556,6 +553,32 @@ void BT::Renderer::Impl::render_imgui()
         glfwMakeContextCurrent(backup_current_context);
     }
 }
+
+// Skeletal animation compute.
+bool BT::Renderer::Impl::compute_mesh_skinning_for_all_deformed_models()
+{
+    bool mutated{ false };
+
+    auto rend_objs{ m_rend_obj_pool.checkout_all_render_objs() };
+    for (auto rend_obj : rend_objs)
+        if (rend_obj->get_deformed_model() != nullptr)
+        {
+            std::vector<mat4s> joint_matrices;
+            static_assert(false);  // @HERE @TODO Add the animator query right here.
+            rend_obj->get_deformed_model()->dispatch_compute_deform(std::move(joint_matrices));
+            mutated = true;
+        }
+    m_rend_obj_pool.return_render_objs(std::move(rend_objs));
+
+    return mutated;
+}
+
+void BT::Renderer::Impl::memory_barrier_for_mesh_skinning()
+{
+    // @TODO: @CHECK: I think that this is what I need to set as the barrier?
+    glMemoryBarrier(GL_BUFFER_UPDATE_BARRIER_BIT);
+}
+
 
 // Display rendering.
 void BT::Renderer::Impl::create_ldr_fbo()  // @COPYPASTA: see `create_hdr_fbo()`.

@@ -447,10 +447,12 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
             - [x] Add the dispatch to `Deformed_model`
             - [x] Add it to `main.cpp` in shader loading step too.
         - @TODO vvvvBELOWvvvv change how the structure is gonna work!!! (I think that for starters render object is just gonna hold a ptr to `Renderable_ifc` type which `Deformed_model` and `Model` will be)
-        - [ ] Add unique ptr of `Deformed_model` to `Render_object`.
-        - [ ] Add unique ptr of `Model_animator` to `Render_object`.
+        - [ ] ~~Add unique ptr of `Deformed_model` to `Render_object`.~~
+        - [ ] ~~Add unique ptr of `Model_animator` to `Render_object`.~~
             - Technically `Model_animator` and `Deformed_model` can be combined. However, I think there are niche applications of separating them. Like if multiple copies of ppl are in the crowd and animating them all the same would be good.
                 - @NOTE: If this does end up happening, then change `Model_animator` from a unique ptr to a shared ptr.
+        - [ ] Add unique ptr of `Model_animator` to `Render_object`
+            - So um yah, it ended up just being needed if I wanted to do this. This just ended up being the most sound way of accomplishing the support. Idk if I want `Render_object` holding unique ptrs but this is the best option atm.
     - [ ] ~~Add support for GLTF2 filetype for models.~~
         - Already happening above ^^
     - [ ] IK legs.

@@ -7,12 +7,14 @@
 #include "material.h"
 #include "mesh.h"
 #include <atomic>
+#include <memory>
 #include <string>
 #include <vector>
 
 using std::atomic_bool;
 using std::atomic_uint64_t;
 using std::string;
+using std::unique_ptr;
 using std::vector;
 
 
@@ -37,10 +39,18 @@ class Render_object : public Scene_serialization_ifc, public UUID_ifc
 {
 public:
     Render_object(Game_object& game_obj,
-                  Model const* model,
-                  Render_layer layer);
+                  Render_layer layer,
+                  Renderable_ifc const* renderable = nullptr);
 
     Game_object& get_owning_game_obj() { return m_game_obj; }
+
+    void set_deformed_model(unique_ptr<Deformed_model>&& deformed_model)
+    {
+        m_deformed_model = std::move(deformed_model);
+        if (m_deformed_model != nullptr)
+            m_renderable = m_deformed_model.get();
+    }
+    Deformed_model* get_deformed_model() { return m_deformed_model.get(); }
 
     void render(Render_layer active_layers,
                 Material_ifc* override_material = nullptr);
@@ -50,8 +60,9 @@ public:
 
 private:
     Game_object& m_game_obj;
-    Model const* m_model;
     Render_layer m_layer;
+    Renderable_ifc const* m_renderable;
+    unique_ptr<Deformed_model> m_deformed_model{ nullptr };  // For owning a deformed model (since models are stored in a bank).
 };
 
 // @COPYPASTA: Not quite copypasta. It's a little bit different.

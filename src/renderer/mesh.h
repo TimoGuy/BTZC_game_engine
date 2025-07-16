@@ -59,7 +59,16 @@ struct Vertex_skin_data
     vec4     weights;
 };
 
-class Model
+class Renderable_ifc
+{
+public:
+    virtual ~Renderable_ifc() = default;
+    virtual std::string get_type_str() const = 0;
+    virtual std::string get_model_name() const = 0;
+    virtual void render(mat4 transform, Material_ifc* override_material = nullptr) const = 0;
+};
+
+class Model : public Renderable_ifc
 {
 public:
     Model(string const& fname, string const& material_name);
@@ -69,7 +78,9 @@ public:
     Model& operator=(Model&&)      = delete;
     ~Model();
 
-    void render_model(mat4 transform, Material_ifc* override_material = nullptr) const;
+    std::string get_type_str() const override { return "Model"; }
+    std::string get_model_name() const override;
+    void render(mat4 transform, Material_ifc* override_material = nullptr) const override;
 
     pair<vector<Vertex> const&, vector<uint32_t>> get_all_vertices_and_indices() const;
 
@@ -97,7 +108,7 @@ private:
     friend class Model_animator;
 };
 
-class Deformed_model
+class Deformed_model : public Renderable_ifc
 {
 public:
     Deformed_model(Model const& model);
@@ -105,7 +116,9 @@ public:
 
     void dispatch_compute_deform(vector<mat4s>&& joint_matrices);
 
-    inline uint32_t get_vao() const { return m_deform_vertex_vao; }
+    std::string get_type_str() const override { return "Deformed_model"; }
+    std::string get_model_name() const override;
+    void render(mat4 transform, Material_ifc* override_material = nullptr) const override;
 
 private:
     Model const& m_model;
