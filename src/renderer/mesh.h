@@ -78,13 +78,13 @@ private:
     //   apply all the transforms of the meshes inside of the model during loading
     //   so that the meshes are on the same transform as model.
     vector<Mesh>    m_meshes;
-    vector<Vertex>  m_vertices;
+    vector<Vertex>  m_vertices;  // Kept for physics mesh colliders.
     AA_bounding_box m_model_aabb;
 
     uint32_t m_model_vertex_vao;
     uint32_t m_model_vertex_vbo;
 
-    vector<Vertex_skin_data> m_vert_skin_datas;
+    vector<Vertex_skin_data> m_vert_skin_datas;  // @TODO: See if this needs to be stored CPU-side.
     Model_skin m_model_skin;
     vector<Model_joint_animation> m_animations;
     
@@ -112,6 +112,9 @@ private:
 
     uint32_t m_deform_vertex_vao;
     uint32_t m_deform_vertex_vbo;
+
+    static constexpr size_t k_max_num_joints{ 128 };  // @NOTE: Must match `skinned_mesh.comp`.
+    uint32_t m_mesh_joint_deform_data_ssbo;
 };
 
 // @COPYPASTA: See "material.h"

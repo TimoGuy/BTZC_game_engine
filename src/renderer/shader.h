@@ -19,6 +19,7 @@ class Shader
 {
 public:
     Shader(string const& vert_fname, string const& frag_fname);
+    Shader(string const& comp_fname);
     ~Shader();
 
     void bind() const;

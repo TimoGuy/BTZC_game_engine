@@ -226,13 +226,26 @@ void BT::Renderer::Impl::render(float_t delta_time, function<void()>&& debug_vie
     m_camera.update_frontend(m_input_handler.get_input_state(), delta_time);
     m_camera.update_camera_matrices();
 
+    // Update skeletal animations.
+    bool compute_skeletal_animations{ get_deformed_models_exist() };
+    if (compute_skeletal_animations)
+    {
+        compute_mesh_skinning_for_all_deformed_models();
+    }
+
     // Render new frame.
     begin_new_display_frame();
+    if (compute_skeletal_animations)
+    {
+        memory_barrier_for_mesh_skinning();
+    }
+
     render_scene_to_hdr_framebuffer();
     if (is_requesting_picking())
     {
         render_scene_to_picking_framebuffer();
     }
+
     render_hdr_color_to_ldr_framebuffer();
     render_debug_views_to_ldr_framebuffer(delta_time, std::move(debug_views_render_fn));
     render_imgui();

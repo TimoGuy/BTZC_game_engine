@@ -31,7 +31,7 @@ BT::Shader::Shader(string const& vert_fname, string const& frag_fname)
     if (!success)
     {
         glGetShaderInfoLog(vert_shader, 512, nullptr, info_log);
-        logger::printef(logger::ERROR, "Vertex: Compilation failed: %s", info_log);
+        logger::printef(logger::ERROR, "Vertex shader: Compilation failed: %s", info_log);
     }
 
     // Fragment shader.
@@ -44,7 +44,7 @@ BT::Shader::Shader(string const& vert_fname, string const& frag_fname)
     if (!success)
     {
         glGetShaderInfoLog(frag_shader, 512, nullptr, info_log);
-        logger::printef(logger::ERROR, "Fragment: Compilation failed: %s", info_log);
+        logger::printef(logger::ERROR, "Fragment shader: Compilation failed: %s", info_log);
     }
 
     // Link into shader program.
@@ -63,6 +63,43 @@ BT::Shader::Shader(string const& vert_fname, string const& frag_fname)
     // Cleanup.
     glDeleteShader(vert_shader);
     glDeleteShader(frag_shader);
+}
+
+BT::Shader::Shader(string const& comp_fname)
+{
+    string compute_code{ read_shader_file(comp_fname) };
+
+    uint32_t comp_shader;
+    int32_t success;
+    char info_log[512];
+
+    // Fragment shader.
+    comp_shader = glCreateShader(GL_COMPUTE_SHADER);
+    auto compute_code_cstr{ compute_code.c_str() };
+    glShaderSource(comp_shader, 1, &compute_code_cstr, nullptr);
+    glCompileShader(comp_shader);
+
+    glGetShaderiv(comp_shader, GL_COMPILE_STATUS, &success);
+    if (!success)
+    {
+        glGetShaderInfoLog(comp_shader, 512, nullptr, info_log);
+        logger::printef(logger::ERROR, "Compute shader: Compilation failed: %s", info_log);
+    }
+
+    // Link into shader program.
+    m_shader_program = glCreateProgram();
+    glAttachShader(m_shader_program, comp_shader);
+    glLinkProgram(m_shader_program);
+
+    glGetProgramiv(m_shader_program, GL_LINK_STATUS, &success);
+    if (!success)
+    {
+        glGetShaderInfoLog(m_shader_program, 512, nullptr, info_log);
+        logger::printef(logger::ERROR, "Program: Link failed: %s", info_log);
+    }
+
+    // Cleanup.
+    glDeleteShader(comp_shader);
 }
 
 BT::Shader::~Shader()

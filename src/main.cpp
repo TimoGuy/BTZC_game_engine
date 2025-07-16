@@ -72,6 +72,9 @@ int32_t main()
         "post_process",
         make_unique<BT::Shader>(BTZC_GAME_ENGINE_ASSET_SHADER_PATH "post_process.vert",
                                 BTZC_GAME_ENGINE_ASSET_SHADER_PATH "post_process.frag"));
+    BT::Shader_bank::emplace_shader(
+        "skinned_mesh_compute",
+        make_unique<BT::Shader>(BTZC_GAME_ENGINE_ASSET_SHADER_PATH "skinned_mesh.comp"));
 
     // Textures.
     BT::Texture_bank::emplace_texture_2d(
@@ -141,6 +144,10 @@ int32_t main()
     BT::Model_bank::emplace_model(
         "probuilder_example",
         make_unique<BT::Model>(BTZC_GAME_ENGINE_ASSET_MODEL_PATH "probuilder_example.obj",
+                               "textured_material"));
+    BT::Model_bank::emplace_model(  // @NOCHECKIN: REMOVE THIS MODEL ONCE DONE TESTING SKINNING (and remove from `s_scene_as_json`).
+        "test_gltf",
+        make_unique<BT::Model>(BTZC_GAME_ENGINE_ASSET_MODEL_PATH "SlimeGirl.glb",
                                "textured_material"));
 
     // POPULATE TEST LEVEL (@TODO: Once level loading is implemented, replace this with it)
@@ -294,7 +301,7 @@ int32_t main()
                     "physics_obj": null,
                     "render_obj": {
                         "guid": "fa2a0c0c-cfd4-47a7-b4e7-01dbbd3b3537",
-                        "model_name": "player_model_0.5_2",
+                        "model_name": "test_gltf",
                         "render_layer": 1
                     },
                     "scripts": [],

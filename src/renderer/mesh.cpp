@@ -1001,6 +1001,12 @@ BT::Deformed_model::Deformed_model(Model const& model)
     // Unbind.
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+
+    // Create ssbo for storing joint matrices.
+    glGenBuffers(1, &m_mesh_joint_deform_data_ssbo);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_mesh_joint_deform_data_ssbo);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, k_max_num_joints * sizeof(mat4), nullptr, GL_DYNAMIC_COPY);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
 
 BT::Deformed_model::~Deformed_model()
@@ -1011,21 +1017,21 @@ BT::Deformed_model::~Deformed_model()
 
 void BT::Deformed_model::dispatch_compute_deform(vector<mat4s>&& joint_matrices)
 {
-    // @TODO: Figure out how to do compute shaders!!!
-    assert(false);
+    // Upload joint matrices to GPU.
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_mesh_joint_deform_data_ssbo);
+    glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, joint_matrices.size() * sizeof(mat4), joint_matrices.data());
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
-    // @TODO: START HERE!!!! Get the correct buffers bound.
-    #if 0
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_input_vertex_buffer);
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_input_vertex_buffer);
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_input_vertex_skin_data_ssbo);
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, m_input_vertex_skin_data_ssbo);
+    // Dispatch compute.
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_model.m_model_vertex_vbo);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_model.m_model_vertex_vbo);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_model.m_model_vertex_skin_datas_buffer);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, m_model.m_model_vertex_skin_datas_buffer);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_mesh_joint_deform_data_ssbo);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, m_mesh_joint_deform_data_ssbo);
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_output_vertex_buffer);
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, m_output_vertex_buffer);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_deform_vertex_vbo);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, m_deform_vertex_vbo);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-    #endif
 
     static auto& s_shader{ *Shader_bank::get_shader("skinned_mesh_compute") };
     s_shader.bind();
