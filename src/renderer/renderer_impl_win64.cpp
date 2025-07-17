@@ -227,12 +227,12 @@ void BT::Renderer::Impl::render(float_t delta_time, function<void()>&& debug_vie
     m_camera.update_camera_matrices();
 
     // Update skeletal animations.
-    bool computed_skeletal_animations{
-        compute_mesh_skinning_for_all_deformed_models() };
+    bool dispatched_mesh_skinning{
+        update_animators_and_compute_mesh_skinning() };
 
     // Render new frame.
     begin_new_display_frame();
-    if (computed_skeletal_animations)
+    if (dispatched_mesh_skinning)
     {
         memory_barrier_for_mesh_skinning();
     }
@@ -555,7 +555,7 @@ void BT::Renderer::Impl::render_imgui()
 }
 
 // Skeletal animation compute.
-bool BT::Renderer::Impl::compute_mesh_skinning_for_all_deformed_models()
+bool BT::Renderer::Impl::update_animators_and_compute_mesh_skinning()
 {
     bool mutated{ false };
 

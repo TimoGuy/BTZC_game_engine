@@ -73,7 +73,7 @@ private:
                                          Render_layer::RENDER_LAYER_LEVEL_EDITOR };
 
     // Skeletal animation compute.
-    bool compute_mesh_skinning_for_all_deformed_models();
+    bool update_animators_and_compute_mesh_skinning();
     void memory_barrier_for_mesh_skinning();
 
     // Display rendering.

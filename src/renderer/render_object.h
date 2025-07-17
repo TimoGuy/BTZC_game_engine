@@ -6,6 +6,7 @@
 #include "cglm/cglm.h"
 #include "material.h"
 #include "mesh.h"
+#include "model_animator.h"
 #include <atomic>
 #include <memory>
 #include <string>
@@ -63,6 +64,7 @@ private:
     Render_layer m_layer;
     Renderable_ifc const* m_renderable;
     unique_ptr<Deformed_model> m_deformed_model{ nullptr };  // For owning a deformed model (since models are stored in a bank).
+    unique_ptr<Model_animator> m_model_animator{ nullptr };
 };
 
 // @COPYPASTA: Not quite copypasta. It's a little bit different.
