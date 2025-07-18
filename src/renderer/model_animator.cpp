@@ -77,11 +77,11 @@ uint32_t BT::Model_joint_animation::calc_frame_idx(float_t time,
     switch (rounding)
     {
         case FLOOR:
-            frame_idx = std::floor(time / k_frames_per_second);
+            frame_idx = std::floor(time * k_frames_per_second);
             break;
 
         case CEIL:
-            frame_idx = std::ceil(time / k_frames_per_second);
+            frame_idx = std::ceil(time * k_frames_per_second);
             break;
 
         default:
@@ -112,7 +112,7 @@ void BT::Model_joint_animation::calc_joint_matrices(float_t time,
     uint32_t frame_idx_b{ calc_frame_idx(time, loop, CEIL) };
 
     float_t interp_t{ (time / k_frames_per_second)
-                           - std::floor(time / k_frames_per_second) };
+                      - std::floor(time / k_frames_per_second) };
 
     // Allocate calculation cache.
     std::vector<mat4s> joint_global_transform_cache;

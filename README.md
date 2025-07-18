@@ -454,6 +454,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - [x] Add unique ptr of `Model_animator` to `Render_object`
             - So um yah, it ended up just being needed if I wanted to do this. This just ended up being the most sound way of accomplishing the support. Idk if I want `Render_object` holding unique ptrs but this is the best option atm.
             - I ended up just doing a simple, hardcody version.
+        - [ ] @FIX: I think the joint indices are incorrect on the vertices. I think that maybe have some kind of conversion for node indices to the actual joint index upload position.
     - [ ] ~~Add support for GLTF2 filetype for models.~~
         - Already happening above ^^
     - [ ] IK legs.
