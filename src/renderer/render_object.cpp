@@ -69,13 +69,16 @@ void BT::Render_object::scene_serialize(Scene_serialization_mode mode, json& nod
         std::string rend_type{ node_ref["renderable"]["type"] };
         if (rend_type == "Model")
         {
-            m_renderable = Model_bank::get_model(node_ref["model_name"]);
+            m_renderable = Model_bank::get_model(node_ref["renderable"]["model_name"]);
         }
         else if (rend_type == "Deformed_model")
         {
-            set_deformed_model(
-                std::make_unique<Deformed_model>(
-                    *Model_bank::get_model(node_ref["model_name"])));
+            auto const& model{ *Model_bank::get_model(node_ref["renderable"]["model_name"]) };
+            set_deformed_model(std::make_unique<Deformed_model>(model));
+
+            auto animator{ std::make_unique<Model_animator>(model) };
+            animator->configure_animator({ { 2 } });  // @NOCHECKIN: @HARDCODE.
+            set_model_animator(std::move(animator));
         }
         else
         {   // Unsupported renderable type.

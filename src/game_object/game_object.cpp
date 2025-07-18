@@ -369,7 +369,6 @@ void BT::Game_object::scene_serialize(Scene_serialization_mode mode, json& node_
         if (node_ref["render_obj"].is_object())
         {
             Render_object new_rend_obj{ *this,
-                                        nullptr,
                                         Render_layer::RENDER_LAYER_DEFAULT };
             new_rend_obj.scene_serialize(mode, node_ref["render_obj"]);
             m_rend_obj_key =

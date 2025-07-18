@@ -228,7 +228,7 @@ void BT::Renderer::Impl::render(float_t delta_time, function<void()>&& debug_vie
 
     // Update skeletal animations.
     bool dispatched_mesh_skinning{
-        update_animators_and_compute_mesh_skinning() };
+        update_animators_and_compute_mesh_skinning(delta_time) };
 
     // Render new frame.
     begin_new_display_frame();
@@ -555,7 +555,7 @@ void BT::Renderer::Impl::render_imgui()
 }
 
 // Skeletal animation compute.
-bool BT::Renderer::Impl::update_animators_and_compute_mesh_skinning()
+bool BT::Renderer::Impl::update_animators_and_compute_mesh_skinning(float_t delta_time)
 {
     bool mutated{ false };
 
@@ -563,9 +563,13 @@ bool BT::Renderer::Impl::update_animators_and_compute_mesh_skinning()
     for (auto rend_obj : rend_objs)
         if (rend_obj->get_deformed_model() != nullptr)
         {
+            auto& animator{ *rend_obj->get_model_animator() };
+            animator.update(delta_time);
+
             std::vector<mat4s> joint_matrices;
-            static_assert(false);  // @HERE @TODO Add the animator query right here.
+            animator.calc_anim_pose(joint_matrices);
             rend_obj->get_deformed_model()->dispatch_compute_deform(std::move(joint_matrices));
+
             mutated = true;
         }
     m_rend_obj_pool.return_render_objs(std::move(rend_objs));

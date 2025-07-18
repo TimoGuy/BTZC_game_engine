@@ -264,7 +264,10 @@ int32_t main()
                     "name": "Static ground geometry",
                     "render_obj": {
                         "guid": "fa2a0c0c-cfd4-47a7-b4e7-01dbbd3b3538",
-                        "model_name": "probuilder_example",
+                        "renderable": {
+                            "model_name": "probuilder_example",
+                            "type": "Model"
+                        },
                         "render_layer": 1,
                         "transform": [[1.0, 0.0, 0.0, 0.0],
                                     [0.0, 1.0, 0.0, 0.0],
@@ -301,7 +304,10 @@ int32_t main()
                     "physics_obj": null,
                     "render_obj": {
                         "guid": "fa2a0c0c-cfd4-47a7-b4e7-01dbbd3b3537",
-                        "model_name": "test_gltf",
+                        "renderable": {
+                            "model_name": "test_gltf",
+                            "type": "Deformed_model"
+                        },
                         "render_layer": 1
                     },
                     "scripts": [],

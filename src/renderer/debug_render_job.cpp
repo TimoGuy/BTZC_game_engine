@@ -70,11 +70,11 @@ void BT::Debug_mesh_pool::render_all_meshes()
     {
         // Render foreground first so that foreground doesn't overwrite background material.
         if (mesh_job.second.foreground_material != nullptr)
-            mesh_job.second.model.render_model(mesh_job.second.transform,
-                                               mesh_job.second.foreground_material);
+            mesh_job.second.model.render(mesh_job.second.transform,
+                                         mesh_job.second.foreground_material);
         if (mesh_job.second.background_material != nullptr)
-            mesh_job.second.model.render_model(mesh_job.second.transform,
-                                               mesh_job.second.background_material);
+            mesh_job.second.model.render(mesh_job.second.transform,
+                                         mesh_job.second.background_material);
     }
 }
 

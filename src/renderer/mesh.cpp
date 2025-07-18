@@ -956,6 +956,7 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
                     new_frame.joint_transforms_in_order.emplace_back(
                         std::move(joint_idx_to_local_trans_map.at(joint_node_idx)));
                 }
+                new_anim_frames.emplace_back(std::move(new_frame));
 
                 // Tick next frame (and clamp to end time for any possible extra frames).
                 curr_time = std::min(curr_time + k_anim_frame_time,

@@ -73,7 +73,7 @@ private:
                                          Render_layer::RENDER_LAYER_LEVEL_EDITOR };
 
     // Skeletal animation compute.
-    bool update_animators_and_compute_mesh_skinning();
+    bool update_animators_and_compute_mesh_skinning(float_t delta_time);
     void memory_barrier_for_mesh_skinning();
 
     // Display rendering.

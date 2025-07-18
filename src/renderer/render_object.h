@@ -53,6 +53,12 @@ public:
     }
     Deformed_model* get_deformed_model() { return m_deformed_model.get(); }
 
+    void set_model_animator(unique_ptr<Model_animator>&& model_animator)
+    {
+        m_model_animator = std::move(model_animator);
+    }
+    Model_animator* get_model_animator() { return m_model_animator.get(); }
+
     void render(Render_layer active_layers,
                 Material_ifc* override_material = nullptr);
 

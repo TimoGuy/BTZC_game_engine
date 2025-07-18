@@ -451,8 +451,9 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - [ ] ~~Add unique ptr of `Model_animator` to `Render_object`.~~
             - Technically `Model_animator` and `Deformed_model` can be combined. However, I think there are niche applications of separating them. Like if multiple copies of ppl are in the crowd and animating them all the same would be good.
                 - @NOTE: If this does end up happening, then change `Model_animator` from a unique ptr to a shared ptr.
-        - [ ] Add unique ptr of `Model_animator` to `Render_object`
+        - [x] Add unique ptr of `Model_animator` to `Render_object`
             - So um yah, it ended up just being needed if I wanted to do this. This just ended up being the most sound way of accomplishing the support. Idk if I want `Render_object` holding unique ptrs but this is the best option atm.
+            - I ended up just doing a simple, hardcody version.
     - [ ] ~~Add support for GLTF2 filetype for models.~~
         - Already happening above ^^
     - [ ] IK legs.
