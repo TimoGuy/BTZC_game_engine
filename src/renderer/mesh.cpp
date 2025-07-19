@@ -360,191 +360,9 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
         asset = std::move(possible_asset.get());
     }
 
-    // Load meshes.
-    bool overall_has_skin{ !asset.skins.empty() };
-    m_vertices.clear();
-    m_model_aabb.reset();
-    
-    size_t num_meshes{ 0 };
-    for (auto& mesh : asset.meshes)
-        num_meshes += mesh.primitives.size();
-
-    m_meshes.clear();
-    m_meshes.reserve(num_meshes);  // @NOTE: Reserve prevents calling dtor() which messes up the meshes.
-
-    for (auto& mesh : asset.meshes)
-        for (auto& primitive : mesh.primitives)
-        {   // Load vertices.
-            // Find all wanted accessors.
-            auto pos_attribute{ primitive.findAttribute("POSITION") };
-            auto norm_attribute{ primitive.findAttribute("NORMAL") };
-            auto tex_coord_attribute{ primitive.findAttribute("TEXCOORD_0") };
-            auto joints_attribute{ primitive.findAttribute("JOINTS_0") };
-            auto weights_attribute{ primitive.findAttribute("WEIGHTS_0") };
-
-            assert(pos_attribute != nullptr);  // POSITION is definitely required.
-            assert(norm_attribute != nullptr);
-            assert(tex_coord_attribute != nullptr);
-            assert((joints_attribute != nullptr) == (weights_attribute != nullptr));
-
-            auto& pos_accessor{ asset.accessors[pos_attribute->accessorIndex] };
-            auto& norm_accessor{ asset.accessors[norm_attribute->accessorIndex] };
-            auto& tex_coord_accessor{ asset.accessors[tex_coord_attribute->accessorIndex] };
-            fastgltf::Accessor* joints_accessor{ nullptr };
-            fastgltf::Accessor* weights_accessor{ nullptr };
-            bool has_skin{ false };
-
-            if (joints_attribute != nullptr && weights_attribute != nullptr)
-            {   // Include skinning accessors.
-                joints_accessor = &asset.accessors[joints_attribute->accessorIndex];
-                weights_accessor = &asset.accessors[weights_attribute->accessorIndex];
-                has_skin = true;
-            }
-
-            // Either all meshes must have/not have a skin, with the exception of
-            // overall meshes having skins but this one in particular doesn't.
-            // A dummy set of skin weights will be applied later for this exception.
-            assert(overall_has_skin == has_skin ||
-                   (overall_has_skin && !has_skin));
-
-            // Resize to include new vertices.
-            auto base_vertex_idx{ m_vertices.size() };
-            m_vertices.resize(base_vertex_idx + pos_accessor.count);
-            if (overall_has_skin)
-            {   // Include vertex skin data even if this mesh does not have skin.
-                m_vert_skin_datas.resize(base_vertex_idx + pos_accessor.count);
-            }
-
-            // Load data for new vertices.
-            fastgltf::iterateAccessorWithIndex<fastgltf::math::fvec3>(asset, pos_accessor,
-                [this, base_vertex_idx](fastgltf::math::fvec3 v, size_t index) {
-                    m_model_aabb.feed_position(v.data());
-                    glm_vec3_copy(v.data(),
-                                  m_vertices[base_vertex_idx + index].position);
-                });
-
-            fastgltf::iterateAccessorWithIndex<fastgltf::math::fvec3>(asset, norm_accessor,
-                [this, base_vertex_idx](fastgltf::math::fvec3 v, size_t index) {
-                    glm_vec3_copy(v.data(),
-                                  m_vertices[base_vertex_idx + index].normal);
-                });
-
-            fastgltf::iterateAccessorWithIndex<fastgltf::math::fvec2>(asset, tex_coord_accessor,
-                [this, base_vertex_idx](fastgltf::math::fvec2 v, size_t index) {
-                    glm_vec2_copy(v.data(),
-                                  m_vertices[base_vertex_idx + index].tex_coord);
-                });
-
-            if (has_skin)
-            {   // Joint indices.
-                switch (joints_accessor->componentType)
-                {
-                    case fastgltf::ComponentType::UnsignedByte:
-                        fastgltf::iterateAccessorWithIndex<fastgltf::math::u8vec4>(asset, *joints_accessor,
-                            [this, base_vertex_idx](fastgltf::math::u8vec4 v, size_t index) {
-                                m_vert_skin_datas[base_vertex_idx + index].joint_mat_idxs[0] = v.x();
-                                m_vert_skin_datas[base_vertex_idx + index].joint_mat_idxs[1] = v.y();
-                                m_vert_skin_datas[base_vertex_idx + index].joint_mat_idxs[2] = v.z();
-                                m_vert_skin_datas[base_vertex_idx + index].joint_mat_idxs[3] = v.w();
-                            });
-                        break;
-
-                    case fastgltf::ComponentType::UnsignedShort:
-                        fastgltf::iterateAccessorWithIndex<fastgltf::math::u16vec4>(asset, *joints_accessor,
-                            [this, base_vertex_idx](fastgltf::math::u16vec4 v, size_t index) {
-                                m_vert_skin_datas[base_vertex_idx + index].joint_mat_idxs[0] = v.x();
-                                m_vert_skin_datas[base_vertex_idx + index].joint_mat_idxs[1] = v.y();
-                                m_vert_skin_datas[base_vertex_idx + index].joint_mat_idxs[2] = v.z();
-                                m_vert_skin_datas[base_vertex_idx + index].joint_mat_idxs[3] = v.w();
-                            });
-                        break;
-
-                    default:
-                        // Component type for joint indices not supported.
-                        assert(false);
-                        return;
-                }
-
-                // Weights.
-                fastgltf::iterateAccessorWithIndex<fastgltf::math::fvec4>(asset, *weights_accessor,
-                    [this, base_vertex_idx](fastgltf::math::fvec4 v, size_t index) {
-                        glm_vec4_copy(v.data(),
-                                      m_vert_skin_datas[base_vertex_idx + index].weights);
-                    });
-            }
-            else if (overall_has_skin && !has_skin)
-            {   // Joint indices (dummy).
-                for (size_t index = 0; index < pos_accessor.count; index++)
-                {
-                    m_vert_skin_datas[base_vertex_idx + index].joint_mat_idxs[0] = 0;
-                    m_vert_skin_datas[base_vertex_idx + index].joint_mat_idxs[1] = 0;
-                    m_vert_skin_datas[base_vertex_idx + index].joint_mat_idxs[2] = 0;
-                    m_vert_skin_datas[base_vertex_idx + index].joint_mat_idxs[3] = 0;
-                }
-
-                // Weights (dummy).
-                for (size_t index = 0; index < pos_accessor.count; index++)
-                {
-                    glm_vec4_zero(m_vert_skin_datas[base_vertex_idx + index].weights);
-                }
-            }
-
-            // Load all indices.
-            assert(primitive.indicesAccessor.has_value());
-            auto& indices_accessor{ asset.accessors[primitive.indicesAccessor.value()] };
-
-            std::vector<uint32_t> indices;
-            indices.reserve(indices_accessor.count);
-
-            for (uint32_t ind :
-                     fastgltf::iterateAccessor<uint32_t>(asset, indices_accessor))
-            {
-                // Offset indices to ensure they're referencing the correct
-                // mesh.
-                indices.emplace_back(base_vertex_idx + ind);
-            }
-
-            // Create mesh in model.
-            m_meshes.emplace_back(std::move(indices), material_name);
-        }
-
-    {   // Upload vertices to GPU.
-        glGenVertexArrays(1, &m_model_vertex_vao);
-        glGenBuffers(1, &m_model_vertex_vbo);
-
-        glBindVertexArray(m_model_vertex_vao);
-        glBindBuffer(GL_ARRAY_BUFFER, m_model_vertex_vbo);
-        glBufferData(GL_ARRAY_BUFFER, m_vertices.size() * sizeof(Vertex), m_vertices.data(), GL_STATIC_DRAW);
-
-        // Register vertex attributes.
-        glEnableVertexAttribArray(0);
-        glEnableVertexAttribArray(1);
-        glEnableVertexAttribArray(2);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
-                              sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, position)));
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
-                              sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, normal)));
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE,
-                              sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, tex_coord)));
-
-        // Unbind.
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindVertexArray(0);
-
-        if (overall_has_skin)
-        {   // Upload vertex skin datas to GPU as well.
-            glGenBuffers(1, &m_model_vertex_skin_datas_buffer);
-            glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_model_vertex_skin_datas_buffer);
-            glBufferData(GL_SHADER_STORAGE_BUFFER,
-                         m_vert_skin_datas.size() * sizeof(Vertex_skin_data),
-                         m_vert_skin_datas.data(),
-                         GL_STATIC_READ);
-            glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-        }
-    }
-
     // Load skins.
     std::unordered_map<size_t, size_t> node_idx_to_model_joint_idx_map;  // @NOTE: Need for rest of loading procs.
+    std::unordered_map<size_t, size_t> gltf_asset_joint_node_idx_to_insert_order_map;  // @NOTE: For remapping joint indices.
     std::vector<size_t> node_index_insert_order;  // @NOTE: Need for animation creation.
 
     if (asset.skins.size() > 1)
@@ -647,9 +465,10 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
             // Enter root job.
             process_jobs.emplace_back(root_node_idx,
                                       node_idx_to_inv_bind_mat_idx_map.at(root_node_idx));
-            
+
             // Process jobs while adding more in a breadth-first way.
             node_idx_to_model_joint_idx_map.clear();
+            gltf_asset_joint_node_idx_to_insert_order_map.clear();
             node_index_insert_order.clear();
             while (!process_jobs.empty())
             {
@@ -667,6 +486,9 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
                 // @NOTE: Add parent-child relation later.
 
                 m_model_skin.joints_sorted_breadth_first.emplace_back(new_model_joint);
+                gltf_asset_joint_node_idx_to_insert_order_map.emplace(job.node_idx,                             // @HERE!!!!
+                // gltf_asset_joint_node_idx_to_insert_order_map.emplace(node_index_insert_order.size(),
+                                                                      node_index_insert_order.size());
                 node_index_insert_order.emplace_back(job.node_idx);
 
                 for (auto child_node_idx : asset.nodes[job.node_idx].children)
@@ -676,6 +498,15 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
                                                   root_node_idx));
                 }
             }
+
+#if 0
+            // @DEBUG: Check that the insertion order is the same as the joint order.
+            assert(asset.skins[0].joints.size() == node_index_insert_order.size());
+            for (size_t i = 0; i < asset.skins[0].joints.size(); i++)
+            {
+                assert(asset.skins[0].joints[i] == node_index_insert_order[i]);
+            }
+#endif  // 0
 
             // Add parent-child relationships.
             assert(m_model_skin.joints_sorted_breadth_first.size() == node_index_insert_order.size());
@@ -695,6 +526,199 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
         }
 
         // @NOTE: Ignore the `skeleton` property in the `Skin` struct.
+    }
+
+    // Load meshes.
+    bool overall_has_skin{ !asset.skins.empty() };
+    m_vertices.clear();
+    m_model_aabb.reset();
+    
+    size_t num_meshes{ 0 };
+    for (auto& mesh : asset.meshes)
+        num_meshes += mesh.primitives.size();
+
+    m_meshes.clear();
+    m_meshes.reserve(num_meshes);  // @NOTE: Reserve prevents calling dtor() which messes up the meshes.
+
+    for (auto& mesh : asset.meshes)
+        for (auto& primitive : mesh.primitives)
+        {   // Load vertices.
+            // Find all wanted accessors.
+            auto pos_attribute{ primitive.findAttribute("POSITION") };
+            auto norm_attribute{ primitive.findAttribute("NORMAL") };
+            auto tex_coord_attribute{ primitive.findAttribute("TEXCOORD_0") };
+            auto joints_attribute{ primitive.findAttribute("JOINTS_0") };
+            auto weights_attribute{ primitive.findAttribute("WEIGHTS_0") };
+
+            assert(pos_attribute != nullptr);  // POSITION is definitely required.
+            assert(norm_attribute != nullptr);
+            assert(tex_coord_attribute != nullptr);
+            assert((joints_attribute != nullptr) == (weights_attribute != nullptr));
+
+            auto& pos_accessor{ asset.accessors[pos_attribute->accessorIndex] };
+            auto& norm_accessor{ asset.accessors[norm_attribute->accessorIndex] };
+            auto& tex_coord_accessor{ asset.accessors[tex_coord_attribute->accessorIndex] };
+            fastgltf::Accessor* joints_accessor{ nullptr };
+            fastgltf::Accessor* weights_accessor{ nullptr };
+            bool has_skin{ false };
+
+            if (joints_attribute != nullptr && weights_attribute != nullptr)
+            {   // Include skinning accessors.
+                joints_accessor = &asset.accessors[joints_attribute->accessorIndex];
+                weights_accessor = &asset.accessors[weights_attribute->accessorIndex];
+                has_skin = true;
+            }
+
+            // Either all meshes must have/not have a skin, with the exception of
+            // overall meshes having skins but this one in particular doesn't.
+            // A dummy set of skin weights will be applied later for this exception.
+            assert(overall_has_skin == has_skin ||
+                   (overall_has_skin && !has_skin));
+
+            // Resize to include new vertices.
+            auto base_vertex_idx{ m_vertices.size() };
+            m_vertices.resize(base_vertex_idx + pos_accessor.count);
+            if (overall_has_skin)
+            {   // Include vertex skin data even if this mesh does not have skin.
+                m_vert_skin_datas.resize(base_vertex_idx + pos_accessor.count);
+            }
+
+            // Load data for new vertices.
+            fastgltf::iterateAccessorWithIndex<fastgltf::math::fvec3>(asset, pos_accessor,
+                [this, base_vertex_idx](fastgltf::math::fvec3 v, size_t index) {
+                    m_model_aabb.feed_position(v.data());
+                    glm_vec3_copy(v.data(),
+                                  m_vertices[base_vertex_idx + index].position);
+                });
+
+            fastgltf::iterateAccessorWithIndex<fastgltf::math::fvec3>(asset, norm_accessor,
+                [this, base_vertex_idx](fastgltf::math::fvec3 v, size_t index) {
+                    glm_vec3_copy(v.data(),
+                                  m_vertices[base_vertex_idx + index].normal);
+                });
+
+            fastgltf::iterateAccessorWithIndex<fastgltf::math::fvec2>(asset, tex_coord_accessor,
+                [this, base_vertex_idx](fastgltf::math::fvec2 v, size_t index) {
+                    glm_vec2_copy(v.data(),
+                                  m_vertices[base_vertex_idx + index].tex_coord);
+                });
+
+            if (has_skin)
+            {   // Joint indices.
+                switch (joints_accessor->componentType)
+                {
+                    case fastgltf::ComponentType::UnsignedByte:
+                        fastgltf::iterateAccessorWithIndex<fastgltf::math::u8vec4>(asset, *joints_accessor,
+                            [this, base_vertex_idx, &gltf_asset_joint_node_idx_to_insert_order_map]
+                            (fastgltf::math::u8vec4 v, size_t index) {
+                                m_vert_skin_datas[base_vertex_idx + index].joint_mat_idxs[0] =
+                                    gltf_asset_joint_node_idx_to_insert_order_map.at(v.x());
+                                m_vert_skin_datas[base_vertex_idx + index].joint_mat_idxs[1] =
+                                    gltf_asset_joint_node_idx_to_insert_order_map.at(v.y());
+                                m_vert_skin_datas[base_vertex_idx + index].joint_mat_idxs[2] =
+                                    gltf_asset_joint_node_idx_to_insert_order_map.at(v.z());
+                                m_vert_skin_datas[base_vertex_idx + index].joint_mat_idxs[3] =
+                                    gltf_asset_joint_node_idx_to_insert_order_map.at(v.w());
+                            });
+                        break;
+
+                    case fastgltf::ComponentType::UnsignedShort:
+                        fastgltf::iterateAccessorWithIndex<fastgltf::math::u16vec4>(asset, *joints_accessor,
+                            [this, base_vertex_idx, &gltf_asset_joint_node_idx_to_insert_order_map]
+                            (fastgltf::math::u16vec4 v, size_t index) {
+                                m_vert_skin_datas[base_vertex_idx + index].joint_mat_idxs[0] =
+                                    gltf_asset_joint_node_idx_to_insert_order_map.at(v.x());
+                                m_vert_skin_datas[base_vertex_idx + index].joint_mat_idxs[1] =
+                                    gltf_asset_joint_node_idx_to_insert_order_map.at(v.y());
+                                m_vert_skin_datas[base_vertex_idx + index].joint_mat_idxs[2] =
+                                    gltf_asset_joint_node_idx_to_insert_order_map.at(v.z());
+                                m_vert_skin_datas[base_vertex_idx + index].joint_mat_idxs[3] =
+                                    gltf_asset_joint_node_idx_to_insert_order_map.at(v.w());
+                            });
+                        break;
+
+                    default:
+                        // Component type for joint indices not supported.
+                        assert(false);
+                        return;
+                }
+
+                // Weights.
+                fastgltf::iterateAccessorWithIndex<fastgltf::math::fvec4>(asset, *weights_accessor,
+                    [this, base_vertex_idx](fastgltf::math::fvec4 v, size_t index) {
+                        glm_vec4_copy(v.data(),
+                                      m_vert_skin_datas[base_vertex_idx + index].weights);
+                    });
+            }
+            else if (overall_has_skin && !has_skin)
+            {   // Joint indices (dummy).
+                for (size_t index = 0; index < pos_accessor.count; index++)
+                {
+                    m_vert_skin_datas[base_vertex_idx + index].joint_mat_idxs[0] = 0;
+                    m_vert_skin_datas[base_vertex_idx + index].joint_mat_idxs[1] = 0;
+                    m_vert_skin_datas[base_vertex_idx + index].joint_mat_idxs[2] = 0;
+                    m_vert_skin_datas[base_vertex_idx + index].joint_mat_idxs[3] = 0;
+                }
+
+                // Weights (dummy).
+                for (size_t index = 0; index < pos_accessor.count; index++)
+                {
+                    glm_vec4_zero(m_vert_skin_datas[base_vertex_idx + index].weights);
+                }
+            }
+
+            // Load all indices.
+            assert(primitive.indicesAccessor.has_value());
+            auto& indices_accessor{ asset.accessors[primitive.indicesAccessor.value()] };
+
+            std::vector<uint32_t> indices;
+            indices.reserve(indices_accessor.count);
+
+            for (uint32_t ind :
+                     fastgltf::iterateAccessor<uint32_t>(asset, indices_accessor))
+            {
+                // Offset indices to ensure they're referencing the correct
+                // mesh.
+                indices.emplace_back(base_vertex_idx + ind);
+            }
+
+            // Create mesh in model.
+            m_meshes.emplace_back(std::move(indices), material_name);
+        }
+
+    {   // Upload vertices to GPU.
+        glGenVertexArrays(1, &m_model_vertex_vao);
+        glGenBuffers(1, &m_model_vertex_vbo);
+
+        glBindVertexArray(m_model_vertex_vao);
+        glBindBuffer(GL_ARRAY_BUFFER, m_model_vertex_vbo);
+        glBufferData(GL_ARRAY_BUFFER, m_vertices.size() * sizeof(Vertex), m_vertices.data(), GL_STATIC_DRAW);
+
+        // Register vertex attributes.
+        glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
+                              sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, position)));
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
+                              sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, normal)));
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE,
+                              sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, tex_coord)));
+
+        // Unbind.
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+
+        if (overall_has_skin)
+        {   // Upload vertex skin datas to GPU as well.
+            glGenBuffers(1, &m_model_vertex_skin_datas_buffer);
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_model_vertex_skin_datas_buffer);
+            glBufferData(GL_SHADER_STORAGE_BUFFER,
+                         m_vert_skin_datas.size() * sizeof(Vertex_skin_data),
+                         m_vert_skin_datas.data(),
+                         GL_STATIC_READ);
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+        }
     }
 
     // Load animations.
