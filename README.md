@@ -454,7 +454,12 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - [x] Add unique ptr of `Model_animator` to `Render_object`
             - So um yah, it ended up just being needed if I wanted to do this. This just ended up being the most sound way of accomplishing the support. Idk if I want `Render_object` holding unique ptrs but this is the best option atm.
             - I ended up just doing a simple, hardcody version.
-        - [ ] @FIX: I think the joint indices are incorrect on the vertices. I think that maybe have some kind of conversion for node indices to the actual joint index upload position.
+        - [x] @FIX: I think the joint indices are incorrect on the vertices. I think that maybe have some kind of conversion for node indices to the actual joint index upload position.
+            - Tested with the Leever.glb model file. It affects the right bones now! There was a bone mismatch where the comment says "it's wrong"
+        - [ ] @FIX: Rotations and possibly all forms of transforms for the nodes.
+            - Checked. There is no weird quat ordering. It's XYZW.
+            - Possibly, the recording phase??
+            - Idk yet.
     - [ ] ~~Add support for GLTF2 filetype for models.~~
         - Already happening above ^^
     - [ ] IK legs.
