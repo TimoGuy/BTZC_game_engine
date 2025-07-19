@@ -498,6 +498,8 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
                                                   root_node_idx));
                 }
             }
+            // Emplace for zero case (if zero case already exists then nothing happens with `emplace()`).
+            gltf_asset_joint_node_idx_to_insert_order_map.emplace(0, 0);
 
 #if 0
             // @DEBUG: Check that the insertion order is the same as the joint order.
@@ -532,7 +534,7 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
     bool overall_has_skin{ !asset.skins.empty() };
     m_vertices.clear();
     m_model_aabb.reset();
-    
+
     size_t num_meshes{ 0 };
     for (auto& mesh : asset.meshes)
         num_meshes += mesh.primitives.size();
@@ -750,6 +752,8 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
         };
         std::vector<Channel_extracted_data> channel_datas;
 
+        bool animation_data_invalid{ false };
+
         {   // Organize samplers.
             for (size_t i = 0; i < anim.samplers.size(); i++)
             {
@@ -852,11 +856,28 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
             // Organize channels.
             for (auto& channel : anim.channels)
             {
-                channel_datas.emplace_back(&sampler_idx_to_data_map.at(channel.samplerIndex),
-                                           node_idx_to_model_joint_idx_map.at(
-                                               channel.nodeIndex.value()),
-                                           channel.path);
+                if (node_idx_to_model_joint_idx_map.find(channel.nodeIndex.value())
+                    == node_idx_to_model_joint_idx_map.end())
+                {   // This channel is found to reference an invalid node. Handle by skipping this animation.
+                    animation_data_invalid = true;
+                }
+                else
+                {   // Add channel information to data extraction struct.
+                    channel_datas.emplace_back(&sampler_idx_to_data_map.at(channel.samplerIndex),
+                                               node_idx_to_model_joint_idx_map.at(
+                                                   channel.nodeIndex.value()),
+                                               channel.path);
+                }
+
             }
+        }
+
+        if (animation_data_invalid)
+        {   // Abort trying to import this animation and skip to next one.
+            logger::printef(logger::WARN,
+                            "Animation data for anim \"%s\" is invalid. Skipping.",
+                            anim_name.c_str());
+            continue;
         }
 
         // Convert glTF-style data to `Model_animator` data.
@@ -975,10 +996,11 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
                 Model_joint_animation_frame new_frame;
                 new_frame.joint_transforms_in_order.reserve(
                     m_model_skin.joints_sorted_breadth_first.size());
-                for (size_t joint_node_idx : node_index_insert_order)
+                // for (size_t joint_node_idx : node_index_insert_order)  @NOTE: This is WRONG! Bc `joint_idx` here is referring to the idx in the `joints_sorted_breadth_first`.  -Thea
+                for (size_t i = 0; i < m_model_skin.joints_sorted_breadth_first.size(); i++)
                 {
                     new_frame.joint_transforms_in_order.emplace_back(
-                        std::move(joint_idx_to_local_trans_map.at(joint_node_idx)));
+                        std::move(joint_idx_to_local_trans_map.at(i)));
                 }
                 new_anim_frames.emplace_back(std::move(new_frame));
 
