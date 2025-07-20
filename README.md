@@ -468,6 +468,9 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
                 - There were some errors with incorrect inverse global transform and inverse binding matrices.
                     - [x] Fixed.
                 - It seems like there's really only the mixing to get the global joint transform?
+                    - When checking the quaternion for that it seemed correct tho.
+                    - Nope nvm. The quat is correct on its own but when using it to multiply to an `Vec3.up` then it puts it to `-z`, so there needs to be some kind of transformation somewhere that's missing.
+                        - [ ] Figure that out.
     - [ ] ~~Add support for GLTF2 filetype for models.~~
         - Already happening above ^^
     - [ ] IK legs.
