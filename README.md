@@ -460,6 +460,14 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
             - Checked. There is no weird quat ordering. It's XYZW.
             - Possibly, the recording phase??
             - Idk yet.
+            - Here is what I checked:
+                - Recording animations is working correctly.
+                - Animations are getting emplaced w/out memory corruption.
+                - The skin's global transform is different from the root joint transform (when it was the same when calculating the inverse global transform, which is wrong)
+                    - [x] Fixed.
+                - There were some errors with incorrect inverse global transform and inverse binding matrices.
+                    - [x] Fixed.
+                - It seems like there's really only the mixing to get the global joint transform?
     - [ ] ~~Add support for GLTF2 filetype for models.~~
         - Already happening above ^^
     - [ ] IK legs.

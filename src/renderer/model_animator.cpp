@@ -132,20 +132,37 @@ void BT::Model_joint_animation::calc_joint_matrices(float_t time,
             return;
         }
 
-        // Calculate global transform (relative to root bone).
-        auto local_joint_transform{
-            m_frames[frame_idx_a].joint_transforms_in_order[i].interpolate_fast(
-                m_frames[frame_idx_b].joint_transforms_in_order[i],
-                interp_t) };
+        // Calculate global transform (relative to parent bone -> model space).
+        // auto local_joint_transform{  // @NOCHECKIN!!!!
+        //     m_frames[frame_idx_a].joint_transforms_in_order[i].interpolate_fast(
+        //         m_frames[frame_idx_b].joint_transforms_in_order[i],
+        //         interp_t) };
+        auto local_joint_transform{ m_frames[frame_idx_a].joint_transforms_in_order[i] };
 
         mat4 global_joint_transform;
         glm_translate_make(global_joint_transform, local_joint_transform.position);
         glm_quat_rotate(global_joint_transform, local_joint_transform.rotation, global_joint_transform);
         glm_scale(global_joint_transform, local_joint_transform.scale);
-        if (joint.parent_idx != (uint32_t)-1)
-        {
+        // glm_mat4_identity(global_joint_transform);
+
+        if (joint.parent_idx == (uint32_t)-1)
+        {   // Use skin transform as baseline.
+            glm_mat4_mul(const_cast<vec4*>(m_model_skin.global_transform),
+                 global_joint_transform,
+                 global_joint_transform);
+        }
+        else
+        {   // Fetch parent global transform. (@NOTE: DO NOT USE THIS BC SHOULD BE GOING OFF OTHER ANIMATIONS)
+            // auto& parent_joint{ m_model_skin.joints_sorted_breadth_first[joint.parent_idx] };
+            // glm_mat4_mul(const_cast<vec4*>(parent_joint.global_transform),
+            //      global_joint_transform,
+            //      global_joint_transform);
+
             // Use cached parent global trans to make global trans.
-            glm_mat4_mul(joint_global_transform_cache[joint.parent_idx].raw,
+            // glm_mat4_mul(global_joint_transform,
+            //              joint_global_transform_cache[joint.parent_idx].raw,
+            //              global_joint_transform);
+            glm_mat4_mul(joint_global_transform_cache[joint.parent_idx].raw,  // @CORRECT.
                          global_joint_transform,
                          global_joint_transform);
         }
@@ -156,13 +173,39 @@ void BT::Model_joint_animation::calc_joint_matrices(float_t time,
         // Calculate joint matrix.
         // @RANT: I hate how all the glm functions don't mark the params as const,
         //   and also since they're not getting mutated! Aaaaggghhhh
-        mat4 joint_matrix;
-        glm_mat4_mul(const_cast<vec4*>(m_model_skin.inverse_global_transform),
+        mat4 joint_matrix;                 // vv Possibly unnecessary vv @CHECK
+        glm_mat4_mul(const_cast<vec4*>(m_model_skin.inverse_global_transform),  // @CORRECT.
                      global_joint_transform,
                      joint_matrix);
         glm_mat4_mul(joint_matrix,
                      const_cast<vec4*>(joint.inverse_bind_matrix),
                      out_joint_matrices[i].raw);
+        // glm_mat4_mul(const_cast<vec4*>(joint.inverse_bind_matrix),
+        //              global_joint_transform,
+        //              joint_matrix);
+        // glm_mat4_mul(const_cast<vec4*>(m_model_skin.inverse_global_transform),
+        //              joint_matrix,
+        //              out_joint_matrices[i].raw);
+    }
+
+    // @DEBUG.
+    static float_t s_target_matrix_as_flt{ 0.0f };
+    size_t keep_idx{ static_cast<size_t>(std::floorf(s_target_matrix_as_flt)) % out_joint_matrices.size() };
+    static size_t prev_keep_idx{ (size_t)-1 };
+    for (size_t i = 0; i < out_joint_matrices.size(); i++)
+    {
+        // // if (m_model_skin.joints_sorted_breadth_first[i].name == "Neck")
+        // // if (i == keep_idx)
+        // if (i == 78)
+        //     glm_translate_make(out_joint_matrices[i].raw, vec3{ 0.0f, 0.0f, 10.0f });
+        // else
+        //     glm_mat4_identity(out_joint_matrices[i].raw);
+    }
+    s_target_matrix_as_flt += 0.01f;
+    if (keep_idx != prev_keep_idx)
+    {
+        logger::printef(logger::TRACE, "New keep idx: %d", keep_idx);
+        prev_keep_idx = keep_idx;
     }
 }
 

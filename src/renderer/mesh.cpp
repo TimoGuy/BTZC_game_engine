@@ -360,6 +360,74 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
         asset = std::move(possible_asset.get());
     }
 
+    // Calculate all nodes' global transform.
+    std::unordered_map<size_t, mat4s> node_idx_to_global_transform_map;
+    {
+        std::vector<size_t> root_node_indices;
+        {   // Build list of root nodes.
+            std::vector<bool> per_node_is_root_node;
+            per_node_is_root_node.resize(asset.nodes.size(), true);
+            for (auto& node : asset.nodes)
+            {   // Mark found children nodes as not a root node.
+                for (size_t child_idx : node.children)
+                    per_node_is_root_node[child_idx] = false;
+            }
+
+            // Return list of root nodes.
+            for (size_t i = 0; i < per_node_is_root_node.size(); i++)
+                if (per_node_is_root_node[i])
+                    root_node_indices.emplace_back(i);
+        }
+
+        // Calc all global transforms.
+        // @NOTE: Queue method is used to accomplish breadth first.
+        struct Process_node
+        {
+            size_t parent_idx;
+            size_t my_idx;
+        };
+        constexpr size_t k_invalid{ (size_t)-1 };
+
+        std::list<Process_node> process_nodes;
+        for (size_t root_node_idx : root_node_indices)
+            process_nodes.emplace_back(k_invalid, root_node_idx);
+
+        while (!process_nodes.empty())
+        {   // Process front node in queue.
+            auto process_node{ process_nodes.front() };
+            process_nodes.pop_front();
+
+            mat4 parent_transform = GLM_MAT4_IDENTITY_INIT;
+            if (process_node.parent_idx != k_invalid)
+            {   // Read parent transform.
+                glm_mat4_copy(
+                    node_idx_to_global_transform_map.at(process_node.parent_idx).raw,
+                    parent_transform);
+            }
+
+            auto trs{ std::get<fastgltf::TRS>(asset.nodes[process_node.my_idx].transform) };
+            mat4s node_transform;
+            glm_translate_make(node_transform.raw, trs.translation.data());
+            glm_quat_rotate(node_transform.raw,
+                            versor{ trs.rotation.x(),  // Quat copy uses SIMD which conflicts
+                                    trs.rotation.y(),  // memory-wise with the fastgltf setup.
+                                    trs.rotation.z(),
+                                    trs.rotation.w() },
+                            node_transform.raw);
+            glm_scale(node_transform.raw, trs.scale.data());
+
+            glm_mat4_mul(parent_transform, node_transform.raw, node_transform.raw);
+            // glm_mat4_mul(node_transform.raw, parent_transform, node_transform.raw);
+
+            node_idx_to_global_transform_map.emplace(process_node.my_idx,
+                                                     std::move(node_transform));
+
+            // Add children as process nodes.
+            for (size_t child_node_idx : asset.nodes[process_node.my_idx].children)
+                process_nodes.emplace_back(process_node.my_idx, child_node_idx);
+        }
+    }
+
     // Load skins.
     std::unordered_map<size_t, size_t> node_idx_to_model_joint_idx_map;  // @NOTE: Need for rest of loading procs.
     std::unordered_map<size_t, size_t> gltf_asset_joint_node_idx_to_insert_order_map;  // @NOTE: For remapping joint indices.
@@ -396,7 +464,7 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
             }
         }
 
-        size_t root_node_idx;
+        size_t root_joint_node_idx;
         std::unordered_map<size_t, size_t> node_idx_to_inv_bind_mat_idx_map;
         {   // Build child-to-parent map and node-to-inverse_bind_matrices map.
             std::unordered_map<size_t, size_t> child_to_parent_map;
@@ -418,12 +486,13 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
             }
 
             // Find root node.
-            root_node_idx = skin.joints.front();
-            while (child_to_parent_map.find(root_node_idx) != child_to_parent_map.end())
-                root_node_idx = child_to_parent_map.at(root_node_idx);
+            root_joint_node_idx = skin.joints.front();
+            while (child_to_parent_map.find(root_joint_node_idx) != child_to_parent_map.end())
+                root_joint_node_idx = child_to_parent_map.at(root_joint_node_idx);
         }
 
         {   // Calc root node inverse global transform.
+#if 0  // @WRONG
             mat4 global_transform;
             {
                 auto global_trs{
@@ -452,6 +521,30 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
 
             glm_mat4_inv_precise(global_transform,
                                  m_model_skin.inverse_global_transform);
+#endif
+            // Find skin node idx.
+            size_t skin_idx{ (size_t)-1 };
+            for (size_t i = 0; i < asset.skins.size(); i++)
+                if (&asset.skins[i] == &skin)
+                {
+                    skin_idx = i;
+                    break;
+                }
+
+            size_t skin_node_idx{ (size_t)-1 };
+            for (size_t i = 0; i < asset.nodes.size(); i++)
+                if (asset.nodes[i].skinIndex.has_value() &&
+                    asset.nodes[i].skinIndex.value() == skin_idx)
+                {
+                    skin_node_idx = i;
+                    break;
+                }
+
+            // Spit out skin node inverse transform.
+            glm_mat4_copy(node_idx_to_global_transform_map.at(skin_node_idx).raw,
+                          m_model_skin.global_transform);
+            glm_mat4_inv_precise(m_model_skin.global_transform,
+                                 m_model_skin.inverse_global_transform);
         }
 
         {   // Write model joints into model skin.
@@ -463,8 +556,8 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
             std::list<Node_process_job> process_jobs;
 
             // Enter root job.
-            process_jobs.emplace_back(root_node_idx,
-                                      node_idx_to_inv_bind_mat_idx_map.at(root_node_idx));
+            process_jobs.emplace_back(root_joint_node_idx,
+                                      node_idx_to_inv_bind_mat_idx_map.at(root_joint_node_idx));
 
             // Process jobs while adding more in a breadth-first way.
             node_idx_to_model_joint_idx_map.clear();
@@ -481,6 +574,8 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
 
                 Model_joint new_model_joint{
                     std::string(asset.nodes[job.node_idx].name), };
+                glm_mat4_copy(node_idx_to_global_transform_map.at(job.node_idx).raw,
+                              new_model_joint.global_transform);  // @CHECK: @TODO: Possibly unneeded???
                 glm_mat4_copy(inv_bind_mats[job.inv_bind_mat_idx].raw,
                               new_model_joint.inverse_bind_matrix);
                 // @NOTE: Add parent-child relation later.
@@ -495,7 +590,7 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
                 {
                     process_jobs.emplace_back(child_node_idx,
                                               node_idx_to_inv_bind_mat_idx_map.at(
-                                                  root_node_idx));
+                                                  child_node_idx));
                 }
             }
             // Emplace for zero case (if zero case already exists then nothing happens with `emplace()`).
@@ -748,6 +843,7 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
         {
             Sampler_extracted_data* sampler{ nullptr };
             size_t target_joint_idx;  // Idx in `joints_sorted_breadth_first`.
+            // size_t gltf_asset_node_idx;  // For joint transform.
             fastgltf::AnimationPath trs_type;
         };
         std::vector<Channel_extracted_data> channel_datas;
@@ -866,6 +962,7 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
                     channel_datas.emplace_back(&sampler_idx_to_data_map.at(channel.samplerIndex),
                                                node_idx_to_model_joint_idx_map.at(
                                                    channel.nodeIndex.value()),
+                                            //    channel.nodeIndex.value(),
                                                channel.path);
                 }
 
@@ -921,10 +1018,10 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
         {   // Record animation frames.
             float_t curr_time{ start_time };
             for (size_t _ = 0; _ < perceived_frames; _++)
-            {
-                // Get interpolation of current frame.
+            {   // Get interpolation of current frame.
                 std::unordered_map<size_t, Model_joint_animation_frame::Joint_local_transform>
                     joint_idx_to_local_trans_map;
+                // std::unordered_map<size_t, fastgltf::TRS> joint_idx_to_joint_trs;
                 for (auto const& channel : channel_datas)
                 {
                     if (joint_idx_to_local_trans_map.find(channel.target_joint_idx)
@@ -935,6 +1032,14 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
                             channel.target_joint_idx,
                             Model_joint_animation_frame::Joint_local_transform{});
                     }
+
+                    // if (joint_idx_to_joint_trs.find(channel.target_joint_idx)
+                    //         == joint_idx_to_joint_trs.end())
+                    // {
+                    //     joint_idx_to_joint_trs.emplace(
+                    //         channel.target_joint_idx,
+                    //         std::get<fastgltf::TRS>(asset.nodes[channel.gltf_asset_node_idx].transform));
+                    // }
 
                     Model_joint_animation_frame::Joint_local_transform& joint_trans{
                         joint_idx_to_local_trans_map.at(channel.target_joint_idx) };
@@ -952,27 +1057,30 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
                             switch (channel.trs_type)
                             {
                                 case fastgltf::AnimationPath::Translation:
-                                    glm_vec3_lerp(const_cast<float_t*>(output0.raw),
-                                                  const_cast<float_t*>(output1.raw),
-                                                  interp_t,
-                                                  joint_trans.position);
+                                    // glm_vec3_lerp(const_cast<float_t*>(output0.raw),
+                                    //               const_cast<float_t*>(output1.raw),
+                                    //               interp_t,
+                                    //               joint_trans.position);
+                                    glm_vec3_copy(const_cast<float_t*>(output0.raw), joint_trans.position);
                                     break;
 
                                 case fastgltf::AnimationPath::Rotation:
                                     // @NOTE: Using `slerp()` for better accuracy than `nlerp()`.
                                     //   This is fine since it's just the import stage, not actual
                                     //   animation.
-                                    glm_quat_slerp(const_cast<float_t*>(output0.raw),
-                                                   const_cast<float_t*>(output1.raw),
-                                                   interp_t,
-                                                   joint_trans.rotation);
+                                    // glm_quat_slerp(const_cast<float_t*>(output0.raw),
+                                    //                const_cast<float_t*>(output1.raw),
+                                    //                interp_t,
+                                    //                joint_trans.rotation);
+                                    glm_quat_copy(const_cast<float_t*>(output0.raw), joint_trans.rotation);
                                     break;
 
                                 case fastgltf::AnimationPath::Scale:
-                                    glm_vec3_lerp(const_cast<float_t*>(output0.raw),
-                                                  const_cast<float_t*>(output1.raw),
-                                                  interp_t,
-                                                  joint_trans.scale);
+                                    // glm_vec3_lerp(const_cast<float_t*>(output0.raw),
+                                    //               const_cast<float_t*>(output1.raw),
+                                    //               interp_t,
+                                    //               joint_trans.scale);
+                                    glm_vec3_copy(const_cast<float_t*>(output0.raw), joint_trans.scale);
                                     break;
 
                                 case fastgltf::AnimationPath::Weights:

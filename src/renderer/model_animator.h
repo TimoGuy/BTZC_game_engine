@@ -16,6 +16,7 @@ struct Model_joint;
 
 struct Model_skin
 {
+    mat4 global_transform = GLM_MAT4_IDENTITY_INIT;  // @TODO: Possibly unnecessary?
     mat4 inverse_global_transform = GLM_MAT4_IDENTITY_INIT;
     std::unordered_map<std::string, uint32_t> joint_name_to_idx;
     std::vector<Model_joint> joints_sorted_breadth_first;
@@ -24,6 +25,7 @@ struct Model_skin
 struct Model_joint
 {
     std::string name;
+    mat4 global_transform;  // @TODO: Possibly unnecessary?
     mat4 inverse_bind_matrix;
     uint32_t parent_idx{ (uint32_t)-1 };  // @NOTE: Idx instead of pointer for cache lookup.  -Thea 2025/07/10
     std::vector<Model_joint*> children;
