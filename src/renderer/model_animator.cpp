@@ -152,16 +152,7 @@ void BT::Model_joint_animation::calc_joint_matrices(float_t time,
                  global_joint_transform);
         }
         else
-        {   // Fetch parent global transform. (@NOTE: DO NOT USE THIS BC SHOULD BE GOING OFF OTHER ANIMATIONS)
-            // auto& parent_joint{ m_model_skin.joints_sorted_breadth_first[joint.parent_idx] };
-            // glm_mat4_mul(const_cast<vec4*>(parent_joint.global_transform),
-            //      global_joint_transform,
-            //      global_joint_transform);
-
-            // Use cached parent global trans to make global trans.
-            // glm_mat4_mul(global_joint_transform,
-            //              joint_global_transform_cache[joint.parent_idx].raw,
-            //              global_joint_transform);
+        {   // Use cached parent global trans to make global trans.
             glm_mat4_mul(joint_global_transform_cache[joint.parent_idx].raw,  // @CORRECT.
                          global_joint_transform,
                          global_joint_transform);
