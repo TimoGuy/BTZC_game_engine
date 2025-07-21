@@ -133,17 +133,15 @@ void BT::Model_joint_animation::calc_joint_matrices(float_t time,
         }
 
         // Calculate global transform (relative to parent bone -> model space).
-        // auto local_joint_transform{  // @NOCHECKIN!!!!
-        //     m_frames[frame_idx_a].joint_transforms_in_order[i].interpolate_fast(
-        //         m_frames[frame_idx_b].joint_transforms_in_order[i],
-        //         interp_t) };
-        auto local_joint_transform{ m_frames[frame_idx_a].joint_transforms_in_order[i] };
+        auto local_joint_transform{
+            m_frames[frame_idx_a].joint_transforms_in_order[i].interpolate_fast(
+                m_frames[frame_idx_b].joint_transforms_in_order[i],
+                interp_t) };
 
         mat4 global_joint_transform;
         glm_translate_make(global_joint_transform, local_joint_transform.position);
         glm_quat_rotate(global_joint_transform, local_joint_transform.rotation, global_joint_transform);
         glm_scale(global_joint_transform, local_joint_transform.scale);
-        // glm_mat4_identity(global_joint_transform);
 
         if (joint.parent_idx == (uint32_t)-1)
         {   // Use skin baseline transform.
@@ -153,7 +151,7 @@ void BT::Model_joint_animation::calc_joint_matrices(float_t time,
         }
         else
         {   // Use cached parent global trans to make global trans.
-            glm_mat4_mul(joint_global_transform_cache[joint.parent_idx].raw,  // @CORRECT.
+            glm_mat4_mul(joint_global_transform_cache[joint.parent_idx].raw,
                          global_joint_transform,
                          global_joint_transform);
         }
@@ -164,19 +162,15 @@ void BT::Model_joint_animation::calc_joint_matrices(float_t time,
         // Calculate joint matrix.
         // @RANT: I hate how all the glm functions don't mark the params as const,
         //   and also since they're not getting mutated! Aaaaggghhhh
-        mat4 joint_matrix;                 // vv Possibly unnecessary vv @CHECK
-        glm_mat4_mul(const_cast<vec4*>(m_model_skin.inverse_global_transform),  // @CORRECT.
+        // @RANT: I hate how the rant above was a rant!!! The amount of strenuous
+        //   work to get this whole shitshow working was insane!!!! Hahahahahahaha  -Thea 2025/07/20
+        mat4 joint_matrix;
+        glm_mat4_mul(const_cast<vec4*>(m_model_skin.inverse_global_transform),
                      global_joint_transform,
                      joint_matrix);
         glm_mat4_mul(joint_matrix,
                      const_cast<vec4*>(joint.inverse_bind_matrix),
                      out_joint_matrices[i].raw);
-        // glm_mat4_mul(const_cast<vec4*>(joint.inverse_bind_matrix),
-        //              global_joint_transform,
-        //              joint_matrix);
-        // glm_mat4_mul(const_cast<vec4*>(m_model_skin.inverse_global_transform),
-        //              joint_matrix,
-        //              out_joint_matrices[i].raw);
     }
 
     // @DEBUG.
