@@ -405,9 +405,9 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - [x] @PLEASE: Add checkbox to toggle showing physics object wireframe.
         - [x] Toggle showing imgui demo window as well.
 
-1. IN PROG: Skeletal animations using compute shaders.
+1. DONE: Skeletal animations using compute shaders.
     - [ ] @FUTURE: ~~See `@IQHEWRIHDFKNAXI` for levels of detail and round-robin system.~~
-        - [ ] For first iter, just do all skeletal animations computed.
+        - [x] For first iter, just do all skeletal animations computed.
     - [x] Create vertex buffers to store the deformed models.
         - 1 per skinned mesh thingy.
         - If `animated` == true:
@@ -486,12 +486,23 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - IT WORKS NOW!!!!!! WOOOHOOOOO!!!!!
     - [ ] ~~Add support for GLTF2 filetype for models.~~
         - Already happening above ^^
-    - [ ] IK legs.
-    - @TODO.
+    - [ ] @FUTURE @DEFER: ~~IK legs.~~
+        - I want this too, but I need a break so that I can create the combat system.
+        - @TODO: Do this ^^ when ready for more graphical improvements!!!
 
-1. Misc bugfixes.
+1. DONE: Misc bugfixes.
     - [x] Overflow from logger.
     - [x] Logger only writing to head reserved line instead of all the lines.
+
+1. Swordplay combat.
+    - [ ] @PREREQUISITE: Skeletal animations.
+    - Cutting.
+    - Deflecting.
+    - Jumping/stomping.
+    - Dodging.
+    - [ ] Figure out how to create sensors.
+        - [ ] Research shape stuff.
+        - @REF: https://jrouwe.github.io/JoltPhysics/index.html#sensors
 
 1. Refactor: materials attached to mesh -> material set system.
     - @NOTE: The number of materials in the material set and the model can be different, rather, the material set will loop back to the beginning for the material set.
@@ -503,16 +514,6 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
     - @THOUGHT: I think that trying to ledge grab the sphere isn't quite working correctly for some reason.
         - It seems not quite right. Maybe...
             - [ ] Figure out why there's weird ledge grab behavior on the smooth sphere.
-
-1. Swordplay combat.
-    - [ ] @PREREQUISITE: Skeletal animations.
-    - Cutting.
-    - Deflecting.
-    - Jumping/stomping.
-    - Dodging.
-    - [ ] Figure out how to create sensors.
-        - [ ] Research shape stuff.
-        - @REF: https://jrouwe.github.io/JoltPhysics/index.html#sensors
 
 1. Unity to this engine migration.
     - @TODO.
