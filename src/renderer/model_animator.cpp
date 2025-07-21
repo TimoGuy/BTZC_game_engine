@@ -172,26 +172,6 @@ void BT::Model_joint_animation::calc_joint_matrices(float_t time,
                      const_cast<vec4*>(joint.inverse_bind_matrix),
                      out_joint_matrices[i].raw);
     }
-
-    // @DEBUG.
-    static float_t s_target_matrix_as_flt{ 0.0f };
-    size_t keep_idx{ static_cast<size_t>(std::floorf(s_target_matrix_as_flt)) % out_joint_matrices.size() };
-    static size_t prev_keep_idx{ (size_t)-1 };
-    for (size_t i = 0; i < out_joint_matrices.size(); i++)
-    {
-        // // if (m_model_skin.joints_sorted_breadth_first[i].name == "Neck")
-        // // if (i == keep_idx)
-        // if (i == 78)
-        //     glm_translate_make(out_joint_matrices[i].raw, vec3{ 0.0f, 0.0f, 10.0f });
-        // else
-        //     glm_mat4_identity(out_joint_matrices[i].raw);
-    }
-    s_target_matrix_as_flt += 0.01f;
-    if (keep_idx != prev_keep_idx)
-    {
-        logger::printef(logger::TRACE, "New keep idx: %d", keep_idx);
-        prev_keep_idx = keep_idx;
-    }
 }
 
 void BT::Model_joint_animation::get_joint_matrices_at_frame(
