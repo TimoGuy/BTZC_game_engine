@@ -408,7 +408,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
 1. IN PROG: Skeletal animations using compute shaders.
     - [ ] @FUTURE: ~~See `@IQHEWRIHDFKNAXI` for levels of detail and round-robin system.~~
         - [ ] For first iter, just do all skeletal animations computed.
-    - [ ] Create vertex buffers to store the deformed models.
+    - [x] Create vertex buffers to store the deformed models.
         - 1 per skinned mesh thingy.
         - If `animated` == true:
             - If the set model cannot be animated then `animated = false;` and a warning emitted.
@@ -456,7 +456,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
             - I ended up just doing a simple, hardcody version.
         - [x] @FIX: I think the joint indices are incorrect on the vertices. I think that maybe have some kind of conversion for node indices to the actual joint index upload position.
             - Tested with the Leever.glb model file. It affects the right bones now! There was a bone mismatch where the comment says "it's wrong"
-        - [ ] @FIX: Rotations and possibly all forms of transforms for the nodes.
+        - [x] @FIX: Rotations and possibly all forms of transforms for the nodes.
             - Checked. There is no weird quat ordering. It's XYZW.
             - Possibly, the recording phase??
             - Idk yet.
@@ -470,11 +470,28 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
                 - It seems like there's really only the mixing to get the global joint transform?
                     - When checking the quaternion for that it seemed correct tho.
                     - Nope nvm. The quat is correct on its own but when using it to multiply to an `Vec3.up` then it puts it to `-z`, so there needs to be some kind of transformation somewhere that's missing.
-                        - [ ] Figure that out.
+                        - [x] Figure that out.
+                        - Did a bunch of matrix math in desmos, and when trying to retrieve the inverse bind matrix found that only the 0th inverse bind matrix was being given (cry emoji)
+                            - [x] Fixed.
+                            - [x] Triple checked that the correct inverse bind matrices are loaded and associated with the right bones.
+                - So after discovering the inverse bind matrices thing, I found that it fixes issues with a lot of issues but there's still some weirdness.
+                    - Looked into making sure that the inverse bind matrices and the local transforms are correct. They are associated to the right bones.
+                    - Looked into making sure that the animated data is correct. It's correct.
+                    - Looked into making sure the joint transforms are in order with `.joint_transforms_in_order` and `joints_sorted_breadth_first`. It's correct.
+                    - Looked into making sure that joints are in fact sorted breadth first.
+                    - Perhaps the vertex joint indices are incorrect?
+                        - It actually REALLY looks like this.
+                        - Yes it was~!
+                            - [x] Fixed.
+        - IT WORKS NOW!!!!!! WOOOHOOOOO!!!!!
     - [ ] ~~Add support for GLTF2 filetype for models.~~
         - Already happening above ^^
     - [ ] IK legs.
     - @TODO.
+
+1. Misc bugfixes.
+    - [x] Overflow from logger.
+    - [x] Logger only writing to head reserved line instead of all the lines.
 
 1. Refactor: materials attached to mesh -> material set system.
     - @NOTE: The number of materials in the material set and the model can be different, rather, the material set will loop back to the beginning for the material set.

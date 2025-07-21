@@ -483,9 +483,10 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
                     }
                     child_to_parent_map.emplace(child_node_idx, joint_node_idx);
                 }
+                inv_bind_mat_idx++;
             }
 
-            // Find root node.
+            // Find joint root node.
             root_joint_node_idx = skin.joints.front();
             while (child_to_parent_map.find(root_joint_node_idx) != child_to_parent_map.end())
                 root_joint_node_idx = child_to_parent_map.at(root_joint_node_idx);
@@ -541,10 +542,54 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
                 }
 
             // Spit out skin node inverse transform.
-            glm_mat4_copy(node_idx_to_global_transform_map.at(skin_node_idx).raw,
-                          m_model_skin.global_transform);
-            glm_mat4_inv_precise(m_model_skin.global_transform,
+            glm_mat4_inv_precise(node_idx_to_global_transform_map.at(skin_node_idx).raw,
                                  m_model_skin.inverse_global_transform);
+        }
+
+        {   // Calc full child to parent node map.
+            std::unordered_map<size_t, size_t> child_to_parent_node_idx_map;
+            for (size_t parent_node_idx = 0; parent_node_idx < asset.nodes.size(); parent_node_idx++)
+                for (size_t child_node_idx : asset.nodes[parent_node_idx].children)
+                {
+                    child_to_parent_node_idx_map.emplace(child_node_idx, parent_node_idx);
+                }
+
+            // Calc jjlkjlkjljklj.
+            // auto goto_parent_fn = [&child_to_parent_node_idx_map](size_t node_idx) -> size_t {
+            //     if (child_to_parent_node_idx_map.find(node_idx) == child_to_parent_node_idx_map.end())
+            //         return -1;
+            //     else
+            //         return child_to_parent_node_idx_map.at(node_idx);
+            // };
+
+            // mat4 baseline_transform = GLM_MAT4_IDENTITY_INIT;
+            // size_t current_node_idx{ goto_parent_fn(root_joint_node_idx) };
+            // while (current_node_idx != (size_t)-1)
+            // {
+            //     glm_mat4_mul()
+
+            //     // Go up one.
+            //     current_node_idx = goto_parent_fn(current_node_idx);
+            // }
+
+            // Calc baseline transform.
+            if (child_to_parent_node_idx_map.find(root_joint_node_idx) != child_to_parent_node_idx_map.end())
+            {
+                glm_mat4_copy(
+                    node_idx_to_global_transform_map.at(
+                        child_to_parent_node_idx_map.at(root_joint_node_idx)).raw,
+                    m_model_skin.baseline_transform);
+            }
+            else
+            {
+                glm_mat4_identity(m_model_skin.baseline_transform);
+            }
+        }
+
+        std::unordered_map<size_t, size_t> node_idx_to_gltf_joint_idx_map;
+        for (size_t gji = 0; gji < skin.joints.size(); gji++)
+        {   // Create mapping from node idx to gltf joint idx.
+            node_idx_to_gltf_joint_idx_map.emplace(skin.joints[gji], gji);
         }
 
         {   // Write model joints into model skin.
@@ -581,7 +626,7 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
                 // @NOTE: Add parent-child relation later.
 
                 m_model_skin.joints_sorted_breadth_first.emplace_back(new_model_joint);
-                gltf_asset_joint_node_idx_to_insert_order_map.emplace(job.node_idx,                             // @HERE!!!!
+                gltf_asset_joint_node_idx_to_insert_order_map.emplace(node_idx_to_gltf_joint_idx_map.at(job.node_idx),                             // @HERE!!!!
                 // gltf_asset_joint_node_idx_to_insert_order_map.emplace(node_index_insert_order.size(),
                                                                       node_index_insert_order.size());
                 node_index_insert_order.emplace_back(job.node_idx);

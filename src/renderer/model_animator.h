@@ -16,7 +16,8 @@ struct Model_joint;
 
 struct Model_skin
 {
-    mat4 global_transform = GLM_MAT4_IDENTITY_INIT;  // @TODO: Possibly unnecessary?
+    // mat4 global_transform = GLM_MAT4_IDENTITY_INIT;  // @TODO: Possibly unnecessary?
+    mat4 baseline_transform = GLM_MAT4_IDENTITY_INIT;
     mat4 inverse_global_transform = GLM_MAT4_IDENTITY_INIT;
     std::unordered_map<std::string, uint32_t> joint_name_to_idx;
     std::vector<Model_joint> joints_sorted_breadth_first;

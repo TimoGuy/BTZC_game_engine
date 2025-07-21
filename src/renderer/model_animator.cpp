@@ -146,8 +146,8 @@ void BT::Model_joint_animation::calc_joint_matrices(float_t time,
         // glm_mat4_identity(global_joint_transform);
 
         if (joint.parent_idx == (uint32_t)-1)
-        {   // Use skin transform as baseline.
-            glm_mat4_mul(const_cast<vec4*>(m_model_skin.global_transform),
+        {   // Use skin baseline transform.
+            glm_mat4_mul(const_cast<vec4*>(m_model_skin.baseline_transform),
                  global_joint_transform,
                  global_joint_transform);
         }

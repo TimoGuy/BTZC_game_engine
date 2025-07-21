@@ -173,7 +173,8 @@ void BT::logger::printe(Log_type type, string entry)
     uint32_t head_row{ reserve_rows(rows.size()) };
     for (auto& row : rows)
     {
-        strncpy(s_all_entry_data[head_row], row.c_str(), row.size());
+        strncpy(s_all_entry_data[head_row % k_num_rows], row.c_str(), row.size());
+        head_row++;
     }
 
     if (check_show_type(type))
