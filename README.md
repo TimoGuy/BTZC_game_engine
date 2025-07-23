@@ -494,6 +494,16 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
     - [x] Overflow from logger.
     - [x] Logger only writing to head reserved line instead of all the lines.
 
+1. Unity to this engine migration.
+    - [x] Import scene as yaml structure.
+        - Using `python:unityparser`
+    - [ ] Get gameobject structure figured out.
+        - [ ] Game objects.
+        - [ ] Transforms.
+        - [ ] Transform hierarchy.
+    - [ ] Get mesh importing figured out.
+    - @TODO.
+
 1. Swordplay combat.
     - [ ] @PREREQUISITE: Skeletal animations.
     - Cutting.
@@ -514,9 +524,6 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
     - @THOUGHT: I think that trying to ledge grab the sphere isn't quite working correctly for some reason.
         - It seems not quite right. Maybe...
             - [ ] Figure out why there's weird ledge grab behavior on the smooth sphere.
-
-1. Unity to this engine migration.
-    - @TODO.
 
 1. Level authoring tools.
     - [ ] Think about wanted level authoring tools
