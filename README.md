@@ -26,6 +26,12 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
 - World Peace.
 
 
+## Ideas.
+
+- Base the engine setup and execution flow off the Unity execution flowchart.
+    - I do have some thinking to do about why there is an animator update in both the physics and rendering parts and what that could do there.
+
+
 ## Todo List.
 
 1. DONE: Get basic renderer assembled.
@@ -493,6 +499,14 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
 1. DONE: Misc bugfixes.
     - [x] Overflow from logger.
     - [x] Logger only writing to head reserved line instead of all the lines.
+
+------------------------------------------------------------------------------------------------------------------------
+
+1. Resting point.
+    - Putting this project on hold since Bozzy wants to make an RTS instead.
+    - I am still curious how I could make a game engine that's extensible instead of like a "game w a level editor in it"
+
+------------------------------------------------------------------------------------------------------------------------
 
 1. Unity to this engine migration.
     - [x] Import scene as yaml structure.
