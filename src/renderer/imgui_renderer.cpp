@@ -7,6 +7,7 @@
 #include "imgui.h"
 #include "ImGuizmo.h"
 #include "imgui_internal.h"
+#include "logger.h"
 #include <fstream>
 
 
@@ -165,7 +166,61 @@ void BT::ImGui_renderer::render_imgui()
     {
         ImGui::Begin("Console");
         {
-            ImGui::Text("@TODO: Implement");
+            if (ImGui::Button("Clear##console"))
+            {
+                logger::clear_log_entries();
+            }
+
+            ImGui::SameLine();
+
+            static bool s_console_auto_scroll{ true };
+            ImGui::Checkbox("Auto-scroll##console", &s_console_auto_scroll);
+
+            ImGui::Separator();
+
+            // // Reserve enough left-over height for 1 separator + 1 input text.
+            // float_t const footer_height_to_reserve{ ImGui::GetStyle().ItemSpacing.y
+            //                                         + ImGui::GetFrameHeightWithSpacing() };
+            ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0, 0, 0, 1));
+            if (ImGui::BeginChild("console_scrolling_region",
+                                  ImVec2(0, 0), //-footer_height_to_reserve),
+                                  ImGuiChildFlags_NavFlattened,
+                                  ImGuiWindowFlags_HorizontalScrollbar))
+            {
+                ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 1)); // Tighten spacing.
+
+                // Print all log entries recorded.
+                auto [head_idx, tail_idx] = logger::get_head_and_tail();
+                for (auto row_idx = head_idx; row_idx != tail_idx; row_idx++)
+                {
+                    auto [log_type, log_str] = logger::read_log_entry(row_idx);
+
+                    static auto const s_get_text_color_fn = [](logger::Log_type type) {
+                        switch (type)
+                        {
+                            case logger::TRACE: return ImVec4(1, 1, 1, 1);
+                            case logger::WARN:  return ImVec4(0.647, 0.722, 0.180, 1);
+                            case logger::ERROR: return ImVec4(0.719, 0.180, 0.180, 1);
+                            default: return ImVec4();  // Ignore.
+                        }
+                    };
+
+                    auto text_color{ s_get_text_color_fn(log_type) };
+                    ImGui::PushStyleColor(ImGuiCol_Text, text_color);
+                    ImGui::TextUnformatted(log_str);
+                    ImGui::PopStyleColor();
+                }
+
+                // Scroll to bottom if auto scroll enabled.
+                if (s_console_auto_scroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY())
+                {
+                    ImGui::SetScrollHereY(1.0f);
+                }
+
+                ImGui::PopStyleVar();
+            }
+            ImGui::EndChild();
+            ImGui::PopStyleColor();
         }
         ImGui::End();
     }

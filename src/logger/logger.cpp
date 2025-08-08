@@ -34,7 +34,14 @@ constexpr uint32_t k_num_columns{ 120 };
 constexpr uint32_t k_num_columns_w_encoding{ k_num_columns + sizeof("\e[9;99x") * 4 };
 constexpr uint32_t k_num_rows{ 16384 };  // @NOTE: Must be a power of 2.
 static atomic_uint32_t s_next_entry{ 0 };
-static array<char[k_num_columns_w_encoding], k_num_rows> s_all_entry_data;
+static atomic_uint32_t s_recording_head_entry{ 0 };  // For keeping track of log entries.
+
+struct Row_entry
+{
+    Log_type log_type;
+    char char_columns[k_num_columns_w_encoding];
+};
+static array<Row_entry, k_num_rows> s_all_entry_data;
 
 static atomic_uint32_t s_print_mask{ ALL };
 
@@ -60,31 +67,49 @@ static string const k_ansi_cc_bold_white  = "\e[1;37m";
 static string const k_ansi_cc_reset = "\e[0m";
 
 // Helper functions.
-string get_type_prefix_str(Log_type type, uint32_t& out_prefix_length)
+string get_type_prefix_str(Log_type type, bool ansi_colored, uint32_t& out_prefix_length)
 {
     string iter_str{ to_string(s_mainloop_iteration.load()) };
     switch (type)
     {
         case TRACE:
-            out_prefix_length = ("[trace](" + iter_str + ") :: ").size();
-            return (k_ansi_cc_bold_white + "[" +
-                    k_ansi_cc_bold_cyan  + "trace" +
-                    k_ansi_cc_bold_white + "](" + iter_str + ") :: " +
-                    k_ansi_cc_reset);
+        {
+            string no_ansi_str{ "[trace](" + iter_str + ") :: " };
+            out_prefix_length = no_ansi_str.size();
+            if (ansi_colored)
+                return (k_ansi_cc_bold_white + "[" +
+                        k_ansi_cc_bold_cyan  + "trace" +
+                        k_ansi_cc_bold_white + "](" + iter_str + ") :: " +
+                        k_ansi_cc_reset);
+            else
+                return no_ansi_str;
+        }
 
         case WARN:
-            out_prefix_length = ("[warn](" + iter_str + ") :: ").size();
-            return (k_ansi_cc_bold_white  + "[" +
-                    k_ansi_cc_bold_yellow + "warn" +
-                    k_ansi_cc_bold_white  + "](" + iter_str + ") :: " +
-                    k_ansi_cc_reset);
+        {
+            string no_ansi_str{ "[warn](" + iter_str + ") :: " };
+            out_prefix_length = no_ansi_str.size();
+            if (ansi_colored)
+                return (k_ansi_cc_bold_white  + "[" +
+                        k_ansi_cc_bold_yellow + "warn" +
+                        k_ansi_cc_bold_white  + "](" + iter_str + ") :: " +
+                        k_ansi_cc_reset);
+            else
+                return no_ansi_str;
+        }
 
         case ERROR:
-            out_prefix_length = ("[error(" + iter_str + ")] :: ").size();
-            return (k_ansi_cc_bold_white + "[" +
-                    k_ansi_cc_bold_red   + "error" +
-                    k_ansi_cc_bold_white + "](" + iter_str + ") :: " +
-                    k_ansi_cc_reset);
+        {
+            string no_ansi_str{ "[error](" + iter_str + ") :: " };
+            out_prefix_length = no_ansi_str.size();
+            if (ansi_colored)
+                return (k_ansi_cc_bold_white + "[" +
+                        k_ansi_cc_bold_red   + "error" +
+                        k_ansi_cc_bold_white + "](" + iter_str + ") :: " +
+                        k_ansi_cc_reset);
+            else
+                return no_ansi_str;
+        }
 
         default:
             // Unsupported Log type (or is aggregate type which is unsupported also).
@@ -132,7 +157,7 @@ void BT::logger::printef(Log_type type, string format_str, ...)
 void BT::logger::printe(Log_type type, string entry)
 {
     uint32_t prefix_length;
-    string prefix{ get_type_prefix_str(type, prefix_length) };
+    string prefix{ get_type_prefix_str(type, false, prefix_length) };
 
     // Cut up entry into column width.
     vector<string> rows;
@@ -173,7 +198,9 @@ void BT::logger::printe(Log_type type, string entry)
     uint32_t head_row{ reserve_rows(rows.size()) };
     for (auto& row : rows)
     {
-        strncpy(s_all_entry_data[head_row % k_num_rows], row.c_str(), row.size());
+        uint32_t current_row{ head_row % k_num_rows };
+        s_all_entry_data[current_row].log_type = type;
+        strncpy(s_all_entry_data[current_row].char_columns, row.c_str(), row.size());
         head_row++;
     }
 
@@ -195,4 +222,21 @@ void BT::logger::printe(Log_type type, string entry)
             std::cout << row << std::endl;
         }
     }
+}
+
+tuple<uint32_t, uint32_t> BT::logger::get_head_and_tail()
+{
+    return { s_recording_head_entry.load(), s_next_entry.load() };
+}
+
+tuple<BT::logger::Log_type, char const*> BT::logger::read_log_entry(uint32_t row_idx)
+{
+    uint32_t actual_row_idx{ row_idx % k_num_rows };
+    return { s_all_entry_data[actual_row_idx].log_type,
+             s_all_entry_data[actual_row_idx].char_columns };
+}
+
+void BT::logger::clear_log_entries()
+{
+    s_recording_head_entry = s_next_entry.load();
 }
