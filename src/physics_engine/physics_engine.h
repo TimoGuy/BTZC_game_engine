@@ -26,7 +26,7 @@ public:
     void* get_physics_body_ifc();
     void* get_physics_temp_allocator_ptr();
 
-    static constexpr uint32_t k_simulation_hz{ 50 };
+    static constexpr uint32_t k_simulation_hz{ 60 };
     static constexpr float_t k_simulation_delta_time{ 1.0f / k_simulation_hz };
 
     float_t limit_delta_time(float_t delta_time);

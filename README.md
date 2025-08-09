@@ -510,7 +510,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
 
 1. Some things I want to create!!!!
     - [x] Console window. (Once the renderer is initialized, then pipe the debug printlns to that window)
-    - [ ] Change animation frames and physics to 60hz instead of 50hz. (This allows for a 1:1 experience for 60fps gamers, but it will definitely be harder on the system)
+    - [x] Change animation frames and physics to 60hz instead of 50hz. (This allows for a 1:1 experience for 60fps gamers, but it will definitely be harder on the system)
     - [ ] Animation authoring tool window. (So it lists out all the animations and one can be clicked to be edited and events and variable override times can get added to the animation. The variable overrides and events are integer frames.)
     - [ ] Use simple anim dude and create fighting animation movesets.
 

@@ -67,7 +67,7 @@ public:
     void calc_joint_matrices(float_t time, bool loop, std::vector<mat4s>& out_joint_matrices) const;
     void get_joint_matrices_at_frame(uint32_t frame_idx, std::vector<mat4s>& out_joint_matrices) const;
 
-    static constexpr float_t k_frames_per_second{ 50.0f };
+    static constexpr float_t k_frames_per_second{ 60.0f };
 
 private:
     Model_skin const& m_model_skin;
