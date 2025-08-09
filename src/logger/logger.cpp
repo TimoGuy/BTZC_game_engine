@@ -125,7 +125,7 @@ bool check_show_type(Log_type type)
 
 uint32_t reserve_rows(uint32_t num_rows)
 {
-    return (s_next_entry += num_rows);
+    return ((s_next_entry += num_rows) - num_rows);
 }
 
 }  // namespace BT::logger

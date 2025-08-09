@@ -9,3 +9,6 @@
 - Aaaaggghhh it looks like there's not gonna be anymore ansi coloring in the console bc it's kinda haaaarrd ^_^;
 
 - Ok this seems done for now.
+
+- NEVERMIND!!! The logs printed are off.
+    - [x] Fixed.

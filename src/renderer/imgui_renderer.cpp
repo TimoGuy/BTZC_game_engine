@@ -166,9 +166,24 @@ void BT::ImGui_renderer::render_imgui()
     {
         ImGui::Begin("Console");
         {
+            bool copy_logs{ false };
+            if (ImGui::Button("Copy##console"))
+            {
+                copy_logs = true;
+            }
+
+            ImGui::SameLine();
+
             if (ImGui::Button("Clear##console"))
             {
                 logger::clear_log_entries();
+            }
+
+            ImGui::SameLine();
+
+            if (ImGui::Button("DEBUG add test log##console"))
+            {
+                logger::printe(logger::TRACE, "TEST LOG ENTRY HERE");
             }
 
             ImGui::SameLine();
