@@ -6,6 +6,8 @@
 #include "debug_render_job.h"
 #include "imgui.h"
 #include "ImGuizmo.h"
+#include "ImSequencer.h"
+#include "ImCurveEdit.h"  // @TEMP @NOCHECKIN
 #include "imgui_internal.h"
 #include "logger.h"
 #include <array>
@@ -337,6 +339,170 @@ void BT::ImGui_renderer::render_imgui__level_editor_context()
     ImGui::End();
 }
 
+namespace
+{
+
+class Animation_frame_data_sequencer
+    : public ImSequencer::SequenceInterface
+{
+public:
+    int32_t mFrameMin = 0;
+    int32_t mFrameMax = 60;
+
+    int32_t GetFrameMin() const override
+    {
+        return mFrameMin;
+    }
+
+    int32_t GetFrameMax() const override
+    {
+        return mFrameMax;
+    }
+
+    int32_t GetItemCount() const override
+    {
+        return 5;
+    }
+
+    void BeginEdit(int32_t index) override
+    {
+        BT::logger::printef(BT::logger::TRACE, "Fn: BeginEdit(%i);", index);
+    }
+
+    void EndEdit() override
+    {
+        BT::logger::printe(BT::logger::TRACE, "Fn: EndEdit();");
+    }
+
+    int32_t GetItemTypeCount() const override
+    {
+        return 1;
+    }
+
+    char const* GetItemTypeName(int32_t type_index) const override
+    {
+        return "Something type name";
+    }
+    
+    char const* GetItemLabel(int32_t index) const override
+    {
+        switch (index)
+        {
+            case 0: return "squeegee";
+            case 1: return "hip hop";
+            case 2: return "dementia";
+            case 3: return "solo leveling";
+            case 4: return "transgenders";
+            default: assert(false); return "";
+        }
+    }
+    
+    char const* GetCollapseFmt() const override
+    {
+        return "%d Frames / %d entries";
+    }
+
+    struct MySequenceItem
+    {
+        int mType = 0;
+        int mFrameStart = 4, mFrameEnd = 40;
+        bool mExpanded = false;
+    };
+    std::array<MySequenceItem, 5> myItems;
+
+    void Get(int32_t index, int32_t** start, int32_t** end, int32_t* type, uint32_t* color) override
+    {
+        MySequenceItem& item = myItems[index];
+        if (color)
+            *color = 0xFFAA8080; // same color for everyone, return color based on type
+        if (start)
+            *start = &item.mFrameStart;
+        if (end)
+            *end = &item.mFrameEnd;
+        if (type)
+            *type = item.mType;
+    }
+
+    void Add(int32_t type) override
+    {
+        BT::logger::printef(BT::logger::TRACE, "Fn: Add(%i);", type);
+    }
+
+    void Del(int32_t index) override
+    {
+        BT::logger::printef(BT::logger::TRACE, "Fn: Del(%i);", index);
+    }
+
+    void Duplicate(int32_t index) override
+    {
+        BT::logger::printef(BT::logger::TRACE, "Fn: Duplicate(%i);", index);
+    }
+
+    void Copy() override
+    {
+        BT::logger::printe(BT::logger::TRACE, "Fn: Copy();");
+    }
+
+    void Paste() override
+    {
+        BT::logger::printe(BT::logger::TRACE, "Fn: Paste();");
+    }
+
+    size_t GetCustomHeight(int32_t index) override
+    {
+        BT::logger::printef(BT::logger::TRACE, "Fn: GetCustomHeight(%i);", index);
+        return 0;
+    }
+
+    void DoubleClick(int32_t index) override
+    {
+        BT::logger::printef(BT::logger::TRACE, "Fn: DoubleClick(%i);", index);
+    }
+
+    void CustomDraw(int32_t index, ImDrawList* draw_list, const ImRect& rc, const ImRect& legendRect, const ImRect& clippingRect, const ImRect& legendClippingRect) override
+    {
+        static const char* labels[] = { "Translation", "Rotation" , "Scale" };
+
+        // rampEdit.mMax = ImVec2(float(mFrameMax), 1.f);
+        // rampEdit.mMin = ImVec2(float(mFrameMin), 0.f);
+        draw_list->PushClipRect(legendClippingRect.Min, legendClippingRect.Max, true);
+        for (int i = 0; i < 3; i++)
+        {
+            // ImVec2 pta(legendRect.Min.x + 30, legendRect.Min.y + i * 14.f);
+            // ImVec2 ptb(legendRect.Max.x, legendRect.Min.y + (i + 1) * 14.f);
+            // draw_list->AddText(pta, rampEdit.mbVisible[i] ? 0xFFFFFFFF : 0x80FFFFFF, labels[i]);
+            // if (ImRect(pta, ptb).Contains(ImGui::GetMousePos()) && ImGui::IsMouseClicked(0))
+            //     rampEdit.mbVisible[i] = !rampEdit.mbVisible[i];
+        }
+        draw_list->PopClipRect();
+
+        ImGui::SetCursorScreenPos(rc.Min);
+        // ImCurveEdit::Edit(rampEdit, rc.Max - rc.Min, 137 + index, &clippingRect);
+    }
+
+    void CustomDrawCompact(int32_t index, ImDrawList* draw_list, const ImRect& rc, const ImRect& clippingRect) override
+    {
+        // rampEdit.mMax = ImVec2(float(mFrameMax), 1.f);
+        // rampEdit.mMin = ImVec2(float(mFrameMin), 0.f);
+        draw_list->PushClipRect(clippingRect.Min, clippingRect.Max, true);
+        for (int i = 0; i < 3; i++)
+        {
+            // for (unsigned int j = 0; j < rampEdit.mPointCount[i]; j++)
+            // {
+            //     float p = rampEdit.mPts[i][j].x;
+            //     if (p < myItems[index].mFrameStart || p > myItems[index].mFrameEnd)
+            //         continue;
+            //     float r = (p - mFrameMin) / float(mFrameMax - mFrameMin);
+            //     float x = ImLerp(rc.Min.x, rc.Max.x, r);
+            //     draw_list->AddLine(ImVec2(x, rc.Min.y + 6), ImVec2(x, rc.Max.y - 4), 0xAA000000, 4.f);
+            // }
+        }
+        draw_list->PopClipRect();
+    }
+};
+
+}  // namespace
+
 void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
 {
     static int32_t s_current_animation_clip{ 0 };
@@ -359,12 +525,34 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
     // Animation timeline.
     ImGui::Begin("Animation timeline");
     {
-
         ImGui::Combo("Animation clip", &s_current_animation_clip, "Idle\0Running\0Jump\0Fall\0");
         ImGui::Text("Frame: 4/20");
 
         ImGui::Separator();
 
+        static Animation_frame_data_sequencer s_sequencer;
+        // let's create the sequencer
+        static int selectedEntry = -1;
+        static int firstFrame = 0;
+        static bool expanded = true;
+        static int currentFrame = 30;
+
+        ImGui::PushItemWidth(130);
+        ImGui::InputInt("Frame Min", &s_sequencer.mFrameMin);
+        ImGui::SameLine();
+        ImGui::InputInt("Frame ", &currentFrame);
+        ImGui::SameLine();
+        ImGui::InputInt("Frame Max", &s_sequencer.mFrameMax);
+        ImGui::PopItemWidth();
+        ImSequencer::Sequencer(&s_sequencer, &currentFrame, &expanded, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_STARTEND | ImSequencer::SEQUENCER_ADD | ImSequencer::SEQUENCER_DEL | ImSequencer::SEQUENCER_COPYPASTE | ImSequencer::SEQUENCER_CHANGE_FRAME);
+        // @TODO vvvv
+        // // add a UI to edit that particular item
+        // if (selectedEntry != -1)
+        // {
+        //     const MySequence::MySequenceItem &item = mySequence.myItems[selectedEntry];
+        //     ImGui::Text("I am a %s, please edit me", SequencerItemTypeNames[item.mType]);
+        //     // switch (type) ....
+        // }
         ImGui::Text("@TODO: Add sequencer table here");
     }
     ImGui::End();

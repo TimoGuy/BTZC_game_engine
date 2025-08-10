@@ -161,6 +161,8 @@ add_executable(${PROJECT_NAME}
     # ImGuizmo source files.
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/ImGuizmo/ImGuizmo.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/ImGuizmo/ImGuizmo.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/ImGuizmo/ImSequencer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/ImGuizmo/ImSequencer.h
 
     # stb header files.
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/stb/stb_image.h
