@@ -339,9 +339,19 @@ void BT::ImGui_renderer::render_imgui__level_editor_context()
 
 void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
 {
+    static int32_t s_current_animation_clip{ 0 };
+
     // Model selection.
     ImGui::Begin("Model select");
     {
+        ImGui::Button("Refresh list");
+        ImGui::SameLine();
+        ImGui::Spacing();
+        ImGui::SameLine();
+        ImGui::Text("Models:69 Avg:6.9KB Mdn:6.9KB Max:69.4KB");
+
+        ImGui::SeparatorText("List of Models");
+
         ImGui::Text("@TODO: Implement");
     }
     ImGui::End();
@@ -349,7 +359,13 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
     // Animation timeline.
     ImGui::Begin("Animation timeline");
     {
-        ImGui::Text("@TODO: Implement");
+
+        ImGui::Combo("Animation clip", &s_current_animation_clip, "Idle\0Running\0Jump\0Fall\0");
+        ImGui::Text("Frame: 4/20");
+
+        ImGui::Separator();
+
+        ImGui::Text("@TODO: Add sequencer table here");
     }
     ImGui::End();
 }
