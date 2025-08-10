@@ -28,6 +28,9 @@ private:
     Game_object_pool* m_game_obj_pool{ nullptr };
     Camera* m_camera{ nullptr };
     Renderer* m_renderer{ nullptr };
+
+    void render_imgui__level_editor_context();
+    void render_imgui__animation_frame_data_editor_context();
 };
 
 }  // namespace BT
