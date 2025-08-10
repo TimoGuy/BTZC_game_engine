@@ -10,6 +10,7 @@
 #include "logger.h"
 #include <array>
 #include <fstream>
+#include <string>
 
 
 void BT::ImGui_renderer::set_selected_game_obj(Game_object* game_obj)
@@ -39,6 +40,12 @@ void BT::ImGui_renderer::render_imgui()
         &ImGui_renderer::render_imgui__animation_frame_data_editor_context,
     };
     static Editor_context s_current_editor_context{ Editor_context(0) };
+
+    static auto const s_window_name_w_context_fn = [&](char const* const name) {
+        return (std::string(name)
+                + "##editor_context_"
+                + std::to_string(s_current_editor_context));
+    };
 
     // Main menu bar.
     if (ImGui::BeginMainMenuBar())
@@ -121,7 +128,9 @@ void BT::ImGui_renderer::render_imgui()
     // Game view.
     ImGui::SetNextWindowViewport(ImGui::GetMainViewport()->ID);  // Force game view to stay in main window.
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
-    ImGui::Begin("Main viewport", nullptr, ImGuiWindowFlags_NoScrollbar);
+    ImGui::Begin(s_window_name_w_context_fn("Main viewport").c_str(),
+                 nullptr,
+                 ImGuiWindowFlags_NoScrollbar);
     {
         static bool s_on_play_switch_to_player_camera{ true };
 
@@ -191,7 +200,7 @@ void BT::ImGui_renderer::render_imgui()
     ImGui::PopStyleVar();
 
     // Console.
-    ImGui::Begin("Console");
+    ImGui::Begin(s_window_name_w_context_fn("Console").c_str());
     {
         bool copy_logs{ false };
         if (ImGui::Button("Copy##console"))
@@ -273,6 +282,9 @@ void BT::ImGui_renderer::render_imgui()
     // Context dependant gui.
     auto fn_ptr{ k_editor_context_fns[s_current_editor_context] };
     ((*this).*fn_ptr)();
+
+    // Context dependant ID.
+    ImGui::PopID();
 }
 
 void BT::ImGui_renderer::render_imgui__level_editor_context()
@@ -329,4 +341,18 @@ void BT::ImGui_renderer::render_imgui__level_editor_context()
 }
 
 void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
-{}
+{
+    // Model selection.
+    ImGui::Begin("Model select");
+    {
+        ImGui::Text("@TODO: Implement");
+    }
+    ImGui::End();
+
+    // Animation timeline.
+    ImGui::Begin("Animation timeline");
+    {
+        ImGui::Text("@TODO: Implement");
+    }
+    ImGui::End();
+}

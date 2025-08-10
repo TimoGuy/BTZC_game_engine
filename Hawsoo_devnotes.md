@@ -25,3 +25,11 @@
     - Or maybe it could just be a dropdown like in Unity???
     - Or maybe we could just ignore it all and just change the UI to have one level loaded.
         - Like grayed out or something.
+
+- [x] Get simple context switching.
+
+- Dang, like ImGui code just is monstrous how large it gets. Crazy.
+
+- [ ] Add placeholder for:
+    - Timeline thingy.
+    - Model selector.
