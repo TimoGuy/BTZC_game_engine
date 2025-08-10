@@ -272,6 +272,7 @@ void BT::Camera::render_imgui()
     auto& camera{ m_data->camera };
 
     ImGui::Begin("Camera properties");
+    ImGui::PushItemWidth(ImGui::GetFontSize() * -10);
     {
         ImGui::Text("Mode: %s", Data::Frontend::s_state_strs[m_data->frontend.state].c_str());
         ImGui::Text("aspect_ratio: %.3f", camera.aspect_ratio);
@@ -301,6 +302,7 @@ void BT::Camera::render_imgui()
             camera.view_direction[0] *= -1.0f;
         }
     }
+    ImGui::PopItemWidth();
     ImGui::End();
 }
 

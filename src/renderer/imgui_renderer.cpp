@@ -8,6 +8,7 @@
 #include "ImGuizmo.h"
 #include "imgui_internal.h"
 #include "logger.h"
+#include <array>
 #include <fstream>
 
 
@@ -20,17 +21,31 @@ void BT::ImGui_renderer::render_imgui()
 {
     // @NOCHECKIN: @TEMP
     static bool s_show_game_view{ true };
-    static bool s_show_scene_hierarchy{ true };
     static bool s_show_camera_props{ true };
     static bool s_show_console{ true };
+    static bool s_show_level_select{ true };
+    static bool s_show_scene_hierarchy{ true };
     static bool s_show_gameobj_palette{ true };
     static bool s_show_demo_window{ false };
     static ImGuiIO& io = ImGui::GetIO();
 
+    // Context switching.
+    enum Editor_context
+    {
+        LEVEL_EDITOR,
+        ANIMATION_FRAME_DATA_EDITOR,
+        NUM_EDITOR_CONTEXTS
+    };
+    static std::array<std::string, NUM_EDITOR_CONTEXTS> const k_editor_context_strs{
+        "Level Editor",
+        "Animation Frame Data Editor",
+    };
+    static Editor_context s_current_editor_context{ Editor_context(0) };
+
     // Main menu bar.
     if (ImGui::BeginMainMenuBar())
     {
-        if (ImGui::BeginMenu("Menu"))
+        if (ImGui::BeginMenu("Menu##main_menu_bar_option"))
         {
             if (ImGui::MenuItem("New")) {}
             if (ImGui::MenuItem("Save"))
@@ -64,6 +79,37 @@ void BT::ImGui_renderer::render_imgui()
             }
 
             ImGui::EndMenu();
+        }
+
+        // Context switching menu.
+        ImGui::Spacing();
+        ImGui::Separator();
+        ImGui::Spacing();
+
+        for (size_t i = 0; i < NUM_EDITOR_CONTEXTS; i++)
+        {
+            auto color_btn_default{ ImGui::GetStyleColorVec4(ImGuiCol_Button) };
+            auto color_btn_hover{ ImGui::GetStyleColorVec4(ImGuiCol_ButtonHovered) };
+            auto color_btn_active{ ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive) };
+            {   // Make very translucent for showing they're not the active button.
+                color_btn_default.w *= (s_current_editor_context == i ? 1.0f : 0.25f);
+                color_btn_hover.w *= (s_current_editor_context == i ? 1.0f : 0.25f);
+                color_btn_active.w *= (s_current_editor_context == i ? 1.0f : 0.25f);
+            }
+
+            ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 12.0f);
+            ImGui::PushStyleColor(ImGuiCol_Button, color_btn_default);
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, color_btn_hover);
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, color_btn_active);
+            // ImGui::BeginDisabled(s_current_editor_context == i);
+            if (ImGui::Button((k_editor_context_strs[i]
+                               + "##main_menu_bar_context_switch").c_str()))
+            {   // New editor context.
+                s_current_editor_context = Editor_context(i);
+            }
+            // ImGui::EndDisabled();
+            ImGui::PopStyleColor(3);
+            ImGui::PopStyleVar();
         }
 
         ImGui::EndMainMenuBar();
@@ -149,12 +195,6 @@ void BT::ImGui_renderer::render_imgui()
         ImGui::PopStyleVar();
     }
 
-    // Scene hierarchy.
-    if (s_show_scene_hierarchy)
-    {
-        m_game_obj_pool->render_imgui_scene_hierarchy();
-    }
-
     // Camera properties.
     if (s_show_camera_props)
     {
@@ -193,9 +233,6 @@ void BT::ImGui_renderer::render_imgui()
 
             ImGui::Separator();
 
-            // // Reserve enough left-over height for 1 separator + 1 input text.
-            // float_t const footer_height_to_reserve{ ImGui::GetStyle().ItemSpacing.y
-            //                                         + ImGui::GetFrameHeightWithSpacing() };
             ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0, 0, 0, 1));
             if (ImGui::BeginChild("console_scrolling_region",
                                   ImVec2(0, 0), //-footer_height_to_reserve),
@@ -238,6 +275,56 @@ void BT::ImGui_renderer::render_imgui()
             ImGui::PopStyleColor();
         }
         ImGui::End();
+    }
+
+    // Level select.
+    if (s_show_level_select)
+    {
+        ImGui::Begin("Level select");
+        {
+            ImGui::Button("Create new level..");
+            ImGui::SameLine();
+            ImGui::Button("Refresh list");
+            ImGui::SameLine();
+            ImGui::Spacing();
+            ImGui::Text("Levels:69 Avg:6.9KB Mdn:6.9KB Max:69.4KB");
+
+            ImGui::SeparatorText("Open levels");
+
+            // @TODO: Change to just be 1 level loaded at a time.
+            std::vector<std::string> open_levels{ "choo_choo_torial_station.btscene",
+                                                  "jump_jump_jungle.btscene" };
+            static float_t s_close_btn_width{ 0.0f };
+            for (auto& level : open_levels)
+            {
+                ImGui::PushID(("open_level" + level).c_str());
+                ImGui::SetNextItemWidth(-(s_close_btn_width + ImGui::GetFontSize()));
+                ImGui::Button("choo_choo_torial_station.btscene");  // Idk what this does. Maybe go to the hierarchy and highlight the level's root node?
+                ImGui::SameLine();
+                ImGui::Button("X");
+                s_close_btn_width = ImGui::GetItemRectSize().x;
+                ImGui::PopID();
+            }
+
+            ImGui::SeparatorText("Level list");
+
+            // @TODO: Gray out loaded level in this list below.
+            ImGui::PushItemWidth(0.0f);
+            ImGui::Text("choo_choo_torial_station.btscene");
+            ImGui::Text("jump_jump_jungle.btscene");
+            ImGui::Text("give_temu_hitler_a_blowjob.btscene");
+            ImGui::Text("cluster_lights_test.btscene");
+            ImGui::Text("global_illumination_test.btscene");
+            ImGui::Text("skeletal_animation_test.btscene");
+            ImGui::PopItemWidth();
+        }
+        ImGui::End();
+    }
+
+    // Scene hierarchy.
+    if (s_show_scene_hierarchy)
+    {
+        m_game_obj_pool->render_imgui_scene_hierarchy();
     }
 
     // Game obj palette.

@@ -12,3 +12,16 @@
 
 - NEVERMIND!!! The logs printed are off.
     - [x] Fixed.
+
+
+## Animation authoring tool window.
+
+- Gonna use blender-style context switching like they got on the top bar.
+    - Well, except it will be in the main menubar as like a "Context: Level Editor"
+
+> I just learned about `ImGui::PushItemWidth(ImGui::GetFontSize() * -10)`. Put it after beginning a new window and it will align all of the widgets to a constant width instead of making them take up 2/3rds of the window width which was hecka annoying.
+
+- So on a bit of a UI adventure tangent, but I decided there will be the ability to have multiple levels in the hierarchy. Each level will be represented by a root object in the hiearachy with an empty gameobject any kind of transform (ideally just position is changed here).
+    - Or maybe it could just be a dropdown like in Unity???
+    - Or maybe we could just ignore it all and just change the UI to have one level loaded.
+        - Like grayed out or something.
