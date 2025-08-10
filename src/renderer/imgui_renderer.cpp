@@ -41,7 +41,7 @@ void BT::ImGui_renderer::render_imgui()
     };
     static Editor_context s_current_editor_context{ Editor_context(0) };
 
-    static auto const s_window_name_w_context_fn = [&](char const* const name) {
+    static auto const s_window_name_w_context_fn = [](char const* const name) {
         return (std::string(name)
                 + "##editor_context_"
                 + std::to_string(s_current_editor_context));
