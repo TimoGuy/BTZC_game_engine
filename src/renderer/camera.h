@@ -47,7 +47,7 @@ public:
 
     // ImGui.
     void set_hovering_over_game_viewport(bool hovering);
-    void render_imgui();
+    void render_imgui(std::function<std::string(char const* const)> const& window_name_w_context_fn);
 
 private:
     struct Data;

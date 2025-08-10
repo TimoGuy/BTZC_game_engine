@@ -267,11 +267,11 @@ void BT::Camera::set_hovering_over_game_viewport(bool hovering)
     m_data->is_hovering_over_game_viewport = hovering;
 }
 
-void BT::Camera::render_imgui()
+void BT::Camera::render_imgui(std::function<std::string(char const* const)> const& window_name_w_context_fn)
 {
     auto& camera{ m_data->camera };
 
-    ImGui::Begin("Camera properties");
+    ImGui::Begin(window_name_w_context_fn("Camera properties").c_str());
     ImGui::PushItemWidth(ImGui::GetFontSize() * -10);
     {
         ImGui::Text("Mode: %s", Data::Frontend::s_state_strs[m_data->frontend.state].c_str());

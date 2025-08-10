@@ -30,6 +30,8 @@
 
 - Dang, like ImGui code just is monstrous how large it gets. Crazy.
 
+- [x] Make window IDs separate with context switching.
+
 - [ ] Add placeholder for:
     - Timeline thingy.
     - Model selector.

@@ -24,6 +24,7 @@
 #include "render_object.h"
 #include "renderer.h"
 #include "stb_image.h"
+#include <algorithm>
 #include <memory>
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
 #include "stb_image_resize2.h"
@@ -213,6 +214,10 @@ void BT::Renderer::Impl::render(float_t delta_time, function<void()>&& debug_vie
     if (m_main_viewport_wanted_dims.width != m_main_viewport_dims.width ||
         m_main_viewport_wanted_dims.height != m_main_viewport_dims.height)
     {
+        // @HACK: For some reason negative viewport dims are wanted? So ensure they're >= 1.
+        m_main_viewport_wanted_dims.width = std::max(1, m_main_viewport_wanted_dims.width);
+        m_main_viewport_wanted_dims.height = std::max(1, m_main_viewport_wanted_dims.height);
+
         // Recreate window dimension-dependent resources.
         m_main_viewport_dims = m_main_viewport_wanted_dims;
         create_ldr_fbo();

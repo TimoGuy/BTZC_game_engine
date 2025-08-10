@@ -273,7 +273,7 @@ void BT::ImGui_renderer::render_imgui()
     ImGui::End();
 
     // Camera properties.
-    m_camera->render_imgui();
+    m_camera->render_imgui(s_window_name_w_context_fn);
 
     // Demo window.
     if (s_show_demo_window)
@@ -282,9 +282,6 @@ void BT::ImGui_renderer::render_imgui()
     // Context dependant gui.
     auto fn_ptr{ k_editor_context_fns[s_current_editor_context] };
     ((*this).*fn_ptr)();
-
-    // Context dependant ID.
-    ImGui::PopID();
 }
 
 void BT::ImGui_renderer::render_imgui__level_editor_context()
