@@ -553,7 +553,6 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
         //     ImGui::Text("I am a %s, please edit me", SequencerItemTypeNames[item.mType]);
         //     // switch (type) ....
         // }
-        ImGui::Text("@TODO: Add sequencer table here");
     }
     ImGui::End();
 }

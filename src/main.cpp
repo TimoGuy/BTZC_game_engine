@@ -368,6 +368,7 @@ int32_t main()
     main_timer.start_timer();
 
     // Main loop.
+    bool first_iter{ true };
     while (!main_renderer.get_requesting_close())
     {
         BT::logger::notify_start_new_mainloop_iteration();
@@ -429,7 +430,19 @@ int32_t main()
         game_object_pool.return_list(std::move(all_game_objs));
 
         // @TODO: @HERE: Tick level loading.
+
+        if (first_iter)
+        {   // Turn off logging to the console.
+            BT::logger::printe(BT::logger::TRACE, "Set logger to not print to console.");
+            BT::logger::set_logging_print_mask(BT::logger::NONE);
+
+            first_iter = false;
+        }
     }
+
+    // Start showing console logs again for cleanup now that window is gonna disappear.
+    BT::logger::set_logging_print_mask(BT::logger::ALL);
+    BT::logger::printe(BT::logger::TRACE, "Set logger to print to console.");
 
     return 0;
 }
