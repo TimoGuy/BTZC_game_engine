@@ -4,7 +4,13 @@
 
 
 void BT::Input_handler::report_keyboard_input_change(int32_t key_code, bool pressed)
-{
+{   // Update direct lookup table.
+    if (m_direct_lookup_key_state_map.find(key_code)
+        == m_direct_lookup_key_state_map.end())
+        m_direct_lookup_key_state_map.emplace(key_code, pressed);
+    else
+        m_direct_lookup_key_state_map.at(key_code) = pressed;
+
     // @HARDCODE.
     bool update_move_wasd{ false };
 

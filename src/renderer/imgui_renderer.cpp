@@ -2,6 +2,8 @@
 
 #include "../btzc_game_engine.h"
 #include "../game_object/game_object.h"
+#include "../input_handler/input_codes.h"
+#include "../input_handler/input_handler.h"
 #include "camera.h"
 #include "debug_render_job.h"
 #include "imgui.h"
@@ -25,6 +27,26 @@ void BT::ImGui_renderer::render_imgui()
     // @NOCHECKIN: @TEMP
     static bool s_show_demo_window{ false };
     static ImGuiIO& io = ImGui::GetIO();
+
+    {   // Zoom keyboard shortcut.
+        static bool s_prev_pressed_zoom_ks{ false };
+        bool pressed_zoom_in_ks{ (m_input_handler->is_key_pressed(BT_KEY_LEFT_CONTROL) ||
+                                  m_input_handler->is_key_pressed(BT_KEY_RIGHT_CONTROL)) &&
+                                 m_input_handler->is_key_pressed(BT_KEY_EQUAL) };
+        bool pressed_zoom_out_ks{ (m_input_handler->is_key_pressed(BT_KEY_LEFT_CONTROL) ||
+                                   m_input_handler->is_key_pressed(BT_KEY_RIGHT_CONTROL)) &&
+                                  m_input_handler->is_key_pressed(BT_KEY_MINUS) };
+        if (!s_prev_pressed_zoom_ks && (pressed_zoom_in_ks || pressed_zoom_out_ks))
+        {   // Do zoom in/out.
+            io.FontGlobalScale += (pressed_zoom_in_ks ? 0.25f : -0.25f);
+            logger::printef(logger::TRACE,
+                            "ImGui font global scale to: %.3f",
+                            io.FontGlobalScale);
+        }
+
+        // Update prev.
+        s_prev_pressed_zoom_ks = (pressed_zoom_in_ks || pressed_zoom_out_ks);
+    }
 
     // Context switching.
     enum Editor_context

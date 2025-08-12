@@ -215,6 +215,7 @@ int32_t main()
     main_renderer_imgui_renderer.set_game_obj_pool_ref(&game_object_pool);
     main_renderer_imgui_renderer.set_camera_ref(main_renderer.get_camera_obj());
     main_renderer_imgui_renderer.set_renderer_ref(&main_renderer);
+    main_renderer_imgui_renderer.set_input_handler_ref(&main_input_handler);
 
     static json s_scene_as_json =
         R"({

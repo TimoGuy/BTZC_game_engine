@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cmath>
+#include <unordered_map>
 
 
 namespace BT
@@ -64,10 +65,21 @@ public:
 
     inline State const& get_input_state() const { return m_state; }
 
+    inline bool is_key_pressed(int32_t key_code)
+    {
+        if (m_direct_lookup_key_state_map.find(key_code)
+            == m_direct_lookup_key_state_map.end())
+            return false;
+        else
+            return m_direct_lookup_key_state_map.at(key_code);
+    }
+
 private:
     State m_state;
     float_t m_mouse_pos_offset_x{ 0 };
     float_t m_mouse_pos_offset_y{ 0 };
+
+    std::unordered_map<int32_t, bool> m_direct_lookup_key_state_map;
 };
 
 }  // namespace BT

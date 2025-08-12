@@ -32,6 +32,10 @@
 
 - [x] Make window IDs separate with context switching.
 
-- [ ] Add placeholder for:
+- [x] Add placeholder for:
     - Timeline thingy.
     - Model selector.
+
+- I'm starting to use the living room compy which it would be nice to have an imgui zoom thing.
+    - [x] Have a `direct_lookup_table` for the input handler.
+    - [x] Implement zoom with ctrl+(-/=)
