@@ -39,3 +39,17 @@
 - I'm starting to use the living room compy which it would be nice to have an imgui zoom thing.
     - [x] Have a `direct_lookup_table` for the input handler.
     - [x] Implement zoom with ctrl+(-/=)
+
+- These are the things I want the anim authoring tool to be able to handle:
+    - Inside the timeline:
+        - Temporary state variable overrides.
+            - `in_deflect_window : bool`
+            - `lerp_to(x) : float` <- @NOTE: Happens over the course of the bar.
+        - Events.
+            - `play_sfx_fart()` <- @NOTE: Only happens on rising edge of event.
+        - Inserting hurtboxes.
+            - `use_hurtbox(x)` <- @NOTE: While in this bar, displays previously authored hurtbox.
+    - Inside the hit/hurtbox creator:
+        - Hitbox/Hurtbox create capsules, add tags, and assign to 1-2 bones.
+            - Tags are used for enabling/disabling during timeline.
+            - Hitboxes are default on, and hurtboxes are default off.
