@@ -63,7 +63,7 @@ void BT::ImGui_renderer::render_imgui()
         &ImGui_renderer::render_imgui__level_editor_context,
         &ImGui_renderer::render_imgui__animation_frame_data_editor_context,
     };
-    static Editor_context s_current_editor_context{ Editor_context(0) };
+    static Editor_context s_current_editor_context{ Editor_context(1) };
 
     static auto const s_window_name_w_context_fn = [](char const* const name) {
         return (std::string(name)
@@ -472,7 +472,6 @@ public:
 
     size_t GetCustomHeight(int32_t index) override
     {
-        BT::logger::printef(BT::logger::TRACE, "Fn: GetCustomHeight(%i);", index);
         return 0;
     }
 
@@ -566,6 +565,44 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
         ImGui::SameLine();
         ImGui::InputInt("Frame Max", &s_sequencer.mFrameMax);
         ImGui::PopItemWidth();
+
+        // BT sequencer.
+        ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.175, 0.175, 0.175, 1));
+        if (ImGui::BeginChild("BT_sequencer"))
+        {
+            // static float_t s_timeline_zoom_x{ 1.0f };  IGNORE FOR NOW.
+            static vec2s s_timeline_cell_size{ 8.0f, 16.0f };
+
+            ImDrawList* draw_list = ImGui::GetWindowDrawList();
+            ImVec2 canvas_pos = ImGui::GetCursorScreenPos();      // ImDrawList API uses screen coordinates!
+            ImVec2 canvas_size = ImGui::GetContentRegionAvail();  // Resize canvas to what's available.
+
+            for (size_t i = 0; i < 100; i++)
+            {
+                constexpr std::array<float_t, 10> k_baseline_heights{
+                    0, 10, 10, 10, 10,
+                    5, 10, 10, 10, 10,
+                };
+
+                draw_list->AddLine(ImVec2(canvas_pos.x + (i * s_timeline_cell_size.x), canvas_pos.y + k_baseline_heights[i % 10]),
+                                   ImVec2(canvas_pos.x + (i * s_timeline_cell_size.x), canvas_pos.y + 20),
+                                   0xFFFFFFFF);
+                
+                if (i % 10 == 0)
+                {
+                    auto number_label{ std::to_string(i) };
+                    // @TODO: Fix the offset. Look into how it's done in `imgui_renderer.cpp` and stuff.
+                    draw_list->AddText(ImVec2(canvas_pos.x + (i * s_timeline_cell_size.x) + (ImGui::GetFontSize() * number_label.length() * 0.5f), canvas_pos.y + 0),
+                                       0xFFFFFFFF,
+                                       number_label.c_str());
+                }
+            }
+
+            ImGui::EndChild();
+        }
+        ImGui::PopStyleColor();
+
+        #if 0
         ImSequencer::Sequencer(&s_sequencer, &currentFrame, &expanded, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_STARTEND | ImSequencer::SEQUENCER_ADD | ImSequencer::SEQUENCER_DEL | ImSequencer::SEQUENCER_COPYPASTE | ImSequencer::SEQUENCER_CHANGE_FRAME);
         // @TODO vvvv
         // // add a UI to edit that particular item
@@ -575,6 +612,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
         //     ImGui::Text("I am a %s, please edit me", SequencerItemTypeNames[item.mType]);
         //     // switch (type) ....
         // }
+        #endif  //0
     }
     ImGui::End();
 }
