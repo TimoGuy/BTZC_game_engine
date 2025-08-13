@@ -584,7 +584,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
             {
                 auto& ins{ m_input_handler->get_input_state() };
                 if (ins.le_lctrl_mod.val)
-                {
+                {   // @TODO: Add focusing onto where the mouse cursor is instead of global cell size.
                     s_timeline_cell_size.x +=
                         m_input_handler->get_input_state().ui_scroll_delta.val
                         * 1.5f;
