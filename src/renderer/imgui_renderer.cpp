@@ -641,10 +641,18 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
 
                 for (auto& region : s_regions)
                 {
-                    draw_list->AddRectFilled(ImVec2(canvas_pos.x + s_timeline_x_offset + (region.start_frame * s_timeline_cell_size.x) + 1, canvas_pos.y + 20 + 2 + (s_timeline_cell_size.y * region.var_idx) + 1),
-                                             ImVec2(canvas_pos.x + s_timeline_x_offset + (region.end_frame * s_timeline_cell_size.x) - 1, canvas_pos.y + 20 + 2 + (s_timeline_cell_size.y * (region.var_idx + 1)) - 1),
+                    ImVec2 p_min{ canvas_pos.x + s_timeline_x_offset + (region.start_frame * s_timeline_cell_size.x) + 1, canvas_pos.y + 20 + 2 + (s_timeline_cell_size.y * region.var_idx) + 1 };
+                    ImVec2 p_max{ canvas_pos.x + s_timeline_x_offset + (region.end_frame * s_timeline_cell_size.x) - 1, canvas_pos.y + 20 + 2 + (s_timeline_cell_size.y * (region.var_idx + 1)) - 1 };
+                    draw_list->AddRectFilled(p_min,
+                                             p_max,
                                              0xFF005500,
                                              2.0f);
+                    if (ImGui::IsMouseHoveringRect(p_min, p_max))
+                    {
+                        ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+
+                        // @TODO: Add the clicking features.
+                    }
                 }
             }
 
