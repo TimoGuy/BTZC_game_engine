@@ -255,7 +255,7 @@ void BT::Renderer::Impl::render(float_t delta_time, function<void()>&& debug_vie
     present_display_frame();
 
     m_input_handler.clear_look_delta();
-    // m_input_handler.clear_ui_scroll_delta();  @UNSURE
+    m_input_handler.clear_ui_scroll_delta();
 }
 
 void BT::Renderer::Impl::submit_window_focused(bool focused)

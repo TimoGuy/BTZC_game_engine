@@ -577,26 +577,47 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
             ImVec2 canvas_pos = ImGui::GetCursorScreenPos();      // ImDrawList API uses screen coordinates!
             ImVec2 canvas_size = ImGui::GetContentRegionAvail();  // Resize canvas to what's available.
 
-            for (size_t i = 0; i < 100; i++)
+            static float_t s_timeline_x_offset{ 0.0f };
+            s_timeline_x_offset += m_input_handler->get_input_state().ui_scroll_delta.val * 10.0f;
+
+            // Draw measuring lines and numbers.
+            for (size_t i = 0; i < 100 + 1; i++)
             {
                 constexpr std::array<float_t, 10> k_baseline_heights{
-                    0, 10, 10, 10, 10,
-                    5, 10, 10, 10, 10,
+                    0, 15, 15, 15, 15,
+                    10, 15, 15, 15, 15,
                 };
 
-                draw_list->AddLine(ImVec2(canvas_pos.x + (i * s_timeline_cell_size.x), canvas_pos.y + k_baseline_heights[i % 10]),
-                                   ImVec2(canvas_pos.x + (i * s_timeline_cell_size.x), canvas_pos.y + 20),
+                draw_list->AddLine(ImVec2(canvas_pos.x + s_timeline_x_offset + (i * s_timeline_cell_size.x), canvas_pos.y + k_baseline_heights[i % 10]),
+                                   ImVec2(canvas_pos.x + s_timeline_x_offset + (i * s_timeline_cell_size.x), canvas_pos.y + 20),
                                    0xFFFFFFFF);
-                
+
                 if (i % 10 == 0)
                 {
                     auto number_label{ std::to_string(i) };
                     // @TODO: Fix the offset. Look into how it's done in `imgui_renderer.cpp` and stuff.
-                    draw_list->AddText(ImVec2(canvas_pos.x + (i * s_timeline_cell_size.x) + (ImGui::GetFontSize() * number_label.length() * 0.5f), canvas_pos.y + 0),
+                    draw_list->AddText(ImVec2(canvas_pos.x
+                                              + s_timeline_x_offset
+                                              + (i * s_timeline_cell_size.x)
+                                              + 4,
+                                              canvas_pos.y + 0),
                                        0xFFFFFFFF,
                                        number_label.c_str());
                 }
             }
+
+            // Draw current frame line.
+            auto cur_frame_str{ std::to_string(currentFrame) };
+            draw_list->AddLine(ImVec2(canvas_pos.x + s_timeline_x_offset + (currentFrame * s_timeline_cell_size.x), canvas_pos.y + 0),
+                               ImVec2(canvas_pos.x + s_timeline_x_offset + (currentFrame * s_timeline_cell_size.x), canvas_pos.y + 100),
+                               0xFF992200,
+                               2.0f);
+            draw_list->AddRectFilled(ImVec2(canvas_pos.x + s_timeline_x_offset + (currentFrame * s_timeline_cell_size.x), canvas_pos.y + 0),
+                                     ImVec2(canvas_pos.x + s_timeline_x_offset + (currentFrame * s_timeline_cell_size.x) + 4 + (ImGui::GetFontSize() * cur_frame_str.length() * 0.5f) + 4, canvas_pos.y + 20),
+                                     0xFF992200);
+            draw_list->AddText(ImVec2(canvas_pos.x + s_timeline_x_offset + (currentFrame * s_timeline_cell_size.x) + 4, canvas_pos.y + 0),
+                               0xFFFFFFFF,
+                               cur_frame_str.c_str());
 
             ImGui::EndChild();
         }
