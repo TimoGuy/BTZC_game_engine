@@ -611,6 +611,31 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
                 }
             }
 
+            {   // Draw bars for regions.
+                struct Region
+                {
+                    uint32_t var_idx;
+                    int32_t  start_frame;
+                    int32_t  end_frame;
+                };
+                static std::vector<Region> s_regions{
+                    { 0, 0, 5 },
+                    { 0, 5, 6 },
+                    { 0, 30, 35 },
+                    { 1, 30, 35 },
+                    { 2, 30, 35 },
+                    { 3, 30, 35 },
+                };
+
+                for (auto& region : s_regions)
+                {
+                    draw_list->AddRectFilled(ImVec2(canvas_pos.x + s_timeline_x_offset + (region.start_frame * s_timeline_cell_size.x) + 1, canvas_pos.y + 20 + 2 + (s_timeline_cell_size.y * region.var_idx) + 1),
+                                             ImVec2(canvas_pos.x + s_timeline_x_offset + (region.end_frame * s_timeline_cell_size.x) - 1, canvas_pos.y + 20 + 2 + (s_timeline_cell_size.y * (region.var_idx + 1)) - 1),
+                                             0xFF005500,
+                                             2.0f);
+                }
+            }
+
             {   // Draw current frame line.
                 auto cur_frame_str{ std::to_string(currentFrame) };
                 draw_list->AddLine(ImVec2(canvas_pos.x + s_timeline_x_offset + (currentFrame * s_timeline_cell_size.x), canvas_pos.y + 0),
@@ -623,10 +648,6 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
                 draw_list->AddText(ImVec2(canvas_pos.x + s_timeline_x_offset + (currentFrame * s_timeline_cell_size.x) + 4, canvas_pos.y + 0),
                                    0xFFFFFFFF,
                                    cur_frame_str.c_str());
-            }
-
-            {   // Draw 
-
             }
 
             ImGui::EndChild();
