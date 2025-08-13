@@ -606,18 +606,19 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
                 }
             }
 
-            // Draw current frame line.
-            auto cur_frame_str{ std::to_string(currentFrame) };
-            draw_list->AddLine(ImVec2(canvas_pos.x + s_timeline_x_offset + (currentFrame * s_timeline_cell_size.x), canvas_pos.y + 0),
-                               ImVec2(canvas_pos.x + s_timeline_x_offset + (currentFrame * s_timeline_cell_size.x), canvas_pos.y + 100),
-                               0xFF992200,
-                               2.0f);
-            draw_list->AddRectFilled(ImVec2(canvas_pos.x + s_timeline_x_offset + (currentFrame * s_timeline_cell_size.x), canvas_pos.y + 0),
-                                     ImVec2(canvas_pos.x + s_timeline_x_offset + (currentFrame * s_timeline_cell_size.x) + 4 + (ImGui::GetFontSize() * cur_frame_str.length() * 0.5f) + 4, canvas_pos.y + 20),
-                                     0xFF992200);
-            draw_list->AddText(ImVec2(canvas_pos.x + s_timeline_x_offset + (currentFrame * s_timeline_cell_size.x) + 4, canvas_pos.y + 0),
-                               0xFFFFFFFF,
-                               cur_frame_str.c_str());
+            {   // Draw current frame line.
+                auto cur_frame_str{ std::to_string(currentFrame) };
+                draw_list->AddLine(ImVec2(canvas_pos.x + s_timeline_x_offset + (currentFrame * s_timeline_cell_size.x), canvas_pos.y + 0),
+                                   ImVec2(canvas_pos.x + s_timeline_x_offset + (currentFrame * s_timeline_cell_size.x), canvas_pos.y + 100),
+                                   0xFF992200,
+                                   2.0f);
+                draw_list->AddRectFilled(ImVec2(canvas_pos.x + s_timeline_x_offset + (currentFrame * s_timeline_cell_size.x), canvas_pos.y + 0),
+                                         ImVec2(canvas_pos.x + s_timeline_x_offset + (currentFrame * s_timeline_cell_size.x) + 4 + (ImGui::GetFontSize() * cur_frame_str.length() * 0.5f) + 4, canvas_pos.y + 20),
+                                         0xFF992200);
+                draw_list->AddText(ImVec2(canvas_pos.x + s_timeline_x_offset + (currentFrame * s_timeline_cell_size.x) + 4, canvas_pos.y + 0),
+                                   0xFFFFFFFF,
+                                   cur_frame_str.c_str());
+            }
 
             ImGui::EndChild();
         }
