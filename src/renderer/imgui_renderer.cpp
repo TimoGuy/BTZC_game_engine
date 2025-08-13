@@ -578,7 +578,12 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
             ImVec2 canvas_size = ImGui::GetContentRegionAvail();  // Resize canvas to what's available.
 
             static float_t s_timeline_x_offset{ 0.0f };
-            s_timeline_x_offset += m_input_handler->get_input_state().ui_scroll_delta.val * 10.0f;
+            if (ImGui::IsMouseHoveringRect(canvas_pos,
+                                           ImVec2(canvas_pos.x + canvas_size.x,
+                                                  canvas_pos.y + canvas_size.y)))
+                s_timeline_x_offset +=
+                    m_input_handler->get_input_state().ui_scroll_delta.val
+                    * 10.0f;
 
             // Draw measuring lines and numbers.
             for (size_t i = 0; i < 100 + 1; i++)
@@ -618,6 +623,10 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
                 draw_list->AddText(ImVec2(canvas_pos.x + s_timeline_x_offset + (currentFrame * s_timeline_cell_size.x) + 4, canvas_pos.y + 0),
                                    0xFFFFFFFF,
                                    cur_frame_str.c_str());
+            }
+
+            {   // Draw 
+
             }
 
             ImGui::EndChild();
