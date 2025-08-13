@@ -581,9 +581,21 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
             if (ImGui::IsMouseHoveringRect(canvas_pos,
                                            ImVec2(canvas_pos.x + canvas_size.x,
                                                   canvas_pos.y + canvas_size.y)))
-                s_timeline_x_offset +=
-                    m_input_handler->get_input_state().ui_scroll_delta.val
-                    * 10.0f;
+            {
+                auto& ins{ m_input_handler->get_input_state() };
+                if (ins.le_lctrl_mod.val)
+                {
+                    s_timeline_cell_size.x +=
+                        m_input_handler->get_input_state().ui_scroll_delta.val
+                        * 1.5f;
+                }
+                else
+                {
+                    s_timeline_x_offset +=
+                        m_input_handler->get_input_state().ui_scroll_delta.val
+                        * 20.0f;
+                }
+            }
 
             // Draw measuring lines and numbers.
             for (size_t i = 0; i < 100 + 1; i++)
