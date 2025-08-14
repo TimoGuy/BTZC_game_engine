@@ -405,7 +405,7 @@ public:
     {
         return "Something type name";
     }
-    
+
     char const* GetItemLabel(int32_t index) const override
     {
         switch (index)
@@ -418,7 +418,7 @@ public:
             default: assert(false); return "";
         }
     }
-    
+
     char const* GetCollapseFmt() const override
     {
         return "%d Frames / %d entries";
@@ -567,112 +567,168 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
         ImGui::PopItemWidth();
 
         // BT sequencer.
-        ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.175, 0.175, 0.175, 1));
         if (ImGui::BeginChild("BT_sequencer"))
         {
             // static float_t s_timeline_zoom_x{ 1.0f };  IGNORE FOR NOW.
-            static vec2s s_timeline_cell_size{ 8.0f, 16.0f };
+            static vec2s s_timeline_cell_size{ 16.0f, 24.0f };
 
             ImDrawList* draw_list = ImGui::GetWindowDrawList();
             ImVec2 canvas_pos = ImGui::GetCursorScreenPos();      // ImDrawList API uses screen coordinates!
             ImVec2 canvas_size = ImGui::GetContentRegionAvail();  // Resize canvas to what's available.
 
-            static float_t s_timeline_x_offset{ 0.0f };
-            if (ImGui::IsMouseHoveringRect(canvas_pos,
-                                           ImVec2(canvas_pos.x + canvas_size.x,
-                                                  canvas_pos.y + canvas_size.y)))
-            {
-                auto& ins{ m_input_handler->get_input_state() };
-                if (ins.le_lctrl_mod.val)
-                {   // @TODO: Add focusing onto where the mouse cursor is instead of global cell size.
-                    s_timeline_cell_size.x +=
+            static float_t s_sequencer_x_offset{ 0.0f };
+            static float_t s_sequencer_y_offset{ 0.0f };
+
+            // Clip rects.
+            constexpr float_t k_item_list_width_ratio{ 0.3f };
+            ImVec2 cr_item_list_min{ canvas_pos };
+            ImVec2 cr_item_list_max{ std::floorf(canvas_pos.x + canvas_size.x * k_item_list_width_ratio),
+                                     canvas_pos.y + canvas_size.y };
+            ImVec2 cr_timeline_min{ cr_item_list_max.x + 1, canvas_pos.y };
+            ImVec2 cr_timeline_max{ canvas_pos.x + canvas_size.x,
+                                    canvas_pos.y + canvas_size.y };
+
+            // Sequencer item list.
+            ImGui::PushClipRect(cr_item_list_min, cr_item_list_max, true);
+            {   // Draw bg.
+                draw_list->AddRectFilled(cr_item_list_min, cr_item_list_max, 0xFF362C2B);
+
+                if (ImGui::IsMouseHoveringRect(cr_item_list_min,
+                                               cr_item_list_max))
+                {   // Scrolling behavior.
+                    auto& ins{ m_input_handler->get_input_state() };
+                    s_sequencer_y_offset +=
                         m_input_handler->get_input_state().ui_scroll_delta.val
-                        * 1.5f;
-                }
-                else
-                {
-                    s_timeline_x_offset +=
-                        m_input_handler->get_input_state().ui_scroll_delta.val
-                        * 20.0f;
+                        * 40.0f;
                 }
             }
+            ImGui::PopClipRect();
 
-            // Draw measuring lines and numbers.
-            for (size_t i = 0; i < 100 + 1; i++)
-            {
-                constexpr std::array<float_t, 10> k_baseline_heights{
-                    0, 15, 15, 15, 15,
-                    10, 15, 15, 15, 15,
-                };
+            // Sequencer timeline.
+            ImGui::PushClipRect(cr_timeline_min, cr_timeline_max, true);
+            {   // Draw bg.
+                draw_list->AddRectFilled(cr_timeline_min, cr_timeline_max, 0xFF2D2D2D);
 
-                draw_list->AddLine(ImVec2(canvas_pos.x + s_timeline_x_offset + (i * s_timeline_cell_size.x), canvas_pos.y + k_baseline_heights[i % 10]),
-                                   ImVec2(canvas_pos.x + s_timeline_x_offset + (i * s_timeline_cell_size.x), canvas_pos.y + 20),
-                                   0xFFFFFFFF);
-
-                if (i % 10 == 0)
-                {
-                    auto number_label{ std::to_string(i) };
-                    // @TODO: Fix the offset. Look into how it's done in `imgui_renderer.cpp` and stuff.
-                    draw_list->AddText(ImVec2(canvas_pos.x
-                                              + s_timeline_x_offset
-                                              + (i * s_timeline_cell_size.x)
-                                              + 4,
-                                              canvas_pos.y + 0),
-                                       0xFFFFFFFF,
-                                       number_label.c_str());
-                }
-            }
-
-            {   // Draw bars for regions.
-                struct Region
-                {
-                    uint32_t var_idx;
-                    int32_t  start_frame;
-                    int32_t  end_frame;
-                };
-                static std::vector<Region> s_regions{
-                    { 0, 0, 5 },
-                    { 0, 5, 6 },
-                    { 0, 30, 35 },
-                    { 1, 30, 35 },
-                    { 2, 30, 35 },
-                    { 3, 30, 35 },
-                };
-
-                for (auto& region : s_regions)
-                {
-                    ImVec2 p_min{ canvas_pos.x + s_timeline_x_offset + (region.start_frame * s_timeline_cell_size.x) + 1, canvas_pos.y + 20 + 2 + (s_timeline_cell_size.y * region.var_idx) + 1 };
-                    ImVec2 p_max{ canvas_pos.x + s_timeline_x_offset + (region.end_frame * s_timeline_cell_size.x) - 1, canvas_pos.y + 20 + 2 + (s_timeline_cell_size.y * (region.var_idx + 1)) - 1 };
-                    draw_list->AddRectFilled(p_min,
-                                             p_max,
-                                             0xFF005500,
-                                             2.0f);
-                    if (ImGui::IsMouseHoveringRect(p_min, p_max))
+                if (ImGui::IsMouseHoveringRect(cr_timeline_min,
+                                               cr_timeline_max))
+                {   // Scrolling behavior.
+                    auto& ins{ m_input_handler->get_input_state() };
+                    if (ins.le_lctrl_mod.val)
+                    {   // @TODO: Add focusing onto where the mouse cursor is instead of global cell size.
+                        s_timeline_cell_size.x +=
+                            m_input_handler->get_input_state().ui_scroll_delta.val
+                            * 1.5f;
+                    }
+                    else
                     {
-                        ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-
-                        // @TODO: Add the clicking features.
+                        s_sequencer_x_offset +=
+                            m_input_handler->get_input_state().ui_scroll_delta.val
+                            * 40.0f;
                     }
                 }
-            }
 
-            {   // Draw current frame line.
-                auto cur_frame_str{ std::to_string(currentFrame) };
-                draw_list->AddLine(ImVec2(canvas_pos.x + s_timeline_x_offset + (currentFrame * s_timeline_cell_size.x), canvas_pos.y + 0),
-                                   ImVec2(canvas_pos.x + s_timeline_x_offset + (currentFrame * s_timeline_cell_size.x), canvas_pos.y + 100),
-                                   0xFF992200,
-                                   2.0f);
-                draw_list->AddRectFilled(ImVec2(canvas_pos.x + s_timeline_x_offset + (currentFrame * s_timeline_cell_size.x), canvas_pos.y + 0),
-                                         ImVec2(canvas_pos.x + s_timeline_x_offset + (currentFrame * s_timeline_cell_size.x) + 4 + (ImGui::GetFontSize() * cur_frame_str.length() * 0.5f) + 4, canvas_pos.y + 20),
-                                         0xFF992200);
-                draw_list->AddText(ImVec2(canvas_pos.x + s_timeline_x_offset + (currentFrame * s_timeline_cell_size.x) + 4, canvas_pos.y + 0),
-                                   0xFFFFFFFF,
-                                   cur_frame_str.c_str());
+                constexpr int32_t k_top_measuring_region_height{ 20 };
+                {   // Draw bars for regions.
+                    struct Region
+                    {
+                        uint32_t var_idx;
+                        int32_t  start_frame;
+                        int32_t  end_frame;
+                    };
+                    static std::vector<Region> s_regions{
+                        { 0, 0, 5 },
+                        { 0, 5, 6 },
+                        { 0, 30, 35 },
+                        { 1, 30, 35 },
+                        { 2, 30, 35 },
+                        { 3, 30, 35 },
+                    };
+
+                    for (auto& region : s_regions)
+                    {
+                        vec2s region_bar_top_bottom{
+                            canvas_pos.y + s_sequencer_y_offset + k_top_measuring_region_height + 2 + (s_timeline_cell_size.y * region.var_idx) + 1,
+                            canvas_pos.y + s_sequencer_y_offset + k_top_measuring_region_height + 2 + (s_timeline_cell_size.y * (region.var_idx + 1)) - 1 };
+                        ImVec2 p_min{ canvas_pos.x + s_sequencer_x_offset + (region.start_frame * s_timeline_cell_size.x) + 1, region_bar_top_bottom.s };
+                        ImVec2 p_max{ canvas_pos.x + s_sequencer_x_offset + (region.end_frame * s_timeline_cell_size.x) - 1, region_bar_top_bottom.t };
+                        draw_list->AddRectFilled(p_min,
+                                                 p_max,
+                                                 0xFF005500,
+                                                 2.0f);
+
+                        // Adjustment handles.
+                        constexpr int32_t k_side_handle_size{ 4 };
+                        if (ImGui::IsMouseHoveringRect(ImVec2(p_min),
+                                                       ImVec2(p_min.x + k_side_handle_size, p_max.y)))
+                        {   // Left side.
+                            ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+
+                            // @TODO: Add the clicking features.
+                        }
+                        else if (ImGui::IsMouseHoveringRect(ImVec2(p_min.x + k_side_handle_size, p_min.y),
+                                                            ImVec2(p_max.x - k_side_handle_size, p_max.y)))
+                        {   // Move region.
+                            ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+
+                            // @TODO: Add the clicking features.
+                        }
+                        else if (ImGui::IsMouseHoveringRect(ImVec2(p_max.x - k_side_handle_size, p_min.y),
+                                                            ImVec2(p_max)))
+                        {   // Right side.
+                            ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+
+                            // @TODO: Add the clicking features.
+                        }
+                    }
+                }
+
+                // Draw measuring region bg.
+                draw_list->AddRectFilled(cr_timeline_min, ImVec2(cr_timeline_max.x, cr_timeline_min.y + k_top_measuring_region_height + 2), 0x99000000);
+
+                // Draw measuring lines and numbers.
+                for (size_t i = 0; i < 100 + 1; i++)
+                {
+                    constexpr std::array<float_t, 10> k_baseline_heights{
+                        0, 15, 15, 15, 15,
+                        10, 15, 15, 15, 15,
+                    };
+
+                    draw_list->AddLine(ImVec2(canvas_pos.x + s_sequencer_x_offset + (i * s_timeline_cell_size.x), canvas_pos.y + k_baseline_heights[i % 10]),
+                                       ImVec2(canvas_pos.x + s_sequencer_x_offset + (i * s_timeline_cell_size.x), canvas_pos.y + k_top_measuring_region_height),
+                                       0xFFFFFFFF);
+
+                    if (i % 10 == 0)
+                    {
+                        auto number_label{ std::to_string(i) };
+                        // @TODO: Fix the offset. Look into how it's done in `imgui_renderer.cpp` and stuff.
+                        draw_list->AddText(ImVec2(canvas_pos.x
+                                                  + s_sequencer_x_offset
+                                                  + (i * s_timeline_cell_size.x)
+                                                  + 4,
+                                                  canvas_pos.y + 0),
+                                           0xFFFFFFFF,
+                                           number_label.c_str());
+                    }
+                }
+
+                {   // Draw current frame line.
+                    auto cur_frame_str{ std::to_string(currentFrame) };
+                    draw_list->AddLine(ImVec2(canvas_pos.x + s_sequencer_x_offset + (currentFrame * s_timeline_cell_size.x), canvas_pos.y + 0),
+                                       ImVec2(canvas_pos.x + s_sequencer_x_offset + (currentFrame * s_timeline_cell_size.x), canvas_pos.y + 100),
+                                       0xFF992200,
+                                       2.0f);
+                    draw_list->AddRectFilled(ImVec2(canvas_pos.x + s_sequencer_x_offset + (currentFrame * s_timeline_cell_size.x), canvas_pos.y + 0),
+                                             ImVec2(canvas_pos.x + s_sequencer_x_offset + (currentFrame * s_timeline_cell_size.x) + 4 + (ImGui::GetFontSize() * cur_frame_str.length() * 0.5f) + 4, canvas_pos.y + k_top_measuring_region_height),
+                                             0xFF992200);
+                    draw_list->AddText(ImVec2(canvas_pos.x + s_sequencer_x_offset + (currentFrame * s_timeline_cell_size.x) + 4, canvas_pos.y + 0),
+                                       0xFFFFFFFF,
+                                       cur_frame_str.c_str());
+                }
             }
+            ImGui::PopClipRect();
 
             ImGui::EndChild();
         }
-        ImGui::PopStyleColor();
 
         #if 0
         ImSequencer::Sequencer(&s_sequencer, &currentFrame, &expanded, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_STARTEND | ImSequencer::SEQUENCER_ADD | ImSequencer::SEQUENCER_DEL | ImSequencer::SEQUENCER_COPYPASTE | ImSequencer::SEQUENCER_CHANGE_FRAME);
