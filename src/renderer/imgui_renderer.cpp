@@ -637,8 +637,8 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
                         y_top_btm.t = (y_top_btm.s + s_timeline_cell_size.y);
                     }
 
-                    if (i % 2 == 0)
-                    {   // Draw label background.
+                    if (i % 2 == 1)
+                    {   // Draw label background for odd rows.
                         draw_list->AddRectFilled(ImVec2{ cr_item_list_min.x, y_top_btm.s },
                                                  ImVec2{ cr_item_list_max.x, y_top_btm.t },
                                                  0x11DDDDDD);
@@ -648,13 +648,15 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
                     {   // Draw above line.
                         draw_list->AddLine(ImVec2{ cr_item_list_min.x, y_top_btm.s },
                                            ImVec2{ cr_item_list_max.x, y_top_btm.s },
-                                           0xFFDDDDDD);
+                                           0x99DDDDDD);
                     }
 
-                    // Draw below line.
-                    draw_list->AddLine(ImVec2{ cr_item_list_min.x, y_top_btm.t },
-                                       ImVec2{ cr_item_list_max.x, y_top_btm.t },
-                                       0xFFDDDDDD);
+                    if (i == s_ctrl_items.size() - 1)
+                    {   // Draw below line.
+                        draw_list->AddLine(ImVec2{ cr_item_list_min.x, y_top_btm.t },
+                                           ImVec2{ cr_item_list_max.x, y_top_btm.t },
+                                           0x99DDDDDD);
+                    }
 
                     // Draw control item labels.
                     draw_list->AddText(ImVec2{ canvas_pos.x + 4,
@@ -688,13 +690,43 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
                     }
                 }
 
+                for (size_t i = 0; i < s_ctrl_items.size(); i++)
+                {
+                    vec2s y_top_btm;
+                    {
+                        y_top_btm.s = (cr_timeline_min.y + s_sequencer_y_offset + k_top_measuring_region_height + 2 + (s_timeline_cell_size.y * i));
+                        y_top_btm.t = (y_top_btm.s + s_timeline_cell_size.y);
+                    }
+
+                    if (i % 2 == 1)
+                    {   // Draw bg for odd rows.
+                        draw_list->AddRectFilled(ImVec2{ cr_timeline_min.x, y_top_btm.s },
+                                                 ImVec2{ cr_timeline_max.x, y_top_btm.t },
+                                                 0x11DDDDDD);
+                    }
+
+                    if (i == 0)
+                    {   // Draw above line.
+                        draw_list->AddLine(ImVec2{ cr_timeline_min.x, y_top_btm.s },
+                                           ImVec2{ cr_timeline_max.x, y_top_btm.s },
+                                           0x99DDDDDD);
+                    }
+
+                    if (i == s_ctrl_items.size() - 1)
+                    {   // Draw below line.
+                        draw_list->AddLine(ImVec2{ cr_timeline_min.x, y_top_btm.t },
+                                           ImVec2{ cr_timeline_max.x, y_top_btm.t },
+                                           0x99DDDDDD);
+                    }
+                }
+
                 for (auto& region : s_regions)
                 {   // Draw bars for regions.
                     vec2s region_bar_top_bottom{
-                        canvas_pos.y + s_sequencer_y_offset + k_top_measuring_region_height + 2 + (s_timeline_cell_size.y * region.ctrl_item_idx) + 1,
-                        canvas_pos.y + s_sequencer_y_offset + k_top_measuring_region_height + 2 + (s_timeline_cell_size.y * (region.ctrl_item_idx + 1)) - 1 };
-                    ImVec2 p_min{ canvas_pos.x + s_sequencer_x_offset + (region.start_frame * s_timeline_cell_size.x) + 1, region_bar_top_bottom.s };
-                    ImVec2 p_max{ canvas_pos.x + s_sequencer_x_offset + (region.end_frame * s_timeline_cell_size.x) - 1, region_bar_top_bottom.t };
+                        cr_timeline_min.y + s_sequencer_y_offset + k_top_measuring_region_height + 2 + (s_timeline_cell_size.y * region.ctrl_item_idx) + 1,
+                        cr_timeline_min.y + s_sequencer_y_offset + k_top_measuring_region_height + 2 + (s_timeline_cell_size.y * (region.ctrl_item_idx + 1)) - 1 };
+                    ImVec2 p_min{ cr_timeline_min.x + s_sequencer_x_offset + (region.start_frame * s_timeline_cell_size.x) + 1, region_bar_top_bottom.s };
+                    ImVec2 p_max{ cr_timeline_min.x + s_sequencer_x_offset + (region.end_frame * s_timeline_cell_size.x) - 1, region_bar_top_bottom.t };
                     draw_list->AddRectFilled(p_min,
                                              p_max,
                                              0xFF005500,
@@ -726,26 +758,37 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
                 draw_list->AddRectFilled(cr_timeline_min, ImVec2(cr_timeline_max.x, cr_timeline_min.y + k_top_measuring_region_height + 2), 0x99000000);
 
                 // Draw measuring lines and numbers.
-                for (size_t i = 0; i < 100 + 1; i++)
+                int32_t frame_start{ 0 };
+                int32_t frame_end{ 100 };
+                for (int32_t i = frame_start; i <= frame_end; i++)
                 {
+                    float_t line_x{ cr_timeline_min.x + s_sequencer_x_offset + (i * s_timeline_cell_size.x) };
+
+                    // Draw top measuring line.
                     constexpr std::array<float_t, 10> k_baseline_heights{
                         0, 15, 15, 15, 15,
                         10, 15, 15, 15, 15,
                     };
-
-                    draw_list->AddLine(ImVec2(canvas_pos.x + s_sequencer_x_offset + (i * s_timeline_cell_size.x), canvas_pos.y + k_baseline_heights[i % 10]),
-                                       ImVec2(canvas_pos.x + s_sequencer_x_offset + (i * s_timeline_cell_size.x), canvas_pos.y + k_top_measuring_region_height),
+                    draw_list->AddLine(ImVec2(line_x, cr_timeline_min.y + k_baseline_heights[i % 10]),
+                                       ImVec2(line_x, cr_timeline_min.y + k_top_measuring_region_height),
                                        0xFFFFFFFF);
 
+                    if (i == frame_start || i == frame_end)
+                    {   // Draw full height start-end lines.
+                        draw_list->AddLine(ImVec2(line_x, cr_timeline_min.y + k_top_measuring_region_height),
+                                           ImVec2(line_x, cr_timeline_max.y),
+                                           0x77DDDDDD);
+                    }
+
                     if (i % 10 == 0)
-                    {
+                    {   // Draw 10s benchmark number.
                         auto number_label{ std::to_string(i) };
                         // @TODO: Fix the offset. Look into how it's done in `imgui_renderer.cpp` and stuff.
-                        draw_list->AddText(ImVec2(canvas_pos.x
+                        draw_list->AddText(ImVec2(cr_timeline_min.x
                                                   + s_sequencer_x_offset
                                                   + (i * s_timeline_cell_size.x)
                                                   + 4,
-                                                  canvas_pos.y + 0),
+                                                  cr_timeline_min.y + 0),
                                            0xFFFFFFFF,
                                            number_label.c_str());
                     }
@@ -753,14 +796,16 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
 
                 {   // Draw current frame line.
                     auto cur_frame_str{ std::to_string(currentFrame) };
-                    draw_list->AddLine(ImVec2(canvas_pos.x + s_sequencer_x_offset + (currentFrame * s_timeline_cell_size.x), canvas_pos.y + 0),
-                                       ImVec2(canvas_pos.x + s_sequencer_x_offset + (currentFrame * s_timeline_cell_size.x), cr_timeline_max.y),
+                    float_t cur_frame_line_x{ cr_timeline_min.x + s_sequencer_x_offset + (currentFrame * s_timeline_cell_size.x) };
+
+                    draw_list->AddLine(ImVec2(cur_frame_line_x, cr_timeline_min.y + 0),
+                                       ImVec2(cur_frame_line_x, cr_timeline_max.y),
                                        0xFF992200,
                                        2.0f);
-                    draw_list->AddRectFilled(ImVec2(canvas_pos.x + s_sequencer_x_offset + (currentFrame * s_timeline_cell_size.x), canvas_pos.y + 0),
-                                             ImVec2(canvas_pos.x + s_sequencer_x_offset + (currentFrame * s_timeline_cell_size.x) + 4 + (ImGui::GetFontSize() * cur_frame_str.length() * 0.5f) + 4, canvas_pos.y + k_top_measuring_region_height),
+                    draw_list->AddRectFilled(ImVec2(cur_frame_line_x, cr_timeline_min.y + 0),
+                                             ImVec2(cur_frame_line_x + 4 + (ImGui::GetFontSize() * cur_frame_str.length() * 0.5f) + 4, cr_timeline_min.y + k_top_measuring_region_height),
                                              0xFF992200);
-                    draw_list->AddText(ImVec2(canvas_pos.x + s_sequencer_x_offset + (currentFrame * s_timeline_cell_size.x) + 4, canvas_pos.y + 0),
+                    draw_list->AddText(ImVec2(cur_frame_line_x + 4, cr_timeline_min.y + 0),
                                        0xFFFFFFFF,
                                        cur_frame_str.c_str());
                 }
