@@ -569,6 +569,31 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
         // BT sequencer.
         if (ImGui::BeginChild("BT_sequencer"))
         {
+            struct Control_item
+            {
+                std::string name;
+            };
+            static std::vector<Control_item> s_ctrl_items{
+                { "JOJO" },
+                { "BF6" },
+                { "Lerp to sweet happiness" },
+                { "Enable hurtbox 1" },
+            };
+            struct Region
+            {
+                uint32_t ctrl_item_idx;
+                int32_t  start_frame;
+                int32_t  end_frame;
+            };
+            static std::vector<Region> s_regions{
+                { 0, 0, 5 },
+                { 0, 5, 6 },
+                { 0, 30, 35 },
+                { 1, 30, 35 },
+                { 2, 30, 35 },
+                { 3, 30, 35 },
+            };
+
             // static float_t s_timeline_zoom_x{ 1.0f };  IGNORE FOR NOW.
             static vec2s s_timeline_cell_size{ 16.0f, 24.0f };
 
@@ -588,7 +613,9 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
             ImVec2 cr_timeline_max{ canvas_pos.x + canvas_size.x,
                                     canvas_pos.y + canvas_size.y };
 
-            // Sequencer item list.
+            constexpr int32_t k_top_measuring_region_height{ 20 };
+
+            // Sequencer control item list.
             ImGui::PushClipRect(cr_item_list_min, cr_item_list_max, true);
             {   // Draw bg.
                 draw_list->AddRectFilled(cr_item_list_min, cr_item_list_max, 0xFF362C2B);
@@ -600,6 +627,40 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
                     s_sequencer_y_offset +=
                         m_input_handler->get_input_state().ui_scroll_delta.val
                         * 40.0f;
+                }
+
+                for (size_t i = 0; i < s_ctrl_items.size(); i++)
+                {
+                    vec2s y_top_btm;
+                    {
+                        y_top_btm.s = (canvas_pos.y + s_sequencer_y_offset + k_top_measuring_region_height + 2 + (s_timeline_cell_size.y * i));
+                        y_top_btm.t = (y_top_btm.s + s_timeline_cell_size.y);
+                    }
+
+                    if (i % 2 == 0)
+                    {   // Draw label background.
+                        draw_list->AddRectFilled(ImVec2{ cr_item_list_min.x, y_top_btm.s },
+                                                 ImVec2{ cr_item_list_max.x, y_top_btm.t },
+                                                 0x11DDDDDD);
+                    }
+
+                    if (i == 0)
+                    {   // Draw above line.
+                        draw_list->AddLine(ImVec2{ cr_item_list_min.x, y_top_btm.s },
+                                           ImVec2{ cr_item_list_max.x, y_top_btm.s },
+                                           0xFFDDDDDD);
+                    }
+
+                    // Draw below line.
+                    draw_list->AddLine(ImVec2{ cr_item_list_min.x, y_top_btm.t },
+                                       ImVec2{ cr_item_list_max.x, y_top_btm.t },
+                                       0xFFDDDDDD);
+
+                    // Draw control item labels.
+                    draw_list->AddText(ImVec2{ canvas_pos.x + 4,
+                                               y_top_btm.s + (s_timeline_cell_size.y * 0.5f) - (ImGui::GetFontSize() * 0.5f) },
+                                       0xFFFFFFFF,
+                                       s_ctrl_items[i].name.c_str());
                 }
             }
             ImGui::PopClipRect();
@@ -627,58 +688,37 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
                     }
                 }
 
-                constexpr int32_t k_top_measuring_region_height{ 20 };
+                for (auto& region : s_regions)
                 {   // Draw bars for regions.
-                    struct Region
-                    {
-                        uint32_t var_idx;
-                        int32_t  start_frame;
-                        int32_t  end_frame;
-                    };
-                    static std::vector<Region> s_regions{
-                        { 0, 0, 5 },
-                        { 0, 5, 6 },
-                        { 0, 30, 35 },
-                        { 1, 30, 35 },
-                        { 2, 30, 35 },
-                        { 3, 30, 35 },
-                    };
+                    vec2s region_bar_top_bottom{
+                        canvas_pos.y + s_sequencer_y_offset + k_top_measuring_region_height + 2 + (s_timeline_cell_size.y * region.ctrl_item_idx) + 1,
+                        canvas_pos.y + s_sequencer_y_offset + k_top_measuring_region_height + 2 + (s_timeline_cell_size.y * (region.ctrl_item_idx + 1)) - 1 };
+                    ImVec2 p_min{ canvas_pos.x + s_sequencer_x_offset + (region.start_frame * s_timeline_cell_size.x) + 1, region_bar_top_bottom.s };
+                    ImVec2 p_max{ canvas_pos.x + s_sequencer_x_offset + (region.end_frame * s_timeline_cell_size.x) - 1, region_bar_top_bottom.t };
+                    draw_list->AddRectFilled(p_min,
+                                             p_max,
+                                             0xFF005500,
+                                             2.0f);
 
-                    for (auto& region : s_regions)
-                    {
-                        vec2s region_bar_top_bottom{
-                            canvas_pos.y + s_sequencer_y_offset + k_top_measuring_region_height + 2 + (s_timeline_cell_size.y * region.var_idx) + 1,
-                            canvas_pos.y + s_sequencer_y_offset + k_top_measuring_region_height + 2 + (s_timeline_cell_size.y * (region.var_idx + 1)) - 1 };
-                        ImVec2 p_min{ canvas_pos.x + s_sequencer_x_offset + (region.start_frame * s_timeline_cell_size.x) + 1, region_bar_top_bottom.s };
-                        ImVec2 p_max{ canvas_pos.x + s_sequencer_x_offset + (region.end_frame * s_timeline_cell_size.x) - 1, region_bar_top_bottom.t };
-                        draw_list->AddRectFilled(p_min,
-                                                 p_max,
-                                                 0xFF005500,
-                                                 2.0f);
-
-                        // Adjustment handles.
-                        constexpr int32_t k_side_handle_size{ 4 };
-                        if (ImGui::IsMouseHoveringRect(ImVec2(p_min),
-                                                       ImVec2(p_min.x + k_side_handle_size, p_max.y)))
-                        {   // Left side.
-                            ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
-
-                            // @TODO: Add the clicking features.
-                        }
-                        else if (ImGui::IsMouseHoveringRect(ImVec2(p_min.x + k_side_handle_size, p_min.y),
-                                                            ImVec2(p_max.x - k_side_handle_size, p_max.y)))
-                        {   // Move region.
-                            ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-
-                            // @TODO: Add the clicking features.
-                        }
-                        else if (ImGui::IsMouseHoveringRect(ImVec2(p_max.x - k_side_handle_size, p_min.y),
-                                                            ImVec2(p_max)))
-                        {   // Right side.
-                            ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
-
-                            // @TODO: Add the clicking features.
-                        }
+                    // Adjustment handles.
+                    constexpr int32_t k_side_handle_size{ 4 };
+                    if (ImGui::IsMouseHoveringRect(ImVec2(p_min),
+                                                   ImVec2(p_min.x + k_side_handle_size, p_max.y)))
+                    {   // Left side.
+                        ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+                        // @TODO: Add the clicking features.
+                    }
+                    else if (ImGui::IsMouseHoveringRect(ImVec2(p_min.x + k_side_handle_size, p_min.y),
+                                                        ImVec2(p_max.x - k_side_handle_size, p_max.y)))
+                    {   // Move region.
+                        ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+                        // @TODO: Add the clicking features.
+                    }
+                    else if (ImGui::IsMouseHoveringRect(ImVec2(p_max.x - k_side_handle_size, p_min.y),
+                                                        ImVec2(p_max)))
+                    {   // Right side.
+                        ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+                        // @TODO: Add the clicking features.
                     }
                 }
 
@@ -714,7 +754,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
                 {   // Draw current frame line.
                     auto cur_frame_str{ std::to_string(currentFrame) };
                     draw_list->AddLine(ImVec2(canvas_pos.x + s_sequencer_x_offset + (currentFrame * s_timeline_cell_size.x), canvas_pos.y + 0),
-                                       ImVec2(canvas_pos.x + s_sequencer_x_offset + (currentFrame * s_timeline_cell_size.x), canvas_pos.y + 100),
+                                       ImVec2(canvas_pos.x + s_sequencer_x_offset + (currentFrame * s_timeline_cell_size.x), cr_timeline_max.y),
                                        0xFF992200,
                                        2.0f);
                     draw_list->AddRectFilled(ImVec2(canvas_pos.x + s_sequencer_x_offset + (currentFrame * s_timeline_cell_size.x), canvas_pos.y + 0),

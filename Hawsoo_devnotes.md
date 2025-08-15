@@ -53,3 +53,5 @@
         - Hitbox/Hurtbox create capsules, add tags, and assign to 1-2 bones.
             - Tags are used for enabling/disabling during timeline.
             - Hitboxes are default on, and hurtboxes are default off.
+
+> Yknow, it really just feels like the best kind of developing is when I play it like Sudoku. Just look at stuff I wanna change and go and do it. Instead of getting overwhelmed, pull back my pace and just take it in a relaxed, slow way.

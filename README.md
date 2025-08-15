@@ -525,7 +525,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
     - @TODO.
 
 1. Swordplay combat.
-    - [ ] @PREREQUISITE: Skeletal animations.
+    - [x] @PREREQUISITE: Skeletal animations.
     - Cutting.
     - Deflecting.
     - Jumping/stomping.
