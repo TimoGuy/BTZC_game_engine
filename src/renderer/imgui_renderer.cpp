@@ -5,6 +5,7 @@
 #include "../input_handler/input_codes.h"
 #include "../input_handler/input_handler.h"
 #include "camera.h"
+#include "cglm/util.h"
 #include "debug_render_job.h"
 #include "imgui.h"
 #include "ImGuizmo.h"
@@ -594,7 +595,6 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
                 { 3, 30, 35 },
             };
 
-            // static float_t s_timeline_zoom_x{ 1.0f };  IGNORE FOR NOW.
             static vec2s s_timeline_cell_size{ 16.0f, 24.0f };
 
             ImDrawList* draw_list = ImGui::GetWindowDrawList();
@@ -720,6 +720,81 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
                     }
                 }
 
+                // Region selecting.
+                struct Region_selecting
+                {
+                    enum Select_state
+                    {
+                        UNSELECTED,
+                        SELECTED,
+                        LEFT_DRAG,
+                        WHOLE_DRAG,
+                        RIGHT_DRAG,
+                    };
+                    Select_state sel_state{ Select_state::UNSELECTED };
+                    Region* sel_reg{ nullptr };
+                    float_t drag_x_amount{ 0.0f };
+                    bool prev_lmb_pressed{ false };
+                };
+                static Region_selecting s_reg_sel;
+
+                // Selecting inputs.
+                bool cur_lmb_pressed{ m_input_handler->get_input_state().le_select.val };
+                bool on_lmb_press{ cur_lmb_pressed && !s_reg_sel.prev_lmb_pressed };
+                bool on_lmb_release{ !cur_lmb_pressed && s_reg_sel.prev_lmb_pressed };
+                s_reg_sel.prev_lmb_pressed = cur_lmb_pressed;
+
+                if (s_reg_sel.sel_reg != nullptr)
+                {   // Drag region.
+                    s_reg_sel.drag_x_amount += m_input_handler->get_input_state()
+                                               .look_delta.x.val;
+                    while (abs(s_reg_sel.drag_x_amount) >= s_timeline_cell_size.x)
+                    {   // Modulate dragged amount and apply to dragging region.
+                        int32_t drag_sign{
+                            static_cast<int32_t>(glm_signf(s_reg_sel.drag_x_amount)) };
+                        s_reg_sel.drag_x_amount -= (s_timeline_cell_size.x
+                                                    * drag_sign);
+
+                        bool left_side_drag{ false };
+                        if (s_reg_sel.sel_state == Region_selecting::LEFT_DRAG ||
+                            s_reg_sel.sel_state == Region_selecting::WHOLE_DRAG)
+                        {   // Left side drag.
+                            s_reg_sel.sel_reg->start_frame += drag_sign;
+                            left_side_drag = true;
+                        }
+                        if (s_reg_sel.sel_state == Region_selecting::RIGHT_DRAG ||
+                            s_reg_sel.sel_state == Region_selecting::WHOLE_DRAG)
+                        {   // Right side drag.
+                            s_reg_sel.sel_reg->end_frame += drag_sign;
+                            left_side_drag = false;
+                        }
+
+                        // Check for overlap issue/error after all drag operations.
+                        if (left_side_drag)
+                        {
+                            s_reg_sel.sel_reg->start_frame =
+                                glm_min(s_reg_sel.sel_reg->start_frame,
+                                        s_reg_sel.sel_reg->end_frame - 1);
+                        }
+                        else
+                        {
+                            s_reg_sel.sel_reg->end_frame =
+                                glm_max(s_reg_sel.sel_reg->start_frame + 1,
+                                        s_reg_sel.sel_reg->end_frame);
+                        }
+                    }
+
+                    if (on_lmb_release)
+                    {   // Release drag.
+                        s_reg_sel.sel_state = Region_selecting::SELECTED;
+                    }
+
+                    if (on_lmb_press)
+                    {   // Deselect selected region.
+                        s_reg_sel.sel_reg = nullptr;
+                    }
+                }
+
                 for (auto& region : s_regions)
                 {   // Draw bars for regions.
                     vec2s region_bar_top_bottom{
@@ -729,8 +804,15 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
                     ImVec2 p_max{ cr_timeline_min.x + s_sequencer_x_offset + (region.end_frame * s_timeline_cell_size.x) - 1, region_bar_top_bottom.t };
                     draw_list->AddRectFilled(p_min,
                                              p_max,
-                                             0xFF005500,
-                                             2.0f);
+                                             0x5500FF00,
+                                             4.0f);
+                    bool is_selected_region{ &region == s_reg_sel.sel_reg };
+                    draw_list->AddRect(p_min,
+                                       p_max,
+                                       (is_selected_region ? 0xFF3176F5 : 0x55FFFFFF),
+                                       4.0f,
+                                       NULL,
+                                       (is_selected_region ? 4.0f : 2.0f));
 
                     // Adjustment handles.
                     constexpr int32_t k_side_handle_size{ 4 };
@@ -738,19 +820,34 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
                                                    ImVec2(p_min.x + k_side_handle_size, p_max.y)))
                     {   // Left side.
                         ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
-                        // @TODO: Add the clicking features.
+                        if (on_lmb_press)
+                        {
+                            s_reg_sel.sel_state = Region_selecting::LEFT_DRAG;
+                            s_reg_sel.sel_reg = &region;
+                            s_reg_sel.drag_x_amount = 0.0f;
+                        }
                     }
                     else if (ImGui::IsMouseHoveringRect(ImVec2(p_min.x + k_side_handle_size, p_min.y),
                                                         ImVec2(p_max.x - k_side_handle_size, p_max.y)))
                     {   // Move region.
                         ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-                        // @TODO: Add the clicking features.
+                        if (on_lmb_press)
+                        {
+                            s_reg_sel.sel_state = Region_selecting::WHOLE_DRAG;
+                            s_reg_sel.sel_reg = &region;
+                            s_reg_sel.drag_x_amount = 0.0f;
+                        }
                     }
                     else if (ImGui::IsMouseHoveringRect(ImVec2(p_max.x - k_side_handle_size, p_min.y),
                                                         ImVec2(p_max)))
                     {   // Right side.
                         ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
-                        // @TODO: Add the clicking features.
+                        if (on_lmb_press)
+                        {
+                            s_reg_sel.sel_state = Region_selecting::RIGHT_DRAG;
+                            s_reg_sel.sel_reg = &region;
+                            s_reg_sel.drag_x_amount = 0.0f;
+                        }
                     }
                 }
 
