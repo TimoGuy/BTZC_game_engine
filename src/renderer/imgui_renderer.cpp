@@ -791,6 +791,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
 
                     if (on_lmb_press)
                     {   // Deselect selected region.
+                        s_reg_sel.sel_state = Region_selecting::UNSELECTED;
                         s_reg_sel.sel_reg = nullptr;
                     }
                 }
@@ -919,8 +920,8 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
                           s_reg_sel.sel_state == Region_selecting::UNSELECTED) &&
                          ImGui::IsMouseHoveringRect(ImVec2(cr_timeline_min.x, cr_timeline_min.y + glm_max(0, s_sequencer_y_offset) + k_top_measuring_region_height + 2),
                                                     ImVec2(cr_timeline_max.x, glm_min(cr_timeline_max.y, cr_timeline_min.y + s_sequencer_y_offset + k_top_measuring_region_height + 2 + (s_timeline_cell_size.y * s_ctrl_items.size())))))
-                {   // Create new node in region since empty space selected.
-                    logger::printe(logger::TRACE, "Create new node!!!! @TODO");
+                {   // Create new region since empty space selected.
+                    logger::printe(logger::TRACE, "Create new region!!!! @TODO");
                 }
             }
             ImGui::PopClipRect();
