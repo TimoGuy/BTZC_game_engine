@@ -906,6 +906,22 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
                                        0xFFFFFFFF,
                                        cur_frame_str.c_str());
                 }
+
+                if (on_lmb_press &&
+                    ImGui::IsMouseHoveringRect(ImVec2(cr_timeline_min),
+                                               ImVec2(cr_timeline_max.x,
+                                                      cr_timeline_min.y + k_top_measuring_region_height + 2)))
+                {   // Move current frame to mouse.
+                    logger::printe(logger::TRACE, "Move current frame!!!! @TODO");
+                }
+                else if (on_lmb_press &&
+                         ((s_reg_sel.sel_reg != nullptr && s_reg_sel.sel_state == Region_selecting::SELECTED) ||
+                          s_reg_sel.sel_state == Region_selecting::UNSELECTED) &&
+                         ImGui::IsMouseHoveringRect(ImVec2(cr_timeline_min.x, cr_timeline_min.y + glm_max(0, s_sequencer_y_offset) + k_top_measuring_region_height + 2),
+                                                    ImVec2(cr_timeline_max.x, glm_min(cr_timeline_max.y, cr_timeline_min.y + s_sequencer_y_offset + k_top_measuring_region_height + 2 + (s_timeline_cell_size.y * s_ctrl_items.size())))))
+                {   // Create new node in region since empty space selected.
+                    logger::printe(logger::TRACE, "Create new node!!!! @TODO");
+                }
             }
             ImGui::PopClipRect();
 
