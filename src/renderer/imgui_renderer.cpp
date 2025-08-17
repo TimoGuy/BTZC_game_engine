@@ -557,12 +557,12 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
         static int selectedEntry = -1;
         static int firstFrame = 0;
         static bool expanded = true;
-        static int currentFrame = 30;
+        static int s_current_frame = 30;
 
         ImGui::PushItemWidth(130);
         ImGui::InputInt("Frame Min", &s_sequencer.mFrameMin);
         ImGui::SameLine();
-        ImGui::InputInt("Frame ", &currentFrame);
+        ImGui::InputInt("Frame ", &s_current_frame);
         ImGui::SameLine();
         ImGui::InputInt("Frame Max", &s_sequencer.mFrameMax);
         ImGui::PopItemWidth();
@@ -893,27 +893,35 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
                 }
 
                 {   // Draw current frame line.
-                    auto cur_frame_str{ std::to_string(currentFrame) };
-                    float_t cur_frame_line_x{ cr_timeline_min.x + s_sequencer_x_offset + (currentFrame * s_timeline_cell_size.x) };
+                    auto cur_frame_str{ std::to_string(s_current_frame) };
+                    float_t cur_frame_line_x{ cr_timeline_min.x + s_sequencer_x_offset + (s_current_frame * s_timeline_cell_size.x) };
 
                     draw_list->AddLine(ImVec2(cur_frame_line_x, cr_timeline_min.y + 0),
                                        ImVec2(cur_frame_line_x, cr_timeline_max.y),
-                                       0xFF992200,
+                                       0xFF7A50FA,
                                        2.0f);
                     draw_list->AddRectFilled(ImVec2(cur_frame_line_x, cr_timeline_min.y + 0),
-                                             ImVec2(cur_frame_line_x + 4 + (ImGui::GetFontSize() * cur_frame_str.length() * 0.5f) + 4, cr_timeline_min.y + k_top_measuring_region_height),
-                                             0xFF992200);
-                    draw_list->AddText(ImVec2(cur_frame_line_x + 4, cr_timeline_min.y + 0),
+                                             ImVec2(cur_frame_line_x + 4 + ImGui::CalcTextSize(cur_frame_str.c_str()).x + 4, cr_timeline_min.y + k_top_measuring_region_height),
+                                             0xFF7A50FA);
+                    draw_list->AddText(ImVec2(cur_frame_line_x + 4, cr_timeline_min.y + 2),
                                        0xFFFFFFFF,
                                        cur_frame_str.c_str());
                 }
 
-                if (on_lmb_press &&
-                    ImGui::IsMouseHoveringRect(ImVec2(cr_timeline_min),
-                                               ImVec2(cr_timeline_max.x,
-                                                      cr_timeline_min.y + k_top_measuring_region_height + 2)))
+                static bool s_move_current_frame_to_mouse_active{ false };  // For click-n-drag.
+                if (on_lmb_release)
+                    s_move_current_frame_to_mouse_active = false;
+                if ((s_move_current_frame_to_mouse_active && cur_lmb_pressed) ||
+                    (on_lmb_press &&
+                     ImGui::IsMouseHoveringRect(ImVec2(cr_timeline_min),
+                                                ImVec2(cr_timeline_max.x,
+                                                       cr_timeline_min.y + k_top_measuring_region_height + 2))))
                 {   // Move current frame to mouse.
-                    logger::printe(logger::TRACE, "Move current frame!!!! @TODO");
+                    s_move_current_frame_to_mouse_active = true;
+                    float_t zoom_relative_mouse_x{ (ImGui::GetIO().MousePos.x
+                                                    - (cr_timeline_min.x + s_sequencer_x_offset))
+                                                   / s_timeline_cell_size.x };
+                    s_current_frame = std::roundf(zoom_relative_mouse_x);
                 }
                 else if (on_lmb_press &&
                          ((s_reg_sel.sel_reg != nullptr && s_reg_sel.sel_state == Region_selecting::SELECTED) ||
@@ -930,7 +938,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
         }
 
         #if 0
-        ImSequencer::Sequencer(&s_sequencer, &currentFrame, &expanded, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_STARTEND | ImSequencer::SEQUENCER_ADD | ImSequencer::SEQUENCER_DEL | ImSequencer::SEQUENCER_COPYPASTE | ImSequencer::SEQUENCER_CHANGE_FRAME);
+        ImSequencer::Sequencer(&s_sequencer, &s_current_frame, &expanded, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_STARTEND | ImSequencer::SEQUENCER_ADD | ImSequencer::SEQUENCER_DEL | ImSequencer::SEQUENCER_COPYPASTE | ImSequencer::SEQUENCER_CHANGE_FRAME);
         // @TODO vvvv
         // // add a UI to edit that particular item
         // if (selectedEntry != -1)
