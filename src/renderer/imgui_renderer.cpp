@@ -735,6 +735,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
                     Region* sel_reg{ nullptr };
                     float_t drag_x_amount{ 0.0f };
                     bool prev_lmb_pressed{ false };
+                    bool prev_del_pressed{ false };
                 };
                 static Region_selecting s_reg_sel;
 
@@ -743,6 +744,11 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
                 bool on_lmb_press{ cur_lmb_pressed && !s_reg_sel.prev_lmb_pressed };
                 bool on_lmb_release{ !cur_lmb_pressed && s_reg_sel.prev_lmb_pressed };
                 s_reg_sel.prev_lmb_pressed = cur_lmb_pressed;
+
+                bool cur_del_pressed{ m_input_handler->is_key_pressed(BT_KEY_DELETE) ||
+                                      m_input_handler->is_key_pressed(BT_KEY_X) };
+                bool on_del_press{ cur_del_pressed && !s_reg_sel.prev_del_pressed };
+                s_reg_sel.prev_del_pressed = cur_del_pressed;
 
                 if (s_reg_sel.sel_reg != nullptr)
                 {   // Drag region.
@@ -944,11 +950,55 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
                         !s_prev_is_key_a_pressed &&
                         m_input_handler->is_key_pressed(BT_KEY_LEFT_SHIFT))
                     {   // Create new region since empty space selected.
-                        logger::printe(logger::TRACE, "Create new region!!!! @TODO");
+                        ImVec2 mouse_pos{ ImGui::GetIO().MousePos };
+                        float_t zoom_relative_mouse_x{ (mouse_pos.x
+                                                        - (cr_timeline_min.x + s_sequencer_x_offset))
+                                                       / s_timeline_cell_size.x };
+                        uint32_t ctrl_item_idx{
+                            static_cast<uint32_t>((mouse_pos.y
+                                                   - (cr_timeline_min.y
+                                                      + s_sequencer_y_offset
+                                                      + k_top_measuring_region_height + 2))
+                                                  / s_timeline_cell_size.y) };
+                        int32_t start_frame{
+                            static_cast<int32_t>(std::floorf(zoom_relative_mouse_x)) };
 
+                        s_regions.emplace_back(ctrl_item_idx,
+                                               start_frame,
+                                               start_frame + 4);
+                        
+                        // Immediately assign created region as selected.
+                        // (Just in case there may be some kind of vector resizing
+                        //  which makes the pointers stale. I hate this issue too)
+                        s_reg_sel.sel_state = Region_selecting::SELECTED;
+                        s_reg_sel.sel_reg = &s_regions.back();
                     }
 
                     s_prev_is_key_a_pressed = cur_is_key_a_pressed;
+                }
+                else if (on_del_press && s_reg_sel.sel_state == Region_selecting::SELECTED)
+                {   // Delete selected region.
+                    assert(s_reg_sel.sel_reg != nullptr);
+                    for (size_t i = s_regions.size() - 1;; i--)
+                    {
+                        if (&s_regions[i] == s_reg_sel.sel_reg)
+                        {   // Found the one to delete.
+                            s_regions.erase(s_regions.begin() + i);
+                            break;
+                        }
+                        if (i == 0)
+                        {   // Searching failed. Abort/exit.
+                            logger::printe(logger::ERROR,
+                                           "Delete selected region searching failed.");
+                            assert(false);
+                            break;
+                        }
+                    }
+
+                    // Clear selection state.
+                    // (Do this right after to prevent stale pointer issues)
+                    s_reg_sel.sel_state = Region_selecting::UNSELECTED;
+                    s_reg_sel.sel_reg = nullptr;
                 }
             }
             ImGui::PopClipRect();
