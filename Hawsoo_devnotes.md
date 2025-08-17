@@ -59,3 +59,7 @@
 - I'm just vibe coding rn. Setting in different things and stuff.
 
 - I need to change the region creation to change to non-clicking (so Shift+a like blender it is).
+
+> It really seems to be that game dev and software dev for this matter should be very therapeutic. An experience where one simply sits down and starts vibing w the code. I am just having a blast w the time I spend just sitting and thinking. just sitting and working wo any convos or distractions. I think in the past month I’ve learned so much about how I can be effective thru pacing myself w running and being effective there. its been super fun.
+
+- for this upcoming part it seems like getting the model selector working and connected to some model rendering in the main view is needed. perhaps have a render object that you use? or maybe there needs to be some kind of if statement to switch between level editor/gameplay and the animation editor.
