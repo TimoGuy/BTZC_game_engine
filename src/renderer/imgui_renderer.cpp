@@ -796,6 +796,12 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
                     }
                 }
 
+                // Detect whether cursor is over empty area on timeline.
+                bool is_hovering_over_timeline{
+                    ImGui::IsMouseHoveringRect(ImVec2(cr_timeline_min.x, cr_timeline_min.y + glm_max(0, s_sequencer_y_offset) + k_top_measuring_region_height + 2),
+                                               ImVec2(cr_timeline_max.x, glm_min(cr_timeline_max.y, cr_timeline_min.y + s_sequencer_y_offset + k_top_measuring_region_height + 2 + (s_timeline_cell_size.y * s_ctrl_items.size())))) };
+                bool is_hovering_over_timeline_region{ false };  // Check in upcoming block.
+
                 for (auto& region : s_regions)
                 {   // Draw bars for regions.
                     vec2s region_bar_top_bottom{
@@ -820,6 +826,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
                     if (ImGui::IsMouseHoveringRect(ImVec2(p_min),
                                                    ImVec2(p_min.x + k_side_handle_size, p_max.y)))
                     {   // Left side.
+                        is_hovering_over_timeline_region = true;
                         ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
                         if (on_lmb_press)
                         {
@@ -831,7 +838,8 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
                     else if (ImGui::IsMouseHoveringRect(ImVec2(p_min.x + k_side_handle_size, p_min.y),
                                                         ImVec2(p_max.x - k_side_handle_size, p_max.y)))
                     {   // Move region.
-                        ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+                        is_hovering_over_timeline_region = true;
+                        ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeAll);
                         if (on_lmb_press)
                         {
                             s_reg_sel.sel_state = Region_selecting::WHOLE_DRAG;
@@ -842,6 +850,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
                     else if (ImGui::IsMouseHoveringRect(ImVec2(p_max.x - k_side_handle_size, p_min.y),
                                                         ImVec2(p_max)))
                     {   // Right side.
+                        is_hovering_over_timeline_region = true;
                         ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
                         if (on_lmb_press)
                         {
@@ -923,13 +932,23 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
                                                    / s_timeline_cell_size.x };
                     s_current_frame = std::roundf(zoom_relative_mouse_x);
                 }
-                else if (on_lmb_press &&
-                         ((s_reg_sel.sel_reg != nullptr && s_reg_sel.sel_state == Region_selecting::SELECTED) ||
-                          s_reg_sel.sel_state == Region_selecting::UNSELECTED) &&
-                         ImGui::IsMouseHoveringRect(ImVec2(cr_timeline_min.x, cr_timeline_min.y + glm_max(0, s_sequencer_y_offset) + k_top_measuring_region_height + 2),
-                                                    ImVec2(cr_timeline_max.x, glm_min(cr_timeline_max.y, cr_timeline_min.y + s_sequencer_y_offset + k_top_measuring_region_height + 2 + (s_timeline_cell_size.y * s_ctrl_items.size())))))
-                {   // Create new region since empty space selected.
-                    logger::printe(logger::TRACE, "Create new region!!!! @TODO");
+                else if (is_hovering_over_timeline &&
+                         !is_hovering_over_timeline_region &&
+                         s_reg_sel.sel_state <= Region_selecting::SELECTED)  // Not doing a drag operation.
+                {   // Prompt creating new region w/ tooltip.
+                    ImGui::SetTooltip("Press Shift+A to create new region.");
+
+                    static bool s_prev_is_key_a_pressed{ false };
+                    bool cur_is_key_a_pressed{ m_input_handler->is_key_pressed(BT_KEY_A) };
+                    if (cur_is_key_a_pressed &&
+                        !s_prev_is_key_a_pressed &&
+                        m_input_handler->is_key_pressed(BT_KEY_LEFT_SHIFT))
+                    {   // Create new region since empty space selected.
+                        logger::printe(logger::TRACE, "Create new region!!!! @TODO");
+
+                    }
+
+                    s_prev_is_key_a_pressed = cur_is_key_a_pressed;
                 }
             }
             ImGui::PopClipRect();
