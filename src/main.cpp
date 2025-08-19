@@ -348,7 +348,9 @@ int32_t main()
     main_renderer.get_camera_obj()->set_follow_object(
         BT::UUID_helper::to_UUID(s_scene_as_json["cam_following_game_obj"]));
 
-    {   // @TODO: @NOCHECKIN: @DEBUG
+    {
+        
+
         // Serialize scene.
         json root = {};
         size_t game_obj_idx{ 0 };

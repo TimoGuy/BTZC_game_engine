@@ -122,6 +122,7 @@ add_executable(${PROJECT_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/texture.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/texture.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/scene/scene_serialization_ifc.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/scene/scene_serialization.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/timer/timer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/timer/timer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/timer/watchdog_timer.cpp
