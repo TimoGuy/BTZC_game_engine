@@ -232,8 +232,7 @@ int32_t main()
             main_renderer.get_camera_obj()->set_follow_object(follow_obj);
         });
 
-    // BT::scene_serialization_io_helper::load_scene_from_disk("_dev_sample_scene.btscene");
-    BT::scene_serialization_io_helper::load_scene_from_disk("_dev_animation_editor_view.btscene");
+    BT::scene_serialization_io_helper::load_scene_from_disk("_dev_sample_scene.btscene");
 
     // Timer.
     BT::Timer main_timer;
