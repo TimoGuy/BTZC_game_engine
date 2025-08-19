@@ -217,6 +217,25 @@ int32_t main()
     main_renderer_imgui_renderer.set_renderer_ref(&main_renderer);
     main_renderer_imgui_renderer.set_input_handler_ref(&main_input_handler);
 
+    // Setup scene serialization IO helper.
+    BT::scene_serialization_io_helper::set_load_scene_callbacks(
+        [&]() {
+            return new BT::Game_object(main_input_handler,
+                                       main_physics_engine,
+                                       main_renderer,
+                                       game_object_pool);
+        },
+        [&](BT::Game_object* game_obj) {
+            game_object_pool.emplace(unique_ptr<BT::Game_object>{ game_obj });
+        },
+        [&](BT::UUID follow_obj) {
+            main_renderer.get_camera_obj()->set_follow_object(follow_obj);
+        });
+
+
+    BT::scene_serialization_io_helper::load_scene_from_disk("_dev_sample_scene.btscene");
+
+    #if 0
     static json s_scene_as_json =
         R"({
             "cam_following_game_obj": "aae5ebfb-7c2b-49a8-bcb9-658fdea987af",
@@ -349,8 +368,6 @@ int32_t main()
         BT::UUID_helper::to_UUID(s_scene_as_json["cam_following_game_obj"]));
 
     {
-        
-
         // Serialize scene.
         json root = {};
         size_t game_obj_idx{ 0 };
@@ -369,6 +386,7 @@ int32_t main()
         std::ofstream f{ BTZC_GAME_ENGINE_ASSET_SCENE_PATH "sumthin_cumming_outta_me.btscene" };
         f << root.dump(4);
     }
+    #endif  // 0
 
     // Timer.
     BT::Timer main_timer;

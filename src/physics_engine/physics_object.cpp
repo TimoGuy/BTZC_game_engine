@@ -221,8 +221,8 @@ void BT::Physics_object::scene_serialize(Scene_serialization_mode mode, json& no
         m_type_pimpl->scene_serialize(mode, node_ref);
 
         auto phys_transform{ m_type_pimpl->read_transform() };
-        vec3_to_json(phys_transform.position, node_ref["initial_transform"][0]);
-        quat_to_json(phys_transform.rotation, node_ref["initial_transform"][1]);
+        vec3_to_json(phys_transform.position, node_ref["init_transform"][0]);
+        quat_to_json(phys_transform.rotation, node_ref["init_transform"][1]);
     }
     else if (mode == SCENE_SERIAL_MODE_DESERIALIZE)
     {

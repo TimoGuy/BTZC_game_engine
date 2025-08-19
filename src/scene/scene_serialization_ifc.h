@@ -40,8 +40,7 @@ void set_load_scene_callbacks(std::function<Game_object*()>&& new_game_obj_fn,
                               std::function<void(Game_object*)>&& emplace_game_obj_into_scene_fn,
                               std::function<void(UUID)>&& set_cam_following_game_obj_fn);
 
-void load_scene_from_disk(std::string const& scene_name,
-                          Scene_package& out_scene);
+void load_scene_from_disk(std::string const& scene_name);
 
 void write_scene_to_disk(std::string const& scene_name,
                          Scene_package&& scene);

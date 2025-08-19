@@ -9,10 +9,10 @@
             "name": "My Gay object",
             "parent": null,
             "physics_obj": {
-                "crouch_height": 0.0,
+                "crouch_height": 1.0,
                 "guid": "08743552-fff6-49d2-ad15-efbd121ab773",
-                "height": 1.0,
-                "initial_transform": [
+                "height": 2.0,
+                "init_transform": [
                     [
                         0.0,
                         5.099999904632568,
@@ -91,7 +91,7 @@
             "parent": null,
             "physics_obj": {
                 "guid": "08743552-fff6-49d2-ad15-efbd121ab772",
-                "initial_transform": [
+                "init_transform": [
                     [
                         0.0,
                         0.0,

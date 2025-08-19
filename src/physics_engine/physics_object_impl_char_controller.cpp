@@ -258,8 +258,8 @@ void BT::Phys_obj_impl_char_controller::scene_serialize(Scene_serialization_mode
     if (mode == SCENE_SERIAL_MODE_SERIALIZE)
     {
         node_ref["radius"] = m_radius;
-        node_ref["height"] = m_height;
-        node_ref["crouch_height"] = m_crouch_height;
+        node_ref["height"] = (m_height + 2.0f * m_radius);
+        node_ref["crouch_height"] = (m_crouch_height + 2.0f * m_radius);
     }
     else if (mode == SCENE_SERIAL_MODE_DESERIALIZE)
     {
