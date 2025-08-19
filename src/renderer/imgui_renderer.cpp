@@ -1005,18 +1005,6 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
 
             ImGui::EndChild();
         }
-
-        #if 0
-        ImSequencer::Sequencer(&s_sequencer, &s_current_frame, &expanded, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_STARTEND | ImSequencer::SEQUENCER_ADD | ImSequencer::SEQUENCER_DEL | ImSequencer::SEQUENCER_COPYPASTE | ImSequencer::SEQUENCER_CHANGE_FRAME);
-        // @TODO vvvv
-        // // add a UI to edit that particular item
-        // if (selectedEntry != -1)
-        // {
-        //     const MySequence::MySequenceItem &item = mySequence.myItems[selectedEntry];
-        //     ImGui::Text("I am a %s, please edit me", SequencerItemTypeNames[item.mType]);
-        //     // switch (type) ....
-        // }
-        #endif  //0
     }
     ImGui::End();
 }

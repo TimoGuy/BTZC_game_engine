@@ -196,6 +196,11 @@ void BT::Camera::set_follow_object(UUID game_object_ref)
     m_data->frontend.follow_orbit.game_object_ref = game_object_ref;
 }
 
+BT::UUID BT::Camera::get_follow_object()
+{
+    return m_data->frontend.follow_orbit.game_object_ref;
+}
+
 void BT::Camera::request_follow_orbit()
 {
     m_data->frontend.request_follow_orbit = true;

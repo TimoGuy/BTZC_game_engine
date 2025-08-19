@@ -39,6 +39,7 @@ public:
 
     // Camera frontend.
     void set_follow_object(UUID game_object_ref);
+    UUID get_follow_object();
     void request_follow_orbit();
     bool is_capture_fly();
     bool is_follow_orbit();
