@@ -50,6 +50,7 @@ void BT::ImGui_renderer::render_imgui()
     }
 
     // Context switching.
+    static bool s_entering_new_context{ true };
     enum Editor_context
     {
         LEVEL_EDITOR,
@@ -60,7 +61,7 @@ void BT::ImGui_renderer::render_imgui()
         "Level Editor",
         "Animation Frame Data Editor",
     };
-    static std::array<void(ImGui_renderer::*)(), NUM_EDITOR_CONTEXTS> const k_editor_context_fns{
+    static std::array<void(ImGui_renderer::*)(bool), NUM_EDITOR_CONTEXTS> const k_editor_context_fns{
         &ImGui_renderer::render_imgui__level_editor_context,
         &ImGui_renderer::render_imgui__animation_frame_data_editor_context,
     };
@@ -136,6 +137,7 @@ void BT::ImGui_renderer::render_imgui()
                                + "##main_menu_bar_context_switch").c_str()))
             {   // New editor context.
                 s_current_editor_context = Editor_context(i);
+                s_entering_new_context = true;
             }
             // ImGui::EndDisabled();
             ImGui::PopStyleColor(3);
@@ -306,10 +308,11 @@ void BT::ImGui_renderer::render_imgui()
 
     // Context dependant gui.
     auto fn_ptr{ k_editor_context_fns[s_current_editor_context] };
-    ((*this).*fn_ptr)();
+    ((*this).*fn_ptr)(s_entering_new_context);
+    s_entering_new_context = false;
 }
 
-void BT::ImGui_renderer::render_imgui__level_editor_context()
+void BT::ImGui_renderer::render_imgui__level_editor_context(bool enter)
 {   // Level select.
     ImGui::Begin("Level select");
     {
@@ -525,8 +528,13 @@ public:
 
 }  // namespace
 
-void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context()
+void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool enter)
 {
+    if (enter)
+    {   // Load up editor-specific scene.
+        m_request_switch_scene_callback("_dev_animation_editor_view.btscene");
+    }
+
     static int32_t s_current_animation_clip{ 0 };
 
     // Model selection.

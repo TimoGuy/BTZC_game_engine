@@ -170,6 +170,20 @@ BT::Game_object::Game_object(Input_handler& input_handler,
 {
 }
 
+BT::Game_object::~Game_object()
+{   // Remove owning components as well.
+    if (!m_phys_obj_key.is_nil())
+    {
+        m_phys_engine.remove_physics_object(m_phys_obj_key);
+    }
+    if (!m_rend_obj_key.is_nil())
+    {
+        m_renderer.get_render_object_pool().remove(m_rend_obj_key);
+    }
+
+    // @NOTE: Taking care of the hierarchy for children is handled by `Game_object_pool::remove()`.
+}
+
 void BT::Game_object::run_pre_physics_scripts(float_t physics_delta_time)
 {
     for (auto& script : m_scripts)
@@ -342,6 +356,7 @@ void BT::Game_object::scene_serialize(Scene_serialization_mode mode, json& node_
         }
 
         m_parent = (node_ref["parent"].is_null() ?
+
                     UUID() :
                     UUID_helper::to_UUID(node_ref["parent"]));
 
@@ -550,8 +565,16 @@ void BT::Game_object_pool::remove(UUID key)
         return;
     }
 
-    if (m_game_objects.at(key)->get_parent_uuid().is_nil())
+    auto& removing_game_obj{ m_game_objects.at(key) };
+    if (removing_game_obj->get_parent_uuid().is_nil())
+        // Remove self from root level if self is one.
         remove_root_level_status(key);
+
+    for (auto child_uuid : removing_game_obj->get_children_uuids())
+    {   // Sever parent-child relationship and set child to root level obj.
+        removing_game_obj->remove_child(*m_game_objects.at(child_uuid));
+        m_root_level_game_objects_ordering.emplace_back(child_uuid);
+    }
 
     m_game_objects.erase(key);
     unblock();

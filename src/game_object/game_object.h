@@ -163,6 +163,7 @@ public:
                 Physics_engine& phys_engine,
                 Renderer& renderer,
                 Game_object_pool& obj_pool);
+    ~Game_object();
 
     static void set_imgui_gizmo_trans_space(int32_t trans_space) { s_imgui_gizmo_trans_space = trans_space; }
     static int32_t get_imgui_gizmo_trans_space() { return s_imgui_gizmo_trans_space; }

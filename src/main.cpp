@@ -211,12 +211,6 @@ int32_t main()
 
     main_renderer.get_camera_obj()->set_game_object_pool(game_object_pool);
 
-    // Setup imgui renderer.
-    main_renderer_imgui_renderer.set_game_obj_pool_ref(&game_object_pool);
-    main_renderer_imgui_renderer.set_camera_ref(main_renderer.get_camera_obj());
-    main_renderer_imgui_renderer.set_renderer_ref(&main_renderer);
-    main_renderer_imgui_renderer.set_input_handler_ref(&main_input_handler);
-
     // Setup scene serialization IO helper.
     BT::scene_serialization_io_helper::set_load_scene_callbacks(
         [&]() {
@@ -232,7 +226,55 @@ int32_t main()
             main_renderer.get_camera_obj()->set_follow_object(follow_obj);
         });
 
-    BT::scene_serialization_io_helper::load_scene_from_disk("_dev_sample_scene.btscene");
+    // Load default scene.
+    class Scene_switching_cache
+    {   // Simple class for holding scene switching logic.
+    public:     Scene_switching_cache(BT::Game_object_pool& game_object_pool)
+                    : m_game_object_pool{ game_object_pool }
+                {
+                }
+    
+                void request_new_scene(std::string const& scene_name)
+                {
+                    m_scene_name = scene_name;
+                    m_new_request = true;
+                }
+
+                void process_scene_load_request()
+                {
+                    if (!m_new_request)
+                        return;
+
+                    // Unload whole scene.
+                    auto const all_game_objs{ m_game_object_pool.get_all_as_list_no_lock() };
+                    for (auto game_obj : all_game_objs)
+                    {
+                        m_game_object_pool.remove(game_obj->get_uuid());
+                    }
+
+                    // Load new scene.
+                    BT::scene_serialization_io_helper::load_scene_from_disk(m_scene_name);
+
+                    m_new_request = false;
+                }
+
+    private:    std::string m_scene_name;
+                bool m_new_request;
+
+                BT::Game_object_pool& m_game_object_pool;
+    } main_scene_switcher{ game_object_pool };
+    main_scene_switcher.request_new_scene("_dev_sample_scene.btscene");
+    main_scene_switcher.process_scene_load_request();
+
+    // Setup imgui renderer.
+    main_renderer_imgui_renderer.set_game_obj_pool_ref(&game_object_pool);
+    main_renderer_imgui_renderer.set_camera_ref(main_renderer.get_camera_obj());
+    main_renderer_imgui_renderer.set_renderer_ref(&main_renderer);
+    main_renderer_imgui_renderer.set_input_handler_ref(&main_input_handler);
+    main_renderer_imgui_renderer.set_switch_scene_callback(
+        [&main_scene_switcher](std::string const& new_scene_name) {
+            main_scene_switcher.request_new_scene(new_scene_name);
+        });
 
     // Timer.
     BT::Timer main_timer;
@@ -254,8 +296,7 @@ int32_t main()
 
         main_physics_engine.accumulate_delta_time(delta_time);
         while (main_physics_engine.calc_wants_to_tick())
-        {
-            // Run all pre-physics scripts.
+        {   // Run all pre-physics scripts.
             for (auto game_obj : all_game_objs)
             {
                 game_obj->run_pre_physics_scripts(main_physics_engine.k_simulation_delta_time);
@@ -265,8 +306,7 @@ int32_t main()
         }
 
         main_physics_engine.calc_interpolation_alpha();
-        {
-            // Run all pre-render scripts.
+        {   // Run all pre-render scripts.
             for (auto game_obj : all_game_objs)
             {
                 game_obj->run_pre_render_scripts(delta_time);
@@ -300,7 +340,8 @@ int32_t main()
 
         game_object_pool.return_list(std::move(all_game_objs));
 
-        // @TODO: @HERE: Tick level loading.
+        // Tick level loading.
+        main_scene_switcher.process_scene_load_request();
 
         if (first_iter)
         {   // Turn off logging to the console.

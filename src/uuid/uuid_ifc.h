@@ -12,6 +12,7 @@ namespace BT
 class UUID_ifc
 {
 public:
+    virtual ~UUID_ifc() = default;
     void assign_uuid(string const& pretty_uuid, bool generate_if_nil);
     void assign_generated_uuid();
     UUID get_uuid() const;
