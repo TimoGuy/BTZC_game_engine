@@ -313,7 +313,13 @@ void BT::ImGui_renderer::render_imgui()
 }
 
 void BT::ImGui_renderer::render_imgui__level_editor_context(bool enter)
-{   // Level select.
+{
+    if (enter)
+    {   // Load current loaded level.
+        m_request_switch_scene_callback("_dev_sample_scene.btscene");
+    }
+
+    // Level select.
     ImGui::Begin("Level select");
     {
         ImGui::Button("Create new level..");

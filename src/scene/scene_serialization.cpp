@@ -55,8 +55,7 @@ void BT::scene_serialization_io_helper::load_scene_from_disk(std::string const& 
 void BT::scene_serialization_io_helper::write_scene_to_disk(
     std::string const& scene_name,
     Scene_package&& scene)
-{
-    // Collect scene into json.
+{   // Collect scene into json.
     json root = {};
     size_t game_obj_idx{ 0 };
     for (auto game_obj : scene.game_objs)

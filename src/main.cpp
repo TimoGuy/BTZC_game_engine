@@ -245,6 +245,9 @@ int32_t main()
                     if (!m_new_request)
                         return;
 
+                    BT::Timer perf_timer;
+                    perf_timer.start_timer();
+
                     // Unload whole scene.
                     auto const all_game_objs{ m_game_object_pool.get_all_as_list_no_lock() };
                     for (auto game_obj : all_game_objs)
@@ -254,6 +257,11 @@ int32_t main()
 
                     // Load new scene.
                     BT::scene_serialization_io_helper::load_scene_from_disk(m_scene_name);
+
+                    BT::logger::printef(BT::logger::TRACE,
+                                        "Switch to scene \"%s\" from disk finished in %.3fms.",
+                                        m_scene_name.c_str(),
+                                        perf_timer.calc_delta_time() * 1000.0f);
 
                     m_new_request = false;
                 }
