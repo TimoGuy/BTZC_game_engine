@@ -137,6 +137,7 @@ public:
     static void emplace_model(string const& name, unique_ptr<Model>&& model);
     static Model const* get_model(string const& name);
     static string get_model_name(Model const* model_ptr);
+    static vector<string> get_all_model_names();
 
 private:
     inline static vector<pair<string, unique_ptr<Model>>> s_models;

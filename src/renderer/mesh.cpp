@@ -1238,3 +1238,16 @@ string BT::Model_bank::get_model_name(Model const* model_ptr)
 
     return model_name;
 }
+
+vector<string> BT::Model_bank::get_all_model_names()
+{
+    vector<string> model_names;
+    model_names.reserve(s_models.size());
+
+    for (auto& model : s_models)
+    {
+        model_names.emplace_back(model.first);
+    }
+
+    return model_names;
+}

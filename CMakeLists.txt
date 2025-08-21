@@ -56,6 +56,8 @@ add_subdirectory(third_party/stduuid)
 
 # Executable build.
 add_executable(${PROJECT_NAME}
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/animation_editor_tool/animation_editor_tool.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/animation_editor_tool/animation_editor_tool.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/list_of_scripts_begin.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/list_of_scripts_end.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/script_apply_phys_xform_to_rend_obj.cpp

@@ -1,5 +1,6 @@
 #include "imgui_renderer.h"
 
+#include "../animation_editor_tool/animation_editor_tool.h"
 #include "../btzc_game_engine.h"
 #include "../game_object/game_object.h"
 #include "../input_handler/input_codes.h"
@@ -13,6 +14,7 @@
 #include "ImCurveEdit.h"  // @TEMP @NOCHECKIN
 #include "imgui_internal.h"
 #include "logger.h"
+#include "mesh.h"
 #include <array>
 #include <fstream>
 #include <string>
@@ -541,12 +543,21 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
         m_request_switch_scene_callback("_dev_animation_editor_view.btscene");
     }
 
+    static size_t s_selected_model_idx{ 0 };
     static int32_t s_current_animation_clip{ 0 };
 
     // Model selection.
     ImGui::Begin("Model select");
     {
-        ImGui::Button("Refresh list");
+        static bool s_load_selected_model{ true };
+        static auto s_all_model_names{ Model_bank::get_all_model_names() };
+        if (ImGui::Button("Refresh list"))
+        {   // Reset model selection and load first model from refreshed list.
+            s_selected_model_idx = 0;
+            s_load_selected_model = true;
+            s_all_model_names = Model_bank::get_all_model_names();
+        }
+
         ImGui::SameLine();
         ImGui::Spacing();
         ImGui::SameLine();
@@ -554,7 +565,23 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
 
         ImGui::SeparatorText("List of Models");
 
-        ImGui::Text("@TODO: Implement");
+        for (size_t i = 0; i < s_all_model_names.size(); i++)
+        {
+            auto& model_name{ s_all_model_names[i] };
+            bool is_active_model{ s_selected_model_idx == i };
+            if (ImGui::RadioButton(model_name.c_str(), is_active_model) &&
+                !is_active_model)
+            {   // Request loading new model.
+                s_selected_model_idx = i;
+                s_load_selected_model = true;
+            }
+        }
+
+        if (s_load_selected_model)
+        {   // Process load model request.
+            // @TODO: @HERE
+            assert(false);
+        }
     }
     ImGui::End();
 
