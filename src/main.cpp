@@ -233,7 +233,7 @@ int32_t main()
                     : m_game_object_pool{ game_object_pool }
                 {
                 }
-    
+
                 void request_new_scene(std::string const& scene_name)
                 {
                     m_scene_name = scene_name;
