@@ -15,7 +15,14 @@
                     "type": "Model"
                 }
             },
-            "scripts": null,
+            "scripts": [
+                {
+                    "script_datas": {
+                        "render_obj_key": "fa2a0c0c-cfd4-47a7-b4e7-01dbbd3b3538"
+                    },
+                    "script_type": "script__dev__anim_editor_tool_state_agent"
+                }
+            ],
             "transform": {
                 "global": {
                     "position": [

@@ -579,8 +579,10 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
 
         if (s_load_selected_model)
         {   // Process load model request.
-            // @TODO: @HERE
-            assert(false);
+            anim_editor::s_editor_state.working_model =
+                Model_bank::get_model(s_all_model_names[s_selected_model_idx]);
+            assert(anim_editor::s_editor_state.working_model != nullptr);
+            s_load_selected_model = false;
         }
     }
     ImGui::End();

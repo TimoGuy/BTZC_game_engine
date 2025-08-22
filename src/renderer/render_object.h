@@ -45,6 +45,18 @@ public:
 
     Game_object& get_owning_game_obj() { return m_game_obj; }
 
+    void set_model(Model const* model)
+    {
+        assert(model != nullptr);
+        m_renderable = model;
+
+        // Remove any traces of deformed model if included.
+        if (m_deformed_model != nullptr)
+            m_deformed_model.reset();
+        if (m_model_animator != nullptr)
+            m_model_animator.reset();
+    }
+
     void set_deformed_model(unique_ptr<Deformed_model>&& deformed_model)
     {
         m_deformed_model = std::move(deformed_model);

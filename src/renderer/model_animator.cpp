@@ -196,6 +196,11 @@ BT::Model_animator::Model_animator(Model const& model)
 {
 }
 
+size_t BT::Model_animator::get_num_model_animations()
+{
+    return m_model_animations.size();
+}
+
 void BT::Model_animator::configure_animator(std::vector<Animator_state>&& animator_states)
 {
     // Idk why I put this into a separate method instead of in the constructor but hey, here we are.

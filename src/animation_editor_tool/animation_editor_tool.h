@@ -3,12 +3,16 @@
 
 namespace BT
 {
+
+class Model;
+
 namespace anim_editor
 {
 
 struct Editor_state
 {
-    // @TODO.
+    Model const* working_model{ nullptr };
+    size_t num_animations{ 0 };
 };
 
 extern Editor_state s_editor_state;

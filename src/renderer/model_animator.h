@@ -83,6 +83,8 @@ class Model_animator
 public:
     Model_animator(Model const& model);
 
+    size_t get_num_model_animations();
+
     struct Animator_state
     {
         uint32_t animation_idx;
