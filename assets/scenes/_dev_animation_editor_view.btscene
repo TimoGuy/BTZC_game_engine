@@ -61,6 +61,60 @@
                     ]
                 }
             }
+        },
+        {
+            "children": null,
+            "guid": "88a277a7-3481-42e5-a584-e0d06f892d48",
+            "name": "Anim editor view focus object",
+            "parent": null,
+            "physics_obj": null,
+            "render_obj": {
+                "guid": "28914509-4638-4077-9865-c4c3e6994f57",
+                "render_layer": 1,
+                "renderable": {
+                    "model_name": "xz_grid",
+                    "type": "Model"
+                }
+            },
+            "scripts": null,
+            "transform": {
+                "global": {
+                    "position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "local": {
+                    "position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                }
+            }
         }
     ]
 }

@@ -138,6 +138,10 @@ int32_t main()
         make_unique<BT::Model>(BTZC_GAME_ENGINE_ASSET_MODEL_PATH "box_0.5_2.obj",
                                "color_material"));
     BT::Model_bank::emplace_model(
+        "xz_grid",
+        make_unique<BT::Model>(BTZC_GAME_ENGINE_ASSET_MODEL_PATH "stupid_polygon_grid.obj",
+                               "color_material"));
+    BT::Model_bank::emplace_model(
         "player_model_0.5_2",
         make_unique<BT::Model>(BTZC_GAME_ENGINE_ASSET_MODEL_PATH "player_model_0.5_2.obj",
                                "color_material"));

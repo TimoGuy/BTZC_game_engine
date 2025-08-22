@@ -82,7 +82,7 @@ void BT::Scripts::Script__dev__anim_editor_tool_state_agent::on_pre_render(float
         if (num_anims > 0)
         {   // Create deformed model with animator.
             rend_obj.set_deformed_model(std::make_unique<Deformed_model>(new_model));
-            animator->configure_animator({ { 0 } });  // @NOCHECKIN: @HARDCODE.
+            animator->configure_animator({ { 24 } });  // @NOCHECKIN: @HARDCODE.
             rend_obj.set_model_animator(std::move(animator));
         }
         else
