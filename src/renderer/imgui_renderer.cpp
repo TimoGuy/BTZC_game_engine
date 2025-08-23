@@ -466,14 +466,15 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
         static int32_t s_current_frame = 30;
         static int32_t s_final_frame = 60;
 
-        anim_editor::s_editor_state.anim_current_frame = std::max(0, s_current_frame);  // A frame late but oh well.
+        anim_editor::s_editor_state.anim_current_frame =  // A frame late but oh well.
+            std::min(std::max(0, s_current_frame), s_final_frame);
 
         ImGui::PushItemWidth(130);
-        ImGui::Text("Frame %d/%d. %.2f FPS",
-                    s_current_frame,
+        ImGui::Text("Displaying frame %llu/%d. %.2f FPS",
+                    anim_editor::s_editor_state.anim_current_frame,
                     s_final_frame,
                     Model_joint_animation::k_frames_per_second);
-        ImGui::InputInt("Frame", &s_current_frame);
+        ImGui::InputInt("Selected Frame", &s_current_frame);
         ImGui::PopItemWidth();
 
         // BT sequencer.
@@ -800,10 +801,10 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
 
                 // Draw measuring lines and numbers.
                 constexpr int32_t k_frame_start{ 0 };
-                int32_t frame_end{
-                    static_cast<int32_t>(anim_editor::s_editor_state.selected_anim_num_frames) };
+                s_final_frame =
+                    anim_editor::s_editor_state.selected_anim_num_frames;
 
-                for (int32_t i = k_frame_start; i <= frame_end; i++)
+                for (int32_t i = k_frame_start; i <= s_final_frame; i++)
                 {
                     float_t line_x{ cr_timeline_min.x + s_sequencer_x_offset + (i * s_timeline_cell_size.x) };
 
@@ -816,7 +817,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                                        ImVec2(line_x, cr_timeline_min.y + k_top_measuring_region_height),
                                        0xFFFFFFFF);
 
-                    if (i == k_frame_start || i == frame_end)
+                    if (i == k_frame_start || i == s_final_frame)
                     {   // Draw full height start-end lines.
                         draw_list->AddLine(ImVec2(line_x, cr_timeline_min.y + k_top_measuring_region_height),
                                            ImVec2(line_x, cr_timeline_max.y),

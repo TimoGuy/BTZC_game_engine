@@ -69,3 +69,9 @@
 
 - Ok so for this next part I need to create a specific script that accesses a global block of data for the animator editor stuff.
     - First thing we'll do is get the animated model to switch depending on the selected model and then select the playing animation and the position in the animation to play depending on the controls.
+
+- Yoooo the tool kinda feels complete as soon as the animations just played with the timeline. Hahahaha feels kinda unreal.
+
+- I think the next thing to work on here is getting the event system all put together and saved into a json file.
+    - There also needs to be a main struct to work with that will go well with the animator and the editor.
+    - And then a serialization-ifc attached to this struct I think.

@@ -130,8 +130,7 @@ void BT::Scripts::Script__dev__anim_editor_tool_state_agent::on_pre_render(float
 
     if (m_working_model_animator)
     {   // Update animator frame.
-        auto current_frame_clamped{ std::min(anim_editor::s_editor_state.anim_current_frame,
-                                             anim_editor::s_editor_state.selected_anim_num_frames) };
+        auto current_frame_clamped{ anim_editor::s_editor_state.anim_current_frame };  // @NOTE: Assumed clamped.
         m_working_model_animator->set_time(current_frame_clamped
                                            / Model_joint_animation::k_frames_per_second);
     }
