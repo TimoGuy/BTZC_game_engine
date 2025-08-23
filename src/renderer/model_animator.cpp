@@ -196,6 +196,11 @@ BT::Model_animator::Model_animator(Model const& model)
 {
 }
 
+BT::Model_joint_animation const& BT::Model_animator::get_model_animation_by_idx(size_t idx)
+{
+    return m_model_animations[idx];
+}
+
 size_t BT::Model_animator::get_num_model_animations()
 {
     return m_model_animations.size();

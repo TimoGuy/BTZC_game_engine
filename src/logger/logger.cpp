@@ -20,7 +20,6 @@ using std::lock_guard;
 using std::min;
 using std::mutex;
 using std::stringstream;
-using std::strncpy;
 using std::to_string;
 using std::vector;
 

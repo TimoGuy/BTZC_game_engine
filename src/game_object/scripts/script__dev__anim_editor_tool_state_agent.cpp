@@ -44,6 +44,8 @@ public:
     UUID m_render_obj_key;
 
     Model const* m_prev_working_model{ nullptr };
+    Model_animator* m_working_model_animator{ nullptr };
+    uint32_t m_working_anim_idx{ (uint32_t)-1 };
 };
 
 }  // namespace BT
@@ -73,16 +75,30 @@ void BT::Scripts::Script__dev__anim_editor_tool_state_agent::on_pre_render(float
     
     // Update self of any changes.
     if (m_prev_working_model != anim_editor::s_editor_state.working_model)
-    {   // Check if new model is deformable by decorating an animator.
+    {
+        m_working_model_animator = nullptr;
+
+        // Check if new model is deformable by decorating an animator.
         auto const& new_model{ *anim_editor::s_editor_state.working_model };
         auto animator{ std::make_unique<Model_animator>(new_model) };
 
         auto num_anims{ animator->get_num_model_animations() };
-        anim_editor::s_editor_state.num_animations = num_anims;
+
+        anim_editor::s_editor_state.anim_name_to_idx_map.clear();
+        for (size_t i = 0; i < num_anims; i++)
+        {   // Fill in animation map.
+            anim_editor::s_editor_state.anim_name_to_idx_map
+                .emplace(animator->get_model_animation_by_idx(i).get_name(), i);
+        }
+
         if (num_anims > 0)
         {   // Create deformed model with animator.
             rend_obj.set_deformed_model(std::make_unique<Deformed_model>(new_model));
-            animator->configure_animator({ { 24 } });  // @NOCHECKIN: @HARDCODE.
+
+            m_working_anim_idx = 0;  // @HARDCODE: First anim.
+            anim_editor::s_editor_state.selected_anim_idx = m_working_anim_idx;
+            animator->configure_animator({ { m_working_anim_idx } });
+            m_working_model_animator = animator.get();
             rend_obj.set_model_animator(std::move(animator));
         }
         else
@@ -92,6 +108,13 @@ void BT::Scripts::Script__dev__anim_editor_tool_state_agent::on_pre_render(float
         }
 
         m_prev_working_model = anim_editor::s_editor_state.working_model;
+    }
+
+    if (m_working_anim_idx != anim_editor::s_editor_state.selected_anim_idx)
+    {   // Configure deformed model animator to new anim idx.
+        m_working_anim_idx = anim_editor::s_editor_state.selected_anim_idx;
+        if (m_working_model_animator)
+            m_working_model_animator->configure_animator({ { m_working_anim_idx } });
     }
 
     m_renderer.get_render_object_pool().return_render_objs({ &rend_obj });

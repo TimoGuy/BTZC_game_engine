@@ -1,5 +1,8 @@
 #pragma once
 
+#include <string>
+#include <map>
+
 
 namespace BT
 {
@@ -12,7 +15,9 @@ namespace anim_editor
 struct Editor_state
 {
     Model const* working_model{ nullptr };
-    size_t num_animations{ 0 };
+    std::map<std::string, size_t> anim_name_to_idx_map;
+    size_t selected_anim_idx{ 0 };
+
 };
 
 extern Editor_state s_editor_state;

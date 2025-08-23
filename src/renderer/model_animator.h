@@ -62,6 +62,8 @@ public:
                           std::string name,
                           std::vector<Model_joint_animation_frame>&& animation_frames);
 
+    std::string get_name() const { return m_name; }
+
     enum Rounding_func{ FLOOR, CEIL };
     uint32_t calc_frame_idx(float_t time, bool loop, Rounding_func rounding) const;
     void calc_joint_matrices(float_t time, bool loop, std::vector<mat4s>& out_joint_matrices) const;
@@ -83,6 +85,7 @@ class Model_animator
 public:
     Model_animator(Model const& model);
 
+    Model_joint_animation const& get_model_animation_by_idx(size_t idx);
     size_t get_num_model_animations();
 
     struct Animator_state
