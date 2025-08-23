@@ -222,6 +222,11 @@ void BT::Model_animator::change_state_idx(uint32_t to_state)
     }
 }
 
+void BT::Model_animator::set_time(float_t time)
+{
+    m_time = time;
+}
+
 void BT::Model_animator::update(float_t delta_time)
 {
     m_time += delta_time * m_animator_states[m_current_state_idx].speed;

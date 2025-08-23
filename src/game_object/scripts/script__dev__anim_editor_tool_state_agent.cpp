@@ -95,9 +95,12 @@ void BT::Scripts::Script__dev__anim_editor_tool_state_agent::on_pre_render(float
         {   // Create deformed model with animator.
             rend_obj.set_deformed_model(std::make_unique<Deformed_model>(new_model));
 
-            m_working_anim_idx = 0;  // @HARDCODE: First anim.
-            anim_editor::s_editor_state.selected_anim_idx = m_working_anim_idx;
-            animator->configure_animator({ { m_working_anim_idx } });
+            // Force animator to get rebuilt immediately.
+            m_working_anim_idx = (uint32_t)-1;
+            anim_editor::s_editor_state.selected_anim_idx = 0;  // @HARDCODE: First anim.
+
+            // Assign a temp configuration and finish deformed model rend obj.
+            animator->configure_animator({});
             m_working_model_animator = animator.get();
             rend_obj.set_model_animator(std::move(animator));
         }
@@ -114,7 +117,23 @@ void BT::Scripts::Script__dev__anim_editor_tool_state_agent::on_pre_render(float
     {   // Configure deformed model animator to new anim idx.
         m_working_anim_idx = anim_editor::s_editor_state.selected_anim_idx;
         if (m_working_model_animator)
-            m_working_model_animator->configure_animator({ { m_working_anim_idx } });
+        {
+            m_working_model_animator->configure_animator({ { m_working_anim_idx,
+                                                             0.0f,
+                                                             false } });
+            anim_editor::s_editor_state.selected_anim_num_frames =
+                m_working_model_animator
+                ->get_model_animation_by_idx(m_working_anim_idx)
+                .get_num_frames();
+        }
+    }
+
+    if (m_working_model_animator)
+    {   // Update animator frame.
+        auto current_frame_clamped{ std::min(anim_editor::s_editor_state.anim_current_frame,
+                                             anim_editor::s_editor_state.selected_anim_num_frames) };
+        m_working_model_animator->set_time(current_frame_clamped
+                                           / Model_joint_animation::k_frames_per_second);
     }
 
     m_renderer.get_render_object_pool().return_render_objs({ &rend_obj });

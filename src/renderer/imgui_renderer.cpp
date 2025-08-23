@@ -260,10 +260,10 @@ void BT::ImGui_renderer::render_imgui()
         ImGui::Separator();
 
         ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0, 0, 0, 1));
-        if (ImGui::BeginChild("console_scrolling_region",
-                              ImVec2(0, 0), //-footer_height_to_reserve),
-                              ImGuiChildFlags_NavFlattened,
-                              ImGuiWindowFlags_HorizontalScrollbar))
+        ImGui::BeginChild("console_scrolling_region",
+                          ImVec2(0, 0), //-footer_height_to_reserve),
+                          ImGuiChildFlags_NavFlattened,
+                          ImGuiWindowFlags_HorizontalScrollbar);
         {
             ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 1)); // Tighten spacing.
 
@@ -383,17 +383,17 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
 
     static size_t s_selected_model_idx{ 0 };
     static int32_t s_current_animation_clip{ 0 };
+    static auto s_all_model_names{ Model_bank::get_all_model_names() };
 
     // Model selection.
     ImGui::Begin("Model select");
     {
         static bool s_load_selected_model{ true };
-        static auto s_all_model_names{ Model_bank::get_all_model_names() };
         if (ImGui::Button("Refresh list"))
         {   // Reset model selection and load first model from refreshed list.
             s_selected_model_idx = 0;
-            s_load_selected_model = true;
             s_all_model_names = Model_bank::get_all_model_names();
+            s_load_selected_model = true;
         }
 
         ImGui::SameLine();
@@ -459,12 +459,14 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                     anim_names_as_list[s_current_animation_clip]);
         }
 
-        // let's create the sequencer
+        // Sequencer component.
         static int selectedEntry = -1;
         static int firstFrame = 0;
         static bool expanded = true;
         static int32_t s_current_frame = 30;
         static int32_t s_final_frame = 60;
+
+        anim_editor::s_editor_state.anim_current_frame = std::max(0, s_current_frame);  // A frame late but oh well.
 
         ImGui::PushItemWidth(130);
         ImGui::Text("Frame %d/%d. %.2f FPS",
@@ -475,8 +477,21 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
         ImGui::PopItemWidth();
 
         // BT sequencer.
-        if (ImGui::BeginChild("BT_sequencer"))
+        ImGui::BeginChild("BT_sequencer");
+        if (anim_editor::s_editor_state.anim_name_to_idx_map.empty())
         {
+            ImGui::SetWindowFontScale(5.0f);
+
+            // Just show empty message.
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(209/256.0, 186/256.0, 73/256.0, 1));
+            ImGui::TextWrapped("Selected model \"%s\" does not contain any animations.",
+                               s_all_model_names[s_selected_model_idx].c_str());
+            ImGui::PopStyleColor();
+        }
+        else
+        {
+            ImGui::SetWindowFontScale(1.0f);
+
             struct Control_item
             {
                 std::string name;
@@ -784,9 +799,11 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                 draw_list->AddRectFilled(cr_timeline_min, ImVec2(cr_timeline_max.x, cr_timeline_min.y + k_top_measuring_region_height + 2), 0x99000000);
 
                 // Draw measuring lines and numbers.
-                int32_t frame_start{ 0 };
-                int32_t frame_end{ 100 };
-                for (int32_t i = frame_start; i <= frame_end; i++)
+                constexpr int32_t k_frame_start{ 0 };
+                int32_t frame_end{
+                    static_cast<int32_t>(anim_editor::s_editor_state.selected_anim_num_frames) };
+
+                for (int32_t i = k_frame_start; i <= frame_end; i++)
                 {
                     float_t line_x{ cr_timeline_min.x + s_sequencer_x_offset + (i * s_timeline_cell_size.x) };
 
@@ -799,7 +816,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                                        ImVec2(line_x, cr_timeline_min.y + k_top_measuring_region_height),
                                        0xFFFFFFFF);
 
-                    if (i == frame_start || i == frame_end)
+                    if (i == k_frame_start || i == frame_end)
                     {   // Draw full height start-end lines.
                         draw_list->AddLine(ImVec2(line_x, cr_timeline_min.y + k_top_measuring_region_height),
                                            ImVec2(line_x, cr_timeline_max.y),
@@ -916,9 +933,8 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                 }
             }
             ImGui::PopClipRect();
-
-            ImGui::EndChild();
         }
+        ImGui::EndChild();
     }
     ImGui::End();
 }

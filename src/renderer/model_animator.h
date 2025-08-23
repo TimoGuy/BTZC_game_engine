@@ -63,6 +63,7 @@ public:
                           std::vector<Model_joint_animation_frame>&& animation_frames);
 
     std::string get_name() const { return m_name; }
+    size_t get_num_frames() const { return m_frames.size(); }
 
     enum Rounding_func{ FLOOR, CEIL };
     uint32_t calc_frame_idx(float_t time, bool loop, Rounding_func rounding) const;
@@ -97,6 +98,7 @@ public:
     void configure_animator(std::vector<Animator_state>&& animator_states);
 
     void change_state_idx(uint32_t to_state);
+    void set_time(float_t time);
     void update(float_t delta_time);
     void calc_anim_pose(std::vector<mat4s>& out_joint_matrices) const;
     void get_anim_floored_frame_pose(std::vector<mat4s>& out_joint_matrices) const;
