@@ -1,0 +1,45 @@
+{
+    "control_items": [
+        { "name": "JIJI" },
+        { "name": "BF5" },
+        { "name": "Nlerp to testicular torsion" },
+        { "name": "Disable hitbox 1" }
+    ],
+    "anim_frame_action_timelines": [
+        {
+            "anim_name": "Running.inmotion",
+            "regions": [
+                {
+                    "ctrl_item_idx": 0,
+                    "start_frame": 0,
+                    "end_frame": 5
+                },
+                {
+                    "ctrl_item_idx": 0,
+                    "start_frame": 5,
+                    "end_frame": 66
+                },
+                {
+                    "ctrl_item_idx": 0,
+                    "start_frame": 30,
+                    "end_frame": 35
+                },
+                {
+                    "ctrl_item_idx": 1,
+                    "start_frame": 30,
+                    "end_frame": 35
+                },
+                {
+                    "ctrl_item_idx": 2,
+                    "start_frame": 30,
+                    "end_frame": 35
+                },
+                {
+                    "ctrl_item_idx": 3,
+                    "start_frame": 30,
+                    "end_frame": 35
+                }
+            ]
+        }
+    ]
+}

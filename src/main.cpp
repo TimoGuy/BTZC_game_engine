@@ -1,3 +1,4 @@
+#include "animation_frame_action_tool/runtime_state.h"
 #include "btzc_game_engine.h"
 #include "cglm/cglm.h"
 #include "cglm/mat4.h"
@@ -157,6 +158,13 @@ int32_t main()
     //     "test_gltf",
     //     make_unique<BT::Model>(BTZC_GAME_ENGINE_ASSET_MODEL_PATH "Leever.glb",
     //                            "textured_material"));
+
+    // Animation frame action runtime data.
+    BT::anim_frame_action::Bank::emplace(
+        "SlimeGirl",
+        BT::anim_frame_action::Runtime_state{
+            BTZC_GAME_ENGINE_ASSET_ANIM_FRAME_ACTIONS_PATH "SlimeGirl.btafa",
+            BT::Model_bank::get_model("test_gltf") });
 
     // POPULATE TEST LEVEL (@TODO: Once level loading is implemented, replace this with it)
     // Physics objects.

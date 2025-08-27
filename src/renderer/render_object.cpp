@@ -77,8 +77,8 @@ void BT::Render_object::scene_serialize(Scene_serialization_mode mode, json& nod
             set_deformed_model(std::make_unique<Deformed_model>(model));
 
             auto animator{ std::make_unique<Model_animator>(model) };
-            // animator->configure_animator({ { 0 } });  // @NOCHECKIN: @HARDCODE.
-            animator->configure_animator({ { 24 } });  // @NOCHECKIN: @HARDCODE.
+            // animator->configure_animator({ { 0 } }, nullptr);  // @NOCHECKIN: @HARDCODE.
+            animator->configure_animator({ { 24 } }, nullptr);  // @NOCHECKIN: @HARDCODE.
             set_model_animator(std::move(animator));
         }
         else

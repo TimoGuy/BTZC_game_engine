@@ -12,8 +12,9 @@
 #endif
 
 // Paths.
-#define BTZC_GAME_ENGINE_ASSET_MODEL_PATH     "assets/models/"
-#define BTZC_GAME_ENGINE_ASSET_SHADER_PATH    "assets/shaders/"
-#define BTZC_GAME_ENGINE_ASSET_TEXTURE_PATH   "assets/textures/"
-#define BTZC_GAME_ENGINE_ASSET_SCENE_PATH     "assets/scenes/"
-#define BTZC_GAME_ENGINE_ASSET_SETTINGS_PATH  "assets/settings/"
+#define BTZC_GAME_ENGINE_ASSET_MODEL_PATH               "assets/models/"
+#define BTZC_GAME_ENGINE_ASSET_SHADER_PATH              "assets/shaders/"
+#define BTZC_GAME_ENGINE_ASSET_TEXTURE_PATH             "assets/textures/"
+#define BTZC_GAME_ENGINE_ASSET_SCENE_PATH               "assets/scenes/"
+#define BTZC_GAME_ENGINE_ASSET_SETTINGS_PATH            "assets/settings/"
+#define BTZC_GAME_ENGINE_ASSET_ANIM_FRAME_ACTIONS_PATH  "assets/anim_frame_actions/"

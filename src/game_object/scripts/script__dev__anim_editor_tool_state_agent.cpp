@@ -4,7 +4,7 @@
 #include "../renderer/renderer.h"
 #include "../renderer/mesh.h"
 #include "../renderer/model_animator.h"
-#include "../animation_editor_tool/animation_editor_tool.h"
+#include "../animation_frame_action_tool/editor_state.h"
 #include <memory>
 
 namespace BT
@@ -74,20 +74,20 @@ void BT::Scripts::Script__dev__anim_editor_tool_state_agent::on_pre_render(float
                     .checkout_render_obj_by_key({ m_render_obj_key }).front() };
     
     // Update self of any changes.
-    if (m_prev_working_model != anim_editor::s_editor_state.working_model)
+    if (m_prev_working_model != anim_frame_action::s_editor_state.working_model)
     {
         m_working_model_animator = nullptr;
 
         // Check if new model is deformable by decorating an animator.
-        auto const& new_model{ *anim_editor::s_editor_state.working_model };
+        auto const& new_model{ *anim_frame_action::s_editor_state.working_model };
         auto animator{ std::make_unique<Model_animator>(new_model) };
 
         auto num_anims{ animator->get_num_model_animations() };
 
-        anim_editor::s_editor_state.anim_name_to_idx_map.clear();
+        anim_frame_action::s_editor_state.anim_name_to_idx_map.clear();
         for (size_t i = 0; i < num_anims; i++)
         {   // Fill in animation map.
-            anim_editor::s_editor_state.anim_name_to_idx_map
+            anim_frame_action::s_editor_state.anim_name_to_idx_map
                 .emplace(animator->get_model_animation_by_idx(i).get_name(), i);
         }
 
@@ -97,10 +97,10 @@ void BT::Scripts::Script__dev__anim_editor_tool_state_agent::on_pre_render(float
 
             // Force animator to get rebuilt immediately.
             m_working_anim_idx = (uint32_t)-1;
-            anim_editor::s_editor_state.selected_anim_idx = 0;  // @HARDCODE: First anim.
+            anim_frame_action::s_editor_state.selected_anim_idx = 0;  // @HARDCODE: First anim.
 
             // Assign a temp configuration and finish deformed model rend obj.
-            animator->configure_animator({});
+            animator->configure_animator({}, nullptr);
             m_working_model_animator = animator.get();
             rend_obj.set_model_animator(std::move(animator));
         }
@@ -110,18 +110,19 @@ void BT::Scripts::Script__dev__anim_editor_tool_state_agent::on_pre_render(float
             rend_obj.set_model(&new_model);
         }
 
-        m_prev_working_model = anim_editor::s_editor_state.working_model;
+        m_prev_working_model = anim_frame_action::s_editor_state.working_model;
     }
 
-    if (m_working_anim_idx != anim_editor::s_editor_state.selected_anim_idx)
+    if (m_working_anim_idx != anim_frame_action::s_editor_state.selected_anim_idx)
     {   // Configure deformed model animator to new anim idx.
-        m_working_anim_idx = anim_editor::s_editor_state.selected_anim_idx;
+        m_working_anim_idx = anim_frame_action::s_editor_state.selected_anim_idx;
         if (m_working_model_animator)
         {
             m_working_model_animator->configure_animator({ { m_working_anim_idx,
                                                              0.0f,
-                                                             false } });
-            anim_editor::s_editor_state.selected_anim_num_frames =
+                                                             false } },
+                                                         nullptr);
+            anim_frame_action::s_editor_state.selected_anim_num_frames =
                 m_working_model_animator
                 ->get_model_animation_by_idx(m_working_anim_idx)
                 .get_num_frames();
@@ -130,7 +131,7 @@ void BT::Scripts::Script__dev__anim_editor_tool_state_agent::on_pre_render(float
 
     if (m_working_model_animator)
     {   // Update animator frame.
-        auto current_frame_clamped{ anim_editor::s_editor_state.anim_current_frame };  // @NOTE: Assumed clamped.
+        auto current_frame_clamped{ anim_frame_action::s_editor_state.anim_current_frame };  // @NOTE: Assumed clamped.
         m_working_model_animator->set_time(current_frame_clamped
                                            / Model_joint_animation::k_frames_per_second);
     }

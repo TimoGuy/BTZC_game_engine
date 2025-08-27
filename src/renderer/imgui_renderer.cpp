@@ -1,6 +1,6 @@
 #include "imgui_renderer.h"
 
-#include "../animation_editor_tool/animation_editor_tool.h"
+#include "../animation_frame_action_tool/editor_state.h"
 #include "../btzc_game_engine.h"
 #include "../game_object/game_object.h"
 #include "../input_handler/input_codes.h"
@@ -417,9 +417,9 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
 
         if (s_load_selected_model)
         {   // Process load model request.
-            anim_editor::s_editor_state.working_model =
+            anim_frame_action::s_editor_state.working_model =
                 Model_bank::get_model(s_all_model_names[s_selected_model_idx]);
-            assert(anim_editor::s_editor_state.working_model != nullptr);
+            assert(anim_frame_action::s_editor_state.working_model != nullptr);
             s_load_selected_model = false;
         }
     }
@@ -432,7 +432,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
         std::vector<std::string> anim_names_as_list;  // If new anim gets selected.
         {
             size_t alloc_size{ 0 };
-            for (auto& [anim_name, idx] : anim_editor::s_editor_state.anim_name_to_idx_map)
+            for (auto& [anim_name, idx] : anim_frame_action::s_editor_state.anim_name_to_idx_map)
             {
                 alloc_size += (anim_name.size() + 1);  // +1 for delimiting \0.
             }
@@ -440,10 +440,10 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
             // Allocate proper size in string.
             anim_names_0_delim.resize(alloc_size + 1, '\0');  // +1 for final \0.
             anim_names_as_list.reserve(
-                anim_editor::s_editor_state.anim_name_to_idx_map.size());
+                anim_frame_action::s_editor_state.anim_name_to_idx_map.size());
 
             size_t current_str_pos{ 0 };
-            for (auto& [anim_name, idx] : anim_editor::s_editor_state.anim_name_to_idx_map)
+            for (auto& [anim_name, idx] : anim_frame_action::s_editor_state.anim_name_to_idx_map)
             {
                 strncpy(const_cast<char*>(anim_names_0_delim.c_str() + current_str_pos),
                         anim_name.c_str(),
@@ -454,8 +454,8 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
         }
         if (ImGui::Combo("Animation clip", &s_current_animation_clip, anim_names_0_delim.c_str()))
         {   // Change selected anim idx.
-            anim_editor::s_editor_state.selected_anim_idx =
-                anim_editor::s_editor_state.anim_name_to_idx_map.at(
+            anim_frame_action::s_editor_state.selected_anim_idx =
+                anim_frame_action::s_editor_state.anim_name_to_idx_map.at(
                     anim_names_as_list[s_current_animation_clip]);
         }
 
@@ -466,12 +466,12 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
         static int32_t s_current_frame = 30;
         static int32_t s_final_frame = 60;
 
-        anim_editor::s_editor_state.anim_current_frame =  // A frame late but oh well.
+        anim_frame_action::s_editor_state.anim_current_frame =  // A frame late but oh well.
             std::min(std::max(0, s_current_frame), s_final_frame);
 
         ImGui::PushItemWidth(130);
         ImGui::Text("Displaying frame %llu/%d. %.2f FPS",
-                    anim_editor::s_editor_state.anim_current_frame,
+                    anim_frame_action::s_editor_state.anim_current_frame,
                     s_final_frame,
                     Model_joint_animation::k_frames_per_second);
         ImGui::InputInt("Selected Frame", &s_current_frame);
@@ -479,7 +479,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
 
         // BT sequencer.
         ImGui::BeginChild("BT_sequencer");
-        if (anim_editor::s_editor_state.anim_name_to_idx_map.empty())
+        if (anim_frame_action::s_editor_state.anim_name_to_idx_map.empty())
         {
             ImGui::SetWindowFontScale(5.0f);
 
@@ -802,7 +802,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                 // Draw measuring lines and numbers.
                 constexpr int32_t k_frame_start{ 0 };
                 s_final_frame =
-                    anim_editor::s_editor_state.selected_anim_num_frames;
+                    anim_frame_action::s_editor_state.selected_anim_num_frames;
 
                 for (int32_t i = k_frame_start; i <= s_final_frame; i++)
                 {

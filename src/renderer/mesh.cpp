@@ -132,6 +132,11 @@ void BT::Model::render(mat4 transform, Material_ifc* override_material /*= nullp
     glBindVertexArray(0);
 }
 
+vector<BT::Model_joint_animation> const& BT::Model::get_joint_animations() const
+{
+    return m_animations;
+}
+
 pair<vector<BT::Vertex> const&, vector<uint32_t>> BT::Model::get_all_vertices_and_indices() const
 {
     vector<uint32_t> all_indices;

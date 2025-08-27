@@ -9,7 +9,7 @@ namespace BT
 
 class Model;
 
-namespace anim_editor
+namespace anim_frame_action
 {
 
 struct Editor_state
@@ -25,5 +25,5 @@ extern Editor_state s_editor_state;
 
 void reset_editor_state();
 
-}  // namespace anim_editor
+}  // namespace anim_frame_action
 }  // namespace BT

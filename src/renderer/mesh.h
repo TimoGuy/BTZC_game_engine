@@ -3,8 +3,8 @@
 #include "cglm/cglm.h"
 #include "cglm/struct.h"
 #include "material.h"
-#include "model_animator.h"
 #include <string>
+#include "model_animator.h"
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -82,6 +82,7 @@ public:
     std::string get_model_name() const override;
     void render(mat4 transform, Material_ifc* override_material = nullptr) const override;
 
+    vector<Model_joint_animation> const& get_joint_animations() const;
     pair<vector<Vertex> const&, vector<uint32_t>> get_all_vertices_and_indices() const;
 
 private:
