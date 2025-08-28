@@ -58,8 +58,8 @@ add_subdirectory(third_party/stduuid)
 add_executable(${PROJECT_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/src/animation_frame_action_tool/editor_state.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/animation_frame_action_tool/editor_state.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/animation_frame_action_tool/runtime_state.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/animation_frame_action_tool/runtime_state.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/animation_frame_action_tool/runtime_data.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/animation_frame_action_tool/runtime_data.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/list_of_scripts_begin.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/list_of_scripts_end.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/script__dev__anim_editor_tool_state_agent.cpp

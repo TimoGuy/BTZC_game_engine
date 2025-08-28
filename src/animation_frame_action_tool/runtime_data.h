@@ -22,11 +22,12 @@ enum Serialization_mode
     SERIAL_MODE_DESERIALIZE
 };
 
-struct Runtime_state  // @TODO: Perhaps enforcement of using the correct model for an animator using this runtime state?  -Thea 2025/08/26
+struct Runtime_data  // @TODO: Perhaps enforcement of using the correct model for an animator using this runtime state?  -Thea 2025/08/26
 {
-    Runtime_state() = default;
-    Runtime_state(std::string const& fname,
-                  Model const* model);
+    Runtime_data() = default;
+    Runtime_data(std::string const& fname);
+
+    Model const* model{ nullptr };
 
     struct Control_item
     {
@@ -48,7 +49,6 @@ struct Runtime_state  // @TODO: Perhaps enforcement of using the correct model f
     std::vector<Animation_frame_action_timeline> anim_frame_action_timelines;  // Same order as `model_animations`.
 
     void serialize(Serialization_mode mode,
-                   Model const* model,
                    json& node_ref);
 };
 
@@ -56,11 +56,12 @@ struct Runtime_state  // @TODO: Perhaps enforcement of using the correct model f
 class Bank
 {
 public:
-    static void emplace(std::string const& name, Runtime_state&& runtime_state);
-    static Runtime_state const& get(std::string const& name);
+    static void emplace(std::string const& name, Runtime_data&& runtime_state);
+    static Runtime_data const& get(std::string const& name);
+    static std::vector<std::string> get_all_names();
 
 private:
-    inline static std::unordered_map<std::string, Runtime_state> s_runtime_states;
+    inline static std::unordered_map<std::string, Runtime_data> s_runtime_states;
 };
 
 }  // namespace anim_frame_action

@@ -1,4 +1,5 @@
 {
+    "animated_mode_name": "test_gltf",
     "control_items": [
         { "name": "JIJI" },
         { "name": "BF5" },

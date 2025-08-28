@@ -1,4 +1,4 @@
-#include "runtime_state.h"
+#include "runtime_data.h"
 
 #include "../renderer/mesh.h"
 #include "../renderer/model_animator.h"
@@ -25,24 +25,26 @@ std::unordered_map<std::string, size_t> compile_anim_name_to_idx_map(
 
 }  // namespace
 
-BT::anim_frame_action::Runtime_state::Runtime_state(std::string const& fname,
-                                                    Model const* model)
+BT::anim_frame_action::Runtime_data::Runtime_data(std::string const& fname)
 {   // @COPYPASTA: See `scene_serialization.cpp` vvvv
     static auto load_to_json_fn = [](std::string const& fname) {
         std::ifstream f{ fname };
         return json::parse(f);
     };
     json root = load_to_json_fn(fname);
-    serialize(SERIAL_MODE_DESERIALIZE, model, root);
+    serialize(SERIAL_MODE_DESERIALIZE, root);
 }
 
-void BT::anim_frame_action::Runtime_state::serialize(
+void BT::anim_frame_action::Runtime_data::serialize(
     Serialization_mode mode,
-    Model const* model,
     json& node_ref)
 {
     if (mode == SERIAL_MODE_DESERIALIZE)
-    {   // Control items.
+    {   // Load model from bank.
+        model = Model_bank::get_model(node_ref["animated_mode_name"]);
+        assert(model != nullptr);
+
+        // Control items.
         control_items.clear();
         auto& nr_control_items{ node_ref["control_items"] };
         if (!nr_control_items.is_null() && nr_control_items.is_array())
@@ -85,13 +87,26 @@ void BT::anim_frame_action::Runtime_state::serialize(
 }
 
 void BT::anim_frame_action::Bank::emplace(std::string const& name,
-                                          Runtime_state&& runtime_state)
+                                          Runtime_data&& runtime_state)
 {
     s_runtime_states.emplace(name, std::move(runtime_state));
 }
 
-BT::anim_frame_action::Runtime_state const&
+BT::anim_frame_action::Runtime_data const&
 BT::anim_frame_action::Bank::get(std::string const& name)
 {
     return s_runtime_states.at(name);
+}
+
+std::vector<std::string> BT::anim_frame_action::Bank::get_all_names()
+{
+    std::vector<std::string> all_names;
+    all_names.reserve(s_runtime_states.size());
+
+    for (auto& [key, data] : s_runtime_states)
+    {
+        all_names.emplace_back(key);
+    }
+
+    return all_names;
 }

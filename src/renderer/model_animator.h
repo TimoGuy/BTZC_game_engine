@@ -12,7 +12,7 @@
 namespace BT
 {
 
-namespace anim_frame_action { struct Runtime_state; }
+namespace anim_frame_action { struct Runtime_data; }
 struct Model_joint;
 
 struct Model_skin
@@ -98,7 +98,7 @@ public:
     };
     void configure_animator(
         std::vector<Animator_state>&& animator_states,
-        anim_frame_action::Runtime_state const* anim_frame_action_runtime_state);
+        anim_frame_action::Runtime_data const* anim_frame_action_runtime_state);
 
     void change_state_idx(uint32_t to_state);
     void set_time(float_t time);
@@ -114,7 +114,7 @@ private:
 
     std::vector<Model_joint_animation> const& m_model_animations;
     std::vector<Animator_state> m_animator_states;
-    anim_frame_action::Runtime_state const* m_anim_frame_action_runtime_state{ nullptr };
+    anim_frame_action::Runtime_data const* m_anim_frame_action_runtime_state{ nullptr };
 };
 
 }  // namespace BT

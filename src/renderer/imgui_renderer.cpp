@@ -1,6 +1,7 @@
 #include "imgui_renderer.h"
 
 #include "../animation_frame_action_tool/editor_state.h"
+#include "../animation_frame_action_tool/runtime_data.h"
 #include "../btzc_game_engine.h"
 #include "../game_object/game_object.h"
 #include "../input_handler/input_codes.h"
@@ -13,7 +14,7 @@
 #include "imgui_internal.h"
 #include "logger.h"
 #include "mesh.h"
-#include "model_animator.h"
+#include "model_animator.h"  // @CHECK: @NOCHECKIN: Is this needed?
 #include <array>
 #include <cstring>
 #include <fstream>
@@ -381,19 +382,19 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
         m_request_switch_scene_callback("_dev_animation_editor_view.btscene");
     }
 
-    static size_t s_selected_model_idx{ 0 };
+    static size_t s_selected_timeline_idx{ 0 };
     static int32_t s_current_animation_clip{ 0 };
-    static auto s_all_model_names{ Model_bank::get_all_model_names() };
+    static auto s_all_timeline_names{ anim_frame_action::Bank::get_all_names() };
 
-    // Model selection.
-    ImGui::Begin("Model select");
+    // Timeline selection.
+    ImGui::Begin("Timeline select");
     {
-        static bool s_load_selected_model{ true };
+        static bool s_load_selected_timeline{ true };
         if (ImGui::Button("Refresh list"))
-        {   // Reset model selection and load first model from refreshed list.
-            s_selected_model_idx = 0;
-            s_all_model_names = Model_bank::get_all_model_names();
-            s_load_selected_model = true;
+        {   // Reset timeline selection and load first one from refreshed list.
+            s_selected_timeline_idx = 0;
+            s_all_timeline_names = anim_frame_action::Bank::get_all_names();
+            s_load_selected_timeline = true;
         }
 
         ImGui::SameLine();
@@ -403,24 +404,30 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
 
         ImGui::SeparatorText("List of Models");
 
-        for (size_t i = 0; i < s_all_model_names.size(); i++)
+        for (size_t i = 0; i < s_all_timeline_names.size(); i++)
         {
-            auto& model_name{ s_all_model_names[i] };
-            bool is_active_model{ s_selected_model_idx == i };
+            auto& model_name{ s_all_timeline_names[i] };
+            bool is_active_model{ s_selected_timeline_idx == i };
             if (ImGui::RadioButton(model_name.c_str(), is_active_model) &&
                 !is_active_model)
             {   // Request loading new model.
-                s_selected_model_idx = i;
-                s_load_selected_model = true;
+                s_selected_timeline_idx = i;
+                s_load_selected_timeline = true;
             }
         }
 
-        if (s_load_selected_model)
-        {   // Process load model request.
+        if (s_load_selected_timeline)
+        {   // Process load timeline (and model) request.
+            anim_frame_action::s_editor_state.working_timeline =
+                const_cast<anim_frame_action::Runtime_data*>(  // @HACK: Since this is an editor I think this is appropriate.
+                    &anim_frame_action::Bank::get(s_all_timeline_names[s_selected_timeline_idx]));
+            assert(anim_frame_action::s_editor_state.working_timeline != nullptr);
+
             anim_frame_action::s_editor_state.working_model =
-                Model_bank::get_model(s_all_model_names[s_selected_model_idx]);
+                anim_frame_action::s_editor_state.working_timeline->model;
             assert(anim_frame_action::s_editor_state.working_model != nullptr);
-            s_load_selected_model = false;
+
+            s_load_selected_timeline = false;
         }
     }
     ImGui::End();
@@ -486,7 +493,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
             // Just show empty message.
             ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(209/256.0, 186/256.0, 73/256.0, 1));
             ImGui::TextWrapped("Selected model \"%s\" does not contain any animations.",
-                               s_all_model_names[s_selected_model_idx].c_str());
+                               s_all_timeline_names[s_selected_timeline_idx].c_str());
             ImGui::PopStyleColor();
         }
         else
