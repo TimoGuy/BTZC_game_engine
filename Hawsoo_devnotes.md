@@ -75,3 +75,5 @@
 - I think the next thing to work on here is getting the event system all put together and saved into a json file.
     - There also needs to be a main struct to work with that will go well with the animator and the editor.
     - And then a serialization-ifc attached to this struct I think.
+
+- In the `.btafa` file, I ended up putting the key "animated_model_name" which connected to the animated model. I think that this one-to-one connection might not have been the best tho. Idk... I'll have to refactor in the future if needed.
