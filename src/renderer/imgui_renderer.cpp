@@ -402,17 +402,44 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
         ImGui::SameLine();
         ImGui::Text("Models:69 Avg:6.9KB Mdn:6.9KB Max:69.4KB");
 
-        ImGui::SeparatorText("List of Models");
+        ImGui::SeparatorText("List of Timelines");
 
         for (size_t i = 0; i < s_all_timeline_names.size(); i++)
         {
-            auto& model_name{ s_all_timeline_names[i] };
-            bool is_active_model{ s_selected_timeline_idx == i };
-            if (ImGui::RadioButton(model_name.c_str(), is_active_model) &&
-                !is_active_model)
+            auto& timeline_name{ s_all_timeline_names[i] };
+            bool is_active_timeline{ s_selected_timeline_idx == i };
+            bool is_active_timeline_dirty{ anim_frame_action::s_editor_state.is_working_timeline_dirty };
+
+            ImGui::BeginDisabled(is_active_timeline_dirty || is_active_timeline);
+            if (ImGui::Button((timeline_name
+                               + (is_active_timeline && is_active_timeline_dirty
+                                  ? "*"
+                                  : "")).c_str()) &&
+                !is_active_timeline)
             {   // Request loading new model.
                 s_selected_timeline_idx = i;
                 s_load_selected_timeline = true;
+            }
+            ImGui::EndDisabled();
+
+            if (is_active_timeline && is_active_timeline_dirty)
+            {   // Add save or discard buttons.
+                ImGui::SameLine();
+                if (ImGui::Button("Save changes"))
+                {   // Save changes.
+                    // @TODO: @HERE: Put saving changes code here!!!!
+                    assert(false);
+                    anim_frame_action::s_editor_state.is_working_timeline_dirty = false;
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Discard changes"))
+                {   // "Discard" changes. See tooltip below for more info.
+                    anim_frame_action::s_editor_state.is_working_timeline_dirty = false;
+                }
+                if (ImGui::IsItemHovered())
+                    ImGui::SetTooltip("%s", "@NOTE: This does not revert the file,\n"
+                                            "it simply disables the `is_working_timeline_dirty`\n"
+                                            "flag so that another timeline can be loaded.");
             }
         }
 
@@ -427,13 +454,22 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                 anim_frame_action::s_editor_state.working_timeline->model;
             assert(anim_frame_action::s_editor_state.working_model != nullptr);
 
+            if (anim_frame_action::s_editor_state.is_working_timeline_dirty)
+            {
+                logger::printe(logger::ERROR, "Working timeline was unloaded without saving changes!");
+                assert(false);
+            }
+            anim_frame_action::s_editor_state.is_working_timeline_dirty = false;  // Load from disk so not dirty.
+
             s_load_selected_timeline = false;
         }
     }
     ImGui::End();
 
     // Animation timeline.
-    ImGui::Begin("Animation timeline");
+    ImGui::Begin("Animation timeline", nullptr, (anim_frame_action::s_editor_state.is_working_timeline_dirty
+                                                 ? ImGuiWindowFlags_UnsavedDocument
+                                                 : 0));
     {   // Build anim clips \0 string set.
         std::string anim_names_0_delim{ "\0" };
         std::vector<std::string> anim_names_as_list;  // If new anim gets selected.
@@ -467,7 +503,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
         }
 
         // Sequencer component.
-        static int32_t s_current_frame = 30;
+        static int32_t s_current_frame = 0;
         static int32_t s_final_frame = 60;
 
         anim_frame_action::s_editor_state.anim_current_frame =  // A frame late but oh well.
@@ -701,6 +737,9 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                                 glm_max(s_reg_sel.sel_reg->start_frame + 1,
                                         s_reg_sel.sel_reg->end_frame);
                         }
+
+                        // Mark working timeline as dirty.
+                        anim_frame_action::s_editor_state.is_working_timeline_dirty = true;
                     }
 
                     if (on_lmb_release)
@@ -892,6 +931,9 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                         //  which makes the pointers stale. I hate this issue too)
                         s_reg_sel.sel_state = Region_selecting::SELECTED;
                         s_reg_sel.sel_reg = &afa_regions.back();
+
+                        // Mark working timeline as dirty.
+                        anim_frame_action::s_editor_state.is_working_timeline_dirty = true;
                     }
 
                     s_prev_is_key_a_pressed = cur_is_key_a_pressed;
@@ -919,6 +961,9 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                     // (Do this right after to prevent stale pointer issues)
                     s_reg_sel.sel_state = Region_selecting::UNSELECTED;
                     s_reg_sel.sel_reg = nullptr;
+
+                    // Mark working timeline as dirty.
+                    anim_frame_action::s_editor_state.is_working_timeline_dirty = true;
                 }
             }
             ImGui::PopClipRect();

@@ -164,6 +164,14 @@ int32_t main()
         "SlimeGirl",
         BT::anim_frame_action::Runtime_data{
             BTZC_GAME_ENGINE_ASSET_ANIM_FRAME_ACTIONS_PATH "SlimeGirl.btafa" });
+    BT::anim_frame_action::Bank::emplace(
+        "SlimeGirl2",
+        BT::anim_frame_action::Runtime_data{
+            BTZC_GAME_ENGINE_ASSET_ANIM_FRAME_ACTIONS_PATH "SlimeGirl.btafa" });
+    BT::anim_frame_action::Bank::emplace(
+        "SlimeGirl3",
+        BT::anim_frame_action::Runtime_data{
+            BTZC_GAME_ENGINE_ASSET_ANIM_FRAME_ACTIONS_PATH "SlimeGirl.btafa" });
 
     // POPULATE TEST LEVEL (@TODO: Once level loading is implemented, replace this with it)
     // Physics objects.

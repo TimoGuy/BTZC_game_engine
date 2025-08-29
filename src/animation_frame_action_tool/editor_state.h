@@ -22,6 +22,7 @@ struct Editor_state
     size_t selected_anim_idx{ 0 };
     size_t selected_anim_num_frames{ 0 };
     size_t anim_current_frame{ 0 };
+    bool is_working_timeline_dirty{ false };
 };
 
 extern Editor_state s_editor_state;
