@@ -467,9 +467,6 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
         }
 
         // Sequencer component.
-        static int selectedEntry = -1;
-        static int firstFrame = 0;
-        static bool expanded = true;
         static int32_t s_current_frame = 30;
         static int32_t s_final_frame = 60;
 
@@ -500,30 +497,8 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
         {
             ImGui::SetWindowFontScale(1.0f);
 
-            struct Control_item
-            {
-                std::string name;
-            };
-            static std::vector<Control_item> s_ctrl_items{
-                { "JOJO" },
-                { "BF6" },
-                { "Lerp to sweet happiness" },
-                { "Enable hurtbox 1" },
-            };
-            struct Region
-            {
-                uint32_t ctrl_item_idx;
-                int32_t  start_frame;
-                int32_t  end_frame;
-            };
-            static std::vector<Region> s_regions{
-                { 0, 0, 5 },
-                { 0, 5, 6 },
-                { 0, 30, 35 },
-                { 1, 30, 35 },
-                { 2, 30, 35 },
-                { 3, 30, 35 },
-            };
+            auto& afa_ctrl_items{ anim_frame_action::s_editor_state.working_timeline->control_items };
+            auto& afa_regions{ anim_frame_action::s_editor_state.working_timeline->anim_frame_action_timelines[anim_frame_action::s_editor_state.selected_anim_idx].regions };
 
             static vec2s s_timeline_cell_size{ 16.0f, 24.0f };
 
@@ -560,7 +535,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                         * 40.0f;
                 }
 
-                for (size_t i = 0; i < s_ctrl_items.size(); i++)
+                for (size_t i = 0; i < afa_ctrl_items.size(); i++)
                 {
                     vec2s y_top_btm;
                     {
@@ -582,7 +557,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                                            0x99DDDDDD);
                     }
 
-                    if (i == s_ctrl_items.size() - 1)
+                    if (i == afa_ctrl_items.size() - 1)
                     {   // Draw below line.
                         draw_list->AddLine(ImVec2{ cr_item_list_min.x, y_top_btm.t },
                                            ImVec2{ cr_item_list_max.x, y_top_btm.t },
@@ -593,7 +568,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                     draw_list->AddText(ImVec2{ canvas_pos.x + 4,
                                                y_top_btm.s + (s_timeline_cell_size.y * 0.5f) - (ImGui::GetFontSize() * 0.5f) },
                                        0xFFFFFFFF,
-                                       s_ctrl_items[i].name.c_str());
+                                       afa_ctrl_items[i].name.c_str());
                 }
             }
             ImGui::PopClipRect();
@@ -622,7 +597,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                     }
                 }
 
-                for (size_t i = 0; i < s_ctrl_items.size(); i++)
+                for (size_t i = 0; i < afa_ctrl_items.size(); i++)
                 {
                     vec2s y_top_btm;
                     {
@@ -644,7 +619,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                                            0x99DDDDDD);
                     }
 
-                    if (i == s_ctrl_items.size() - 1)
+                    if (i == afa_ctrl_items.size() - 1)
                     {   // Draw below line.
                         draw_list->AddLine(ImVec2{ cr_timeline_min.x, y_top_btm.t },
                                            ImVec2{ cr_timeline_max.x, y_top_btm.t },
@@ -664,6 +639,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                         RIGHT_DRAG,
                     };
                     Select_state sel_state{ Select_state::UNSELECTED };
+                    using Region = anim_frame_action::Runtime_data::Animation_frame_action_timeline::Region;
                     Region* sel_reg{ nullptr };
                     float_t drag_x_amount{ 0.0f };
                     bool prev_lmb_pressed{ false };
@@ -738,10 +714,10 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                 bool is_hovering_over_timeline{
                     ImGui::IsWindowHovered() &&
                     ImGui::IsMouseHoveringRect(ImVec2(cr_timeline_min.x, cr_timeline_min.y + glm_max(0, s_sequencer_y_offset) + k_top_measuring_region_height + 2),
-                                               ImVec2(cr_timeline_max.x, glm_min(cr_timeline_max.y, cr_timeline_min.y + s_sequencer_y_offset + k_top_measuring_region_height + 2 + (s_timeline_cell_size.y * s_ctrl_items.size())))) };
+                                               ImVec2(cr_timeline_max.x, glm_min(cr_timeline_max.y, cr_timeline_min.y + s_sequencer_y_offset + k_top_measuring_region_height + 2 + (s_timeline_cell_size.y * afa_ctrl_items.size())))) };
                 bool is_hovering_over_timeline_region{ false };  // Check in upcoming block.
 
-                for (auto& region : s_regions)
+                for (auto& region : afa_regions)
                 {   // Draw bars for regions.
                     vec2s region_bar_top_bottom{
                         cr_timeline_min.y + s_sequencer_y_offset + k_top_measuring_region_height + 2 + (s_timeline_cell_size.y * region.ctrl_item_idx) + 1,
@@ -902,7 +878,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                         int32_t start_frame{
                             static_cast<int32_t>(std::floorf(zoom_relative_mouse_x)) };
 
-                        s_regions.emplace_back(ctrl_item_idx,
+                        afa_regions.emplace_back(ctrl_item_idx,
                                                start_frame,
                                                start_frame + 4);
                         
@@ -910,7 +886,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                         // (Just in case there may be some kind of vector resizing
                         //  which makes the pointers stale. I hate this issue too)
                         s_reg_sel.sel_state = Region_selecting::SELECTED;
-                        s_reg_sel.sel_reg = &s_regions.back();
+                        s_reg_sel.sel_reg = &afa_regions.back();
                     }
 
                     s_prev_is_key_a_pressed = cur_is_key_a_pressed;
@@ -918,11 +894,11 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                 else if (on_del_press && s_reg_sel.sel_state == Region_selecting::SELECTED)
                 {   // Delete selected region.
                     assert(s_reg_sel.sel_reg != nullptr);
-                    for (size_t i = s_regions.size() - 1;; i--)
+                    for (size_t i = afa_regions.size() - 1;; i--)
                     {
-                        if (&s_regions[i] == s_reg_sel.sel_reg)
+                        if (&afa_regions[i] == s_reg_sel.sel_reg)
                         {   // Found the one to delete.
-                            s_regions.erase(s_regions.begin() + i);
+                            afa_regions.erase(afa_regions.begin() + i);
                             break;
                         }
                         if (i == 0)

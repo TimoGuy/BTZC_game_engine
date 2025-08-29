@@ -22,7 +22,7 @@ enum Serialization_mode
     SERIAL_MODE_DESERIALIZE
 };
 
-struct Runtime_data  // @TODO: Perhaps enforcement of using the correct model for an animator using this runtime state?  -Thea 2025/08/26
+struct Runtime_data
 {
     Runtime_data() = default;
     Runtime_data(std::string const& fname);
