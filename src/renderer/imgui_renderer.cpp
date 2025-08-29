@@ -497,8 +497,13 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
         {
             ImGui::SetWindowFontScale(1.0f);
 
-            auto& afa_ctrl_items{ anim_frame_action::s_editor_state.working_timeline->control_items };
-            auto& afa_regions{ anim_frame_action::s_editor_state.working_timeline->anim_frame_action_timelines[anim_frame_action::s_editor_state.selected_anim_idx].regions };
+            auto& afa_ctrl_items{ anim_frame_action::s_editor_state
+                                      .working_timeline->control_items };
+            auto& afa_regions{ anim_frame_action::s_editor_state
+                                   .working_timeline
+                                   ->anim_frame_action_timelines[
+                                       anim_frame_action::s_editor_state.selected_anim_idx]
+                                   .regions };
 
             static vec2s s_timeline_cell_size{ 16.0f, 24.0f };
 
