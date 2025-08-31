@@ -79,3 +79,43 @@
 - In the `.btafa` file, I ended up putting the key "animated_model_name" which connected to the animated model. I think that this one-to-one connection might not have been the best tho. Idk... I'll have to refactor in the future if needed.
 
 > Mmmmm for some reason I keep on feeling like I'm done with this tool, but I can't really use it for anything lol.
+
+> So it has the ability to create and edit regions and ctrl items, I think that now I just need to match the control items to what they're actually mutating.
+
+- Here's what I want mutated.
+    > @NOTE: The below are parts of the runtime data. It should have a copy made and the animator writes to this. Write values if `w` or override values if `o`.
+    - Floats
+        - Set like this: `float_name:w:3.14444` (On the rising edge of the region, the float `float_name` is set to 3.14444 and writes the value (`w`) persistently.)
+        - Interp persistently like this: `float_name:w:0.0->3.5` (For the duration of the region, the float `float_name` lerps from 0.0 to 3.5, and it writes the value (`w`) persistently.)
+    - Bools
+        - Override like this: `bool_name:o:true` (For the duration of the region, the bool `bool_name` is set to true, but only overwritten, not persistent (`o`).)
+    - Rising-edge events
+        - Show 
+
+    - Float names
+        - model_opacity: range(0-1), default(1.0)
+        - turn_speed: range(>=0), default(0.0)
+        - move_speed: range(∞), default(0.0)  <<@NOTE: `move_speed` will cause character to start moving along the facing direction. Knockback is a negative number since this is moving back.
+        - gravity_magnitude: range(∞), default(1.0)  <<@NOTE: Gravity is (0.0, -98.0, 0.0), but this value gets multiplied by gravity to get actual gravity applied to this character.
+        - 
+
+    - Bool names
+        - is_parry_active: default(false)
+        - can_move_exit: default(true)
+        - can_guard_exit: default(true)
+        - can_attack_exit: default(true)
+        - blade_has_mizunokata: default(false)
+        - blade_has_honoonokata: default(false)
+        - show_hurtbox_bicep_r: default(false)
+        - hide_hitbox_leg_l: default(false)
+
+    - Rising-edge event names
+        - play_sfx_footstep
+        - play_sfx_ready_guard
+        - play_sfx_blade_swing
+        <!-- - play_sfx_blade_hit_flesh -->  <<@NOTE: These are going to be called from world interaction, not animation.
+        <!-- - play_sfx_blade_hit_stone -->
+        - play_sfx_hurt_vocalize_human_male_mc
+        - play_sfx_guard_receive_hit
+        - play_sfx_deflect_receive_hit
+        - 
