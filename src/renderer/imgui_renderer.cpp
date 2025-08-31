@@ -14,6 +14,7 @@
 #include "imgui_internal.h"
 #include "logger.h"
 #include "mesh.h"
+#include "misc/cpp/imgui_stdlib.h"
 #include "model_animator.h"  // @CHECK: @NOCHECKIN: Is this needed?
 #include <array>
 #include <cstring>
@@ -588,6 +589,16 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                         * 40.0f;
                 }
 
+                // RMB input for upcoming ui.
+                static bool s_prev_rmb_pressed{ false };
+                bool cur_rmb_pressed{ m_input_handler->get_input_state().le_rclick_cam.val };
+                bool on_rmb_press{ cur_rmb_pressed && !s_prev_rmb_pressed };
+                s_prev_rmb_pressed = cur_rmb_pressed;
+
+                // Control item renaming vars.
+                static size_t s_afa_ctrl_item_renaming_idx{ (size_t)-1 };
+                static bool s_renaming_popup_first{ true };
+
                 for (size_t i = 0; i < afa_ctrl_items.size(); i++)
                 {
                     vec2s y_top_btm;
@@ -622,6 +633,51 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                                                y_top_btm.s + (s_timeline_cell_size.y * 0.5f) - (ImGui::GetFontSize() * 0.5f) },
                                        0xFFFFFFFF,
                                        afa_ctrl_items[i].name.c_str());
+                    
+                    if (ImGui::IsWindowHovered() &&
+                        ImGui::IsMouseHoveringRect(ImVec2{ cr_item_list_min.x, y_top_btm.s },
+                                                   ImVec2{ cr_item_list_max.x, y_top_btm.t }) &&
+                        on_rmb_press)
+                    {   // Right click to rename.
+                        s_afa_ctrl_item_renaming_idx = i;
+                        s_renaming_popup_first = true;
+                        ImGui::OpenPopup("control_item_rename_popup");
+                    }
+                }
+
+                if (ImGui::BeginPopup("control_item_rename_popup"))
+                {   // Rename control item.
+                    auto& renaming_afa_ctrl_item{ afa_ctrl_items[s_afa_ctrl_item_renaming_idx] };
+                    ImGui::Text("Rename control item \"%s\"", renaming_afa_ctrl_item.name.c_str());
+
+                    static std::string s_rename_buffer;
+                    if (s_renaming_popup_first)
+                    {   // Setup renaming input text.
+                        s_rename_buffer = renaming_afa_ctrl_item.name;
+                        ImGui::SetKeyboardFocusHere();
+                    }
+                    ImGui::InputText("New name", &s_rename_buffer);
+
+                    if (ImGui::Button("Confirm##rename_popup") ||
+                        m_input_handler->is_key_pressed(BT_KEY_ENTER))
+                    {   // Submit rename.
+                        renaming_afa_ctrl_item.name = std::move(s_rename_buffer);
+                        anim_frame_action::s_editor_state.is_working_timeline_dirty = true;
+                        ImGui::CloseCurrentPopup();
+                    }
+
+                    ImGui::SameLine();
+
+                    if (ImGui::Button("Cancel##rename_popup") ||
+                        m_input_handler->is_key_pressed(BT_KEY_ESCAPE))
+                    {   // Cancel!!!
+                        ImGui::CloseCurrentPopup();
+                    }
+
+                    ImGui::Text("%s", "Press <Enter> to confirm rename or <Esc> to cancel.");
+
+                    s_renaming_popup_first = false;
+                    ImGui::EndPopup();
                 }
             }
             ImGui::PopClipRect();
