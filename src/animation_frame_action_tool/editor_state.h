@@ -16,7 +16,7 @@ struct Runtime_data;
 
 struct Editor_state
 {
-    Runtime_data* working_timeline{ nullptr };
+    Runtime_data* working_timeline_copy{ nullptr };  // Idc if this is a memory leak (raw pointer).  -Thea 2025/08/30
     Model const* working_model{ nullptr };
     std::map<std::string, size_t> anim_name_to_idx_map;
     size_t selected_anim_idx{ 0 };

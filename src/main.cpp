@@ -130,6 +130,13 @@ int32_t main()
             new BT::Material_impl_post_process(1.0f)));
 
     // Models.
+    // "models": [
+    //     "SlimeGirl": {
+    //         "type": "obj",
+    //         "material": "color_material"
+    //     },
+    //     ...
+    // ]
     BT::Model_bank::emplace_model(
         "unit_box",
         make_unique<BT::Model>(BTZC_GAME_ENGINE_ASSET_MODEL_PATH "unit_box.obj",
@@ -160,18 +167,22 @@ int32_t main()
     //                            "textured_material"));
 
     // Animation frame action runtime data.
+    // "anim_frame_action_runtime_datas": [
+    //     "SlimeGirl",
+    //     ...
+    // ]
     BT::anim_frame_action::Bank::emplace(
-        "SlimeGirl",
-        BT::anim_frame_action::Runtime_data{
-            BTZC_GAME_ENGINE_ASSET_ANIM_FRAME_ACTIONS_PATH "SlimeGirl.btafa" });
+        "SlimeGirl",  // @NOTE: Key must match the file name stem!!!!! This is very very important.  -Thea 2025/08/30
+        BT::anim_frame_action::Runtime_data(
+            BTZC_GAME_ENGINE_ASSET_ANIM_FRAME_ACTIONS_PATH "SlimeGirl.btafa"));
     BT::anim_frame_action::Bank::emplace(
         "SlimeGirl2",
-        BT::anim_frame_action::Runtime_data{
-            BTZC_GAME_ENGINE_ASSET_ANIM_FRAME_ACTIONS_PATH "SlimeGirl.btafa" });
+        BT::anim_frame_action::Runtime_data(
+            BTZC_GAME_ENGINE_ASSET_ANIM_FRAME_ACTIONS_PATH "SlimeGirl2.btafa"));
     BT::anim_frame_action::Bank::emplace(
         "SlimeGirl3",
-        BT::anim_frame_action::Runtime_data{
-            BTZC_GAME_ENGINE_ASSET_ANIM_FRAME_ACTIONS_PATH "SlimeGirl.btafa" });
+        BT::anim_frame_action::Runtime_data(
+            BTZC_GAME_ENGINE_ASSET_ANIM_FRAME_ACTIONS_PATH "SlimeGirl3.btafa"));
 
     // POPULATE TEST LEVEL (@TODO: Once level loading is implemented, replace this with it)
     // Physics objects.

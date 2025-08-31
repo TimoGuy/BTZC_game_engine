@@ -1,46 +1,170 @@
 {
-    "animated_mode_name": "test_gltf",
-    "control_items": [
-        { "name": "JIJI" },
-        { "name": "BF5" },
-        { "name": "Nlerp to testicular torsion" },
-        { "name": "Disable hitbox 1" }
-    ],
     "anim_frame_action_timelines": [
+        {
+            "anim_name": "0_TPose",
+            "regions": [
+                {
+                    "ctrl_item_idx": 0,
+                    "end_frame": 6,
+                    "start_frame": 2
+                }
+            ]
+        },
+        {
+            "anim_name": "Attack_Stone_Charge",
+            "regions": []
+        },
+        {
+            "anim_name": "Attack_Stone_HeavyDown",
+            "regions": []
+        },
+        {
+            "anim_name": "Attack_Stone_HeavyHold",
+            "regions": []
+        },
+        {
+            "anim_name": "Attack_Stone_HeavyJump",
+            "regions": [
+                {
+                    "ctrl_item_idx": 1,
+                    "end_frame": 28,
+                    "start_frame": 2
+                }
+            ]
+        },
+        {
+            "anim_name": "Attack_Stone_HeavyLeft",
+            "regions": []
+        },
+        {
+            "anim_name": "Attack_Stone_HeavyLeft_2_Fail",
+            "regions": []
+        },
+        {
+            "anim_name": "Attack_Stone_HeavyLeft_2_Success",
+            "regions": []
+        },
+        {
+            "anim_name": "Attack_Stone_HeavyUp",
+            "regions": []
+        },
+        {
+            "anim_name": "Attack_Stone_Hurt",
+            "regions": []
+        },
+        {
+            "anim_name": "Attack_Stone_Light1",
+            "regions": []
+        },
+        {
+            "anim_name": "Attack_Stone_Light_1_2_3",
+            "regions": []
+        },
+        {
+            "anim_name": "Attack_Stone_Mugamae",
+            "regions": []
+        },
+        {
+            "anim_name": "Attack_Stone_ParryGuard",
+            "regions": []
+        },
+        {
+            "anim_name": "Get_Out_Getting_Pressed",
+            "regions": []
+        },
+        {
+            "anim_name": "Getting_Pressed",
+            "regions": []
+        },
+        {
+            "anim_name": "Idle",
+            "regions": []
+        },
+        {
+            "anim_name": "Idle_Hip",
+            "regions": []
+        },
+        {
+            "anim_name": "Jumping_From_Idle",
+            "regions": []
+        },
+        {
+            "anim_name": "Jumping_From_Run",
+            "regions": []
+        },
+        {
+            "anim_name": "Jumping_Midair",
+            "regions": []
+        },
+        {
+            "anim_name": "Land_From_Jumping_From_Idle",
+            "regions": []
+        },
+        {
+            "anim_name": "Land_From_Jumping_From_Run",
+            "regions": []
+        },
+        {
+            "anim_name": "Running",
+            "regions": []
+        },
         {
             "anim_name": "Running.inmotion",
             "regions": [
                 {
                     "ctrl_item_idx": 0,
-                    "start_frame": 0,
-                    "end_frame": 5
+                    "end_frame": 5,
+                    "start_frame": 0
                 },
                 {
                     "ctrl_item_idx": 0,
-                    "start_frame": 5,
-                    "end_frame": 66
+                    "end_frame": 66,
+                    "start_frame": 5
                 },
                 {
                     "ctrl_item_idx": 0,
-                    "start_frame": 30,
-                    "end_frame": 35
+                    "end_frame": 35,
+                    "start_frame": 30
                 },
                 {
                     "ctrl_item_idx": 1,
-                    "start_frame": 30,
-                    "end_frame": 35
+                    "end_frame": 35,
+                    "start_frame": 30
                 },
                 {
                     "ctrl_item_idx": 2,
-                    "start_frame": 30,
-                    "end_frame": 35
+                    "end_frame": 35,
+                    "start_frame": 30
                 },
                 {
                     "ctrl_item_idx": 3,
-                    "start_frame": 30,
-                    "end_frame": 35
+                    "end_frame": 35,
+                    "start_frame": 30
                 }
             ]
+        },
+        {
+            "anim_name": "Running.inmotion.LittleUpperbody",
+            "regions": []
+        },
+        {
+            "anim_name": "Running_Turn_Around",
+            "regions": []
+        }
+    ],
+    "animated_model_name": "test_gltf",
+    "control_items": [
+        {
+            "name": "JIJI"
+        },
+        {
+            "name": "BF5"
+        },
+        {
+            "name": "Nlerp to testicular torsion"
+        },
+        {
+            "name": "Disable hitbox 1"
         }
     ]
 }

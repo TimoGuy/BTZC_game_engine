@@ -57,6 +57,7 @@ class Bank
 {
 public:
     static void emplace(std::string const& name, Runtime_data&& runtime_state);
+    static void replace(std::string const& name, Runtime_data&& runtime_state);
     static Runtime_data const& get(std::string const& name);
     static std::vector<std::string> get_all_names();
 

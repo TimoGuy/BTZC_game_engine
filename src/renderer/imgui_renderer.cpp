@@ -426,39 +426,51 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
             {   // Add save or discard buttons.
                 ImGui::SameLine();
                 if (ImGui::Button("Save changes"))
-                {   // Save changes.
-                    // @TODO: @HERE: Put saving changes code here!!!!
-                    assert(false);
-                    anim_frame_action::s_editor_state.is_working_timeline_dirty = false;
+                {
+                    auto const& timeline_name{ s_all_timeline_names[s_selected_timeline_idx] };
+                    {   // Save changes.
+                        json working_timeline_copy_as_json;
+                        anim_frame_action::s_editor_state.working_timeline_copy
+                            ->serialize(anim_frame_action::SERIAL_MODE_SERIALIZE,
+                                        working_timeline_copy_as_json);
+
+                        // Save to disk.
+                        std::ofstream f{
+                            BTZC_GAME_ENGINE_ASSET_ANIM_FRAME_ACTIONS_PATH
+                            + timeline_name
+                            + ".btafa" };
+                        f << working_timeline_copy_as_json.dump(4);
+                    }
+
+                    anim_frame_action::Bank::replace(
+                        timeline_name,
+                        std::move(*anim_frame_action::s_editor_state.working_timeline_copy));
+
+                    // Load the same timeline again.
+                    s_load_selected_timeline = true;
                 }
                 ImGui::SameLine();
                 if (ImGui::Button("Discard changes"))
-                {   // "Discard" changes. See tooltip below for more info.
-                    anim_frame_action::s_editor_state.is_working_timeline_dirty = false;
+                {   // Discard changes by loading the same timeline again.
+                    s_load_selected_timeline = true;
                 }
-                if (ImGui::IsItemHovered())
-                    ImGui::SetTooltip("%s", "@NOTE: This does not revert the file,\n"
-                                            "it simply disables the `is_working_timeline_dirty`\n"
-                                            "flag so that another timeline can be loaded.");
             }
         }
 
         if (s_load_selected_timeline)
         {   // Process load timeline (and model) request.
-            anim_frame_action::s_editor_state.working_timeline =
-                const_cast<anim_frame_action::Runtime_data*>(  // @HACK: Since this is an editor I think this is appropriate.
-                    &anim_frame_action::Bank::get(s_all_timeline_names[s_selected_timeline_idx]));
-            assert(anim_frame_action::s_editor_state.working_timeline != nullptr);
+            if (anim_frame_action::s_editor_state.working_timeline_copy != nullptr)
+                delete anim_frame_action::s_editor_state.working_timeline_copy;
+
+            anim_frame_action::s_editor_state.working_timeline_copy =
+                new anim_frame_action::Runtime_data(
+                    anim_frame_action::Bank::get(s_all_timeline_names[s_selected_timeline_idx]));
+            assert(anim_frame_action::s_editor_state.working_timeline_copy != nullptr);
 
             anim_frame_action::s_editor_state.working_model =
-                anim_frame_action::s_editor_state.working_timeline->model;
+                anim_frame_action::s_editor_state.working_timeline_copy->model;
             assert(anim_frame_action::s_editor_state.working_model != nullptr);
 
-            if (anim_frame_action::s_editor_state.is_working_timeline_dirty)
-            {
-                logger::printe(logger::ERROR, "Working timeline was unloaded without saving changes!");
-                assert(false);
-            }
             anim_frame_action::s_editor_state.is_working_timeline_dirty = false;  // Load from disk so not dirty.
 
             s_load_selected_timeline = false;
@@ -534,9 +546,9 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
             ImGui::SetWindowFontScale(1.0f);
 
             auto& afa_ctrl_items{ anim_frame_action::s_editor_state
-                                      .working_timeline->control_items };
+                                      .working_timeline_copy->control_items };
             auto& afa_regions{ anim_frame_action::s_editor_state
-                                   .working_timeline
+                                   .working_timeline_copy
                                    ->anim_frame_action_timelines[
                                        anim_frame_action::s_editor_state.selected_anim_idx]
                                    .regions };

@@ -41,7 +41,7 @@ void BT::anim_frame_action::Runtime_data::serialize(
 {
     if (mode == SERIAL_MODE_DESERIALIZE)
     {   // Load model from bank.
-        model = Model_bank::get_model(node_ref["animated_mode_name"]);
+        model = Model_bank::get_model(node_ref["animated_model_name"]);
         assert(model != nullptr);
 
         // Control items.
@@ -81,8 +81,42 @@ void BT::anim_frame_action::Runtime_data::serialize(
         }
     }
     else if (mode == SERIAL_MODE_SERIALIZE)
-    {
+    {   // Save model from bank.
+        node_ref["animated_model_name"] = Model_bank::get_model_name(model);
 
+        // Control items.
+        auto& nr_control_items{ node_ref["control_items"] };
+        for (size_t i = 0; i < control_items.size(); i++)
+        {
+            nr_control_items[i]["name"] = control_items[i].name;
+        }
+
+        // Animations.
+        auto& nr_anims{ node_ref["anim_frame_action_timelines"] };
+        nr_anims = json::array();
+        for (size_t anim_idx = 0;
+             anim_idx < anim_frame_action_timelines.size();
+             anim_idx++)
+        {   // Animations level.
+            json nr_anim_entry = {};
+            nr_anim_entry["anim_name"] = model->get_joint_animations()[anim_idx].get_name();
+            auto& nr_anim_regions{ nr_anim_entry["regions"] };
+            nr_anim_regions = json::array();
+
+            for (size_t reg_idx = 0;
+                 reg_idx < anim_frame_action_timelines[anim_idx].regions.size();
+                 reg_idx++)
+            {   // Insert anim action regions.
+                auto const& region{ anim_frame_action_timelines[anim_idx].regions[reg_idx] };
+                json nr_region = {};
+                nr_region["ctrl_item_idx"] = region.ctrl_item_idx;
+                nr_region["start_frame"]   = region.start_frame;
+                nr_region["end_frame"]     = region.end_frame;
+                nr_anim_regions.emplace_back(nr_region);
+            }
+
+            nr_anims.emplace_back(nr_anim_entry);
+        }
     }
 }
 
@@ -90,6 +124,12 @@ void BT::anim_frame_action::Bank::emplace(std::string const& name,
                                           Runtime_data&& runtime_state)
 {
     s_runtime_states.emplace(name, std::move(runtime_state));
+}
+
+void BT::anim_frame_action::Bank::replace(std::string const& name,
+                                          Runtime_data&& runtime_state)
+{
+    s_runtime_states.at(name) = std::move(runtime_state);
 }
 
 BT::anim_frame_action::Runtime_data const&
