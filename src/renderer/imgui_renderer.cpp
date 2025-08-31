@@ -400,7 +400,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
         ImGui::SameLine();
         ImGui::Spacing();
         ImGui::SameLine();
-        ImGui::Text("Models:69 Avg:6.9KB Mdn:6.9KB Max:69.4KB");
+        ImGui::Text("Models:%llu Avg:6.9KB Mdn:6.9KB Max:69.4KB", s_all_timeline_names.size());
 
         ImGui::SeparatorText("List of Timelines");
 

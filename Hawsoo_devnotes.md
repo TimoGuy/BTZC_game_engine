@@ -77,3 +77,5 @@
     - And then a serialization-ifc attached to this struct I think.
 
 - In the `.btafa` file, I ended up putting the key "animated_model_name" which connected to the animated model. I think that this one-to-one connection might not have been the best tho. Idk... I'll have to refactor in the future if needed.
+
+> Mmmmm for some reason I keep on feeling like I'm done with this tool, but I can't really use it for anything lol.
