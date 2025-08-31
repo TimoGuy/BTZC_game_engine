@@ -4,9 +4,9 @@
             "anim_name": "0_TPose",
             "regions": [
                 {
-                    "ctrl_item_idx": 0,
-                    "end_frame": 6,
-                    "start_frame": 2
+                    "ctrl_item_idx": 1,
+                    "end_frame": 7,
+                    "start_frame": 3
                 }
             ]
         },
@@ -158,10 +158,10 @@
             "name": "JIJI"
         },
         {
-            "name": "BF5"
+            "name": "Jojos"
         },
         {
-            "name": "Nlerp to testicular torsion"
+            "name": "Hellp me!!"
         },
         {
             "name": "Disable hitbox 1"

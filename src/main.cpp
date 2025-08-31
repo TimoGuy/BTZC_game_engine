@@ -171,18 +171,18 @@ int32_t main()
     //     "SlimeGirl",
     //     ...
     // ]
-    BT::anim_frame_action::Bank::emplace(
-        "SlimeGirl",  // @NOTE: Key must match the file name stem!!!!! This is very very important.  -Thea 2025/08/30
-        BT::anim_frame_action::Runtime_data(
-            BTZC_GAME_ENGINE_ASSET_ANIM_FRAME_ACTIONS_PATH "SlimeGirl.btafa"));
-    BT::anim_frame_action::Bank::emplace(
+    std::vector<std::string> const afa_names{
+        "SlimeGirl",
         "SlimeGirl2",
-        BT::anim_frame_action::Runtime_data(
-            BTZC_GAME_ENGINE_ASSET_ANIM_FRAME_ACTIONS_PATH "SlimeGirl2.btafa"));
-    BT::anim_frame_action::Bank::emplace(
         "SlimeGirl3",
-        BT::anim_frame_action::Runtime_data(
-            BTZC_GAME_ENGINE_ASSET_ANIM_FRAME_ACTIONS_PATH "SlimeGirl3.btafa"));
+    };
+    for (auto const& afa_name : afa_names)
+    {
+        BT::anim_frame_action::Bank::emplace(
+            afa_name,  // @NOTE: Key must match the file name stem!!!!! This is very very important.  -Thea 2025/08/30
+            BT::anim_frame_action::Runtime_data(
+                BTZC_GAME_ENGINE_ASSET_ANIM_FRAME_ACTIONS_PATH + afa_name + ".btafa"));
+    }
 
     // POPULATE TEST LEVEL (@TODO: Once level loading is implemented, replace this with it)
     // Physics objects.
