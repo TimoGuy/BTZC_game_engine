@@ -185,6 +185,21 @@ public:
     INTERNAL__CTRL_DATA_LABEL_MARKER_END_REEVE
     };
 
+    // Get list of str labels.
+    static std::vector<std::string> const& get_all_str_labels()
+    {
+        static std::vector<std::string> s_all_labels{
+            #define X_float(name, def_val)  #name,
+            #define X__bool(name, def_val)  #name,
+            #define X_reeve(name)           #name,
+            BT_MODEL_ANIMATOR_CONTROLLABLE_DATA_LIST
+            #undef X_float
+            #undef X__bool
+            #undef X_reeve
+        };
+        return s_all_labels;
+    }
+
     // Lookup str->enum.
     static Controllable_data_label str_label_to_enum(std::string const& str_label)
     {
@@ -279,7 +294,6 @@ public:
         return m_data_reeves.at(label);
     }
 
-    
     #undef BT_MODEL_ANIMATOR_CONTROLLABLE_DATA_LIST
 };
 

@@ -17,6 +17,7 @@
 #include "misc/cpp/imgui_stdlib.h"
 #include "model_animator.h"  // @CHECK: @NOCHECKIN: Is this needed?
 #include <array>
+#include <cmath>
 #include <cstring>
 #include <fstream>
 #include <string>
@@ -475,6 +476,61 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
             anim_frame_action::s_editor_state.is_working_timeline_dirty = false;  // Load from disk so not dirty.
 
             s_load_selected_timeline = false;
+        }
+    }
+    ImGui::End();
+
+    // Timeline data viewer.
+    ImGui::Begin("Timeline controllable data");
+    {
+        auto const& all_controllable_data_strs{ Model_animator::get_all_str_labels() };
+        for (auto& data_str : all_controllable_data_strs)
+        {
+            auto data_label{ Model_animator::str_label_to_enum(data_str) };
+            switch ( Model_animator::get_data_type(data_label))
+            {
+                case Model_animator::CTRL_DATA_TYPE_FLOAT:
+                    ImGui::Text("%s : %0.4f", data_str.c_str(), 3.141592f);
+                    break;
+
+                case Model_animator::CTRL_DATA_TYPE_BOOL:
+                    ImGui::Text("%s : %s", data_str.c_str(), (true ? "TRUE" : "FALSE"));
+                    break;
+
+                case Model_animator::CTRL_DATA_TYPE_RISING_EDGE_EVENT:
+                {
+                    ImGui::Text("%s : ", data_str.c_str());
+                    ImGui::SameLine();
+                    float_t trigger_lerp_val{ 0.3f };  // >0.0: Trigger has been set off, and returns to 0.0.
+                    static auto s_trigger_str_fn = [](float_t t) {
+                        assert(t >= 0.0f && t <= 1.0f);
+                        int32_t t_over_trigger_length = std::roundf(t * (sizeof("trigger") - 1));
+                        switch (t_over_trigger_length)
+                        {
+                            case 0: return "trigger";
+                            case 1: return "trIgger";
+                            case 2: return "tRiggEr";
+                            case 3: return "TriGgeR";
+                            case 4: return "TRiGgeR";
+                            case 5: return "tRIGGEr";
+                            case 6: return "TRIgGER";
+                            case 7: return "TRIGGER";
+                            default: assert(false); return "error_str";
+                        }
+                    };
+                    ImGui::TextColored(ImVec4(glm_lerp(1.0f, 1.0f,   trigger_lerp_val),
+                                              glm_lerp(1.0f, 0.914f, trigger_lerp_val),
+                                              glm_lerp(1.0f, 0.180f, trigger_lerp_val),
+                                              glm_lerp(0.3f, 1.0f,   trigger_lerp_val)),
+                                       "%s",
+                                       s_trigger_str_fn(trigger_lerp_val));
+                    break;
+                }
+
+                default:
+                    assert(false);
+                    break;
+            }
         }
     }
     ImGui::End();
