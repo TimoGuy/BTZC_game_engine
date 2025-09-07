@@ -482,6 +482,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
 
     // Timeline data viewer.
     ImGui::Begin("Timeline controllable data");
+    if (anim_frame_action::s_editor_state.working_model_animator != nullptr)
     {
         auto const& all_controllable_data_strs{ Model_animator::get_all_str_labels() };
         for (auto& data_str : all_controllable_data_strs)
@@ -490,17 +491,27 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
             switch ( Model_animator::get_data_type(data_label))
             {
                 case Model_animator::CTRL_DATA_TYPE_FLOAT:
-                    ImGui::Text("%s : %0.4f", data_str.c_str(), 3.141592f);
+                    ImGui::Text("%s : %0.4f",
+                                data_str.c_str(),
+                                anim_frame_action::s_editor_state.working_model_animator
+                                    ->get_float_data_handle(data_label));
                     break;
 
                 case Model_animator::CTRL_DATA_TYPE_BOOL:
-                    ImGui::Text("%s : %s", data_str.c_str(), (true ? "TRUE" : "FALSE"));
+                    ImGui::Text("%s : %s",
+                                data_str.c_str(),
+                                (anim_frame_action::s_editor_state.working_model_animator
+                                     ->get_bool_data_handle(data_label)
+                                 ? "TRUE"
+                                 : "FALSE"));
                     break;
 
                 case Model_animator::CTRL_DATA_TYPE_RISING_EDGE_EVENT:
                 {
                     ImGui::Text("%s : ", data_str.c_str());
                     ImGui::SameLine();
+                    auto& reeve_handle{ anim_frame_action::s_editor_state.working_model_animator->get_reeve_data_handle(data_label) };
+                    assert(false);  // <-- @TODO: @HERE: @NOCHECKIN.
                     float_t trigger_lerp_val{ 0.3f };  // >0.0: Trigger has been set off, and returns to 0.0.
                     static auto s_trigger_str_fn = [](float_t t) {
                         assert(t >= 0.0f && t <= 1.0f);
@@ -532,6 +543,10 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                     break;
             }
         }
+    }
+    else
+    {
+        ImGui::Text("No working model animator assigned.");
     }
     ImGui::End();
 

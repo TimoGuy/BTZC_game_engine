@@ -44,7 +44,6 @@ public:
     UUID m_render_obj_key;
 
     Model const* m_prev_working_model{ nullptr };
-    Model_animator* m_working_model_animator{ nullptr };
     uint32_t m_working_anim_idx{ (uint32_t)-1 };
 };
 
@@ -76,7 +75,7 @@ void BT::Scripts::Script__dev__anim_editor_tool_state_agent::on_pre_render(float
     // Update self of any changes.
     if (m_prev_working_model != anim_frame_action::s_editor_state.working_model)
     {
-        m_working_model_animator = nullptr;
+        anim_frame_action::s_editor_state.working_model_animator = nullptr;
 
         // Check if new model is deformable by decorating an animator.
         auto const& new_model{ *anim_frame_action::s_editor_state.working_model };
@@ -101,7 +100,7 @@ void BT::Scripts::Script__dev__anim_editor_tool_state_agent::on_pre_render(float
 
             // Assign a temp configuration and finish deformed model rend obj.
             animator->configure_animator({}, nullptr);
-            m_working_model_animator = animator.get();
+            anim_frame_action::s_editor_state.working_model_animator = animator.get();
             rend_obj.set_model_animator(std::move(animator));
         }
         else
@@ -116,23 +115,24 @@ void BT::Scripts::Script__dev__anim_editor_tool_state_agent::on_pre_render(float
     if (m_working_anim_idx != anim_frame_action::s_editor_state.selected_anim_idx)
     {   // Configure deformed model animator to new anim idx.
         m_working_anim_idx = anim_frame_action::s_editor_state.selected_anim_idx;
-        if (m_working_model_animator)
+        if (anim_frame_action::s_editor_state.working_model_animator)
         {
-            m_working_model_animator->configure_animator({ { m_working_anim_idx,
-                                                             0.0f,
-                                                             false } },
-                                                         nullptr);
+            anim_frame_action::s_editor_state.working_model_animator
+                ->configure_animator({ { m_working_anim_idx,
+                                         0.0f,
+                                         false } },
+                                     nullptr);
             anim_frame_action::s_editor_state.selected_anim_num_frames =
-                m_working_model_animator
+                anim_frame_action::s_editor_state.working_model_animator
                 ->get_model_animation_by_idx(m_working_anim_idx)
                 .get_num_frames();
         }
     }
 
-    if (m_working_model_animator)
+    if (anim_frame_action::s_editor_state.working_model_animator)
     {   // Update animator frame.
         auto current_frame_clamped{ anim_frame_action::s_editor_state.anim_current_frame };  // @NOTE: Assumed clamped.
-        m_working_model_animator->set_time(current_frame_clamped
+        anim_frame_action::s_editor_state.working_model_animator->set_time(current_frame_clamped
                                            / Model_joint_animation::k_frames_per_second);
     }
 
