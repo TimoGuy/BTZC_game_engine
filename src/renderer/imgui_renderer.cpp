@@ -29,7 +29,7 @@ void BT::ImGui_renderer::set_selected_game_obj(Game_object* game_obj)
     m_game_obj_pool->set_selected_game_obj(game_obj);
 }
 
-void BT::ImGui_renderer::render_imgui()
+void BT::ImGui_renderer::render_imgui(float_t delta_time)
 {
     // @NOCHECKIN: @TEMP
     static bool s_show_demo_window{ false };
@@ -67,7 +67,7 @@ void BT::ImGui_renderer::render_imgui()
         "Level Editor",
         "Animation Frame Data Editor",
     };
-    static std::array<void(ImGui_renderer::*)(bool), NUM_EDITOR_CONTEXTS> const k_editor_context_fns{
+    static std::array<void(ImGui_renderer::*)(bool, float_t), NUM_EDITOR_CONTEXTS> const k_editor_context_fns{
         &ImGui_renderer::render_imgui__level_editor_context,
         &ImGui_renderer::render_imgui__animation_frame_data_editor_context,
     };
@@ -314,11 +314,11 @@ void BT::ImGui_renderer::render_imgui()
 
     // Context dependant gui.
     auto fn_ptr{ k_editor_context_fns[s_current_editor_context] };
-    ((*this).*fn_ptr)(s_entering_new_context);
+    ((*this).*fn_ptr)(s_entering_new_context, delta_time);
     s_entering_new_context = false;
 }
 
-void BT::ImGui_renderer::render_imgui__level_editor_context(bool enter)
+void BT::ImGui_renderer::render_imgui__level_editor_context(bool enter, float_t delta_time)
 {
     if (enter)
     {   // Load current loaded level.
@@ -377,7 +377,7 @@ void BT::ImGui_renderer::render_imgui__level_editor_context(bool enter)
     ImGui::End();
 }
 
-void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool enter)
+void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool enter, float_t delta_time)
 {
     if (enter)
     {   // Load up editor-specific scene.
@@ -511,8 +511,10 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                     ImGui::Text("%s : ", data_str.c_str());
                     ImGui::SameLine();
                     auto& reeve_handle{ anim_frame_action::s_editor_state.working_model_animator->get_reeve_data_handle(data_label) };
-                    assert(false);  // <-- @TODO: @HERE: @NOCHECKIN.
-                    float_t trigger_lerp_val{ 0.3f };  // >0.0: Trigger has been set off, and returns to 0.0.
+
+                    // >0.0: Trigger has been set off, and returns to 0.0.
+                    float_t trigger_lerp_val{ reeve_handle.update_cooldown_and_fetch_val(delta_time) };
+
                     static auto s_trigger_str_fn = [](float_t t) {
                         assert(t >= 0.0f && t <= 1.0f);
                         int32_t t_over_trigger_length = std::roundf(t * (sizeof("trigger") - 1));

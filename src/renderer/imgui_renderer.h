@@ -31,7 +31,7 @@ public:
     }
 
     void set_selected_game_obj(Game_object* game_obj);
-    void render_imgui();
+    void render_imgui(float_t delta_time);
 
 private:
     Game_object_pool* m_game_obj_pool{ nullptr };
@@ -40,8 +40,8 @@ private:
     Input_handler* m_input_handler{ nullptr };
     Switch_scene_fn m_request_switch_scene_callback;
 
-    void render_imgui__level_editor_context(bool enter);
-    void render_imgui__animation_frame_data_editor_context(bool enter);
+    void render_imgui__level_editor_context(bool enter, float_t delta_time);
+    void render_imgui__animation_frame_data_editor_context(bool enter, float_t delta_time);
 };
 
 }  // namespace BT

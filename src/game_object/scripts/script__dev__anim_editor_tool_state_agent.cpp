@@ -134,6 +134,42 @@ void BT::Scripts::Script__dev__anim_editor_tool_state_agent::on_pre_render(float
         auto current_frame_clamped{ anim_frame_action::s_editor_state.anim_current_frame };  // @NOTE: Assumed clamped.
         anim_frame_action::s_editor_state.working_model_animator->set_time(current_frame_clamped
                                            / Model_joint_animation::k_frames_per_second);
+
+        // Process all controllable datas.
+        // @TODO: Get all of them in here doing meaningful things.
+        //        @NOTE: Currently, it's just checking for event triggers.
+        static std::vector<Model_animator::Controllable_data_label> s_all_data_labels;
+        if (s_all_data_labels.empty())
+        {   // Add in data labels.
+            auto const& all_controllable_data_strs{ Model_animator::get_all_str_labels() };
+            for (auto& data_str : all_controllable_data_strs)
+            {
+                auto data_label{ Model_animator::str_label_to_enum(data_str) };
+                s_all_data_labels.emplace_back(data_label);
+            }
+        }
+
+        for (auto label : s_all_data_labels)
+        {
+            switch ( Model_animator::get_data_type(label))
+            {
+                case Model_animator::CTRL_DATA_TYPE_FLOAT:
+                    break;
+
+                case Model_animator::CTRL_DATA_TYPE_BOOL:
+                    break;
+
+                case Model_animator::CTRL_DATA_TYPE_RISING_EDGE_EVENT:
+                    // Activate any events.
+                    (void)anim_frame_action::s_editor_state.working_model_animator
+                        ->get_reeve_data_handle(label)
+                        .check_if_rising_edge_occurred();
+                    break;
+
+                default:
+                    break;
+            }
+        }
     }
 
     m_renderer.get_render_object_pool().return_render_objs({ &rend_obj });

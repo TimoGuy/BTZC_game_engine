@@ -3,6 +3,7 @@
 #include "cglm/mat4.h"
 #include "cglm/types-struct.h"
 #include "cglm/types.h"
+#include "cglm/util.h"
 #include <atomic>
 #include <string>
 #include <unordered_map>
@@ -264,13 +265,23 @@ public:
             if (m_rising_edge_count > 0)
             {
                 m_rising_edge_count--;
+                m__dev_re_ocurred_cooldown = 1.0f;
                 return true;
             }
             else
                 return false;
         }
+        float_t update_cooldown_and_fetch_val(float_t delta_time)
+        {
+            auto cooldown_prev_copy{ m__dev_re_ocurred_cooldown };
+            m__dev_re_ocurred_cooldown = glm_max(0.0f,
+                                                 m__dev_re_ocurred_cooldown
+                                                 - delta_time);
+            return cooldown_prev_copy;
+        }
     private:
         uint32_t m_rising_edge_count{ 0 };
+        float_t m__dev_re_ocurred_cooldown{ 0.0f };
     };
 private:
     std::unordered_map<Controllable_data_label, Rising_edge_event> m_data_reeves;  // @TODO: private.
