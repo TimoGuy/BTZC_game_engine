@@ -65,7 +65,7 @@ private:
 
     // ImGui.
     void setup_imgui();
-    void render_imgui();
+    void render_imgui(float_t delta_time);
 
     // Scene.
     Render_object_pool m_rend_obj_pool;

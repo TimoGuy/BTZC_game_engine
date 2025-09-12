@@ -22,6 +22,13 @@ enum Serialization_mode
     SERIAL_MODE_DESERIALIZE
 };
 
+enum Control_item_type
+{
+    CTRL_ITEM_TYPE_DATA_WRITE,
+    CTRL_ITEM_TYPE_DATA_OVERRIDE,
+    CTRL_ITEM_TYPE_EVENT_TRIGGER,
+};
+
 struct Runtime_data
 {
     Runtime_data() = default;
@@ -32,7 +39,7 @@ struct Runtime_data
     struct Control_item
     {
         std::string name;
-        // @TODO: @HERE: A type of control, i.e. override var region, event, etc.
+        Control_item_type type;
     };
     std::vector<Control_item> control_items;
 

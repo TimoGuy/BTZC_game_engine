@@ -53,6 +53,7 @@ void BT::anim_frame_action::Runtime_data::serialize(
             for (size_t i = 0; i < nr_control_items.size(); i++)
             {
                 control_items.emplace_back(nr_control_items[i]["name"]);
+                assert(false);  // @TODO: ^^ Add ctrl item type into the emplace right here!
             }
         }
 

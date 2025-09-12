@@ -45,6 +45,7 @@ public:
 
     Model const* m_prev_working_model{ nullptr };
     uint32_t m_working_anim_idx{ (uint32_t)-1 };
+    size_t m_prev_anim_frame{ (size_t)-1 };
 };
 
 }  // namespace BT
@@ -113,7 +114,10 @@ void BT::Scripts::Script__dev__anim_editor_tool_state_agent::on_pre_render(float
     }
 
     if (m_working_anim_idx != anim_frame_action::s_editor_state.selected_anim_idx)
-    {   // Configure deformed model animator to new anim idx.
+    {   // Reset prev anim frame.
+        m_prev_anim_frame = (size_t)-1;
+
+        // Configure deformed model animator to new anim idx.
         m_working_anim_idx = anim_frame_action::s_editor_state.selected_anim_idx;
         if (anim_frame_action::s_editor_state.working_model_animator)
         {
@@ -132,8 +136,9 @@ void BT::Scripts::Script__dev__anim_editor_tool_state_agent::on_pre_render(float
     if (anim_frame_action::s_editor_state.working_model_animator)
     {   // Update animator frame.
         auto current_frame_clamped{ anim_frame_action::s_editor_state.anim_current_frame };  // @NOTE: Assumed clamped.
-        anim_frame_action::s_editor_state.working_model_animator->set_time(current_frame_clamped
-                                           / Model_joint_animation::k_frames_per_second);
+        anim_frame_action::s_editor_state.working_model_animator
+            ->set_time(current_frame_clamped
+                       / Model_joint_animation::k_frames_per_second);
 
         // Process all controllable datas.
         // @TODO: Get all of them in here doing meaningful things.
@@ -151,7 +156,7 @@ void BT::Scripts::Script__dev__anim_editor_tool_state_agent::on_pre_render(float
 
         for (auto label : s_all_data_labels)
         {
-            switch ( Model_animator::get_data_type(label))
+            switch (Model_animator::get_data_type(label))
             {
                 case Model_animator::CTRL_DATA_TYPE_FLOAT:
                     break;

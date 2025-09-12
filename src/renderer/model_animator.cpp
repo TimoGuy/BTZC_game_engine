@@ -1,5 +1,6 @@
 #include "model_animator.h"
 
+#include "../animation_frame_action_tool/runtime_data.h"
 #include "cglm/affine.h"
 #include "cglm/mat4.h"
 #include "cglm/quat.h"
@@ -222,6 +223,7 @@ void BT::Model_animator::change_state_idx(uint32_t to_state)
                                                     to_state))
     {
         m_time = 0.0f;
+        m_prev_time = std::numeric_limits<float_t>::lowest();
     }
 }
 
@@ -231,8 +233,48 @@ void BT::Model_animator::set_time(float_t time)
 }
 
 void BT::Model_animator::update(float_t delta_time)
-{
-    m_time += delta_time * m_animator_states[m_current_state_idx].speed;
+{   // Tick forward 
+    float_t state_speed{ m_animator_states[m_current_state_idx].speed };
+    m_time += delta_time * state_speed;
+
+    // Copy current and previous times.
+    float_t prev_time{ m_prev_time };
+    float_t curr_time{ m_time };
+
+    // Process anim frame action runtime.
+    auto& afa_timeline{ m_anim_frame_action_runtime_state
+                        ->anim_frame_action_timelines[
+                            m_animator_states[m_current_state_idx].animation_idx] };
+    auto& ctrl_items{ m_anim_frame_action_runtime_state->control_items };
+
+    for (auto const& region : afa_timeline.regions)
+    {
+        if (ctrl_items[region.ctrl_item_idx].type
+            == anim_frame_action::CTRL_ITEM_TYPE_EVENT_TRIGGER)
+        {   // Check if rising edge (start_frame) of event is within prev_time/curr_time.
+            float_t rising_edge_time = region.start_frame
+                                       * Model_joint_animation::k_frames_per_second
+                                       ;//* state_speed;  <-- @TODO: Include this when it's not editor mode (I think is the best decision)!!!!
+            if (prev_time < rising_edge_time && rising_edge_time <= curr_time)
+            {   // @TODO: Add rising edge event trigger here!!!! @HERE
+                assert(false);
+            }
+        }
+        else
+        {   // Check if time within frame bounds.
+            auto frame_idx = m_model_animations[m_animator_states[m_current_state_idx].animation_idx]
+                             .calc_frame_idx(curr_time,
+                                             m_animator_states[m_current_state_idx].loop,
+                                             Model_joint_animation::FLOOR);
+            if (frame_idx >= region.start_frame && frame_idx < region.end_frame)
+            {   // @TODO: Add override/write mutation here!!! @HERE
+                assert(false);
+            }
+        }
+    }
+
+    // Update prev time.
+    m_prev_time = m_time.load();
 }
 
 void BT::Model_animator::calc_anim_pose(std::vector<mat4s>& out_joint_matrices) const

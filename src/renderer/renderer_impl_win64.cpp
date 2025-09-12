@@ -250,7 +250,7 @@ void BT::Renderer::Impl::render(float_t delta_time, function<void()>&& debug_vie
 
     render_hdr_color_to_ldr_framebuffer();
     render_debug_views_to_ldr_framebuffer(delta_time, std::move(debug_views_render_fn));
-    render_imgui();
+    render_imgui(delta_time);
 
     present_display_frame();
 
@@ -527,7 +527,7 @@ void BT::Renderer::Impl::setup_imgui()
     ImGui_ImplOpenGL3_Init("#version 130");
 }
 
-void BT::Renderer::Impl::render_imgui()
+void BT::Renderer::Impl::render_imgui(float_t delta_time)
 {
     // Start the Dear ImGui frame.
     ImGui_ImplOpenGL3_NewFrame();
@@ -539,7 +539,7 @@ void BT::Renderer::Impl::render_imgui()
     ImGuizmo::BeginFrame();
 
     // Render imgui stuff.
-    m_imgui_renderer.render_imgui();
+    m_imgui_renderer.render_imgui(delta_time);
 
     // Rendering.
     ImGui::Render();

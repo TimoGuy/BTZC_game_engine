@@ -5,6 +5,7 @@
 #include "cglm/types.h"
 #include "cglm/util.h"
 #include <atomic>
+#include <limits>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -111,6 +112,7 @@ private:
     // @TEMP: Super simple animator right here for now.
     std::atomic_uint32_t m_current_state_idx{ 0 };
     std::atomic<float_t> m_time{ 0.0f };
+    std::atomic<float_t> m_prev_time{ std::numeric_limits<float_t>::lowest() };  // For rising edge events.
     ///////////////////////////////////////////////////
 
     std::vector<Model_joint_animation> const& m_model_animations;
