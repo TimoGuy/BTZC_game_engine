@@ -51,10 +51,12 @@ void BT::anim_frame_action::Runtime_data::serialize(
         {
             control_items.reserve(nr_control_items.size());
             for (size_t i = 0; i < nr_control_items.size(); i++)
-            {
+            {   // Only include name since type calc happens later.
                 control_items.emplace_back(nr_control_items[i]["name"]);
-                assert(false);  // @TODO: ^^ Add ctrl item type into the emplace right here!
             }
+
+            // Ctrl items type calculation.
+            calculate_all_ctrl_item_types();
         }
 
         // Animations (use anim names as key).
@@ -88,7 +90,7 @@ void BT::anim_frame_action::Runtime_data::serialize(
         // Control items.
         auto& nr_control_items{ node_ref["control_items"] };
         for (size_t i = 0; i < control_items.size(); i++)
-        {
+        {   // Only save name of control item bc of type calc.
             nr_control_items[i]["name"] = control_items[i].name;
         }
 
@@ -118,6 +120,14 @@ void BT::anim_frame_action::Runtime_data::serialize(
 
             nr_anims.emplace_back(nr_anim_entry);
         }
+    }
+}
+
+void BT::anim_frame_action::Runtime_data::calculate_all_ctrl_item_types()
+{
+    for (auto& ctrl_item : control_items)
+    {
+        assert(false);  // @HERE: @TODO: Fill in the ctrl item types once getting the controllable data in here.
     }
 }
 

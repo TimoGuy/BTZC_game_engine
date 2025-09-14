@@ -24,6 +24,7 @@ enum Serialization_mode
 
 enum Control_item_type
 {
+    CTRL_ITEM_TYPE_UNDEFINED = 0,
     CTRL_ITEM_TYPE_DATA_WRITE,
     CTRL_ITEM_TYPE_DATA_OVERRIDE,
     CTRL_ITEM_TYPE_EVENT_TRIGGER,
@@ -39,7 +40,7 @@ struct Runtime_data
     struct Control_item
     {
         std::string name;
-        Control_item_type type;
+        Control_item_type type = CTRL_ITEM_TYPE_UNDEFINED;
     };
     std::vector<Control_item> control_items;
 
@@ -57,6 +58,8 @@ struct Runtime_data
 
     void serialize(Serialization_mode mode,
                    json& node_ref);
+
+    void calculate_all_ctrl_item_types();
 };
 
 // @COPYPASTA: See `mesh.h`
