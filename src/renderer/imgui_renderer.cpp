@@ -495,7 +495,8 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                                 data_str.c_str(),
                                 anim_frame_action::s_editor_state.working_model_animator
                                     ->get_anim_frame_action_data_handle()
-                                    .get_float_data_handle(data_label));
+                                    .get_float_data_handle(data_label)
+                                    .get_val());
                     break;
 
                 case anim_frame_action::Runtime_controllable_data::CTRL_DATA_TYPE_BOOL:
@@ -504,6 +505,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                                 (anim_frame_action::s_editor_state.working_model_animator
                                      ->get_anim_frame_action_data_handle()
                                     .get_bool_data_handle(data_label)
+                                    .get_val()
                                  ? "TRUE"
                                  : "FALSE"));
                     break;
@@ -525,12 +527,12 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                         switch (t_over_trigger_length)
                         {
                             case 0: return "trigger";
-                            case 1: return "trIgger";
-                            case 2: return "tRiggEr";
-                            case 3: return "TriGgeR";
-                            case 4: return "TRiGgeR";
-                            case 5: return "tRIGGEr";
-                            case 6: return "TRIgGER";
+                            case 1: return "Trigger";
+                            case 2: return "TRigger";
+                            case 3: return "TRIgger";
+                            case 4: return "TRIGger";
+                            case 5: return "TRIGGer";
+                            case 6: return "TRIGGEr";
                             case 7: return "TRIGGER";
                             default: assert(false); return "error_str";
                         }

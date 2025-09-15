@@ -131,6 +131,43 @@ struct Runtime_controllable_data
     };
     static Controllable_data_type get_data_type(Controllable_data_label label);
 
+    // Overridable data type.
+    template<typename T>
+    class Overridable_data
+    {
+    public:
+        explicit Overridable_data(T val)
+            : m_persistant_val{ val }
+            , m_overriding_val{ val }
+        {
+        }
+
+        void clear_overriding()
+        {   // Clear upon every change in the timeline.
+            m_use_overriding_val = false;
+        }
+
+        void write_val(T val)
+        {
+            m_persistant_val = val;
+        }
+
+        void override_val(T val)
+        {
+            m_overriding_val = val;
+            m_use_overriding_val = true;
+        }
+
+        T get_val() const
+        {
+            return (m_use_overriding_val ? m_overriding_val : m_persistant_val);
+        }
+    private:
+        T m_persistant_val;
+        T m_overriding_val;
+        bool m_use_overriding_val{ false };
+    };
+
     // Rising edge event class.
     class Rising_edge_event
     {
@@ -145,8 +182,8 @@ struct Runtime_controllable_data
 
 private:
     // Lookup reading/writing handle for data.
-    std::unordered_map<Controllable_data_label, float_t> m_data_floats{
-        #define X_float(name, def_val)  { CTRL_DATA_LABEL_##name, def_val },
+    std::unordered_map<Controllable_data_label, Overridable_data<float_t>> m_data_floats{
+        #define X_float(name, def_val)  { CTRL_DATA_LABEL_##name, Overridable_data<float_t>(def_val) },
         #define X__bool(name, def_val)
         #define X_reeve(name)
         BT_MODEL_ANIMATOR_CONTROLLABLE_DATA_LIST
@@ -154,9 +191,9 @@ private:
         #undef X__bool
         #undef X_reeve
     };
-    std::unordered_map<Controllable_data_label, bool> m_data_bools{
+    std::unordered_map<Controllable_data_label, Overridable_data<bool>> m_data_bools{
         #define X_float(name, def_val)
-        #define X__bool(name, def_val)  { CTRL_DATA_LABEL_##name, def_val },
+        #define X__bool(name, def_val)  { CTRL_DATA_LABEL_##name, Overridable_data<bool>(def_val) },
         #define X_reeve(name)
         BT_MODEL_ANIMATOR_CONTROLLABLE_DATA_LIST
         #undef X_float
@@ -176,9 +213,11 @@ private:
     #undef BT_MODEL_ANIMATOR_CONTROLLABLE_DATA_LIST
 
 public:
-    float_t& get_float_data_handle(Controllable_data_label label);
-    bool& get_bool_data_handle(Controllable_data_label label);
+    Overridable_data<float_t>& get_float_data_handle(Controllable_data_label label);
+    Overridable_data<bool>& get_bool_data_handle(Controllable_data_label label);
     Rising_edge_event& get_reeve_data_handle(Controllable_data_label label);
+
+    void clear_all_data_overrides();
 };
 
 // Data controls.

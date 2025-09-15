@@ -119,3 +119,11 @@
         - play_sfx_guard_receive_hit
         - play_sfx_deflect_receive_hit
         - 
+
+- Okay, so it seems like there's a pretty good basis for how the timeline should work.
+
+- [ ] FIX: Saving the timeline looks like there's not a proper reset for the model animator after, so fix that.
+- [ ] FIX: Upon renaming ctrl item labels, reload what they're supposed to be doing (same func as when they're loaded in `serialize()`)
+    - The program should crash if the label is not correct upon renaming
+    - [ ] And creating a new ctrl item.
+        - It seems like the data type and stuff is just uninitialized for the creation case so it fails in `get_data_type()`'s unknown switch branch.

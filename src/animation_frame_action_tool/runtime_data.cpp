@@ -65,14 +65,16 @@ BT::anim_frame_action::Runtime_controllable_data::get_data_type(Controllable_dat
     return ctrl_data_type;
 }
 
-float_t& BT::anim_frame_action::Runtime_controllable_data
+BT::anim_frame_action::Runtime_controllable_data::Overridable_data<float_t>&
+BT::anim_frame_action::Runtime_controllable_data
     ::get_float_data_handle(Controllable_data_label label)
 {
     assert(get_data_type(label) == CTRL_DATA_TYPE_FLOAT);
     return m_data_floats.at(label);
 }
 
-bool& BT::anim_frame_action::Runtime_controllable_data
+BT::anim_frame_action::Runtime_controllable_data::Overridable_data<bool>&
+BT::anim_frame_action::Runtime_controllable_data
     ::get_bool_data_handle(Controllable_data_label label)
 {
     assert(get_data_type(label) == CTRL_DATA_TYPE_BOOL);
@@ -85,6 +87,57 @@ BT::anim_frame_action::Runtime_controllable_data
 {
     assert(get_data_type(label) == CTRL_DATA_TYPE_RISING_EDGE_EVENT);
     return m_data_reeves.at(label);
+}
+
+void BT::anim_frame_action::Runtime_controllable_data
+    ::clear_all_data_overrides()
+{   // Populate the overridable data labels.
+    static auto s_get_overridable_data_labels_fn = []() {
+        std::vector<Controllable_data_label> overridable_data_labels;
+
+        auto const& str_labels{ get_all_str_labels() };
+        for (auto const& str_label : str_labels)
+        {
+            auto data_label{ str_label_to_enum(str_label) };
+            switch (get_data_type(data_label))
+            {
+                case CTRL_DATA_TYPE_FLOAT:
+                case CTRL_DATA_TYPE_BOOL:
+                    overridable_data_labels.emplace_back(data_label);
+                    break;
+
+                default:
+                    // Ignore since not overridable label.
+                    break;
+            }
+        }
+
+        return overridable_data_labels;
+    };
+
+    static auto s_overridable_data_labels{ s_get_overridable_data_labels_fn() };
+
+    // Clear the data labels.
+    for (auto data_label : s_overridable_data_labels)
+    {
+        switch (get_data_type(data_label))
+        {
+            case CTRL_DATA_TYPE_FLOAT:
+                get_float_data_handle(data_label)
+                    .clear_overriding();
+                break;
+
+            case CTRL_DATA_TYPE_BOOL:
+                get_bool_data_handle(data_label)
+                    .clear_overriding();
+                break;
+
+            default:
+                // @NOTE: Should not enter this branch bc of prior filtering.
+                assert(false);
+                break;
+        }
+    }
 }
 
 // Data controls.
