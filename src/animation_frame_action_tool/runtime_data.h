@@ -192,7 +192,7 @@ struct Runtime_data_controls
     struct Control_item
     {
         std::string name;
-        Control_item_type type = CTRL_ITEM_TYPE_UNDEFINED;
+        Control_item_type type{ CTRL_ITEM_TYPE_UNDEFINED };
         Controllable_data_label affecting_data_label{ 0 };
 
         uint32_t data_point0;  // Bool, Int, and Float can be encoded into uint32.
