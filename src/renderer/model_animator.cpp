@@ -250,15 +250,17 @@ void BT::Model_animator::update(float_t delta_time)
 
         for (auto const& region : afa_timeline.regions)
         {
-            if (ctrl_items[region.ctrl_item_idx].type
-                == anim_frame_action::CTRL_ITEM_TYPE_EVENT_TRIGGER)
+            auto& ctrl_item{ ctrl_items[region.ctrl_item_idx] };
+            if (ctrl_item.type == anim_frame_action::CTRL_ITEM_TYPE_EVENT_TRIGGER)
             {   // Check if rising edge (start_frame) of event is within prev_time/curr_time.
                 float_t rising_edge_time = region.start_frame
-                                           * Model_joint_animation::k_frames_per_second
+                                           / Model_joint_animation::k_frames_per_second
                                            ;//* state_speed;  <-- @TODO: Include this when it's not editor mode (I think is the best decision)!!!!
                 if (prev_time < rising_edge_time && rising_edge_time <= curr_time)
-                {   // @TODO: Add rising edge event trigger here!!!! @HERE
-                    assert(false);
+                {   // Add rising edge event trigger mark.
+                    m_anim_frame_action_data
+                        .get_reeve_data_handle(ctrl_item.affecting_data_label)
+                        .mark_rising_edge();
                 }
             }
             else
@@ -269,7 +271,7 @@ void BT::Model_animator::update(float_t delta_time)
                                                  Model_joint_animation::FLOOR);
                 if (frame_idx >= region.start_frame && frame_idx < region.end_frame)
                 {   // @TODO: Add override/write mutation here!!! @HERE
-                    assert(false);
+                    // assert(false);
                 }
             }
         }
