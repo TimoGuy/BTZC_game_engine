@@ -3,10 +3,91 @@
 #include "../renderer/mesh.h"
 #include "../renderer/model_animator.h"
 #include <fstream>
+#include <sstream>
 #include <string>
 #include <unordered_map>
 
 
+// Controllable data.
+void BT::anim_frame_action::Runtime_controllable_data::Rising_edge_event
+    ::mark_rising_edge()
+{
+    m_rising_edge_count++;
+}
+
+bool BT::anim_frame_action::Runtime_controllable_data::Rising_edge_event
+    ::check_if_rising_edge_occurred()
+{
+    if (m_rising_edge_count > 0)
+    {
+        m_rising_edge_count--;
+        m__dev_re_ocurred_cooldown = 1.0f;
+        return true;
+    }
+    else
+        return false;
+}
+
+float_t BT::anim_frame_action::Runtime_controllable_data::Rising_edge_event
+    ::update_cooldown_and_fetch_val(float_t delta_time)
+{
+    auto cooldown_prev_copy{ m__dev_re_ocurred_cooldown };
+    m__dev_re_ocurred_cooldown = glm_max(0.0f,
+                                         m__dev_re_ocurred_cooldown
+                                         - delta_time);
+    return cooldown_prev_copy;
+}
+
+BT::anim_frame_action::Runtime_controllable_data::Controllable_data_type
+BT::anim_frame_action::Runtime_controllable_data::get_data_type(Controllable_data_label label)
+{
+    Controllable_data_type ctrl_data_type;
+    if (label > INTERNAL__CTRL_DATA_LABEL_MARKER_BEGIN_FLOAT &&
+        label < INTERNAL__CTRL_DATA_LABEL_MARKER_END_FLOAT_BEGIN_BOOL)
+    {
+        ctrl_data_type = CTRL_DATA_TYPE_FLOAT;
+    }
+    else if (label > INTERNAL__CTRL_DATA_LABEL_MARKER_END_FLOAT_BEGIN_BOOL &&
+                label < INTERNAL__CTRL_DATA_LABEL_MARKER_END_BOOL_BEGIN_REEVE)
+    {
+        ctrl_data_type = CTRL_DATA_TYPE_BOOL;
+    }
+    else if (label > INTERNAL__CTRL_DATA_LABEL_MARKER_END_BOOL_BEGIN_REEVE &&
+                label < INTERNAL__CTRL_DATA_LABEL_MARKER_END_REEVE)
+    {
+        ctrl_data_type = CTRL_DATA_TYPE_RISING_EDGE_EVENT;
+    }
+    else
+    {   // Unknown data type.
+        assert(false);
+        ctrl_data_type = CTRL_DATA_TYPE_UNKNOWN;
+    }
+    return ctrl_data_type;
+}
+
+float_t& BT::anim_frame_action::Runtime_controllable_data
+    ::get_float_data_handle(Controllable_data_label label)
+{
+    assert(get_data_type(label) == CTRL_DATA_TYPE_FLOAT);
+    return m_data_floats.at(label);
+}
+
+bool& BT::anim_frame_action::Runtime_controllable_data
+    ::get_bool_data_handle(Controllable_data_label label)
+{
+    assert(get_data_type(label) == CTRL_DATA_TYPE_BOOL);
+    return m_data_bools.at(label);
+}
+
+BT::anim_frame_action::Runtime_controllable_data::Rising_edge_event&
+BT::anim_frame_action::Runtime_controllable_data
+    ::get_reeve_data_handle(Controllable_data_label label)
+{
+    assert(get_data_type(label) == CTRL_DATA_TYPE_RISING_EDGE_EVENT);
+    return m_data_reeves.at(label);
+}
+
+// Data controls.
 namespace
 {
 
@@ -25,7 +106,7 @@ std::unordered_map<std::string, size_t> compile_anim_name_to_idx_map(
 
 }  // namespace
 
-BT::anim_frame_action::Runtime_data::Runtime_data(std::string const& fname)
+BT::anim_frame_action::Runtime_data_controls::Runtime_data_controls(std::string const& fname)
 {   // @COPYPASTA: See `scene_serialization.cpp` vvvv
     static auto load_to_json_fn = [](std::string const& fname) {
         std::ifstream f{ fname };
@@ -35,7 +116,7 @@ BT::anim_frame_action::Runtime_data::Runtime_data(std::string const& fname)
     serialize(SERIAL_MODE_DESERIALIZE, root);
 }
 
-void BT::anim_frame_action::Runtime_data::serialize(
+void BT::anim_frame_action::Runtime_data_controls::serialize(
     Serialization_mode mode,
     json& node_ref)
 {
@@ -123,27 +204,107 @@ void BT::anim_frame_action::Runtime_data::serialize(
     }
 }
 
-void BT::anim_frame_action::Runtime_data::calculate_all_ctrl_item_types()
+void BT::anim_frame_action::Runtime_data_controls::calculate_all_ctrl_item_types()
 {
     for (auto& ctrl_item : control_items)
     {
-        assert(false);  // @HERE: @TODO: Fill in the ctrl item types once getting the controllable data in here.
+        std::vector<std::string> tokens;
+        {   // Get tokens in ctrl item name.
+            std::stringstream ss(ctrl_item.name);
+            std::string token;
+            while (std::getline(ss, token, ':'))
+            {
+                tokens.emplace_back(token);
+            }
+        }
+
+        {   // Get data label.
+            auto& data_label_str{ tokens[0] };
+            ctrl_item.affecting_data_label =
+                anim_frame_action::Runtime_controllable_data::str_label_to_enum(data_label_str);
+        }
+        {   // Get control type.
+            auto& ctrl_type_str{ tokens[1] };
+            if (ctrl_type_str == "wr")
+                ctrl_item.type = anim_frame_action::CTRL_ITEM_TYPE_DATA_WRITE;
+            else if (ctrl_type_str == "ov")
+                ctrl_item.type = anim_frame_action::CTRL_ITEM_TYPE_DATA_OVERRIDE;
+            else if (ctrl_type_str == "tr")
+                ctrl_item.type = anim_frame_action::CTRL_ITEM_TYPE_EVENT_TRIGGER;
+            else
+            {   // @TODO: Implement this new type of ctrl type.
+                assert(false);
+            }
+        }
+        {   // Get data point(s).
+            static auto s_read_data_pt_fn = [](anim_frame_action::Controllable_data_label data_label,
+                                               std::string const& str_token,
+                                               uint32_t& out_data_point) {
+                // Deduce how to read string token from data label data type.
+                switch (anim_frame_action::Runtime_controllable_data::get_data_type(data_label))
+                {
+                    case anim_frame_action::Runtime_controllable_data::CTRL_DATA_TYPE_FLOAT:
+                    {
+                        float_t token_as_float = std::stof(str_token);
+
+                        static_assert(sizeof(out_data_point) >= sizeof(token_as_float));
+                        *reinterpret_cast<float_t*>(&out_data_point) = token_as_float;
+                        break;
+                    }
+
+                    case anim_frame_action::Runtime_controllable_data::CTRL_DATA_TYPE_BOOL:
+                    {
+                        bool token_as_bool{ str_token == "true" ? true : false };
+
+                        static_assert(sizeof(out_data_point) >= sizeof(token_as_bool));
+                        *reinterpret_cast<bool*>(&out_data_point) = token_as_bool;
+                        break;
+                    }
+
+                    default:
+                        // Unsupported data type.
+                        assert(false);
+                        out_data_point = 0;
+                        break;
+                }
+            };
+            switch (ctrl_item.type)
+            {
+                case anim_frame_action::CTRL_ITEM_TYPE_DATA_WRITE:
+                case anim_frame_action::CTRL_ITEM_TYPE_DATA_OVERRIDE:
+                    // Read one data point.
+                    s_read_data_pt_fn(ctrl_item.affecting_data_label,
+                                      tokens[2],
+                                      ctrl_item.data_point0);
+                    break;
+
+                case anim_frame_action::CTRL_ITEM_TYPE_EVENT_TRIGGER:
+                    // Do nothing.
+                    break;
+
+                default:
+                    // @TODO: Implement this new type of ctrl type.
+                    assert(false);
+                    break;
+            }
+        }
     }
 }
 
+// Bank of data controls.
 void BT::anim_frame_action::Bank::emplace(std::string const& name,
-                                          Runtime_data&& runtime_state)
+                                          Runtime_data_controls&& runtime_state)
 {
     s_runtime_states.emplace(name, std::move(runtime_state));
 }
 
 void BT::anim_frame_action::Bank::replace(std::string const& name,
-                                          Runtime_data&& runtime_state)
+                                          Runtime_data_controls&& runtime_state)
 {
     s_runtime_states.at(name) = std::move(runtime_state);
 }
 
-BT::anim_frame_action::Runtime_data const&
+BT::anim_frame_action::Runtime_data_controls const&
 BT::anim_frame_action::Bank::get(std::string const& name)
 {
     return s_runtime_states.at(name);

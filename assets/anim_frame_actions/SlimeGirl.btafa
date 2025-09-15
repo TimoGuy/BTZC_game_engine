@@ -155,16 +155,16 @@
     "animated_model_name": "test_gltf",
     "control_items": [
         {
-            "name": "JIJI"
+            "name": "model_opacity:wr:0.42069"
         },
         {
-            "name": "Jojos"
+            "name": "model_opacity:ov:3.1415926535"
         },
         {
-            "name": "Hellp me!!"
+            "name": "is_parry_active:ov:true"
         },
         {
-            "name": "Disable hitbox 1"
+            "name": "play_sfx_footstep:tr"
         }
     ]
 }

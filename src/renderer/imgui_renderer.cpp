@@ -465,7 +465,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                 delete anim_frame_action::s_editor_state.working_timeline_copy;
 
             anim_frame_action::s_editor_state.working_timeline_copy =
-                new anim_frame_action::Runtime_data(
+                new anim_frame_action::Runtime_data_controls(
                     anim_frame_action::Bank::get(s_all_timeline_names[s_selected_timeline_idx]));
             assert(anim_frame_action::s_editor_state.working_timeline_copy != nullptr);
 
@@ -484,33 +484,37 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
     ImGui::Begin("Timeline controllable data");
     if (anim_frame_action::s_editor_state.working_model_animator != nullptr)
     {
-        auto const& all_controllable_data_strs{ Model_animator::get_all_str_labels() };
+        auto const& all_controllable_data_strs{ anim_frame_action::Runtime_controllable_data::get_all_str_labels() };
         for (auto& data_str : all_controllable_data_strs)
         {
-            auto data_label{ Model_animator::str_label_to_enum(data_str) };
-            switch ( Model_animator::get_data_type(data_label))
+            auto data_label{ anim_frame_action::Runtime_controllable_data::str_label_to_enum(data_str) };
+            switch ( anim_frame_action::Runtime_controllable_data::get_data_type(data_label))
             {
-                case Model_animator::CTRL_DATA_TYPE_FLOAT:
+                case anim_frame_action::Runtime_controllable_data::CTRL_DATA_TYPE_FLOAT:
                     ImGui::Text("%s : %0.4f",
                                 data_str.c_str(),
                                 anim_frame_action::s_editor_state.working_model_animator
-                                    ->get_float_data_handle(data_label));
+                                    ->get_anim_frame_action_data_handle()
+                                    .get_float_data_handle(data_label));
                     break;
 
-                case Model_animator::CTRL_DATA_TYPE_BOOL:
+                case anim_frame_action::Runtime_controllable_data::CTRL_DATA_TYPE_BOOL:
                     ImGui::Text("%s : %s",
                                 data_str.c_str(),
                                 (anim_frame_action::s_editor_state.working_model_animator
-                                     ->get_bool_data_handle(data_label)
+                                     ->get_anim_frame_action_data_handle()
+                                    .get_bool_data_handle(data_label)
                                  ? "TRUE"
                                  : "FALSE"));
                     break;
 
-                case Model_animator::CTRL_DATA_TYPE_RISING_EDGE_EVENT:
+                case anim_frame_action::Runtime_controllable_data::CTRL_DATA_TYPE_RISING_EDGE_EVENT:
                 {
                     ImGui::Text("%s : ", data_str.c_str());
                     ImGui::SameLine();
-                    auto& reeve_handle{ anim_frame_action::s_editor_state.working_model_animator->get_reeve_data_handle(data_label) };
+                    auto& reeve_handle{ anim_frame_action::s_editor_state.working_model_animator
+                                            ->get_anim_frame_action_data_handle()
+                                            .get_reeve_data_handle(data_label) };
 
                     // >0.0: Trigger has been set off, and returns to 0.0.
                     float_t trigger_lerp_val{ reeve_handle.update_cooldown_and_fetch_val(delta_time) };
@@ -865,7 +869,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                         RIGHT_DRAG,
                     };
                     Select_state sel_state{ Select_state::UNSELECTED };
-                    using Region = anim_frame_action::Runtime_data::Animation_frame_action_timeline::Region;
+                    using Region = anim_frame_action::Runtime_data_controls::Animation_frame_action_timeline::Region;
                     Region* sel_reg{ nullptr };
                     float_t drag_x_amount{ 0.0f };
                     bool prev_lmb_pressed{ false };

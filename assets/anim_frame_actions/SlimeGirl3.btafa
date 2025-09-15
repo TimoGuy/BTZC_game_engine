@@ -1,10 +1,10 @@
 {
     "animated_model_name": "test_gltf",
     "control_items": [
-        { "name": "JIJI" },
-        { "name": "BF5" },
-        { "name": "Nlerp to testicular torsion" },
-        { "name": "Disable hitbox 1" }
+        { "name": "model_opacity:wr:0.42069" },
+        { "name": "model_opacity:ov:3.1415926535" },
+        { "name": "is_parry_active:ov:true" },
+        { "name": "play_sfx_footstep:tr" }
     ],
     "anim_frame_action_timelines": [
         {

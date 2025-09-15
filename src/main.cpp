@@ -180,7 +180,7 @@ int32_t main()
     {
         BT::anim_frame_action::Bank::emplace(
             afa_name,  // @NOTE: Key must match the file name stem!!!!! This is very very important.  -Thea 2025/08/30
-            BT::anim_frame_action::Runtime_data(
+            BT::anim_frame_action::Runtime_data_controls(
                 BTZC_GAME_ENGINE_ASSET_ANIM_FRAME_ACTIONS_PATH + afa_name + ".btafa"));
     }
 

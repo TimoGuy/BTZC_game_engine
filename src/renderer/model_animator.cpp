@@ -209,11 +209,11 @@ size_t BT::Model_animator::get_num_model_animations()
 
 void BT::Model_animator::configure_animator(
     std::vector<Animator_state>&& animator_states,
-    anim_frame_action::Runtime_data const* anim_frame_action_runtime_state)
+    anim_frame_action::Runtime_data_controls const* anim_frame_action_runtime_state)
 {
     // Idk why I put this into a separate method instead of in the constructor but hey, here we are.
     m_animator_states = std::move(animator_states);
-    m_anim_frame_action_runtime_state = anim_frame_action_runtime_state;
+    m_anim_frame_action_controls = anim_frame_action_runtime_state;
 }
 
 void BT::Model_animator::change_state_idx(uint32_t to_state)
@@ -233,48 +233,50 @@ void BT::Model_animator::set_time(float_t time)
 }
 
 void BT::Model_animator::update(float_t delta_time)
-{   // Tick forward 
+{   // Tick forward.
     float_t state_speed{ m_animator_states[m_current_state_idx].speed };
     m_time += delta_time * state_speed;
 
-    // Copy current and previous times.
-    float_t prev_time{ m_prev_time };
-    float_t curr_time{ m_time };
+    if (m_anim_frame_action_controls != nullptr)
+    {   // Copy current and previous times.
+        float_t prev_time{ m_prev_time };
+        float_t curr_time{ m_time };
 
-    // Process anim frame action runtime.
-    auto& afa_timeline{ m_anim_frame_action_runtime_state
-                        ->anim_frame_action_timelines[
-                            m_animator_states[m_current_state_idx].animation_idx] };
-    auto& ctrl_items{ m_anim_frame_action_runtime_state->control_items };
+        // Process anim frame action runtime.
+        auto& afa_timeline{ m_anim_frame_action_controls
+                            ->anim_frame_action_timelines[
+                                m_animator_states[m_current_state_idx].animation_idx] };
+        auto& ctrl_items{ m_anim_frame_action_controls->control_items };
 
-    for (auto const& region : afa_timeline.regions)
-    {
-        if (ctrl_items[region.ctrl_item_idx].type
-            == anim_frame_action::CTRL_ITEM_TYPE_EVENT_TRIGGER)
-        {   // Check if rising edge (start_frame) of event is within prev_time/curr_time.
-            float_t rising_edge_time = region.start_frame
-                                       * Model_joint_animation::k_frames_per_second
-                                       ;//* state_speed;  <-- @TODO: Include this when it's not editor mode (I think is the best decision)!!!!
-            if (prev_time < rising_edge_time && rising_edge_time <= curr_time)
-            {   // @TODO: Add rising edge event trigger here!!!! @HERE
-                assert(false);
+        for (auto const& region : afa_timeline.regions)
+        {
+            if (ctrl_items[region.ctrl_item_idx].type
+                == anim_frame_action::CTRL_ITEM_TYPE_EVENT_TRIGGER)
+            {   // Check if rising edge (start_frame) of event is within prev_time/curr_time.
+                float_t rising_edge_time = region.start_frame
+                                           * Model_joint_animation::k_frames_per_second
+                                           ;//* state_speed;  <-- @TODO: Include this when it's not editor mode (I think is the best decision)!!!!
+                if (prev_time < rising_edge_time && rising_edge_time <= curr_time)
+                {   // @TODO: Add rising edge event trigger here!!!! @HERE
+                    assert(false);
+                }
+            }
+            else
+            {   // Check if time within frame bounds.
+                auto frame_idx = m_model_animations[m_animator_states[m_current_state_idx].animation_idx]
+                                 .calc_frame_idx(curr_time,
+                                                 m_animator_states[m_current_state_idx].loop,
+                                                 Model_joint_animation::FLOOR);
+                if (frame_idx >= region.start_frame && frame_idx < region.end_frame)
+                {   // @TODO: Add override/write mutation here!!! @HERE
+                    assert(false);
+                }
             }
         }
-        else
-        {   // Check if time within frame bounds.
-            auto frame_idx = m_model_animations[m_animator_states[m_current_state_idx].animation_idx]
-                             .calc_frame_idx(curr_time,
-                                             m_animator_states[m_current_state_idx].loop,
-                                             Model_joint_animation::FLOOR);
-            if (frame_idx >= region.start_frame && frame_idx < region.end_frame)
-            {   // @TODO: Add override/write mutation here!!! @HERE
-                assert(false);
-            }
-        }
+
+        // Update prev time.
+        m_prev_time = m_time.load();
     }
-
-    // Update prev time.
-    m_prev_time = m_time.load();
 }
 
 void BT::Model_animator::calc_anim_pose(std::vector<mat4s>& out_joint_matrices) const
@@ -294,4 +296,10 @@ void BT::Model_animator::get_anim_floored_frame_pose(std::vector<mat4s>& out_joi
                             Model_joint_animation::FLOOR) };
     m_model_animations[anim_state.animation_idx]
         .get_joint_matrices_at_frame(frame_idx, out_joint_matrices);
+}
+
+BT::anim_frame_action::Runtime_controllable_data&
+BT::Model_animator::get_anim_frame_action_data_handle()
+{
+    return m_anim_frame_action_data;
 }

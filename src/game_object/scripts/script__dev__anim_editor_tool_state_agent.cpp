@@ -121,11 +121,13 @@ void BT::Scripts::Script__dev__anim_editor_tool_state_agent::on_pre_render(float
         m_working_anim_idx = anim_frame_action::s_editor_state.selected_anim_idx;
         if (anim_frame_action::s_editor_state.working_model_animator)
         {
+            assert(anim_frame_action::s_editor_state.working_timeline_copy != nullptr);
+
             anim_frame_action::s_editor_state.working_model_animator
                 ->configure_animator({ { m_working_anim_idx,
                                          0.0f,
                                          false } },
-                                     nullptr);
+                                     anim_frame_action::s_editor_state.working_timeline_copy);
             anim_frame_action::s_editor_state.selected_anim_num_frames =
                 anim_frame_action::s_editor_state.working_model_animator
                 ->get_model_animation_by_idx(m_working_anim_idx)
@@ -143,31 +145,32 @@ void BT::Scripts::Script__dev__anim_editor_tool_state_agent::on_pre_render(float
         // Process all controllable datas.
         // @TODO: Get all of them in here doing meaningful things.
         //        @NOTE: Currently, it's just checking for event triggers.
-        static std::vector<Model_animator::Controllable_data_label> s_all_data_labels;
+        static std::vector<anim_frame_action::Controllable_data_label> s_all_data_labels;
         if (s_all_data_labels.empty())
         {   // Add in data labels.
-            auto const& all_controllable_data_strs{ Model_animator::get_all_str_labels() };
+            auto const& all_controllable_data_strs{ anim_frame_action::Runtime_controllable_data::get_all_str_labels() };
             for (auto& data_str : all_controllable_data_strs)
             {
-                auto data_label{ Model_animator::str_label_to_enum(data_str) };
+                auto data_label{ anim_frame_action::Runtime_controllable_data::str_label_to_enum(data_str) };
                 s_all_data_labels.emplace_back(data_label);
             }
         }
 
         for (auto label : s_all_data_labels)
         {
-            switch (Model_animator::get_data_type(label))
+            switch (anim_frame_action::Runtime_controllable_data::get_data_type(label))
             {
-                case Model_animator::CTRL_DATA_TYPE_FLOAT:
+                case anim_frame_action::Runtime_controllable_data::CTRL_DATA_TYPE_FLOAT:
                     break;
 
-                case Model_animator::CTRL_DATA_TYPE_BOOL:
+                case anim_frame_action::Runtime_controllable_data::CTRL_DATA_TYPE_BOOL:
                     break;
 
-                case Model_animator::CTRL_DATA_TYPE_RISING_EDGE_EVENT:
+                case anim_frame_action::Runtime_controllable_data::CTRL_DATA_TYPE_RISING_EDGE_EVENT:
                     // Activate any events.
                     (void)anim_frame_action::s_editor_state.working_model_animator
-                        ->get_reeve_data_handle(label)
+                        ->get_anim_frame_action_data_handle()
+                        .get_reeve_data_handle(label)
                         .check_if_rising_edge_occurred();
                     break;
 

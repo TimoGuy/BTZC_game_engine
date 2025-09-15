@@ -13,11 +13,11 @@ class Model_animator;
 namespace anim_frame_action
 {
 
-struct Runtime_data;
+struct Runtime_data_controls;
 
 struct Editor_state
 {
-    Runtime_data* working_timeline_copy{ nullptr };  // Idc if this is a memory leak (raw pointer).  -Thea 2025/08/30
+    Runtime_data_controls* working_timeline_copy{ nullptr };  // Idc if this is a memory leak (raw pointer).  -Thea 2025/08/30
     Model const* working_model{ nullptr };
     Model_animator* working_model_animator{ nullptr };
     std::map<std::string, size_t> anim_name_to_idx_map;
