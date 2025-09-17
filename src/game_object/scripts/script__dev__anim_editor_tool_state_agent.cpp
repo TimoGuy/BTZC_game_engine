@@ -46,6 +46,8 @@ public:
     Model const* m_prev_working_model{ nullptr };
     uint32_t m_working_anim_idx{ (uint32_t)-1 };
     size_t m_prev_anim_frame{ (size_t)-1 };
+
+    anim_frame_action::Runtime_data_controls const* m_prev_working_timeline_copy{ nullptr };
 };
 
 }  // namespace BT
@@ -77,6 +79,7 @@ void BT::Scripts::Script__dev__anim_editor_tool_state_agent::on_pre_render(float
     if (m_prev_working_model != anim_frame_action::s_editor_state.working_model)
     {
         anim_frame_action::s_editor_state.working_model_animator = nullptr;
+        m_prev_working_timeline_copy = nullptr;  // To ensure working timeline and animators get realigned.
 
         // Check if new model is deformable by decorating an animator.
         auto const& new_model{ *anim_frame_action::s_editor_state.working_model };
@@ -113,14 +116,22 @@ void BT::Scripts::Script__dev__anim_editor_tool_state_agent::on_pre_render(float
         m_prev_working_model = anim_frame_action::s_editor_state.working_model;
     }
 
+    bool reconfigure_animator_needed{ false };
+
     if (m_working_anim_idx != anim_frame_action::s_editor_state.selected_anim_idx)
     {   // Reset prev anim frame.
         m_prev_anim_frame = (size_t)-1;
 
         // Configure deformed model animator to new anim idx.
         m_working_anim_idx = anim_frame_action::s_editor_state.selected_anim_idx;
-        if (anim_frame_action::s_editor_state.working_model_animator)
-        {
+        reconfigure_animator_needed = true;
+    }
+
+    if (anim_frame_action::s_editor_state.working_model_animator)
+    {
+        if (reconfigure_animator_needed ||
+            m_prev_working_timeline_copy != anim_frame_action::s_editor_state.working_timeline_copy)
+        {   // Reconfigure animator.
             assert(anim_frame_action::s_editor_state.working_timeline_copy != nullptr);
 
             anim_frame_action::s_editor_state.working_model_animator
@@ -132,11 +143,11 @@ void BT::Scripts::Script__dev__anim_editor_tool_state_agent::on_pre_render(float
                 anim_frame_action::s_editor_state.working_model_animator
                 ->get_model_animation_by_idx(m_working_anim_idx)
                 .get_num_frames();
-        }
-    }
 
-    if (anim_frame_action::s_editor_state.working_model_animator)
-    {   // Update animator frame.
+            m_prev_working_timeline_copy = anim_frame_action::s_editor_state.working_timeline_copy;
+        }
+        
+        // Update animator frame.
         auto current_frame_clamped{ anim_frame_action::s_editor_state.anim_current_frame };  // @NOTE: Assumed clamped.
         anim_frame_action::s_editor_state.working_model_animator
             ->set_time(current_frame_clamped

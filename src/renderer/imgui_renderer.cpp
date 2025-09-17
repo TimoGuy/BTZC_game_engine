@@ -625,12 +625,16 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                 }
                 ImGui::InputText("Name##new_ctrl_item_popup", &s_new_ctrl_item_name_buffer);
 
-                if (ImGui::Button("Confirm##rename_popup") ||
+                if (ImGui::Button("Confirm##new_ctrl_item_popup") ||
                     m_input_handler->is_key_pressed(BT_KEY_ENTER))
                 {   // Create new ctrl item.
                     auto& afa_ctrl_items{ anim_frame_action::s_editor_state
                                               .working_timeline_copy->control_items };
                     afa_ctrl_items.emplace_back(s_new_ctrl_item_name_buffer);
+
+                    // Ctrl items type calculation.
+                    anim_frame_action::s_editor_state
+                        .working_timeline_copy->calculate_all_ctrl_item_types();
 
                     anim_frame_action::s_editor_state.is_working_timeline_dirty = true;
                     ImGui::CloseCurrentPopup();
@@ -638,7 +642,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
 
                 ImGui::SameLine();
 
-                if (ImGui::Button("Cancel##rename_popup") ||
+                if (ImGui::Button("Cancel##new_ctrl_item_popup") ||
                     m_input_handler->is_key_pressed(BT_KEY_ESCAPE))
                 {   // Cancel!!!
                     ImGui::CloseCurrentPopup();
@@ -785,6 +789,11 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                         m_input_handler->is_key_pressed(BT_KEY_ENTER))
                     {   // Submit rename.
                         renaming_afa_ctrl_item.name = std::move(s_rename_buffer);
+
+                        // Ctrl items type calculation.
+                        anim_frame_action::s_editor_state
+                            .working_timeline_copy->calculate_all_ctrl_item_types();
+
                         anim_frame_action::s_editor_state.is_working_timeline_dirty = true;
                         ImGui::CloseCurrentPopup();
                     }

@@ -209,11 +209,11 @@ size_t BT::Model_animator::get_num_model_animations()
 
 void BT::Model_animator::configure_animator(
     std::vector<Animator_state>&& animator_states,
-    anim_frame_action::Runtime_data_controls const* anim_frame_action_runtime_state)
+    anim_frame_action::Runtime_data_controls const* anim_frame_action_controls)
 {
     // Idk why I put this into a separate method instead of in the constructor but hey, here we are.
     m_animator_states = std::move(animator_states);
-    m_anim_frame_action_controls = anim_frame_action_runtime_state;
+    m_anim_frame_action_controls = anim_frame_action_controls;
 }
 
 void BT::Model_animator::change_state_idx(uint32_t to_state)

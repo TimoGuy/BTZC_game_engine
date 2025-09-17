@@ -48,12 +48,12 @@ BT::anim_frame_action::Runtime_controllable_data::get_data_type(Controllable_dat
         ctrl_data_type = CTRL_DATA_TYPE_FLOAT;
     }
     else if (label > INTERNAL__CTRL_DATA_LABEL_MARKER_END_FLOAT_BEGIN_BOOL &&
-                label < INTERNAL__CTRL_DATA_LABEL_MARKER_END_BOOL_BEGIN_REEVE)
+             label < INTERNAL__CTRL_DATA_LABEL_MARKER_END_BOOL_BEGIN_REEVE)
     {
         ctrl_data_type = CTRL_DATA_TYPE_BOOL;
     }
     else if (label > INTERNAL__CTRL_DATA_LABEL_MARKER_END_BOOL_BEGIN_REEVE &&
-                label < INTERNAL__CTRL_DATA_LABEL_MARKER_END_REEVE)
+             label < INTERNAL__CTRL_DATA_LABEL_MARKER_END_REEVE)
     {
         ctrl_data_type = CTRL_DATA_TYPE_RISING_EDGE_EVENT;
     }

@@ -100,7 +100,7 @@ public:
     };
     void configure_animator(
         std::vector<Animator_state>&& animator_states,
-        anim_frame_action::Runtime_data_controls const* anim_frame_action_runtime_state);
+        anim_frame_action::Runtime_data_controls const* anim_frame_action_controls);
 
     void change_state_idx(uint32_t to_state);
     void set_time(float_t time);

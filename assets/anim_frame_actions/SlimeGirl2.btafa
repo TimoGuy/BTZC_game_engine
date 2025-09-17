@@ -2,7 +2,18 @@
     "anim_frame_action_timelines": [
         {
             "anim_name": "0_TPose",
-            "regions": []
+            "regions": [
+                {
+                    "ctrl_item_idx": 0,
+                    "end_frame": 7,
+                    "start_frame": 3
+                },
+                {
+                    "ctrl_item_idx": 1,
+                    "end_frame": 5,
+                    "start_frame": 1
+                }
+            ]
         },
         {
             "anim_name": "Attack_Stone_Charge",
