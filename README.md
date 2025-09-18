@@ -514,7 +514,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
     - [x] Animation authoring tool window. (So it lists out all the animations and one can be clicked to be edited and events and variable override times can get added to the animation. The variable overrides and events are integer frames.)
     - [ ] Use simple anim dude and create fighting animation movesets.
 
-1. Unity to this engine migration.
+1. ~~Unity to this engine migration.~~
     - [x] Import scene as yaml structure.
         - Using `python:unityparser`
     - [ ] Get gameobject structure figured out.
