@@ -60,7 +60,7 @@ public:
     }
 
     ~Script_hitcapsule()
-    {   // Remove hitcapsule groups to solver service.
+    {   // Remove hitcapsule groups from solver service.
         auto& hitcapsule_solver{
             service_finder::find_service<Hitcapsule_group_overlap_solver>() };
 
