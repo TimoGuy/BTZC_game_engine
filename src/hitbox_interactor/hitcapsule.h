@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../uuid/uuid.h"
-#include "cglm/cglm.h"
 #include "cglm/types-struct.h"
 
 #include <string>
@@ -11,6 +10,8 @@
 
 namespace BT
 {
+
+class Model_animator;
 
 struct Hitcapsule
 {
@@ -25,6 +26,9 @@ struct Hitcapsule
     size_t  calcd_bone_mat_idx{ (size_t)-1 };
     size_t  calcd_bone_mat_idx_2{ (size_t)-1 };  // -1 means same as `calcd_bone_mat_idx`.
     float_t calcd_orig_pts_dist;
+
+    void init_calc_info(Model_animator* animator);
+    void calc_orig_pt_distance();
 };
 
 class Hitcapsule_group
@@ -43,7 +47,7 @@ public:
     void set_enabled(bool enabled);
     bool is_enabled();
     Type get_type();
-    std::vector<Hitcapsule> const& get_capsules();
+    std::vector<Hitcapsule>& get_capsules();
 
 private:
     bool m_enabled;
@@ -58,6 +62,7 @@ public:
 
     UUID add_group(Hitcapsule_group const& group);
     void remove_group(UUID group_id);
+
     void update_overlaps();
 
 private:

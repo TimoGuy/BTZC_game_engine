@@ -1,7 +1,7 @@
 #include "logger.h"
 #include "scripts.h"
 
-// #include "../renderer/renderer.h"
+#include "../renderer/renderer.h"
 // #include "../renderer/mesh.h"
 // #include "../renderer/model_animator.h"
 // #include "../animation_frame_action_tool/editor_state.h"
@@ -28,7 +28,24 @@ class Script_hitcapsule : public Script_ifc
 public:
     Script_hitcapsule(json const& node_ref)
     {
+        m_rend_obj_key = UUID_helper::to_UUID(node_ref["render_obj"]);
         deserialize_into_hitcapsule_groups(node_ref);
+
+        // Calc hitcapsule animator.
+        auto& rend_obj_pool{ service_finder::find_service<Renderer>()
+                                 .get_render_object_pool() };
+        auto rend_obj{ rend_obj_pool
+                           .checkout_render_obj_by_key({ m_rend_obj_key })
+                           .front() };
+        auto animator{ rend_obj->get_model_animator() };
+
+        for (auto& group : m_hitcapsule_grps)
+        for (auto& capsule : group.get_capsules())
+        {
+            capsule.init_calc_info(animator);
+        }
+
+        rend_obj_pool.return_render_objs({ rend_obj });
 
         // Add hitcapsule groups to solver service.
         auto& hitcapsule_solver{
@@ -60,6 +77,7 @@ public:
     void serialize_datas(json& node_ref) override;
 
     // Script data.
+    UUID m_rend_obj_key;
     std::vector<Hitcapsule_group> m_hitcapsule_grps;
     std::vector<UUID> m_hitcapsule_grp_uuids;
 
@@ -98,7 +116,10 @@ void BT::Scripts::Script_hitcapsule::deserialize_into_hitcapsule_groups(json con
 }
 
 void BT::Scripts::Script_hitcapsule::serialize_datas(json& node_ref)
-{   // Access list of hitcapsule groups.
+{
+    node_ref["render_obj"] = UUID_helper::to_pretty_repr(m_rend_obj_key);
+
+    // Access list of hitcapsule groups.
     for (auto& capsule_group : m_hitcapsule_grps)
     {   // Serialize capsules.
         json capsule_group_json = {};

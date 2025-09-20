@@ -127,3 +127,8 @@
     - The program should crash if the label is not correct upon renaming
     - [x] And creating a new ctrl item.
         - It seems like the data type and stuff is just uninitialized for the creation case so it fails in `get_data_type()`'s unknown switch branch.
+
+- Mmmm I'm doing all this work to make it so that the hitcapsule script can add hitcapsules to a game object.
+    - But it feels like this stuff should be controlled by the btafa file, not this.
+    - Maybe add ability to create scripts dynamically?
+    - Then add btafa file can create these groups dynamically.  <---- This.

@@ -92,6 +92,8 @@ public:
     Model_joint_animation const& get_model_animation_by_idx(size_t idx);
     size_t get_num_model_animations();
 
+    Model_skin const& get_model_skin();
+
     struct Animator_state
     {
         uint32_t animation_idx;
@@ -111,13 +113,15 @@ public:
     anim_frame_action::Runtime_controllable_data& get_anim_frame_action_data_handle();
 
 private:
+    std::vector<Model_joint_animation> const& m_model_animations;
+    Model_skin const& m_model_skin;
+
     // @TEMP: Super simple animator right here for now.
     std::atomic_uint32_t m_current_state_idx{ 0 };
     std::atomic<float_t> m_time{ 0.0f };
     std::atomic<float_t> m_prev_time{ std::numeric_limits<float_t>::lowest() };  // For rising edge events.
     ///////////////////////////////////////////////////
 
-    std::vector<Model_joint_animation> const& m_model_animations;
     std::vector<Animator_state> m_animator_states;
     anim_frame_action::Runtime_data_controls const* m_anim_frame_action_controls{ nullptr };
     anim_frame_action::Runtime_controllable_data m_anim_frame_action_data;

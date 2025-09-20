@@ -194,6 +194,7 @@ void BT::Model_joint_animation::get_joint_matrices_at_frame(
 
 BT::Model_animator::Model_animator(Model const& model)
     : m_model_animations{ model.m_animations }
+    , m_model_skin{ model.m_model_skin }
 {
 }
 
@@ -205,6 +206,11 @@ BT::Model_joint_animation const& BT::Model_animator::get_model_animation_by_idx(
 size_t BT::Model_animator::get_num_model_animations()
 {
     return m_model_animations.size();
+}
+
+BT::Model_skin const& BT::Model_animator::get_model_skin()
+{
+    return m_model_skin;
 }
 
 void BT::Model_animator::configure_animator(
