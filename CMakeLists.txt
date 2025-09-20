@@ -54,8 +54,8 @@ add_subdirectory(third_party/JoltPhysics/Build)
 add_subdirectory(third_party/json)
 add_subdirectory(third_party/stduuid)
 
-# Executable build.
-add_executable(${PROJECT_NAME}
+# Main source files.
+set(MAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/animation_frame_action_tool/editor_state.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/animation_frame_action_tool/editor_state.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/animation_frame_action_tool/runtime_data.cpp
@@ -138,10 +138,16 @@ add_executable(${PROJECT_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/src/uuid/uuid.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/btzc_game_engine.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
-    
+)
+
+# Executable build.
+add_executable(${PROJECT_NAME}
+    # Main source files.
+    ${MAIN_SOURCES}
+
     # OpenGL source files.
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glad/src/glad.c
-    
+
     # Dear ImGui implementation source files.
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/imgui/backends/imgui_impl_glfw.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/imgui/backends/imgui_impl_glfw.h

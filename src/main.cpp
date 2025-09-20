@@ -5,6 +5,7 @@
 #include "renderer/camera.h"
 #include "game_object/game_object.h"
 #include "game_object/scripts/scripts.h"
+#include "hitbox_interactor/hitcapsule.h"
 #include "input_handler/input_handler.h"
 #include "Jolt/Jolt.h"  // @DEBUG
 #include "Jolt/Math/Real.h"  // @DEBUG
@@ -226,6 +227,9 @@ int32_t main()
     // static_level_terrain_rend_obj.assign_generated_uuid();
     // render_object_pool.emplace(std::move(static_level_terrain_rend_obj));
 
+    // Hitcapsule solver.
+    BT::Hitcapsule_group_overlap_solver hitcapsule_solver;
+
     // Game objects.
     BT::Game_object_pool game_object_pool;
     game_object_pool.set_callback_fn([&]() {
@@ -340,7 +344,11 @@ int32_t main()
                 game_obj->run_pre_physics_scripts(main_physics_engine.k_simulation_delta_time);
             }
 
+            // Update physics.
             main_physics_engine.update_physics();
+
+            // Update overlap solver.
+            hitcapsule_solver.update_overlaps();
         }
 
         main_physics_engine.calc_interpolation_alpha();
