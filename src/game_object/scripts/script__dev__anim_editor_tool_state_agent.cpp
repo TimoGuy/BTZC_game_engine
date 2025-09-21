@@ -96,7 +96,7 @@ void BT::Scripts::Script__dev__anim_editor_tool_state_agent::on_pre_render(float
 
         if (num_anims > 0)
         {   // Create deformed model with animator.
-            rend_obj.set_deformed_model(std::make_unique<Deformed_model>(new_model));
+            rend_obj.set_deformed_model(std::make_unique<Deformed_model>(new_model, /*new_model.get_model_name() + */));  // @TODO: @NOCHECKIN: @FIXME: This needs to get rewritten with anim states.
 
             // Force animator to get rebuilt immediately.
             m_working_anim_idx = (uint32_t)-1;

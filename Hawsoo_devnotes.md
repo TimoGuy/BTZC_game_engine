@@ -128,6 +128,9 @@
     - [x] And creating a new ctrl item.
         - It seems like the data type and stuff is just uninitialized for the creation case so it fails in `get_data_type()`'s unknown switch branch.
 
+
+## Make custom hit/hurt capsule physics implementation.
+
 - Mmmm I'm doing all this work to make it so that the hitcapsule script can add hitcapsules to a game object.
     - But it feels like this stuff should be controlled by the btafa file, not this.
     - Maybe add ability to create scripts dynamically?
@@ -160,3 +163,7 @@ while (running_game_loop)
     // ...
 }
 ```
+
+
+- [ ] Rewrite the `script__dev_anim_editor_tool_state_agent.cpp` to use animator states and templates instead of anim indices.
+- [ ] I think ImGui for the editor also needs to get reworked bc it's probably using the animator indices too.
