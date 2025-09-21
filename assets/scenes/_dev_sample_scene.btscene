@@ -167,8 +167,9 @@
                 "guid": "fa2a0c0c-cfd4-47a7-b4e7-01dbbd3b3537",
                 "render_layer": 1,
                 "renderable": {
-                    "model_name": "test_gltf",
-                    "type": "Deformed_model"
+                    "model_name": "SlimeGirl",
+                    "type": "Deformed_model",
+                    "animator_template": "SlimeGirl.btanitor"
                 }
             },
             "scripts": [],

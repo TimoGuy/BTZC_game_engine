@@ -14,6 +14,7 @@
 #include "physics_engine/physics_engine.h"
 #include "physics_engine/physics_object.h"
 #include "physics_engine/raycast_helper.h"
+#include "renderer/animator_template.h"
 #include "renderer/imgui_renderer.h"  // @DEBUG
 #include "renderer/material.h"  // @DEBUG
 #include "renderer/material_impl_debug_lines.h"  // @DEBUG
@@ -159,13 +160,16 @@ int32_t main()
         make_unique<BT::Model>(BTZC_GAME_ENGINE_ASSET_MODEL_PATH "probuilder_example.obj",
                                "textured_material"));
     BT::Model_bank::emplace_model(  // @NOCHECKIN: REMOVE THIS MODEL ONCE DONE TESTING SKINNING (and remove from `s_scene_as_json`).
-        "test_gltf",
+        "SlimeGirl",
         make_unique<BT::Model>(BTZC_GAME_ENGINE_ASSET_MODEL_PATH "SlimeGirl.glb",
                                "textured_material"));
     // BT::Model_bank::emplace_model(  // @NOCHECKIN: REMOVE THIS MODEL ONCE DONE TESTING SKINNING (and remove from `s_scene_as_json`).
     //     "test_gltf",
     //     make_unique<BT::Model>(BTZC_GAME_ENGINE_ASSET_MODEL_PATH "Leever.glb",
     //                            "textured_material"));
+
+    // Animator templates.
+    BT::Animator_template_bank main_anim_template_bank;
 
     // Animation frame action runtime data.
     // "anim_frame_action_runtime_datas": [

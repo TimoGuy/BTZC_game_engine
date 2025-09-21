@@ -91,6 +91,7 @@ public:
 
     Model_joint_animation const& get_model_animation_by_idx(size_t idx);
     size_t get_num_model_animations();
+    size_t get_model_animation_idx(std::string anim_name);
 
     Model_skin const& get_model_skin();
 
@@ -100,8 +101,9 @@ public:
         float_t speed{ 1.0f };
         bool loop{ true };
     };
-    void configure_animator(
-        std::vector<Animator_state>&& animator_states,
+    void configure_animator_states(
+        std::vector<Animator_state>&& animator_states);
+    void configure_anim_frame_action_controls(
         anim_frame_action::Runtime_data_controls const* anim_frame_action_controls);
 
     void change_state_idx(uint32_t to_state);

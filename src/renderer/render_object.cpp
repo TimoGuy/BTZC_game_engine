@@ -1,6 +1,8 @@
 #include "render_object.h"
 
 #include "../game_object/game_object.h"
+#include "../service_finder/service_finder.h"
+#include "animator_template.h"
 #include "cglm/affine.h"
 #include "cglm/cglm.h"
 #include "logger.h"
@@ -60,6 +62,9 @@ void BT::Render_object::scene_serialize(Scene_serialization_mode mode, json& nod
         node_ref["renderable"]["type"] = m_renderable->get_type_str();
         node_ref["renderable"]["model_name"] = m_renderable->get_model_name();
 
+        if (m_renderable->get_type_str() == "Deformed_model")
+            node_ref["renderable"]["animator_template"] = m_renderable->get_animator_template_name();
+
         node_ref["render_layer"] = static_cast<uint8_t>(m_layer);
     }
     else if (mode == SCENE_SERIAL_MODE_DESERIALIZE)
@@ -74,11 +79,16 @@ void BT::Render_object::scene_serialize(Scene_serialization_mode mode, json& nod
         else if (rend_type == "Deformed_model")
         {
             auto const& model{ *Model_bank::get_model(node_ref["renderable"]["model_name"]) };
-            set_deformed_model(std::make_unique<Deformed_model>(model));
+            std::string anim_template_name{ node_ref["renderable"]["animator_template"] };
+            set_deformed_model(std::make_unique<Deformed_model>(model,
+                                                                anim_template_name));
 
             auto animator{ std::make_unique<Model_animator>(model) };
-            // animator->configure_animator({ { 0 } }, nullptr);  // @NOCHECKIN: @HARDCODE.
-            animator->configure_animator({ { 24 } }, nullptr);  // @NOCHECKIN: @HARDCODE.
+
+            service_finder::find_service<Animator_template_bank>()
+                .load_animator_template_into_animator(*animator,
+                                                      anim_template_name);
+
             set_model_animator(std::move(animator));
         }
         else

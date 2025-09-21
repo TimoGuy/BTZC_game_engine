@@ -103,7 +103,7 @@ void BT::Scripts::Script__dev__anim_editor_tool_state_agent::on_pre_render(float
             anim_frame_action::s_editor_state.selected_anim_idx = 0;  // @HARDCODE: First anim.
 
             // Assign a temp configuration and finish deformed model rend obj.
-            animator->configure_animator({}, nullptr);
+            animator->configure_animator_states({});
             anim_frame_action::s_editor_state.working_model_animator = animator.get();
             rend_obj.set_model_animator(std::move(animator));
         }
@@ -134,11 +134,11 @@ void BT::Scripts::Script__dev__anim_editor_tool_state_agent::on_pre_render(float
         {   // Reconfigure animator.
             assert(anim_frame_action::s_editor_state.working_timeline_copy != nullptr);
 
-            anim_frame_action::s_editor_state.working_model_animator
-                ->configure_animator({ { m_working_anim_idx,
-                                         0.0f,
-                                         false } },
-                                     anim_frame_action::s_editor_state.working_timeline_copy);
+            // anim_frame_action::s_editor_state.working_model_animator
+            //     ->configure_animator({ { m_working_anim_idx,
+            //                              0.0f,
+            //                              false } },
+            //                          anim_frame_action::s_editor_state.working_timeline_copy);
             anim_frame_action::s_editor_state.selected_anim_num_frames =
                 anim_frame_action::s_editor_state.working_model_animator
                 ->get_model_animation_by_idx(m_working_anim_idx)

@@ -1,6 +1,7 @@
 #include "renderer.h"
 
 #include "../input_handler/input_handler.h"
+#include "../service_finder/service_finder.h"
 #include "renderer_impl_win64.h"
 #include <memory>
 #include <string>
@@ -11,6 +12,8 @@ using std::string;
 BT::Renderer::Renderer(Input_handler& input_handler, ImGui_renderer& imgui_renderer, string const& title)
     : m_pimpl{ std::make_unique<Impl>(*this, imgui_renderer, input_handler, title) }
 {
+    // Add self as service.
+    BT_SERVICE_FINDER_ADD_SERVICE(Renderer, this);
 }
 
 BT::Renderer::~Renderer() = default;  // @NOTE: For smart pimpl.

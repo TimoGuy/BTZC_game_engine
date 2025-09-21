@@ -66,7 +66,11 @@ BT::Hitcapsule_group_overlap_solver::Hitcapsule_group_overlap_solver()
 }
 
 BT::UUID BT::Hitcapsule_group_overlap_solver::add_group(Hitcapsule_group const& group)
-{}
+{
+    // @TODO
+    assert(false);
+    return UUID();
+}
 
 void BT::Hitcapsule_group_overlap_solver::remove_group(UUID group_id)
 {}

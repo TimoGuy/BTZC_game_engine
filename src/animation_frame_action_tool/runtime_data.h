@@ -40,14 +40,22 @@ enum Controllable_data_label : std::uint32_t
         X_float(move_speed,        0.0f)                \
         X_float(gravity_magnitude, 1.0f)                \
         /* Bools */                                     \
-        X__bool(is_parry_active,       false)           \
-        X__bool(can_move_exit,         true)            \
-        X__bool(can_guard_exit,        true)            \
-        X__bool(can_attack_exit,       true)            \
-        X__bool(blade_has_mizunokata,  false)           \
-        X__bool(blade_has_honoonokata, false)           \
-        X__bool(show_hurtbox_bicep_r,  false)           \
-        X__bool(hide_hitbox_leg_l,     false)           \
+        X__bool(is_parry_active,            false)      \
+        X__bool(can_move_exit,              true)       \
+        X__bool(can_guard_exit,             true)       \
+        X__bool(can_attack_exit,            true)       \
+        X__bool(blade_has_mizunokata,       false)      \
+        X__bool(blade_has_honoonokata,      false)      \
+        X__bool(hitcapsule_group_0_enabled, false)      \
+        X__bool(hitcapsule_group_1_enabled, false)      \
+        X__bool(hitcapsule_group_2_enabled, false)      \
+        X__bool(hitcapsule_group_3_enabled, false)      \
+        X__bool(hitcapsule_group_4_enabled, false)      \
+        X__bool(hitcapsule_group_5_enabled, false)      \
+        X__bool(hitcapsule_group_6_enabled, false)      \
+        X__bool(hitcapsule_group_7_enabled, false)      \
+        X__bool(hitcapsule_group_8_enabled, false)      \
+        X__bool(hitcapsule_group_9_enabled, false)      \
         /* Rising edge events */                        \
         X_reeve(play_sfx_footstep)                      \
         X_reeve(play_sfx_ready_guard)                   \

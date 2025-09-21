@@ -60,20 +60,25 @@ set(MAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/animation_frame_action_tool/editor_state.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/animation_frame_action_tool/runtime_data.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/animation_frame_action_tool/runtime_data.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/btzc_game_engine.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/game_object.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/game_object.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/list_of_scripts_begin.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/list_of_scripts_end.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/script__dev__anim_editor_tool_state_agent.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/script_apply_phys_xform_to_rend_obj.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/script_hitcapsule.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/script_player_character_movement.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/scripts.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/serialization.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/game_object.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/game_object.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/hitbox_interactor/hitcapsule.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/hitbox_interactor/hitcapsule.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/input_handler/input_codes.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/input_handler/input_handler.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/input_handler/input_handler.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/logger/logger.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/logger/logger.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_engine_impl_custom_listeners.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_engine_impl_error_callbacks.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_engine_impl_layers.h
@@ -91,6 +96,8 @@ set(MAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/raycast_helper.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/raycast_helper.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/rvec3.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/animator_template.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/animator_template.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/camera_read_ifc.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/camera.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/camera.h
@@ -128,6 +135,8 @@ set(MAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/texture.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/scene/scene_serialization_ifc.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/scene/scene_serialization.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/service_finder/service_finder.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/service_finder/service_finder.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/timer/timer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/timer/timer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/timer/watchdog_timer.cpp
@@ -136,8 +145,6 @@ set(MAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/uuid/uuid_ifc.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/uuid/uuid.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/uuid/uuid.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/btzc_game_engine.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
 )
 
 # Executable build.

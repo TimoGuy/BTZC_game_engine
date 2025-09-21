@@ -1,0 +1,24 @@
+{
+    "animator_states": [
+        {
+            "state_name": "st_idle",
+            "anim_name": "Idle",
+            "speed": 1.0,
+            "loop": true
+        },
+        {
+            "state_name": "st_running",
+            "anim_name": "Running.inmotion",
+            "speed": 1.0,
+            "loop": true
+        }
+    ],
+    "transition_states": [
+        {
+            "trans_state_name": "trst_start_run",
+            "from_to_state": ["st_idle", "st_running"],
+            "anim_name": "Start_running",
+            "speed": 1.0
+        }
+    ]
+}

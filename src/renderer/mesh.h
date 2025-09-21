@@ -65,6 +65,7 @@ public:
     virtual ~Renderable_ifc() = default;
     virtual std::string get_type_str() const = 0;
     virtual std::string get_model_name() const = 0;
+    virtual std::string get_animator_template_name() const = 0;
     virtual void render(mat4 transform, Material_ifc* override_material = nullptr) const = 0;
 };
 
@@ -80,6 +81,7 @@ public:
 
     std::string get_type_str() const override { return "Model"; }
     std::string get_model_name() const override;
+    std::string get_animator_template_name() const override { assert(false); return ""; };
     void render(mat4 transform, Material_ifc* override_material = nullptr) const override;
 
     vector<Model_joint_animation> const& get_joint_animations() const;
@@ -112,17 +114,20 @@ private:
 class Deformed_model : public Renderable_ifc
 {
 public:
-    Deformed_model(Model const& model);
+    Deformed_model(Model const& model, std::string const& anim_template_name);
     ~Deformed_model();
 
     void dispatch_compute_deform(vector<mat4s>&& joint_matrices);
 
     std::string get_type_str() const override { return "Deformed_model"; }
     std::string get_model_name() const override;
+    std::string get_animator_template_name() const override { return m_anim_template_name; };
     void render(mat4 transform, Material_ifc* override_material = nullptr) const override;
 
 private:
     Model const& m_model;
+
+    std::string m_anim_template_name;
 
     uint32_t m_deform_vertex_vao;
     uint32_t m_deform_vertex_vbo;

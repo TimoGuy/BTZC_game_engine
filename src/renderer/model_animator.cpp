@@ -9,6 +9,7 @@
 #include "mesh.h"
 #include <algorithm>
 #include <cmath>
+#include <cstddef>
 
 
 BT::Model_joint_animation_frame::Joint_local_transform
@@ -208,17 +209,36 @@ size_t BT::Model_animator::get_num_model_animations()
     return m_model_animations.size();
 }
 
+size_t BT::Model_animator::get_model_animation_idx(std::string anim_name)
+{
+    size_t idx{ (size_t)-1 };
+
+    for (size_t i = 0; i < m_model_animations.size(); i++)
+        if (m_model_animations[i].get_name() == anim_name)
+        {   // Found name.
+            idx = i;
+            break;
+        }
+
+    return idx;
+}
+
 BT::Model_skin const& BT::Model_animator::get_model_skin()
 {
     return m_model_skin;
 }
 
-void BT::Model_animator::configure_animator(
-    std::vector<Animator_state>&& animator_states,
-    anim_frame_action::Runtime_data_controls const* anim_frame_action_controls)
+void BT::Model_animator::configure_animator_states(
+    std::vector<Animator_state>&& animator_states)
 {
     // Idk why I put this into a separate method instead of in the constructor but hey, here we are.
     m_animator_states = std::move(animator_states);
+}
+
+void BT::Model_animator::configure_anim_frame_action_controls(
+    anim_frame_action::Runtime_data_controls const* anim_frame_action_controls)
+{
+    // Idk why I put this into a separate method instead of in the constructor but hey, here we are.
     m_anim_frame_action_controls = anim_frame_action_controls;
 }
 

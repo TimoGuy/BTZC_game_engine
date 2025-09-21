@@ -132,3 +132,31 @@
     - But it feels like this stuff should be controlled by the btafa file, not this.
     - Maybe add ability to create scripts dynamically?
     - Then add btafa file can create these groups dynamically.  <---- This.
+
+```cpp
+auto my_transform{ Transform::identity() };
+auto my_model{ Model_loader::load_model("SlimeGirl.glb") };
+auto my_animator{
+    Animator_factory::create_animator_from_template(my_model,
+                                                    "SlimeGirl.btanitor") };
+auto my_anim_frame_action{
+    Anim_frame_action_loader::load_anim_frame_action(my_model,
+                                                     my_animator,
+                                                     "SlimeGirl.btafa") };
+Render_object my_render_obj{ my_transform,
+                             Render_layer::VISIBLE,
+                             my_model,
+                             my_animator };
+
+while (running_game_loop)
+{
+    // ...
+
+    // Runs at same rate as physics.
+    // Updates hitcapsules, events, and variables for simulation that are driven
+    // by animation.
+    my_anim_frame_action.update();
+
+    // ...
+}
+```

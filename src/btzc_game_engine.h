@@ -17,4 +17,5 @@
 #define BTZC_GAME_ENGINE_ASSET_TEXTURE_PATH             "assets/textures/"
 #define BTZC_GAME_ENGINE_ASSET_SCENE_PATH               "assets/scenes/"
 #define BTZC_GAME_ENGINE_ASSET_SETTINGS_PATH            "assets/settings/"
+#define BTZC_GAME_ENGINE_ASSET_ANIMATOR_TEMPLATES_PATH  "assets/animator_templates/"
 #define BTZC_GAME_ENGINE_ASSET_ANIM_FRAME_ACTIONS_PATH  "assets/anim_frame_actions/"

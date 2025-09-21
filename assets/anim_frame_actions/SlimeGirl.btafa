@@ -1,7 +1,7 @@
 {
     "anim_frame_action_timelines": [
         {
-            "anim_name": "0_TPose",
+            "state_name": "0_TPose",
             "regions": [
                 {
                     "ctrl_item_idx": 1,
@@ -11,19 +11,19 @@
             ]
         },
         {
-            "anim_name": "Attack_Stone_Charge",
+            "state_name": "Attack_Stone_Charge",
             "regions": []
         },
         {
-            "anim_name": "Attack_Stone_HeavyDown",
+            "state_name": "Attack_Stone_HeavyDown",
             "regions": []
         },
         {
-            "anim_name": "Attack_Stone_HeavyHold",
+            "state_name": "Attack_Stone_HeavyHold",
             "regions": []
         },
         {
-            "anim_name": "Attack_Stone_HeavyJump",
+            "state_name": "Attack_Stone_HeavyJump",
             "regions": [
                 {
                     "ctrl_item_idx": 1,
@@ -33,83 +33,83 @@
             ]
         },
         {
-            "anim_name": "Attack_Stone_HeavyLeft",
+            "state_name": "Attack_Stone_HeavyLeft",
             "regions": []
         },
         {
-            "anim_name": "Attack_Stone_HeavyLeft_2_Fail",
+            "state_name": "Attack_Stone_HeavyLeft_2_Fail",
             "regions": []
         },
         {
-            "anim_name": "Attack_Stone_HeavyLeft_2_Success",
+            "state_name": "Attack_Stone_HeavyLeft_2_Success",
             "regions": []
         },
         {
-            "anim_name": "Attack_Stone_HeavyUp",
+            "state_name": "Attack_Stone_HeavyUp",
             "regions": []
         },
         {
-            "anim_name": "Attack_Stone_Hurt",
+            "state_name": "Attack_Stone_Hurt",
             "regions": []
         },
         {
-            "anim_name": "Attack_Stone_Light1",
+            "state_name": "Attack_Stone_Light1",
             "regions": []
         },
         {
-            "anim_name": "Attack_Stone_Light_1_2_3",
+            "state_name": "Attack_Stone_Light_1_2_3",
             "regions": []
         },
         {
-            "anim_name": "Attack_Stone_Mugamae",
+            "state_name": "Attack_Stone_Mugamae",
             "regions": []
         },
         {
-            "anim_name": "Attack_Stone_ParryGuard",
+            "state_name": "Attack_Stone_ParryGuard",
             "regions": []
         },
         {
-            "anim_name": "Get_Out_Getting_Pressed",
+            "state_name": "Get_Out_Getting_Pressed",
             "regions": []
         },
         {
-            "anim_name": "Getting_Pressed",
+            "state_name": "Getting_Pressed",
             "regions": []
         },
         {
-            "anim_name": "Idle",
+            "state_name": "Idle",
             "regions": []
         },
         {
-            "anim_name": "Idle_Hip",
+            "state_name": "Idle_Hip",
             "regions": []
         },
         {
-            "anim_name": "Jumping_From_Idle",
+            "state_name": "Jumping_From_Idle",
             "regions": []
         },
         {
-            "anim_name": "Jumping_From_Run",
+            "state_name": "Jumping_From_Run",
             "regions": []
         },
         {
-            "anim_name": "Jumping_Midair",
+            "state_name": "Jumping_Midair",
             "regions": []
         },
         {
-            "anim_name": "Land_From_Jumping_From_Idle",
+            "state_name": "Land_From_Jumping_From_Idle",
             "regions": []
         },
         {
-            "anim_name": "Land_From_Jumping_From_Run",
+            "state_name": "Land_From_Jumping_From_Run",
             "regions": []
         },
         {
-            "anim_name": "Running",
+            "state_name": "Running",
             "regions": []
         },
         {
-            "anim_name": "Running.inmotion",
+            "state_name": "Running.inmotion",
             "regions": [
                 {
                     "ctrl_item_idx": 0,
@@ -144,15 +144,15 @@
             ]
         },
         {
-            "anim_name": "Running.inmotion.LittleUpperbody",
+            "state_name": "Running.inmotion.LittleUpperbody",
             "regions": []
         },
         {
-            "anim_name": "Running_Turn_Around",
+            "state_name": "Running_Turn_Around",
             "regions": []
         }
     ],
-    "animated_model_name": "test_gltf",
+    "animated_model_name": "SlimeGirl",
     "control_items": [
         {
             "name": "model_opacity:wr:0.42069"
@@ -165,6 +165,21 @@
         },
         {
             "name": "play_sfx_footstep:tr"
+        }
+    ],
+    "hitcapsule_groups": [
+        {
+            "enabled": true,
+            "type": 0,
+            "capsules": [
+                {
+                    "origin_a": [0, 0, 0],
+                    "origin_b": [1, 1, 1],
+                    "radius": 0.5,
+                    "connecting_bone_name": "",
+                    "connecting_bone_name_2": ""
+                }
+            ]
         }
     ]
 }
