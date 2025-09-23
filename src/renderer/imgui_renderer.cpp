@@ -567,7 +567,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
         std::vector<std::string> anim_names_as_list;  // If new anim gets selected.
         {
             size_t alloc_size{ 0 };
-            for (auto& [anim_name, idx] : anim_frame_action::s_editor_state.anim_name_to_idx_map)
+            for (auto& [anim_name, idx] : anim_frame_action::s_editor_state.anim_state_name_to_idx_map)
             {
                 alloc_size += (anim_name.size() + 1);  // +1 for delimiting \0.
             }
@@ -575,10 +575,10 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
             // Allocate proper size in string.
             anim_names_0_delim.resize(alloc_size + 1, '\0');  // +1 for final \0.
             anim_names_as_list.reserve(
-                anim_frame_action::s_editor_state.anim_name_to_idx_map.size());
+                anim_frame_action::s_editor_state.anim_state_name_to_idx_map.size());
 
             size_t current_str_pos{ 0 };
-            for (auto& [anim_name, idx] : anim_frame_action::s_editor_state.anim_name_to_idx_map)
+            for (auto& [anim_name, idx] : anim_frame_action::s_editor_state.anim_state_name_to_idx_map)
             {
                 strncpy(const_cast<char*>(anim_names_0_delim.c_str() + current_str_pos),
                         anim_name.c_str(),
@@ -589,8 +589,8 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
         }
         if (ImGui::Combo("Animation clip", &s_current_animation_clip, anim_names_0_delim.c_str()))
         {   // Change selected anim idx.
-            anim_frame_action::s_editor_state.selected_anim_idx =
-                anim_frame_action::s_editor_state.anim_name_to_idx_map.at(
+            anim_frame_action::s_editor_state.selected_anim_state_idx =
+                anim_frame_action::s_editor_state.anim_state_name_to_idx_map.at(
                     anim_names_as_list[s_current_animation_clip]);
         }
 
@@ -659,7 +659,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
 
         // BT sequencer.
         ImGui::BeginChild("BT_sequencer");
-        if (anim_frame_action::s_editor_state.anim_name_to_idx_map.empty())
+        if (anim_frame_action::s_editor_state.anim_state_name_to_idx_map.empty())
         {
             ImGui::SetWindowFontScale(5.0f);
 
@@ -678,7 +678,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
             auto& afa_regions{ anim_frame_action::s_editor_state
                                    .working_timeline_copy
                                    ->anim_frame_action_timelines[
-                                       anim_frame_action::s_editor_state.selected_anim_idx]
+                                       anim_frame_action::s_editor_state.selected_anim_state_idx]
                                    .regions };
 
             static vec2s s_timeline_cell_size{ 16.0f, 24.0f };

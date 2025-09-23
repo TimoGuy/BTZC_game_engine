@@ -178,8 +178,6 @@ int32_t main()
     // ]
     std::vector<std::string> const afa_names{
         "SlimeGirl",
-        "SlimeGirl2",
-        "SlimeGirl3",
     };
     for (auto const& afa_name : afa_names)
     {

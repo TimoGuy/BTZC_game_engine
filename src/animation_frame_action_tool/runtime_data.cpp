@@ -1,7 +1,9 @@
 #include "runtime_data.h"
 
+#include "../renderer/animator_template.h"
 #include "../renderer/mesh.h"
 #include "../renderer/model_animator.h"
+#include "../service_finder/service_finder.h"
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -144,14 +146,14 @@ void BT::anim_frame_action::Runtime_controllable_data
 namespace
 {
 
-std::unordered_map<std::string, size_t> compile_anim_name_to_idx_map(
-    std::vector<BT::Model_joint_animation> const& model_animations)
+std::unordered_map<std::string, size_t> compile_anim_state_name_to_idx_map(
+    std::vector<BT::Animator_template::Animator_state> const& animator_states)
 {
     std::unordered_map<std::string, size_t> rei_no_map;
     size_t idx{ 0 };
-    for (auto& model_joint_anim : model_animations)
+    for (auto& anim_state : animator_states)
     {
-        rei_no_map.emplace(model_joint_anim.get_name(), idx);
+        rei_no_map.emplace(anim_state.state_name, idx);
         idx++;
     }
     return rei_no_map;
@@ -175,7 +177,8 @@ void BT::anim_frame_action::Runtime_data_controls::serialize(
 {
     if (mode == SERIAL_MODE_DESERIALIZE)
     {   // Load model from bank.
-        model = Model_bank::get_model(node_ref["animated_model_name"]);
+        std::string model_name{ node_ref["animated_model_name"] };
+        model = Model_bank::get_model(model_name);
         assert(model != nullptr);
 
         // Control items.
@@ -193,23 +196,28 @@ void BT::anim_frame_action::Runtime_data_controls::serialize(
             calculate_all_ctrl_item_types();
         }
 
-        // Animations (use anim names as key).
+        // Animations (use anim state names as key).
         anim_frame_action_timelines.clear();
         auto& nr_anims{ node_ref["anim_frame_action_timelines"] };
         if (!nr_anims.is_null() && nr_anims.is_array())
         {
-            auto anim_name_to_idx_map{ compile_anim_name_to_idx_map(model->get_joint_animations()) };
-            anim_frame_action_timelines.resize(anim_name_to_idx_map.size());
+            auto anim_state_name_to_idx_map{
+                compile_anim_state_name_to_idx_map(service_finder
+                                                   ::find_service<Animator_template_bank>()
+                                                   .load_animator_template(model_name + ".btanitor")
+                                                   .animator_states) };
+
+            anim_frame_action_timelines.resize(anim_state_name_to_idx_map.size());
             for (auto& nr_anim_entry : nr_anims)
             {   // Animations level.
-                size_t anim_idx{ anim_name_to_idx_map.at(nr_anim_entry["anim_name"]) };
+                size_t anim_state_idx{ anim_state_name_to_idx_map.at(nr_anim_entry["state_name"]) };
                 auto& nr_anim_regions{ nr_anim_entry["regions"] };
                 if (!nr_anim_regions.is_null() && nr_anim_regions.is_array())
                 {   // Insert anim action regions.
-                    anim_frame_action_timelines[anim_idx]
+                    anim_frame_action_timelines[anim_state_idx]
                         .regions.reserve(nr_anim_regions.size());
                     for (auto& nr_region : nr_anim_regions)
-                        anim_frame_action_timelines[anim_idx].regions
+                        anim_frame_action_timelines[anim_state_idx].regions
                             .emplace_back(nr_region["ctrl_item_idx"].get<uint32_t>(),
                                           nr_region["start_frame"].get<int32_t>(),
                                           nr_region["end_frame"].get<int32_t>());
@@ -219,7 +227,8 @@ void BT::anim_frame_action::Runtime_data_controls::serialize(
     }
     else if (mode == SERIAL_MODE_SERIALIZE)
     {   // Save model from bank.
-        node_ref["animated_model_name"] = Model_bank::get_model_name(model);
+        std::string model_name{ Model_bank::get_model_name(model) };
+        node_ref["animated_model_name"] = model_name;
 
         // Control items.
         auto& nr_control_items{ node_ref["control_items"] };
@@ -229,22 +238,26 @@ void BT::anim_frame_action::Runtime_data_controls::serialize(
         }
 
         // Animations.
+        auto& anim_states{ service_finder::find_service<Animator_template_bank>()
+                           .load_animator_template(model_name + ".btanitor")
+                           .animator_states };
+
         auto& nr_anims{ node_ref["anim_frame_action_timelines"] };
         nr_anims = json::array();
-        for (size_t anim_idx = 0;
-             anim_idx < anim_frame_action_timelines.size();
-             anim_idx++)
+        for (size_t anim_state_idx = 0;
+             anim_state_idx < anim_frame_action_timelines.size();
+             anim_state_idx++)
         {   // Animations level.
             json nr_anim_entry = {};
-            nr_anim_entry["anim_name"] = model->get_joint_animations()[anim_idx].get_name();
+            nr_anim_entry["state_name"] = anim_states[anim_state_idx].state_name;
             auto& nr_anim_regions{ nr_anim_entry["regions"] };
             nr_anim_regions = json::array();
 
             for (size_t reg_idx = 0;
-                 reg_idx < anim_frame_action_timelines[anim_idx].regions.size();
+                 reg_idx < anim_frame_action_timelines[anim_state_idx].regions.size();
                  reg_idx++)
             {   // Insert anim action regions.
-                auto const& region{ anim_frame_action_timelines[anim_idx].regions[reg_idx] };
+                auto const& region{ anim_frame_action_timelines[anim_state_idx].regions[reg_idx] };
                 json nr_region = {};
                 nr_region["ctrl_item_idx"] = region.ctrl_item_idx;
                 nr_region["start_frame"]   = region.start_frame;

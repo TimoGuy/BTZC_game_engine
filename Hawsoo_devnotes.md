@@ -165,5 +165,5 @@ while (running_game_loop)
 ```
 
 
-- [ ] Rewrite the `script__dev_anim_editor_tool_state_agent.cpp` to use animator states and templates instead of anim indices.
-- [ ] I think ImGui for the editor also needs to get reworked bc it's probably using the animator indices too.
+- [x] Rewrite the `script__dev_anim_editor_tool_state_agent.cpp` to use animator states and templates instead of anim indices.
+- [x] I think ImGui for the editor also needs to get reworked bc it's probably using the animator indices too.

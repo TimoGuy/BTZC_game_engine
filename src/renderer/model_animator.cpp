@@ -199,31 +199,7 @@ BT::Model_animator::Model_animator(Model const& model)
 {
 }
 
-BT::Model_joint_animation const& BT::Model_animator::get_model_animation_by_idx(size_t idx)
-{
-    return m_model_animations[idx];
-}
-
-size_t BT::Model_animator::get_num_model_animations()
-{
-    return m_model_animations.size();
-}
-
-size_t BT::Model_animator::get_model_animation_idx(std::string anim_name)
-{
-    size_t idx{ (size_t)-1 };
-
-    for (size_t i = 0; i < m_model_animations.size(); i++)
-        if (m_model_animations[i].get_name() == anim_name)
-        {   // Found name.
-            idx = i;
-            break;
-        }
-
-    return idx;
-}
-
-BT::Model_skin const& BT::Model_animator::get_model_skin()
+BT::Model_skin const& BT::Model_animator::get_model_skin() const
 {
     return m_model_skin;
 }
@@ -242,6 +218,18 @@ void BT::Model_animator::configure_anim_frame_action_controls(
     m_anim_frame_action_controls = anim_frame_action_controls;
 }
 
+std::vector<BT::Model_animator::Animator_state> const&
+BT::Model_animator::get_animator_states() const
+{
+    return m_animator_states;
+}
+
+BT::Model_animator::Animator_state const&
+BT::Model_animator::get_animator_state(size_t idx) const
+{
+    return m_animator_states[idx];
+}
+
 void BT::Model_animator::change_state_idx(uint32_t to_state)
 {
     uint32_t from_state_copy{ m_current_state_idx.load() };
@@ -251,6 +239,25 @@ void BT::Model_animator::change_state_idx(uint32_t to_state)
         m_time = 0.0f;
         m_prev_time = std::numeric_limits<float_t>::lowest();
     }
+}
+
+size_t BT::Model_animator::get_model_animation_idx(std::string anim_name) const
+{
+    size_t idx{ (size_t)-1 };
+
+    for (size_t i = 0; i < m_model_animations.size(); i++)
+        if (m_model_animations[i].get_name() == anim_name)
+        {   // Found name.
+            idx = i;
+            break;
+        }
+
+    return idx;
+}
+
+BT::Model_joint_animation const& BT::Model_animator::get_model_animation(size_t idx) const
+{
+    return m_model_animations[idx];
 }
 
 void BT::Model_animator::set_time(float_t time)

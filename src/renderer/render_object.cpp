@@ -63,7 +63,7 @@ void BT::Render_object::scene_serialize(Scene_serialization_mode mode, json& nod
         node_ref["renderable"]["model_name"] = m_renderable->get_model_name();
 
         if (m_renderable->get_type_str() == "Deformed_model")
-            node_ref["renderable"]["animator_template"] = m_renderable->get_animator_template_name();
+            node_ref["renderable"]["animator_template"] = (m_renderable->get_model_name() + ".btanitor");
 
         node_ref["render_layer"] = static_cast<uint8_t>(m_layer);
     }
@@ -80,8 +80,7 @@ void BT::Render_object::scene_serialize(Scene_serialization_mode mode, json& nod
         {
             auto const& model{ *Model_bank::get_model(node_ref["renderable"]["model_name"]) };
             std::string anim_template_name{ node_ref["renderable"]["animator_template"] };
-            set_deformed_model(std::make_unique<Deformed_model>(model,
-                                                                anim_template_name));
+            set_deformed_model(std::make_unique<Deformed_model>(model));
 
             auto animator{ std::make_unique<Model_animator>(model) };
 

@@ -89,14 +89,11 @@ class Model_animator
 public:
     Model_animator(Model const& model);
 
-    Model_joint_animation const& get_model_animation_by_idx(size_t idx);
-    size_t get_num_model_animations();
-    size_t get_model_animation_idx(std::string anim_name);
-
-    Model_skin const& get_model_skin();
+    Model_skin const& get_model_skin() const;
 
     struct Animator_state
     {
+        std::string state_name;
         uint32_t animation_idx;
         float_t speed{ 1.0f };
         bool loop{ true };
@@ -106,7 +103,13 @@ public:
     void configure_anim_frame_action_controls(
         anim_frame_action::Runtime_data_controls const* anim_frame_action_controls);
 
+    std::vector<Animator_state> const& get_animator_states() const;
+    Animator_state const& get_animator_state(size_t idx) const;
     void change_state_idx(uint32_t to_state);
+
+    size_t get_model_animation_idx(std::string anim_name) const;
+    Model_joint_animation const& get_model_animation(size_t idx) const;
+
     void set_time(float_t time);
     void update(float_t delta_time);
     void calc_anim_pose(std::vector<mat4s>& out_joint_matrices) const;

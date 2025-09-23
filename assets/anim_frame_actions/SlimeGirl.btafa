@@ -1,115 +1,16 @@
 {
     "anim_frame_action_timelines": [
         {
-            "state_name": "0_TPose",
-            "regions": [
-                {
-                    "ctrl_item_idx": 1,
-                    "end_frame": 7,
-                    "start_frame": 3
-                }
-            ]
-        },
-        {
-            "state_name": "Attack_Stone_Charge",
-            "regions": []
-        },
-        {
-            "state_name": "Attack_Stone_HeavyDown",
-            "regions": []
-        },
-        {
-            "state_name": "Attack_Stone_HeavyHold",
-            "regions": []
-        },
-        {
-            "state_name": "Attack_Stone_HeavyJump",
             "regions": [
                 {
                     "ctrl_item_idx": 1,
                     "end_frame": 28,
                     "start_frame": 2
                 }
-            ]
+            ],
+            "state_name": "st_idle"
         },
         {
-            "state_name": "Attack_Stone_HeavyLeft",
-            "regions": []
-        },
-        {
-            "state_name": "Attack_Stone_HeavyLeft_2_Fail",
-            "regions": []
-        },
-        {
-            "state_name": "Attack_Stone_HeavyLeft_2_Success",
-            "regions": []
-        },
-        {
-            "state_name": "Attack_Stone_HeavyUp",
-            "regions": []
-        },
-        {
-            "state_name": "Attack_Stone_Hurt",
-            "regions": []
-        },
-        {
-            "state_name": "Attack_Stone_Light1",
-            "regions": []
-        },
-        {
-            "state_name": "Attack_Stone_Light_1_2_3",
-            "regions": []
-        },
-        {
-            "state_name": "Attack_Stone_Mugamae",
-            "regions": []
-        },
-        {
-            "state_name": "Attack_Stone_ParryGuard",
-            "regions": []
-        },
-        {
-            "state_name": "Get_Out_Getting_Pressed",
-            "regions": []
-        },
-        {
-            "state_name": "Getting_Pressed",
-            "regions": []
-        },
-        {
-            "state_name": "Idle",
-            "regions": []
-        },
-        {
-            "state_name": "Idle_Hip",
-            "regions": []
-        },
-        {
-            "state_name": "Jumping_From_Idle",
-            "regions": []
-        },
-        {
-            "state_name": "Jumping_From_Run",
-            "regions": []
-        },
-        {
-            "state_name": "Jumping_Midair",
-            "regions": []
-        },
-        {
-            "state_name": "Land_From_Jumping_From_Idle",
-            "regions": []
-        },
-        {
-            "state_name": "Land_From_Jumping_From_Run",
-            "regions": []
-        },
-        {
-            "state_name": "Running",
-            "regions": []
-        },
-        {
-            "state_name": "Running.inmotion",
             "regions": [
                 {
                     "ctrl_item_idx": 0,
@@ -118,8 +19,8 @@
                 },
                 {
                     "ctrl_item_idx": 0,
-                    "end_frame": 66,
-                    "start_frame": 5
+                    "end_frame": 58,
+                    "start_frame": -3
                 },
                 {
                     "ctrl_item_idx": 0,
@@ -141,15 +42,8 @@
                     "end_frame": 35,
                     "start_frame": 30
                 }
-            ]
-        },
-        {
-            "state_name": "Running.inmotion.LittleUpperbody",
-            "regions": []
-        },
-        {
-            "state_name": "Running_Turn_Around",
-            "regions": []
+            ],
+            "state_name": "st_running"
         }
     ],
     "animated_model_name": "SlimeGirl",
@@ -165,21 +59,6 @@
         },
         {
             "name": "play_sfx_footstep:tr"
-        }
-    ],
-    "hitcapsule_groups": [
-        {
-            "enabled": true,
-            "type": 0,
-            "capsules": [
-                {
-                    "origin_a": [0, 0, 0],
-                    "origin_b": [1, 1, 1],
-                    "radius": 0.5,
-                    "connecting_bone_name": "",
-                    "connecting_bone_name_2": ""
-                }
-            ]
         }
     ]
 }

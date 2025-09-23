@@ -1110,11 +1110,9 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
 // A memory barrier waits for all of these vbo's to be written.
 // When connected to a render object, the render object will take a `unique_ptr` of the deformed model, and if it exists,
 // it will get the `m_deform_vertex_vao` and call `render_model()` with the `override_vao` param set.
-BT::Deformed_model::Deformed_model(Model const& model, std::string const& anim_template_name)
+BT::Deformed_model::Deformed_model(Model const& model)
     : m_model{ model }
-    , m_anim_template_name{ anim_template_name }
-{
-    // Create empty buffer for resulting deformed vertices.
+{   // Create empty buffer for resulting deformed vertices.
     glGenVertexArrays(1, &m_deform_vertex_vao);
     glGenBuffers(1, &m_deform_vertex_vbo);
 

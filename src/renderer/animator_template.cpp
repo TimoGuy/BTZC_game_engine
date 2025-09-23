@@ -16,8 +16,7 @@ BT::Animator_template_bank::Animator_template_bank()
     BT_SERVICE_FINDER_ADD_SERVICE(Animator_template_bank, this);
 }
 
-void BT::Animator_template_bank::load_animator_template_into_animator(
-    Model_animator& animator,
+BT::Animator_template const& BT::Animator_template_bank::load_animator_template(
     std::string const& anim_template_name)
 {
     if (m_anim_template_cache.find(anim_template_name) == m_anim_template_cache.end())
@@ -57,14 +56,22 @@ void BT::Animator_template_bank::load_animator_template_into_animator(
     }
 
     // Grab template from cache.
-    auto& anim_temp{ m_anim_template_cache.at(anim_template_name) };
+    return m_anim_template_cache.at(anim_template_name);
+}
+
+void BT::Animator_template_bank::load_animator_template_into_animator(
+    Model_animator& animator,
+    std::string const& anim_template_name)
+{
+    auto& anim_temp{ load_animator_template(anim_template_name) };
 
     // Write to model animator.
     std::vector<Model_animator::Animator_state> anim_states;
     anim_states.reserve(anim_temp.animator_states.size());
     for (auto& temp_anim_state : anim_temp.animator_states)
     {
-        anim_states.emplace_back(animator.get_model_animation_idx(
+        anim_states.emplace_back(temp_anim_state.state_name,
+                                 animator.get_model_animation_idx(
                                      temp_anim_state.anim_name),
                                  temp_anim_state.speed,
                                  temp_anim_state.loop);
