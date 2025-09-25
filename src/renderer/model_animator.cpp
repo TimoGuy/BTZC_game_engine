@@ -216,6 +216,9 @@ void BT::Model_animator::configure_anim_frame_action_controls(
 {
     // Idk why I put this into a separate method instead of in the constructor but hey, here we are.
     m_anim_frame_action_controls = anim_frame_action_controls;
+
+    m_anim_frame_action_controls->hitcapsule_group_set_template.deep_clone(
+        m_anim_frame_action_data.hitcapsule_group_set);
 }
 
 std::vector<BT::Model_animator::Animator_state> const&

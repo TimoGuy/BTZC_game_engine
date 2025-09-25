@@ -54,7 +54,8 @@ public:
         m_hitcapsule_grp_uuids.reserve(m_hitcapsule_grps.size());
         for (auto const& group : m_hitcapsule_grps)
         {
-            UUID group_uuid{ hitcapsule_solver.add_group(group) };
+            // @NOCHECKIN
+            UUID group_uuid; //{ hitcapsule_solver.add_group(group) };
             m_hitcapsule_grp_uuids.emplace_back(group_uuid);
         }
     }
@@ -66,7 +67,8 @@ public:
 
         for (auto group_uuid : m_hitcapsule_grp_uuids)
         {
-            hitcapsule_solver.remove_group(group_uuid);
+            // @NOCHECKIN
+            // hitcapsule_solver.remove_group(group_uuid);
         }
     }
 

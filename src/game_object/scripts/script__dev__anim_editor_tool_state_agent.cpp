@@ -155,12 +155,10 @@ void BT::Scripts::Script__dev__anim_editor_tool_state_agent::on_pre_render(float
         }
 
         // Reconfigure animator.
+        anim_frame_action::s_editor_state.working_model_animator
+            ->configure_anim_frame_action_controls(
+                anim_frame_action::s_editor_state.working_timeline_copy);
 
-        // anim_frame_action::s_editor_state.working_model_animator
-        //     ->configure_animator({ { m_working_anim_state_idx,
-        //                              0.0f,
-        //                              false } },
-        //                          anim_frame_action::s_editor_state.working_timeline_copy);
         auto anim_state_anim_idx{
             anim_frame_action::s_editor_state.working_model_animator
             ->get_animator_state(m_working_anim_state_idx)

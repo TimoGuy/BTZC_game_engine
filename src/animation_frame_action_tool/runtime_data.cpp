@@ -1,5 +1,6 @@
 #include "runtime_data.h"
 
+#include "../hitbox_interactor/hitcapsule.h"
 #include "../renderer/animator_template.h"
 #include "../renderer/mesh.h"
 #include "../renderer/model_animator.h"
@@ -268,6 +269,9 @@ void BT::anim_frame_action::Runtime_data_controls::serialize(
             nr_anims.emplace_back(nr_anim_entry);
         }
     }
+
+    hitcapsule_group_set_template.scene_serialize(static_cast<Scene_serialization_mode>(mode),
+                                                  node_ref["hitcapsule_group_set"]);
 }
 
 void BT::anim_frame_action::Runtime_data_controls::calculate_all_ctrl_item_types()

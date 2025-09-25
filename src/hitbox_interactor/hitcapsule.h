@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../scene/scene_serialization_ifc.h"
 #include "../uuid/uuid.h"
 #include "cglm/types-struct.h"
 
@@ -55,13 +56,33 @@ private:
     std::vector<Hitcapsule> m_capsules;
 };
 
+class Hitcapsule_group_set : public Scene_serialization_ifc
+{
+public:
+    // @NOCHECKIN: For now,,,, just let there be full control of copying/moving.
+    // Hitcapsule_group_set()                                             = default;
+    // Hitcapsule_group_set(const Hitcapsule_group_set& other)            = delete;
+    // Hitcapsule_group_set& operator=(const Hitcapsule_group_set& other) = delete;
+    // Hitcapsule_group_set(Hitcapsule_group_set&& other)                 = default;
+    // Hitcapsule_group_set& operator=(Hitcapsule_group_set&& other)      = default;
+    // ~Hitcapsule_group_set()                                            = default;
+
+    void scene_serialize(Scene_serialization_mode mode, json& node_ref) override;
+
+    void deep_clone(Hitcapsule_group_set& dest) const;
+
+private:
+    std::vector<Hitcapsule_group> m_hitcapsule_grps;
+    std::vector<UUID> m_hitcapsule_grp_uuids;
+};
+
 class Hitcapsule_group_overlap_solver
 {
 public:
     Hitcapsule_group_overlap_solver();
 
-    UUID add_group(Hitcapsule_group const& group);
-    void remove_group(UUID group_id);
+    UUID add_group_set(Hitcapsule_group& group);
+    void remove_group_set(Hitcapsule_group& group);
 
     void update_overlaps();
 

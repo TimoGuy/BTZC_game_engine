@@ -60,5 +60,22 @@
         {
             "name": "play_sfx_footstep:tr"
         }
-    ]
+    ],
+    "hitcapsule_group_set": {
+        "hitcapsule_groups": [
+            {
+                "enabled": true,
+                "type": 0,
+                "capsules": [
+                    {
+                        "origin_a": [0, 0, 0],
+                        "origin_b": [1, 1, 1],
+                        "radius": 0.5,
+                        "connecting_bone_name": "",
+                        "connecting_bone_name_2": ""
+                    }
+                ]
+            }
+        ]
+    }
 }

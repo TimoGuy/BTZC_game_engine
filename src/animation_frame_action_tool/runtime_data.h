@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../hitbox_interactor/hitcapsule.h"
 #include "nlohmann/json.hpp"
 #include <string>
 #include <unordered_map>
@@ -226,6 +227,9 @@ public:
     Rising_edge_event& get_reeve_data_handle(Controllable_data_label label);
 
     void clear_all_data_overrides();
+
+    // Controlled hitcapsule group set.
+    Hitcapsule_group_set hitcapsule_group_set;
 };
 
 // Data controls.
@@ -259,8 +263,9 @@ struct Runtime_data_controls
     };
     std::vector<Animation_frame_action_timeline> anim_frame_action_timelines;  // Same order as `model_animations`.
 
-    void serialize(Serialization_mode mode,
-                   json& node_ref);
+    Hitcapsule_group_set hitcapsule_group_set_template;
+
+    void serialize(Serialization_mode mode, json& node_ref);
 
     void calculate_all_ctrl_item_types();
 };
