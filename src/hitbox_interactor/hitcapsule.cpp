@@ -116,8 +116,11 @@ void BT::Hitcapsule_group_set::scene_serialize(Scene_serialization_mode mode, js
 }
 
 void BT::Hitcapsule_group_set::deep_clone(Hitcapsule_group_set& dest) const
-{   // @TODO: IMPLEMENT.
-    assert(false);
+{
+    dest.m_hitcapsule_grps.clear();
+    dest.m_hitcapsule_grp_uuids.clear();  // Leave cleared since clone is unregistered.
+
+    dest.m_hitcapsule_grps = m_hitcapsule_grps;
 }
 
 
