@@ -386,6 +386,12 @@ int32_t main()
             });
         }
 
+        for (auto game_obj : all_game_objs)
+        {   // @DEBUG: @WARNING: Not for production use.
+            // Updates the list of scripts if any changes are detected.
+            game_obj->process_script_list_mutation_requests();
+        }
+
         game_object_pool.return_list(std::move(all_game_objs));
 
         // Tick level loading.

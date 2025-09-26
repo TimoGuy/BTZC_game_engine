@@ -12,6 +12,7 @@
 #include <atomic>
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <unordered_map>
 #include <utility>
@@ -171,6 +172,10 @@ public:
     void run_pre_physics_scripts(float_t physics_delta_time);
     void run_pre_render_scripts(float_t delta_time);
 
+    // @WARNING: Not for production code.
+    // Processes thru all requests for mutating the script list, removing first.
+    void process_script_list_mutation_requests();
+
     void set_name(string&& name);
     string get_name();
     UUID get_phys_obj_key();
@@ -211,6 +216,13 @@ private:
     UUID m_phys_obj_key;
     UUID m_rend_obj_key;
     vector<unique_ptr<Scripts::Script_ifc>> m_scripts;
+
+    // @WARNING: Not for production code.
+    std::vector<std::string> m_remove_script_requests;
+    // @WARNING: Not for production code.
+    std::vector<json> m_add_script_requests;
+    // @WARNING: Not for production code.
+    std::mutex m_mutate_script_requests_mutex;
 
     UUID m_parent;
     vector<UUID> m_children;

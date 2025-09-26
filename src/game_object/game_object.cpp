@@ -18,6 +18,7 @@
 #include "scripts/scripts.h"
 #include <atomic>
 #include <cassert>
+#include <mutex>
 
 using std::atomic_uint8_t;
 using std::atomic_uint64_t;
@@ -201,6 +202,58 @@ void BT::Game_object::run_pre_render_scripts(float_t delta_time)
     }
 }
 
+void BT::Game_object::process_script_list_mutation_requests()
+{
+    std::lock_guard<std::mutex> lock{ m_mutate_script_requests_mutex };
+
+    // Process removals.
+    static auto s_remove_script_fn = [this](std::string const& script_type) {
+        auto script_type_enum{ Scripts::Helper_funcs::get_script_type_from_name(script_type) };
+
+        bool success{ false };
+
+        size_t idx{ 0 };
+        for (size_t idx = 0; idx < m_scripts.size(); idx++)
+        {
+            if (m_scripts[idx]->get_type() == script_type_enum)
+            {   // Erase!
+                m_scripts.erase(m_scripts.begin() + idx);
+                success = true;
+                break;
+            }
+            idx++;
+        }
+
+        if (!success)
+        {
+            logger::printef(
+                logger::WARN,
+                "`remove_script()` did not find attached script type: %s",
+                script_type.c_str());
+        }
+    };
+
+    for (auto& remove_req : m_remove_script_requests)
+    {
+        s_remove_script_fn(remove_req);
+    }
+
+    // Process additions.
+    for (auto& add_req : m_add_script_requests)
+    {
+        m_scripts.emplace_back(
+            Scripts::create_script_from_serialized_datas(&m_input_handler,
+                                                         &m_phys_engine,
+                                                         &m_renderer,
+                                                         &m_obj_pool,
+                                                         add_req));
+    }
+
+    // Clear requests.
+    m_remove_script_requests.clear();
+    m_add_script_requests.clear();
+}
+
 void BT::Game_object::set_name(string&& name)
 {
     m_name = std::move(name);
@@ -347,7 +400,8 @@ void BT::Game_object::scene_serialize(Scene_serialization_mode mode, json& node_
             assert(node_ref["scripts"].is_array());
             for (size_t scripts_idx = 0; scripts_idx < node_ref["scripts"].size();)
             {
-                add_script(node_ref["scripts"][scripts_idx++]);
+                add_script(node_ref["scripts"][scripts_idx++]);  // @NOTE: Adding is deffered until `process_script_list_mutation_requests()`.
+                process_script_list_mutation_requests();  // For immediately adding.
             }
         }
 
@@ -389,39 +443,14 @@ void BT::Game_object::scene_serialize(Scene_serialization_mode mode, json& node_
 
 void BT::Game_object::add_script(json& node_ref)
 {
-    m_scripts.emplace_back(
-        Scripts::create_script_from_serialized_datas(&m_input_handler,
-                                                     &m_phys_engine,
-                                                     &m_renderer,
-                                                     &m_obj_pool,
-                                                     node_ref));
+    std::lock_guard<std::mutex> lock{ m_mutate_script_requests_mutex };
+    m_add_script_requests.emplace_back(node_ref);
 }
 
 void BT::Game_object::remove_script(std::string const& script_type)
 {
-    auto script_type_enum{ Scripts::Helper_funcs::get_script_type_from_name(script_type) };
-
-    bool success{ false };
-
-    size_t idx{ 0 };
-    for (auto& script : m_scripts)
-    {
-        if (script->get_type() == script_type_enum)
-        {   // Erase!
-            m_scripts.erase(m_scripts.begin() + idx);
-            success = true;
-            break;
-        }
-        idx++;
-    }
-
-    if (!success)
-    {
-        logger::printef(
-            logger::WARN,
-            "`remove_script()` did not find attached script type: %s",
-            script_type.c_str());
-    }
+    std::lock_guard<std::mutex> lock{ m_mutate_script_requests_mutex };
+    m_remove_script_requests.emplace_back(script_type);
 }
 
 
