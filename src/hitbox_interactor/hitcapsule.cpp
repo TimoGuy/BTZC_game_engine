@@ -3,6 +3,7 @@
 #include "../renderer/model_animator.h"
 #include "../service_finder/service_finder.h"
 #include "cglm/vec3.h"
+#include "logger.h"
 
 #include <cassert>
 
@@ -115,14 +116,6 @@ void BT::Hitcapsule_group_set::scene_serialize(Scene_serialization_mode mode, js
     }
 }
 
-void BT::Hitcapsule_group_set::deep_clone(Hitcapsule_group_set& dest) const
-{
-    dest.m_hitcapsule_grps.clear();
-    dest.m_hitcapsule_grp_uuids.clear();  // Leave cleared since clone is unregistered.
-
-    dest.m_hitcapsule_grps = m_hitcapsule_grps;
-}
-
 
 // Hitcapsule_group_overlap_solver.
 BT::Hitcapsule_group_overlap_solver::Hitcapsule_group_overlap_solver()
@@ -131,18 +124,21 @@ BT::Hitcapsule_group_overlap_solver::Hitcapsule_group_overlap_solver()
     BT_SERVICE_FINDER_ADD_SERVICE(Hitcapsule_group_overlap_solver, this);
 }
 
-BT::UUID BT::Hitcapsule_group_overlap_solver::add_group_set(Hitcapsule_group& group)
+bool BT::Hitcapsule_group_overlap_solver::add_group_set(Hitcapsule_group_set& group_set)
 {
-    // @TODO
-    assert(false);
-    return UUID();
+    bool success{ false };
+    if (m_group_sets.emplace(&group_set).second)
+        success = true;
+    else
+        logger::printe(logger::ERROR, "Emplacing hitcapsule group set failed.");
+
+    assert(success);
+    return success;
 }
 
-void BT::Hitcapsule_group_overlap_solver::remove_group_set(Hitcapsule_group& group)
+void BT::Hitcapsule_group_overlap_solver::remove_group_set(Hitcapsule_group_set& group_set)
 {
-    // @TODO
-    assert(false);
-
+    m_group_sets.erase(m_group_sets.find(&group_set));
 }
 
 void BT::Hitcapsule_group_overlap_solver::update_overlaps()

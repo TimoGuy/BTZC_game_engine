@@ -1,12 +1,11 @@
 #pragma once
 
 #include "../scene/scene_serialization_ifc.h"
-#include "../uuid/uuid.h"
 #include "cglm/types-struct.h"
 
 #include <string>
 #include <vector>
-#include <unordered_map>
+#include <unordered_set>
 
 
 namespace BT
@@ -52,28 +51,19 @@ public:
 
 private:
     bool m_enabled;
-    Type const m_type;
+    Type m_type;
     std::vector<Hitcapsule> m_capsules;
+
+    void copy_into_me();
 };
 
 class Hitcapsule_group_set : public Scene_serialization_ifc
 {
 public:
-    // @NOCHECKIN: For now,,,, just let there be full control of copying/moving.
-    // Hitcapsule_group_set()                                             = default;
-    // Hitcapsule_group_set(const Hitcapsule_group_set& other)            = delete;
-    // Hitcapsule_group_set& operator=(const Hitcapsule_group_set& other) = delete;
-    // Hitcapsule_group_set(Hitcapsule_group_set&& other)                 = default;
-    // Hitcapsule_group_set& operator=(Hitcapsule_group_set&& other)      = default;
-    // ~Hitcapsule_group_set()                                            = default;
-
     void scene_serialize(Scene_serialization_mode mode, json& node_ref) override;
-
-    void deep_clone(Hitcapsule_group_set& dest) const;
 
 private:
     std::vector<Hitcapsule_group> m_hitcapsule_grps;
-    std::vector<UUID> m_hitcapsule_grp_uuids;
 };
 
 class Hitcapsule_group_overlap_solver
@@ -81,13 +71,13 @@ class Hitcapsule_group_overlap_solver
 public:
     Hitcapsule_group_overlap_solver();
 
-    UUID add_group_set(Hitcapsule_group& group);
-    void remove_group_set(Hitcapsule_group& group);
+    bool add_group_set(Hitcapsule_group_set& group_set);
+    void remove_group_set(Hitcapsule_group_set& group_set);
 
     void update_overlaps();
 
 private:
-    std::unordered_map<UUID, Hitcapsule_group const*> m_groups;
+    std::unordered_set<Hitcapsule_group_set const*> m_group_sets;
 };
 
 }  // namespace BT

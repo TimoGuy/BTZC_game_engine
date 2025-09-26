@@ -172,7 +172,9 @@ while (running_game_loop)
 - [ ] Load extra part in btafa and add hitcapsule groups.
     - I think that there needs to be a way to prevent self-collision, so grouping hitcapsule groups together into an entity-owning set of groups would be good.
     - [x] initial loading
-    - [ ] `deep_clone()`
+    - [x] `deep_clone()`
         - Tried to copy the hitcapsule groups but then copy constructors are deleted.
+        - Just defined the copy ctor.
+        - Ok, just essentially turned off the `Type const m_type;` in order to reinstate the implicit copy ctor stuff.
     - [ ] Use `script_hitcapsule` to get a handle into the bool data handle, and then poll whether the hitcapsules are visible or not based off the labels.
 
