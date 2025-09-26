@@ -176,5 +176,10 @@ while (running_game_loop)
         - Tried to copy the hitcapsule groups but then copy constructors are deleted.
         - Just defined the copy ctor.
         - Ok, just essentially turned off the `Type const m_type;` in order to reinstate the implicit copy ctor stuff.
-    - [ ] Use `script_hitcapsule` to get a handle into the bool data handle, and then poll whether the hitcapsules are visible or not based off the labels.
-
+    - [x] Use `script_hitcapsule` to get a handle into the bool data handle, and then poll whether the hitcapsules are visible or not based off the labels.
+        - Ok I'm doing it a bit different, since I'm deferring the functionality to the animator itself, calling it from the script.
+        - [x] Create add/remove script dynamically interface.
+        - [ ] Use dev anim editor script to dynamically add the script.
+            - [x] initial
+            - [ ] Defer actually mutating the scripts until after the scripts are done running.
+            

@@ -66,8 +66,8 @@ set(MAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/list_of_scripts_begin.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/list_of_scripts_end.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/script__dev__anim_editor_tool_state_agent.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/script_animator_driven_hitcapsule_set.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/script_apply_phys_xform_to_rend_obj.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/script_hitcapsule.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/script_player_character_movement.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/scripts.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/serialization.h

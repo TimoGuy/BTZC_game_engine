@@ -143,6 +143,19 @@ void BT::anim_frame_action::Runtime_controllable_data
     }
 }
 
+void BT::anim_frame_action::Runtime_controllable_data
+    ::assign_hitcapsule_enabled_flags()
+{
+    assert(false);
+}
+
+void BT::anim_frame_action::Runtime_controllable_data
+    ::update_hitcapsule_transform_to_joint_mats(std::vector<mat4s> const& joint_matrices)
+{
+    assert(false);
+}
+
+
 // Data controls.
 namespace
 {

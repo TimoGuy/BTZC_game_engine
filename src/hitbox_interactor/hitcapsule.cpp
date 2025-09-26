@@ -9,10 +9,9 @@
 
 
 // Hitcapsule.
-void BT::Hitcapsule::init_calc_info(Model_animator* animator)
+void BT::Hitcapsule::init_calc_info(Model_animator const& animator)
 {
-    assert(animator != nullptr);
-    auto& joint_name_to_idx{ animator->get_model_skin().joint_name_to_idx };
+    auto& joint_name_to_idx{ animator.get_model_skin().joint_name_to_idx };
 
     if (!connecting_bone_name.empty())
         calcd_bone_mat_idx = joint_name_to_idx.at(connecting_bone_name);
@@ -122,6 +121,15 @@ void BT::Hitcapsule_group_set::replace_and_reregister(Hitcapsule_group_set const
     overlap_solver.remove_group_set(*this);
     *this = other;
     overlap_solver.add_group_set(*this);
+}
+
+void BT::Hitcapsule_group_set::connect_animator(Model_animator const& animator)
+{
+    for (auto& group : m_hitcapsule_grps)
+    for (auto& capsule : group.get_capsules())
+    {
+        capsule.init_calc_info(animator);
+    }
 }
 
 

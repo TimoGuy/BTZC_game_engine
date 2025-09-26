@@ -219,6 +219,7 @@ void BT::Model_animator::configure_anim_frame_action_controls(
 
     m_anim_frame_action_data.hitcapsule_group_set.replace_and_reregister(
         m_anim_frame_action_controls->hitcapsule_group_set_template);
+    m_anim_frame_action_data.hitcapsule_group_set.connect_animator(*this);
 }
 
 std::vector<BT::Model_animator::Animator_state> const&

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../hitbox_interactor/hitcapsule.h"
+#include "cglm/types-struct.h"
 #include "nlohmann/json.hpp"
 #include <string>
 #include <unordered_map>
@@ -230,6 +231,14 @@ public:
 
     // Controlled hitcapsule group set.
     Hitcapsule_group_set hitcapsule_group_set;
+
+    // Update all hitcapsule groups' enabled flags to match
+    // the runtime controllable data enabled flags.
+    void assign_hitcapsule_enabled_flags();
+
+    // Updates hitcapsule transforms to `joint_matrices[x]` where `x` is
+    // the connecting bone matrix index.
+    void update_hitcapsule_transform_to_joint_mats(std::vector<mat4s> const& joint_matrices);
 };
 
 // Data controls.

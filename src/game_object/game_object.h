@@ -186,6 +186,14 @@ public:
     // Scene_serialization_ifc.
     void scene_serialize(Scene_serialization_mode mode, json& node_ref) override;
 
+    // @WARNING: Not for production code.
+    // Adds a script dynamically to this gameobject.
+    void add_script(json& node_ref);
+
+    // @WARNING: Not for production code.
+    // Removes a script dynamically from this gameobject.
+    void remove_script(std::string const& script_type);
+
     void render_imgui_local_transform();
     void render_imgui_transform_gizmo();
 
@@ -213,6 +221,8 @@ private:
 class Game_object_pool : public Scene_serialization_ifc
 {
 public:
+    Game_object_pool();
+
     void set_callback_fn(function<unique_ptr<Game_object>()>&& create_new_empty_game_obj_callback_fn);
 
     UUID emplace(unique_ptr<Game_object>&& game_object);

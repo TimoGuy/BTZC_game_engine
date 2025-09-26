@@ -2,10 +2,12 @@
 #include "scripts.h"
 
 #include "../animation_frame_action_tool/editor_state.h"
+#include "../game_object/game_object.h"
+#include "../game_object/scripts/scripts.h"
 #include "../renderer/animator_template.h"
-#include "../renderer/renderer.h"
 #include "../renderer/mesh.h"
 #include "../renderer/model_animator.h"
+#include "../renderer/renderer.h"
 #include "../service_finder/service_finder.h"
 #include <memory>
 
@@ -23,8 +25,11 @@ namespace BT::Scripts
 class Script__dev__anim_editor_tool_state_agent : public Script_ifc
 {
 public:
-    Script__dev__anim_editor_tool_state_agent(Renderer& renderer, UUID render_obj_key)
+    Script__dev__anim_editor_tool_state_agent(Renderer& renderer,
+                                              UUID game_obj_key,
+                                              UUID render_obj_key)
         : m_renderer{ renderer }
+        , m_game_obj_key{ game_obj_key }
         , m_render_obj_key{ render_obj_key }
     {
     }
@@ -37,12 +42,14 @@ public:
 
     void serialize_datas(json& node_ref) override
     {
+        node_ref["game_obj_key"] = UUID_helper::to_pretty_repr(m_game_obj_key);
         node_ref["render_obj_key"] = UUID_helper::to_pretty_repr(m_render_obj_key);
     }
 
     void on_pre_render(float_t delta_time) override;
 
     Renderer& m_renderer;
+    UUID m_game_obj_key;
     UUID m_render_obj_key;
 
     Model const* m_prev_working_model{ nullptr };
@@ -67,6 +74,7 @@ BT::Scripts::Factory_impl_funcs
 {
     return std::unique_ptr<Script_ifc>(
         new Script__dev__anim_editor_tool_state_agent{ *renderer,
+                                                       UUID_helper::to_UUID(node_ref["game_obj_key"]),
                                                        UUID_helper::to_UUID(node_ref["render_obj_key"]) });
 }
 
@@ -141,6 +149,29 @@ void BT::Scripts::Script__dev__anim_editor_tool_state_agent::on_pre_render(float
             // Attach animator to render obj.
             anim_frame_action::s_editor_state.working_model_animator = animator.get();
             rend_obj.set_model_animator(std::move(animator));
+
+            // Create hitcapsule set driver script onto gameobject.
+            static auto s_script_type_str{
+                Scripts::Helper_funcs::get_script_name_from_type(
+                    SCRIPT_TYPE_animator_driven_hitcapsule_set) };
+
+            static auto s_script_creation_fn = [](UUID render_obj_key) {
+                json node_ref = {};
+                node_ref["script_type"] = s_script_type_str;
+                node_ref["script_datas"]["render_obj"] =
+                    UUID_helper::to_pretty_repr(render_obj_key);
+
+                return node_ref;
+            };
+
+            auto& game_obj_pool{ service_finder::find_service<Game_object_pool>() };
+
+            auto& game_obj{ *game_obj_pool.get_one_no_lock(m_game_obj_key) };
+
+            game_obj.remove_script(s_script_type_str);
+
+            auto creation_json = s_script_creation_fn(m_render_obj_key);
+            game_obj.add_script(creation_json);
         }
 
         // Fill in animator state name to idx map.

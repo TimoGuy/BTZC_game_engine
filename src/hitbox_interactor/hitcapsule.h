@@ -27,7 +27,7 @@ struct Hitcapsule
     size_t  calcd_bone_mat_idx_2{ (size_t)-1 };  // -1 means same as `calcd_bone_mat_idx`.
     float_t calcd_orig_pts_dist;
 
-    void init_calc_info(Model_animator* animator);
+    void init_calc_info(Model_animator const& animator);
     void calc_orig_pt_distance();
 };
 
@@ -63,6 +63,7 @@ public:
     void scene_serialize(Scene_serialization_mode mode, json& node_ref) override;
 
     void replace_and_reregister(Hitcapsule_group_set const& other);
+    void connect_animator(Model_animator const& animator);
 
 private:
     std::vector<Hitcapsule_group> m_hitcapsule_grps;

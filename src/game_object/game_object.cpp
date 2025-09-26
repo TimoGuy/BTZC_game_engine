@@ -4,14 +4,15 @@
 #include "../physics_engine/physics_engine.h"
 #include "../renderer/camera.h"
 #include "../renderer/renderer.h"
+#include "../service_finder/service_finder.h"
 #include "cglm/affine.h"
 #include "cglm/euler.h"
 #include "cglm/mat4.h"
 #include "cglm/quat.h"
 #include "cglm/vec3.h"
+#include "imgui_internal.h"
 #include "imgui.h"
 #include "ImGuizmo.h"
-#include "imgui_internal.h"
 #include "logger.h"
 #include "misc/cpp/imgui_stdlib.h"
 #include "scripts/scripts.h"
@@ -346,17 +347,11 @@ void BT::Game_object::scene_serialize(Scene_serialization_mode mode, json& node_
             assert(node_ref["scripts"].is_array());
             for (size_t scripts_idx = 0; scripts_idx < node_ref["scripts"].size();)
             {
-                m_scripts.emplace_back(
-                    Scripts::create_script_from_serialized_datas(&m_input_handler,
-                                                                 &m_phys_engine,
-                                                                 &m_renderer,
-                                                                 &m_obj_pool,
-                                                                 node_ref["scripts"][scripts_idx++]));
+                add_script(node_ref["scripts"][scripts_idx++]);
             }
         }
 
         m_parent = (node_ref["parent"].is_null() ?
-
                     UUID() :
                     UUID_helper::to_UUID(node_ref["parent"]));
 
@@ -391,6 +386,44 @@ void BT::Game_object::scene_serialize(Scene_serialization_mode mode, json& node_
         }
     }
 }
+
+void BT::Game_object::add_script(json& node_ref)
+{
+    m_scripts.emplace_back(
+        Scripts::create_script_from_serialized_datas(&m_input_handler,
+                                                     &m_phys_engine,
+                                                     &m_renderer,
+                                                     &m_obj_pool,
+                                                     node_ref));
+}
+
+void BT::Game_object::remove_script(std::string const& script_type)
+{
+    auto script_type_enum{ Scripts::Helper_funcs::get_script_type_from_name(script_type) };
+
+    bool success{ false };
+
+    size_t idx{ 0 };
+    for (auto& script : m_scripts)
+    {
+        if (script->get_type() == script_type_enum)
+        {   // Erase!
+            m_scripts.erase(m_scripts.begin() + idx);
+            success = true;
+            break;
+        }
+        idx++;
+    }
+
+    if (!success)
+    {
+        logger::printef(
+            logger::WARN,
+            "`remove_script()` did not find attached script type: %s",
+            script_type.c_str());
+    }
+}
+
 
 namespace
 {
@@ -539,6 +572,12 @@ void BT::Game_object::render_imgui_transform_gizmo()
     }
 }
 
+
+// Game_object_pool.
+BT::Game_object_pool::Game_object_pool()
+{
+    BT_SERVICE_FINDER_ADD_SERVICE(BT::Game_object_pool, this);
+}
 
 void BT::Game_object_pool::set_callback_fn(
     function<unique_ptr<Game_object>()>&& create_new_empty_game_obj_callback_fn)
