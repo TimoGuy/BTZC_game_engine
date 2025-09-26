@@ -116,6 +116,14 @@ void BT::Hitcapsule_group_set::scene_serialize(Scene_serialization_mode mode, js
     }
 }
 
+void BT::Hitcapsule_group_set::replace_and_reregister(Hitcapsule_group_set const& other)
+{
+    auto& overlap_solver{ service_finder::find_service<Hitcapsule_group_overlap_solver>() };
+    overlap_solver.remove_group_set(*this);
+    *this = other;
+    overlap_solver.add_group_set(*this);
+}
+
 
 // Hitcapsule_group_overlap_solver.
 BT::Hitcapsule_group_overlap_solver::Hitcapsule_group_overlap_solver()
@@ -136,13 +144,26 @@ bool BT::Hitcapsule_group_overlap_solver::add_group_set(Hitcapsule_group_set& gr
     return success;
 }
 
-void BT::Hitcapsule_group_overlap_solver::remove_group_set(Hitcapsule_group_set& group_set)
+bool BT::Hitcapsule_group_overlap_solver::remove_group_set(Hitcapsule_group_set& group_set)
 {
-    m_group_sets.erase(m_group_sets.find(&group_set));
+    bool success{ false };
+    auto iter{ m_group_sets.find(&group_set) };
+    if (iter != m_group_sets.end())
+    {
+        m_group_sets.erase(iter);
+        success = true;
+    }
+
+    return success;
 }
 
 void BT::Hitcapsule_group_overlap_solver::update_overlaps()
 {
-    // @TODO
-    assert(false);
+    for (auto grp_set_ptr_a : m_group_sets)
+    for (auto grp_set_ptr_b : m_group_sets)
+    if (grp_set_ptr_a != grp_set_ptr_b)
+    {
+        // @TODO: Check for overlaps.
+        assert(false);
+    }
 }

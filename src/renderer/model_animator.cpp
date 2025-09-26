@@ -217,8 +217,8 @@ void BT::Model_animator::configure_anim_frame_action_controls(
     // Idk why I put this into a separate method instead of in the constructor but hey, here we are.
     m_anim_frame_action_controls = anim_frame_action_controls;
 
-    m_anim_frame_action_data.hitcapsule_group_set = 
-        m_anim_frame_action_controls->hitcapsule_group_set_template;
+    m_anim_frame_action_data.hitcapsule_group_set.replace_and_reregister(
+        m_anim_frame_action_controls->hitcapsule_group_set_template);
 }
 
 std::vector<BT::Model_animator::Animator_state> const&
