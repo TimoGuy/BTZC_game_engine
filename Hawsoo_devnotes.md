@@ -184,3 +184,6 @@ while (running_game_loop)
             - [x] Defer actually mutating the scripts until after the scripts are done running.
                 - [x] Adds call.
                 - [x] Writes deferring funcs.
+        - [ ] Write funcs for updating hitcapsule `.enabled` flags and updating hitcapsule transforms.
+
+- [ ] Add visual representation of when hitcapsules are active.
