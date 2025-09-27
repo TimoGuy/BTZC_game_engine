@@ -184,6 +184,9 @@ while (running_game_loop)
             - [x] Defer actually mutating the scripts until after the scripts are done running.
                 - [x] Adds call.
                 - [x] Writes deferring funcs.
-        - [ ] Write funcs for updating hitcapsule `.enabled` flags and updating hitcapsule transforms.
+        - [x] Write funcs for updating hitcapsule `.enabled` flags
+        - [ ] Write func for updating hitcapsule transforms.
+            - [x] `update_hitcapsule_transform_to_joint_mats()`.
+            - [ ] Write func `get_joint_matrices_at_frame()`.
 
 - [ ] Add visual representation of when hitcapsules are active.

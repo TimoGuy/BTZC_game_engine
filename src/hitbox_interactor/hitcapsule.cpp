@@ -18,12 +18,40 @@ void BT::Hitcapsule::init_calc_info(Model_animator const& animator)
     if (!connecting_bone_name_2.empty())
         calcd_bone_mat_idx_2 = joint_name_to_idx.at(connecting_bone_name_2);
 
+    glm_vec3_copy(origin_a.raw, calcd_origin_a);
+    glm_vec3_copy(origin_b.raw, calcd_origin_b);
+
+    calc_orig_pt_distance();
+}
+
+void BT::Hitcapsule::update_transform_joint_mats(std::vector<mat4s> const& joint_matrices)
+{   // Do nothing if no connecting bone idx.
+    if (calcd_bone_mat_idx == (size_t)-1)
+        return;
+
+    // Use 1st connecting bone idx.
+    size_t connecting_bone_mat_idx{ calcd_bone_mat_idx };
+    glm_mat4_mulv3(const_cast<vec4*>(joint_matrices[connecting_bone_mat_idx].raw),
+                   origin_a.raw,
+                   1.0f,
+                   calcd_origin_a);
+
+    // Use 2nd connecting bone idx if available. If not, use 1st one here too.
+    if (calcd_bone_mat_idx_2 != (size_t)-1)
+        connecting_bone_mat_idx = calcd_bone_mat_idx_2;
+
+    glm_mat4_mulv3(const_cast<vec4*>(joint_matrices[connecting_bone_mat_idx].raw),
+                   origin_b.raw,
+                   1.0f,
+                   calcd_origin_b);
+
+    // Recalc origin point dependent vars.
     calc_orig_pt_distance();
 }
 
 void BT::Hitcapsule::calc_orig_pt_distance()
 {
-    calcd_orig_pts_dist = glm_vec3_distance(origin_a.raw, origin_b.raw);
+    calcd_orig_pts_dist = glm_vec3_distance(calcd_origin_a, calcd_origin_b);
 }
 
 

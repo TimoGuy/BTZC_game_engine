@@ -166,23 +166,26 @@ void BT::anim_frame_action::Runtime_controllable_data
     {
         assert(data_label_idx < s_all_hitcapsule_grp_data_labels.size());
 
-        if (get_bool_data_handle(s_all_hitcapsule_grp_data_labels[data_label_idx])
-            .get_val())
-            {
-                assert(false);  // heyheyheyyyy
-            }
-
+        // Use data handle to set hitcapsule group enabled flag.
+        hitcapsule_grp.set_enabled(
+            get_bool_data_handle(s_all_hitcapsule_grp_data_labels[data_label_idx]).get_val());
 
         data_label_idx++;
     }
-    assert(false);
 }
 
 void BT::anim_frame_action::Runtime_controllable_data
     ::update_hitcapsule_transform_to_joint_mats(std::vector<mat4s> const& joint_matrices)
 {
-
-    assert(false);
+    auto& hitcapsule_grps{ hitcapsule_group_set.get_hitcapsule_groups() };
+    for (auto& hitcapsule_grp : hitcapsule_grps)
+    {
+        auto& hitcapsules{ hitcapsule_grp.get_capsules() };
+        for (auto& hitcapsule : hitcapsules)
+        {   // Update hitcapsule to follow attached joint matrices.
+            hitcapsule.update_transform_joint_mats(joint_matrices);
+        }
+    }
 }
 
 
