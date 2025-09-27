@@ -192,11 +192,23 @@ BT::Hitcapsule_group_overlap_solver::Hitcapsule_group_overlap_solver()
     BT_SERVICE_FINDER_ADD_SERVICE(Hitcapsule_group_overlap_solver, this);
 }
 
+namespace
+{
+constexpr char const* const k_add_log_str    = "(+)     Added hitcapsule group set to overlap solver:";
+constexpr char const* const k_remove_log_str = "(-) Removed hitcapsule group set from overlap solver:";
+}  // namespace
+
 bool BT::Hitcapsule_group_overlap_solver::add_group_set(Hitcapsule_group_set& group_set)
 {
     bool success{ false };
     if (m_group_sets.emplace(&group_set).second)
+    {
+        logger::printef(logger::TRACE,
+                        "%s %p",
+                        k_add_log_str,
+                        (void*)&group_set);
         success = true;
+    }
     else
         logger::printe(logger::ERROR, "Emplacing hitcapsule group set failed.");
 
@@ -211,6 +223,10 @@ bool BT::Hitcapsule_group_overlap_solver::remove_group_set(Hitcapsule_group_set&
     if (iter != m_group_sets.end())
     {
         m_group_sets.erase(iter);
+        logger::printef(logger::TRACE,
+                        "%s %p",
+                        k_remove_log_str,
+                        (void*)&group_set);
         success = true;
     }
 
