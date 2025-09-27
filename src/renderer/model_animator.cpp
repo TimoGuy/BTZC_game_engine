@@ -189,6 +189,12 @@ void BT::Model_joint_animation::get_joint_matrices_at_frame(
         glm_mat4_identity(joint_matrix.raw);
     }
 
+    // @NOTE: So I think that the best thing to do here is just copy the contents of the
+    // `calc_joint_matrices()` function and then instead of using `interpolate_fast()`, just return
+    // the first one essentially. It'll just be copypasta for this run around but maybe in the
+    // future a more efficient way for `get_joint_matrices_at_frame()` can be concocted when the
+    // program demands the performance.  -Thea 2025/09/27
+
     assert(false);
 }
 
