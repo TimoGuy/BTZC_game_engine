@@ -67,6 +67,15 @@ public:
 
     void emplace_debug_line(Debug_line&& dbg_line, float_t timeout = 1.0f);
 
+    // Emplaces a capsule made up of a bunch of debug lines in a batch into the pool. Only one color
+    // param is provided for consistency.
+    //
+    // @NOTE: `origin_a` and `origin_b` are the same operation of `BT::Hitcapsule`, in that
+    // imagining the capsule as a sphere with `radius` that glides along a line segment with start
+    // and end points `origin_a` and `origin_b` is the best way to imagine how the params work.
+    void emplace_debug_line_based_capsule(
+        vec3 origin_a, vec3 origin_b, float_t radius, vec4 color, float_t timeout = 1.0f);
+
     struct Render_data
     {
         size_t num_lines_to_render;
@@ -85,7 +94,8 @@ private:
     };
 
 
-    static constexpr uint32_t k_num_lines{ 1024 };  // @NOTE: Must be power of 2.
+    // static constexpr uint32_t k_num_lines{ 1024 };  // @NOTE: Must be power of 2.
+    static constexpr uint32_t k_num_lines{ 8192 };  // @NOTE: Must be power of 2.
     std::array<Debug_line_with_timeout, k_num_lines> m_lines;
     std::atomic_uint32_t m_next_write_idx{ 0 };
 

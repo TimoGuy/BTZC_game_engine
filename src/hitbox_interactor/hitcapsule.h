@@ -34,6 +34,9 @@ struct Hitcapsule
     void init_calc_info(Model_animator const& animator);
     void update_transform_joint_mats(std::vector<mat4s> const& joint_matrices);
     void calc_orig_pt_distance();
+
+    // Submits debug render representation of this capsule, with provided `color`.
+    void emplace_debug_render_repr(vec4 color) const;
 };
 
 class Hitcapsule_group
@@ -54,6 +57,10 @@ public:
     Type get_type();
     std::vector<Hitcapsule>& get_capsules();
 
+    // Submits debug render representation of hitcapsules, with different colors depending on type
+    // of group and whether this group is enabled.
+    void emplace_debug_render_repr() const;
+
 private:
     bool m_enabled;
     Type m_type;
@@ -73,6 +80,9 @@ public:
     void connect_animator(Model_animator const& animator);
 
     std::vector<Hitcapsule_group>& get_hitcapsule_groups();
+
+    // Submits debug render representation of hitcapsule groups.
+    void emplace_debug_render_repr() const;
 
 private:
     std::vector<Hitcapsule_group> m_hitcapsule_grps;

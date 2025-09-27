@@ -191,3 +191,11 @@ while (running_game_loop)
     - Okay, at this point everything should be working!!! Now we just need to see it to believe it!
 
 - [ ] Add visual representation of when hitcapsules are active.
+    - Use `debug_render_job.h` for now.
+    - [x] Write funcs to submit the capsules to debug render pool.
+    - [ ] Write `emplace_debug_line_based_capsule()` with regular `emplace_debug_line()`.
+        - [x] Initial
+        - It works when I enable/disable on the timeline!!!
+        - [ ] BUGFIX: Saving timeline doesn't work again...
+        - [ ] Shorten the drawing timeout so that it doesn't have a bunch of overlapping draws.
+    - [ ] Write and use batched `emplace_debug_line()`

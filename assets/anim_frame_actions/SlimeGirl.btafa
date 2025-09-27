@@ -6,6 +6,11 @@
                     "ctrl_item_idx": 1,
                     "end_frame": 28,
                     "start_frame": 2
+                },
+                {
+                    "ctrl_item_idx": 4,
+                    "end_frame": 23,
+                    "start_frame": 19
                 }
             ],
             "state_name": "st_idle"
@@ -59,22 +64,33 @@
         },
         {
             "name": "play_sfx_footstep:tr"
+        },
+        {
+            "name": "hitcapsule_group_0_enabled:ov:true"
         }
     ],
     "hitcapsule_group_set": {
         "hitcapsule_groups": [
             {
-                "enabled": true,
-                "type": 0,
                 "capsules": [
                     {
-                        "origin_a": [0, 0, 0],
-                        "origin_b": [1, 1, 1],
-                        "radius": 0.5,
                         "connecting_bone_name": "",
-                        "connecting_bone_name_2": ""
+                        "connecting_bone_name_2": "",
+                        "origin_a": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "origin_b": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "radius": 0.5
                     }
-                ]
+                ],
+                "enabled": true,
+                "type": 0
             }
         ]
     }

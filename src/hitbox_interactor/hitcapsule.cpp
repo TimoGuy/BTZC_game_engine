@@ -1,5 +1,6 @@
 #include "hitcapsule.h"
 
+#include "../renderer/debug_render_job.h"
 #include "../renderer/model_animator.h"
 #include "../service_finder/service_finder.h"
 #include "cglm/vec3.h"
@@ -54,6 +55,12 @@ void BT::Hitcapsule::calc_orig_pt_distance()
     calcd_orig_pts_dist = glm_vec3_distance(calcd_origin_a, calcd_origin_b);
 }
 
+void BT::Hitcapsule::emplace_debug_render_repr(vec4 color) const
+{
+    get_main_debug_line_pool().emplace_debug_line_based_capsule(
+        const_cast<float_t*>(calcd_origin_a), const_cast<float_t*>(calcd_origin_b), radius, color);
+}
+
 
 // Hitcapsule_group.
 BT::Hitcapsule_group::Hitcapsule_group(bool enabled,
@@ -83,6 +90,31 @@ BT::Hitcapsule_group::Type BT::Hitcapsule_group::get_type()
 std::vector<BT::Hitcapsule>& BT::Hitcapsule_group::get_capsules()
 {
     return m_capsules;
+}
+
+void BT::Hitcapsule_group::emplace_debug_render_repr() const
+{   // Generate color.
+    vec4s color;
+    switch (m_type)
+    {
+        case HITBOX_TYPE_RECEIVE_HURT:
+            color = (m_enabled
+                     ? vec4s{ 0.509, 0.465, 0.990 }
+                     : vec4s{ 0.201, 0.183, 0.390 });
+            break;
+
+        case HITBOX_TYPE_GIVE_HURT:
+            color = (m_enabled
+                     ? vec4s{ 0.950, 0.427, 0.00 }
+                     : vec4s{ 0.530, 0.288, 0.0901 });
+            break;
+    }
+
+    // "Draw" hitcapsules.
+    for (auto& hitcapsule : m_capsules)
+    {
+        hitcapsule.emplace_debug_render_repr(color.raw);
+    }
 }
 
 
@@ -184,6 +216,14 @@ std::vector<BT::Hitcapsule_group>& BT::Hitcapsule_group_set::get_hitcapsule_grou
     return m_hitcapsule_grps;
 }
 
+void BT::Hitcapsule_group_set::emplace_debug_render_repr() const
+{
+    for (auto& group : m_hitcapsule_grps)
+    {
+        group.emplace_debug_render_repr();
+    }
+}
+
 
 // Hitcapsule_group_overlap_solver.
 BT::Hitcapsule_group_overlap_solver::Hitcapsule_group_overlap_solver()
@@ -243,5 +283,11 @@ void BT::Hitcapsule_group_overlap_solver::update_overlaps()
     {
         // @TODO: Check for overlaps.
         assert(false);
+    }
+
+    // Submit debug drawing for all hitcapsules.
+    for (auto group_set_ptr : m_group_sets)
+    {
+        group_set_ptr->emplace_debug_render_repr();
     }
 }
