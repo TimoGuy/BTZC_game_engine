@@ -199,3 +199,4 @@ while (running_game_loop)
         - [ ] BUGFIX: Saving timeline doesn't work again...
         - [ ] Shorten the drawing timeout so that it doesn't have a bunch of overlapping draws.
     - [ ] Write and use batched `emplace_debug_line()`
+    - [ ] Connect a capsule to bone of model to test now.
