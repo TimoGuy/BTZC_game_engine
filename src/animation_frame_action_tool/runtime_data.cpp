@@ -146,12 +146,42 @@ void BT::anim_frame_action::Runtime_controllable_data
 void BT::anim_frame_action::Runtime_controllable_data
     ::assign_hitcapsule_enabled_flags()
 {
+    static std::vector<Controllable_data_label> const s_all_hitcapsule_grp_data_labels{
+        CTRL_DATA_LABEL_hitcapsule_group_0_enabled,
+        CTRL_DATA_LABEL_hitcapsule_group_1_enabled,
+        CTRL_DATA_LABEL_hitcapsule_group_2_enabled,
+        CTRL_DATA_LABEL_hitcapsule_group_3_enabled,
+        CTRL_DATA_LABEL_hitcapsule_group_4_enabled,
+        CTRL_DATA_LABEL_hitcapsule_group_5_enabled,
+        CTRL_DATA_LABEL_hitcapsule_group_6_enabled,
+        CTRL_DATA_LABEL_hitcapsule_group_7_enabled,
+        CTRL_DATA_LABEL_hitcapsule_group_8_enabled,
+        CTRL_DATA_LABEL_hitcapsule_group_9_enabled,
+    };
+
+    size_t data_label_idx{ 0 };
+
+    auto& hitcapsule_grps{ hitcapsule_group_set.get_hitcapsule_groups() };
+    for (auto& hitcapsule_grp : hitcapsule_grps)
+    {
+        assert(data_label_idx < s_all_hitcapsule_grp_data_labels.size());
+
+        if (get_bool_data_handle(s_all_hitcapsule_grp_data_labels[data_label_idx])
+            .get_val())
+            {
+                assert(false);  // heyheyheyyyy
+            }
+
+
+        data_label_idx++;
+    }
     assert(false);
 }
 
 void BT::anim_frame_action::Runtime_controllable_data
     ::update_hitcapsule_transform_to_joint_mats(std::vector<mat4s> const& joint_matrices)
 {
+
     assert(false);
 }
 

@@ -65,6 +65,8 @@ public:
     void replace_and_reregister(Hitcapsule_group_set const& other);
     void connect_animator(Model_animator const& animator);
 
+    std::vector<Hitcapsule_group>& get_hitcapsule_groups();
+
 private:
     std::vector<Hitcapsule_group> m_hitcapsule_grps;
 };

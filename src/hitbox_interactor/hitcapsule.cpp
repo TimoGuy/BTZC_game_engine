@@ -132,6 +132,11 @@ void BT::Hitcapsule_group_set::connect_animator(Model_animator const& animator)
     }
 }
 
+std::vector<BT::Hitcapsule_group>& BT::Hitcapsule_group_set::get_hitcapsule_groups()
+{
+    return m_hitcapsule_grps;
+}
+
 
 // Hitcapsule_group_overlap_solver.
 BT::Hitcapsule_group_overlap_solver::Hitcapsule_group_overlap_solver()
