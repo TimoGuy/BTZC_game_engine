@@ -169,7 +169,7 @@ while (running_game_loop)
 - [x] I think ImGui for the editor also needs to get reworked bc it's probably using the animator indices too.
 
 - [x] Reincorporate hitcapsule groups.
-- [ ] Load extra part in btafa and add hitcapsule groups.
+- [x] Load extra part in btafa and add hitcapsule groups.
     - I think that there needs to be a way to prevent self-collision, so grouping hitcapsule groups together into an entity-owning set of groups would be good.
     - [x] initial loading
     - [x] `deep_clone()`
@@ -185,8 +185,9 @@ while (running_game_loop)
                 - [x] Adds call.
                 - [x] Writes deferring funcs.
         - [x] Write funcs for updating hitcapsule `.enabled` flags
-        - [ ] Write func for updating hitcapsule transforms.
+        - [x] Write func for updating hitcapsule transforms.
             - [x] `update_hitcapsule_transform_to_joint_mats()`.
-            - [ ] Write func `get_joint_matrices_at_frame()`.
+            - [x] Write func `get_joint_matrices_at_frame()`.
+    - Okay, at this point everything should be working!!! Now we just need to see it to believe it!
 
 - [ ] Add visual representation of when hitcapsules are active.

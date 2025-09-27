@@ -87,6 +87,16 @@ std::vector<BT::Hitcapsule>& BT::Hitcapsule_group::get_capsules()
 
 
 // Hitcapsule_group_set.
+BT::Hitcapsule_group_set::~Hitcapsule_group_set()
+{
+    if (m_is_registered_in_overlap_solver)
+    {
+        // Unregister to cleanup.
+        m_is_registered_in_overlap_solver =
+            !service_finder::find_service<Hitcapsule_group_overlap_solver>().remove_group_set(*this);
+    }
+}
+
 void BT::Hitcapsule_group_set::scene_serialize(Scene_serialization_mode mode, json& node_ref)
 {
     if (mode == SCENE_SERIAL_MODE_DESERIALIZE)
@@ -146,9 +156,18 @@ void BT::Hitcapsule_group_set::scene_serialize(Scene_serialization_mode mode, js
 void BT::Hitcapsule_group_set::replace_and_reregister(Hitcapsule_group_set const& other)
 {
     auto& overlap_solver{ service_finder::find_service<Hitcapsule_group_overlap_solver>() };
-    overlap_solver.remove_group_set(*this);
+
+    if (m_is_registered_in_overlap_solver)
+    {   // Unregister self if currently registered.
+        m_is_registered_in_overlap_solver =
+            !overlap_solver.remove_group_set(*this);
+        assert(!m_is_registered_in_overlap_solver);
+    }
+
     *this = other;
-    overlap_solver.add_group_set(*this);
+
+    m_is_registered_in_overlap_solver = overlap_solver.add_group_set(*this);
+    assert(m_is_registered_in_overlap_solver);
 }
 
 void BT::Hitcapsule_group_set::connect_animator(Model_animator const& animator)

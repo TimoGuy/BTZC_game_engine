@@ -65,6 +65,8 @@ private:
 class Hitcapsule_group_set : public Scene_serialization_ifc
 {
 public:
+    ~Hitcapsule_group_set();
+
     void scene_serialize(Scene_serialization_mode mode, json& node_ref) override;
 
     void replace_and_reregister(Hitcapsule_group_set const& other);
@@ -74,6 +76,7 @@ public:
 
 private:
     std::vector<Hitcapsule_group> m_hitcapsule_grps;
+    bool m_is_registered_in_overlap_solver{ false };
 };
 
 class Hitcapsule_group_overlap_solver

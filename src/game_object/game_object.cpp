@@ -400,7 +400,8 @@ void BT::Game_object::scene_serialize(Scene_serialization_mode mode, json& node_
             assert(node_ref["scripts"].is_array());
             for (size_t scripts_idx = 0; scripts_idx < node_ref["scripts"].size();)
             {
-                add_script(node_ref["scripts"][scripts_idx++]);  // @NOTE: Adding is deffered until `process_script_list_mutation_requests()`.
+                add_script(node_ref["scripts"][scripts_idx++]);  // @NOTE: Adding is deffered until
+                                                                 // `process_script_list_mutation_requests()`.
                 process_script_list_mutation_requests();  // For immediately adding.
             }
         }
@@ -993,9 +994,8 @@ void BT::Game_object_pool::remove_root_level_status(UUID key)
         m_root_level_game_objects_ordering.end());
 }
 
-void BT::Game_object_pool::render_imgui_scene_hierarchy_node_recursive(void* node_void_ptr,
-                                                                       Modify_scene_hierarchy_action& modify_action,
-                                                                       intptr_t& next_id)
+void BT::Game_object_pool::render_imgui_scene_hierarchy_node_recursive(
+    void* node_void_ptr, Modify_scene_hierarchy_action& modify_action, intptr_t& next_id)
 {
     auto node{ reinterpret_cast<Hierarchy_node*>(node_void_ptr) };  // I like the stink.  -Thea 2025/06/03
 
