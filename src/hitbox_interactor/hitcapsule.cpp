@@ -194,8 +194,10 @@ BT::Hitcapsule_group_overlap_solver::Hitcapsule_group_overlap_solver()
 
 namespace
 {
-constexpr char const* const k_add_log_str    = "(+)     Added hitcapsule group set to overlap solver:";
-constexpr char const* const k_remove_log_str = "(-) Removed hitcapsule group set from overlap solver:";
+constexpr char const* const k_add_log_str =
+    "(+) Added hitcapsule group set to overlap solver:     ";
+constexpr char const* const k_remove_log_str =
+    "(-) Removed hitcapsule group set from overlap solver: ";
 }  // namespace
 
 bool BT::Hitcapsule_group_overlap_solver::add_group_set(Hitcapsule_group_set& group_set)
@@ -204,7 +206,7 @@ bool BT::Hitcapsule_group_overlap_solver::add_group_set(Hitcapsule_group_set& gr
     if (m_group_sets.emplace(&group_set).second)
     {
         logger::printef(logger::TRACE,
-                        "%s %p",
+                        "%s%p",
                         k_add_log_str,
                         (void*)&group_set);
         success = true;
@@ -224,7 +226,7 @@ bool BT::Hitcapsule_group_overlap_solver::remove_group_set(Hitcapsule_group_set&
     {
         m_group_sets.erase(iter);
         logger::printef(logger::TRACE,
-                        "%s %p",
+                        "%s%p",
                         k_remove_log_str,
                         (void*)&group_set);
         success = true;
