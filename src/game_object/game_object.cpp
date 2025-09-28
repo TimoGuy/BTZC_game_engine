@@ -212,7 +212,6 @@ void BT::Game_object::process_script_list_mutation_requests()
 
         bool success{ false };
 
-        size_t idx{ 0 };
         for (size_t idx = 0; idx < m_scripts.size(); idx++)
         {
             if (m_scripts[idx]->get_type() == script_type_enum)

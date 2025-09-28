@@ -190,7 +190,7 @@ while (running_game_loop)
             - [x] Write func `get_joint_matrices_at_frame()`.
     - Okay, at this point everything should be working!!! Now we just need to see it to believe it!
 
-- [ ] Add visual representation of when hitcapsules are active.
+- [x] Add visual representation of when hitcapsules are active.
     - Use `debug_render_job.h` for now.
     - [x] Write funcs to submit the capsules to debug render pool.
     - [x] Write `emplace_debug_line_based_capsule()` with regular `emplace_debug_line()`.
@@ -202,5 +202,10 @@ while (running_game_loop)
             - [x] Maybe anims not switching when the state changes in the gui is a related issue??
                 - BUT FIX THIS IMMEDIATELYYYY
         - [x] Shorten the drawing timeout so that it doesn't have a bunch of overlapping draws.
-    - [ ] Write and use batched `emplace_debug_line()`
     - [x] Connect a capsule to bone of model to test now.
+
+- [ ] Create hitcapsule editor (and group assigner) ImGui.
+    > Honestly, just making it so that it edits the positions and radius of the capsules would be fine, instead of having to worry about creating new capsules (bc that all can be done by editing the txt in `.btafa` files).
+    - @TODO: START HERE!!!!
+
+- [ ] Write and use batched version of `emplace_debug_line()` for `emplace_debug_line_based_capsule()` inner func.
