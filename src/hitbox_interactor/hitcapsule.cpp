@@ -58,7 +58,11 @@ void BT::Hitcapsule::calc_orig_pt_distance()
 void BT::Hitcapsule::emplace_debug_render_repr(vec4 color) const
 {
     get_main_debug_line_pool().emplace_debug_line_based_capsule(
-        const_cast<float_t*>(calcd_origin_a), const_cast<float_t*>(calcd_origin_b), radius, color);
+        const_cast<float_t*>(calcd_origin_a),
+        const_cast<float_t*>(calcd_origin_b),
+        radius,
+        color,
+        0.03f);
 }
 
 

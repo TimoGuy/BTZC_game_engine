@@ -95,7 +95,8 @@ private:
 
 
     // static constexpr uint32_t k_num_lines{ 1024 };  // @NOTE: Must be power of 2.
-    static constexpr uint32_t k_num_lines{ 8192 };  // @NOTE: Must be power of 2.
+    // static constexpr uint32_t k_num_lines{ 8192 };  // @NOTE: Must be power of 2.
+    static constexpr uint32_t k_num_lines{ 16384 };  // @NOTE: Must be power of 2.
     std::array<Debug_line_with_timeout, k_num_lines> m_lines;
     std::atomic_uint32_t m_next_write_idx{ 0 };
 

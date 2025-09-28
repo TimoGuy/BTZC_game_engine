@@ -11,6 +11,11 @@
                     "ctrl_item_idx": 4,
                     "end_frame": 23,
                     "start_frame": 19
+                },
+                {
+                    "ctrl_item_idx": 2,
+                    "end_frame": 38,
+                    "start_frame": 34
                 }
             ],
             "state_name": "st_idle"
@@ -87,6 +92,21 @@
                             1.0
                         ],
                         "radius": 0.5
+                    },
+                    {
+                        "connecting_bone_name": "Upper Arm.R",
+                        "connecting_bone_name_2": "",
+                        "origin_a": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "origin_b": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "radius": 0.25
                     }
                 ],
                 "enabled": true,

@@ -568,9 +568,13 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
                 auto job{ process_jobs.front() };
                 process_jobs.pop_front();
 
+                size_t next_joints_sorted_breadth_first_idx{
+                    m_model_skin.joints_sorted_breadth_first.size()
+                };
+
                 node_idx_to_model_joint_idx_map.emplace(
                     job.node_idx,
-                    m_model_skin.joints_sorted_breadth_first.size());
+                    next_joints_sorted_breadth_first_idx);
 
                 Model_joint new_model_joint{
                     std::string(asset.nodes[job.node_idx].name), };
@@ -578,7 +582,10 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
                               new_model_joint.inverse_bind_matrix);
                 // @NOTE: Add parent-child relation later.
 
+                m_model_skin.joint_name_to_idx.emplace(new_model_joint.name,
+                                                       next_joints_sorted_breadth_first_idx);
                 m_model_skin.joints_sorted_breadth_first.emplace_back(new_model_joint);
+
                 gltf_asset_joint_idx_to_insert_order_map.emplace(
                     node_idx_to_gltf_joint_idx_map.at(job.node_idx),
                     node_index_insert_order.size());

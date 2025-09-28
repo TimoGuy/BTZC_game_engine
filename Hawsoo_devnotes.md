@@ -197,6 +197,9 @@ while (running_game_loop)
         - [x] Initial
         - It works when I enable/disable on the timeline!!!
         - [ ] BUGFIX: Saving timeline doesn't work again...
-        - [ ] Shorten the drawing timeout so that it doesn't have a bunch of overlapping draws.
+            - [x] Seems like it works now that the `k_num_lines` is increased? (1024 -> 16384)
+            - [ ] Maybe anims not switching when the state changes in the gui is a related issue??
+                - BUT FIX THIS IMMEDIATELYYYY
+        - [x] Shorten the drawing timeout so that it doesn't have a bunch of overlapping draws.
     - [ ] Write and use batched `emplace_debug_line()`
     - [ ] Connect a capsule to bone of model to test now.
