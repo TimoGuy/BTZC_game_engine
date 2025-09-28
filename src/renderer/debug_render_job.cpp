@@ -303,7 +303,9 @@ BT::Debug_line_pool::Render_data BT::Debug_line_pool::calc_render_data(float_t d
     }
 
     if (m_is_dirty)
-    {
+    {   // @NOTE: This seems to be the only reason why the GPU upload `memcpy()` step crashes.
+        assert(m_active_indices.size() <= k_num_lines);
+
         // Insert jobs into SSBO.
         std::vector<Debug_line> jobs;
         jobs.reserve(m_active_indices.size());

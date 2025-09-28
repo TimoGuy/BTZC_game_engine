@@ -193,13 +193,14 @@ while (running_game_loop)
 - [ ] Add visual representation of when hitcapsules are active.
     - Use `debug_render_job.h` for now.
     - [x] Write funcs to submit the capsules to debug render pool.
-    - [ ] Write `emplace_debug_line_based_capsule()` with regular `emplace_debug_line()`.
+    - [x] Write `emplace_debug_line_based_capsule()` with regular `emplace_debug_line()`.
         - [x] Initial
         - It works when I enable/disable on the timeline!!!
-        - [ ] BUGFIX: Saving timeline doesn't work again...
+        - [x] BUGFIX: Saving timeline doesn't work again...
             - [x] Seems like it works now that the `k_num_lines` is increased? (1024 -> 16384)
-            - [ ] Maybe anims not switching when the state changes in the gui is a related issue??
+                - [x] Added an assert to make sure that the num active line draw jobs (`m_active_indices`) does not exceed the max `k_num_lines`.
+            - [x] Maybe anims not switching when the state changes in the gui is a related issue??
                 - BUT FIX THIS IMMEDIATELYYYY
         - [x] Shorten the drawing timeout so that it doesn't have a bunch of overlapping draws.
     - [ ] Write and use batched `emplace_debug_line()`
-    - [ ] Connect a capsule to bone of model to test now.
+    - [x] Connect a capsule to bone of model to test now.

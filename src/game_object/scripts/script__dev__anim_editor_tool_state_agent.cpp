@@ -174,6 +174,10 @@ void BT::Scripts::Script__dev__anim_editor_tool_state_agent::on_pre_render(float
             game_obj.add_script(creation_json);
         }
 
+        // Set animator state.
+        anim_frame_action::s_editor_state.working_model_animator->change_state_idx(
+            m_working_anim_state_idx);
+
         // Fill in animator state name to idx map.
         auto& anim_states{
             anim_frame_action::s_editor_state.working_model_animator->get_animator_states() };
