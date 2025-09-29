@@ -558,6 +558,134 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
     }
     ImGui::End();
 
+    // Hitcapsule editor.
+    ImGui::Begin("Animator action frame hitcapsule group set param editor");
+    if (anim_frame_action::s_editor_state.working_model_animator != nullptr)
+    {
+        auto& hitcapsule_grp_set{ anim_frame_action::s_editor_state.working_model_animator
+                                      ->get_anim_frame_action_data_handle()
+                                      .hitcapsule_group_set };
+
+        size_t cap_grp_idx{ 0 };
+        for (auto& cap_grp : hitcapsule_grp_set.get_hitcapsule_groups())
+        {   // 
+            ImGui::Text("JOJJOJOJOJOOJ #%llu", cap_grp_idx);
+
+            ImGui::BeginDisabled();
+            
+            bool cap_grp_enabled{ cap_grp.is_enabled() };
+            ImGui::Checkbox("Enabled", &cap_grp_enabled);
+
+            int32_t cap_grp_type{ cap_grp.get_type() };
+            ImGui::Combo("Type", &cap_grp_type, "Receive hurt\0Give hurt\0");
+
+            ImGui::EndDisabled();
+
+            ImGui::SeparatorText("Capsules within group");
+
+            for (auto& capsule : cap_grp.get_capsules())
+            {
+
+            }
+
+            cap_grp_idx++;
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                      
+
+        auto const& all_controllable_data_strs{ anim_frame_action::Runtime_controllable_data::get_all_str_labels() };
+        for (auto& data_str : all_controllable_data_strs)
+        {
+            auto data_label{ anim_frame_action::Runtime_controllable_data::str_label_to_enum(data_str) };
+            switch ( anim_frame_action::Runtime_controllable_data::get_data_type(data_label))
+            {
+                case anim_frame_action::Runtime_controllable_data::CTRL_DATA_TYPE_FLOAT:
+                    ImGui::Text("%s : %0.4f",
+                                data_str.c_str(),
+                                anim_frame_action::s_editor_state.working_model_animator
+                                    ->get_anim_frame_action_data_handle()
+                                    .get_float_data_handle(data_label)
+                                    .get_val());
+                    break;
+
+                case anim_frame_action::Runtime_controllable_data::CTRL_DATA_TYPE_BOOL:
+                    ImGui::Text("%s : %s",
+                                data_str.c_str(),
+                                (anim_frame_action::s_editor_state.working_model_animator
+                                     ->get_anim_frame_action_data_handle()
+                                    .get_bool_data_handle(data_label)
+                                    .get_val()
+                                 ? "TRUE"
+                                 : "FALSE"));
+                    break;
+
+                case anim_frame_action::Runtime_controllable_data::CTRL_DATA_TYPE_RISING_EDGE_EVENT:
+                {
+                    ImGui::Text("%s : ", data_str.c_str());
+                    ImGui::SameLine();
+                    auto& reeve_handle{ anim_frame_action::s_editor_state.working_model_animator
+                                            ->get_anim_frame_action_data_handle()
+                                            .get_reeve_data_handle(data_label) };
+
+                    // >0.0: Trigger has been set off, and returns to 0.0.
+                    float_t trigger_lerp_val{ reeve_handle.update_cooldown_and_fetch_val(delta_time) };
+
+                    static auto s_trigger_str_fn = [](float_t t) {
+                        assert(t >= 0.0f && t <= 1.0f);
+                        int32_t t_over_trigger_length = std::roundf(t * (sizeof("trigger") - 1));
+                        switch (t_over_trigger_length)
+                        {
+                            case 0: return "trigger";
+                            case 1: return "Trigger";
+                            case 2: return "TRigger";
+                            case 3: return "TRIgger";
+                            case 4: return "TRIGger";
+                            case 5: return "TRIGGer";
+                            case 6: return "TRIGGEr";
+                            case 7: return "TRIGGER";
+                            default: assert(false); return "error_str";
+                        }
+                    };
+                    ImGui::TextColored(ImVec4(glm_lerp(1.0f, 1.0f,   trigger_lerp_val),
+                                              glm_lerp(1.0f, 0.914f, trigger_lerp_val),
+                                              glm_lerp(1.0f, 0.180f, trigger_lerp_val),
+                                              glm_lerp(0.3f, 1.0f,   trigger_lerp_val)),
+                                       "%s",
+                                       s_trigger_str_fn(trigger_lerp_val));
+                    break;
+                }
+
+                default:
+                    assert(false);
+                    break;
+            }
+        }
+    }
+    else
+    {
+        ImGui::Text("No working model animator assigned.");
+    }
+    ImGui::End();
+
     // Animation timeline.
     ImGui::Begin("Animation timeline", nullptr, (anim_frame_action::s_editor_state.is_working_timeline_dirty
                                                  ? ImGuiWindowFlags_UnsavedDocument
