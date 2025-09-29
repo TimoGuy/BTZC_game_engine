@@ -204,8 +204,10 @@ while (running_game_loop)
         - [x] Shorten the drawing timeout so that it doesn't have a bunch of overlapping draws.
     - [x] Connect a capsule to bone of model to test now.
 
-- [ ] Create hitcapsule editor (and group assigner) ImGui.
+- [x] Create hitcapsule editor (and group assigner) ImGui.
     > Honestly, just making it so that it edits the positions and radius of the capsules would be fine, instead of having to worry about creating new capsules (bc that all can be done by editing the txt in `.btafa` files).
-    - @TODO: START HERE!!!!
+- [ ] It kinda seems like more stuff needs to get checked.
+    - Multiply `origin_a` and `origin_b` by the bone matrix and then display those as well (or, just maybe make these editable fields inside imgui too (or just disabled-editable (so... just viewable))).
+        - [ ] misc, have `calcd_origin_a/b` also get mutated when changing the `origin_a/b` in the imgui editor for capsules that don't recalc their `calcd_origin_a/b` after initialization.
 
 - [ ] Write and use batched version of `emplace_debug_line()` for `emplace_debug_line_based_capsule()` inner func.

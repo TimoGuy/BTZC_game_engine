@@ -567,6 +567,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                                       .hitcapsule_group_set };
 
         size_t cap_grp_idx{ 0 };
+        size_t global_capsule_id_idx{ 0 };
         for (auto& cap_grp : hitcapsule_grp_set.get_hitcapsule_groups())
         {   // 
             ImGui::Text("JOJJOJOJOJOOJ #%llu", cap_grp_idx);
@@ -583,101 +584,41 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
 
             ImGui::SeparatorText("Capsules within group");
 
+            size_t cap_idx{ 0 };
             for (auto& capsule : cap_grp.get_capsules())
             {
+                if (ImGui::TreeNodeEx(reinterpret_cast<void*>(global_capsule_id_idx),
+                                      0,
+                                      "group[%llu].capsules[%llu]",
+                                      cap_grp_idx,
+                                      cap_idx))
+                {   // Editing params for capsules.
+                    ImGui::DragFloat3(("origin_a##hitcapsule_grp_set_hitcapsule_grp_hitcapsule"
+                                       + std::to_string(global_capsule_id_idx))
+                                          .c_str(),
+                                      capsule.origin_a.raw,
+                                      0.1f);
 
+                    ImGui::DragFloat3(("origin_b##hitcapsule_grp_set_hitcapsule_grp_hitcapsule"
+                                       + std::to_string(global_capsule_id_idx))
+                                          .c_str(),
+                                      capsule.origin_b.raw,
+                                      0.1f);
+
+                    ImGui::DragFloat(("radius##hitcapsule_grp_set_hitcapsule_grp_hitcapsule"
+                                      + std::to_string(global_capsule_id_idx))
+                                         .c_str(),
+                                     &capsule.radius,
+                                     0.05f);
+
+                    ImGui::TreePop();
+                }
+
+                cap_idx++;
+                global_capsule_id_idx++;
             }
 
             cap_grp_idx++;
-        }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                      
-
-        auto const& all_controllable_data_strs{ anim_frame_action::Runtime_controllable_data::get_all_str_labels() };
-        for (auto& data_str : all_controllable_data_strs)
-        {
-            auto data_label{ anim_frame_action::Runtime_controllable_data::str_label_to_enum(data_str) };
-            switch ( anim_frame_action::Runtime_controllable_data::get_data_type(data_label))
-            {
-                case anim_frame_action::Runtime_controllable_data::CTRL_DATA_TYPE_FLOAT:
-                    ImGui::Text("%s : %0.4f",
-                                data_str.c_str(),
-                                anim_frame_action::s_editor_state.working_model_animator
-                                    ->get_anim_frame_action_data_handle()
-                                    .get_float_data_handle(data_label)
-                                    .get_val());
-                    break;
-
-                case anim_frame_action::Runtime_controllable_data::CTRL_DATA_TYPE_BOOL:
-                    ImGui::Text("%s : %s",
-                                data_str.c_str(),
-                                (anim_frame_action::s_editor_state.working_model_animator
-                                     ->get_anim_frame_action_data_handle()
-                                    .get_bool_data_handle(data_label)
-                                    .get_val()
-                                 ? "TRUE"
-                                 : "FALSE"));
-                    break;
-
-                case anim_frame_action::Runtime_controllable_data::CTRL_DATA_TYPE_RISING_EDGE_EVENT:
-                {
-                    ImGui::Text("%s : ", data_str.c_str());
-                    ImGui::SameLine();
-                    auto& reeve_handle{ anim_frame_action::s_editor_state.working_model_animator
-                                            ->get_anim_frame_action_data_handle()
-                                            .get_reeve_data_handle(data_label) };
-
-                    // >0.0: Trigger has been set off, and returns to 0.0.
-                    float_t trigger_lerp_val{ reeve_handle.update_cooldown_and_fetch_val(delta_time) };
-
-                    static auto s_trigger_str_fn = [](float_t t) {
-                        assert(t >= 0.0f && t <= 1.0f);
-                        int32_t t_over_trigger_length = std::roundf(t * (sizeof("trigger") - 1));
-                        switch (t_over_trigger_length)
-                        {
-                            case 0: return "trigger";
-                            case 1: return "Trigger";
-                            case 2: return "TRigger";
-                            case 3: return "TRIgger";
-                            case 4: return "TRIGger";
-                            case 5: return "TRIGGer";
-                            case 6: return "TRIGGEr";
-                            case 7: return "TRIGGER";
-                            default: assert(false); return "error_str";
-                        }
-                    };
-                    ImGui::TextColored(ImVec4(glm_lerp(1.0f, 1.0f,   trigger_lerp_val),
-                                              glm_lerp(1.0f, 0.914f, trigger_lerp_val),
-                                              glm_lerp(1.0f, 0.180f, trigger_lerp_val),
-                                              glm_lerp(0.3f, 1.0f,   trigger_lerp_val)),
-                                       "%s",
-                                       s_trigger_str_fn(trigger_lerp_val));
-                    break;
-                }
-
-                default:
-                    assert(false);
-                    break;
-            }
         }
     }
     else
