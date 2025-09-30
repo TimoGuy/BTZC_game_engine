@@ -11,6 +11,12 @@
             "anim_name": "Running.inmotion",
             "speed": 1.0,
             "loop": true
+        },
+        {
+            "state_name": "DEBUG_STATE",
+            "anim_name": "0_TPose",
+            "speed": 1.0,
+            "loop": true
         }
     ],
     "transition_states": [

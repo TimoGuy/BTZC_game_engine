@@ -54,6 +54,10 @@
                 }
             ],
             "state_name": "st_running"
+        },
+        {
+            "regions": [],
+            "state_name": "DEBUG_STATE"
         }
     ],
     "animated_model_name": "SlimeGirl",
@@ -97,16 +101,31 @@
                         "connecting_bone_name": "Upper Arm.R",
                         "connecting_bone_name_2": "",
                         "origin_a": [
-                            0.0,
-                            0.0,
+                            -0.1,
+                            1.5,
                             0.0
                         ],
                         "origin_b": [
-                            0.0,
-                            0.0,
-                            1.0
+                            -0.5,
+                            1.5,
+                            0.0
                         ],
-                        "radius": 0.25
+                        "radius": 0.1
+                    },
+                    {
+                        "connecting_bone_name": "Forearm.R",
+                        "connecting_bone_name_2": "",
+                        "origin_a": [
+                            -0.5,
+                            1.5,
+                            0.0
+                        ],
+                        "origin_b": [
+                            -0.75,
+                            1.5,
+                            0.0
+                        ],
+                        "radius": 0.1
                     }
                 ],
                 "enabled": true,

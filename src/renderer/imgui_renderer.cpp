@@ -593,17 +593,25 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                                       cap_grp_idx,
                                       cap_idx))
                 {   // Editing params for capsules.
-                    ImGui::DragFloat3(("origin_a##hitcapsule_grp_set_hitcapsule_grp_hitcapsule"
-                                       + std::to_string(global_capsule_id_idx))
-                                          .c_str(),
-                                      capsule.origin_a.raw,
-                                      0.1f);
+                    if (ImGui::DragFloat3(
+                            ("origin_a##hitcapsule_grp_set_hitcapsule_grp_hitcapsule" +
+                             std::to_string(global_capsule_id_idx))
+                                .c_str(),
+                            capsule.origin_a.raw,
+                            0.1f))
+                    {
+                        glm_vec3_copy(capsule.origin_a.raw, capsule.calcd_origin_a);
+                    }
 
-                    ImGui::DragFloat3(("origin_b##hitcapsule_grp_set_hitcapsule_grp_hitcapsule"
-                                       + std::to_string(global_capsule_id_idx))
-                                          .c_str(),
-                                      capsule.origin_b.raw,
-                                      0.1f);
+                    if (ImGui::DragFloat3(
+                            ("origin_b##hitcapsule_grp_set_hitcapsule_grp_hitcapsule" +
+                             std::to_string(global_capsule_id_idx))
+                                .c_str(),
+                            capsule.origin_b.raw,
+                            0.1f))
+                    {
+                        glm_vec3_copy(capsule.origin_b.raw, capsule.calcd_origin_b);
+                    }
 
                     ImGui::DragFloat(("radius##hitcapsule_grp_set_hitcapsule_grp_hitcapsule"
                                       + std::to_string(global_capsule_id_idx))
