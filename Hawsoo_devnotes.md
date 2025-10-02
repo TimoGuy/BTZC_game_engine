@@ -214,5 +214,7 @@ while (running_game_loop)
 - @THOUGHT: I realllllly reaaallllyyyy wish that there was a multi-view editor (1 reg view, 3 ortho axis views) and that would make this a lot easier to work with.
 
 - [ ] Allow saving to `.btafa` from gui. Save changes if dirty.
+    - [x] Make dirty more strict, where you can't change the anim state while it's dirty
+        - [x] Tooltip for that too.
 
 - [ ] Write and use batched version of `emplace_debug_line()` for `emplace_debug_line_based_capsule()` inner func.

@@ -664,12 +664,24 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                 current_str_pos += (anim_name.size() + 1);
             }
         }
+
+        ImGui::BeginDisabled(anim_frame_action::s_editor_state.is_working_timeline_dirty);
+
         if (ImGui::Combo("Animation clip", &s_current_animation_clip, anim_names_0_delim.c_str()))
         {   // Change selected anim idx.
             anim_frame_action::s_editor_state.selected_anim_state_idx =
                 anim_frame_action::s_editor_state.anim_state_name_to_idx_map.at(
                     anim_names_as_list[s_current_animation_clip]);
         }
+        if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled) &&
+            anim_frame_action::s_editor_state.is_working_timeline_dirty)
+        {   // Set tooltip if disabled.
+            ImGui::SetTooltip(
+                "Working timeline is dirty. Switching animation clip\n"
+                "is disabled until changes are saved or discarded.");
+        }
+
+        ImGui::EndDisabled();
 
         // Sequencer component.
         static int32_t s_current_frame = 0;
