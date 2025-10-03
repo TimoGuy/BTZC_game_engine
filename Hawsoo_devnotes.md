@@ -220,9 +220,8 @@ while (running_game_loop)
 - [ ] ~~Write and use batched version of `emplace_debug_line()` for `emplace_debug_line_based_capsule()` inner func.~~
     - Do this in the future.
 
+- [ ] Add the hitcapsule group sets into game mode.
+    - [ ] Have multiple sets interact with each other.
 
 - [ ] Make simple viewport changing buttons for +-X, +-Y, +-Z positions.
     - This is for making editing the hitcylinders easier.
-
-- [ ] Add the hitcapsule group sets into game mode.
-    - [ ] Have multiple sets interact with each other.
