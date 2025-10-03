@@ -430,7 +430,14 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                 if (ImGui::Button("Save changes"))
                 {
                     auto const& timeline_name{ s_all_timeline_names[s_selected_timeline_idx] };
-                    {   // Save changes.
+                    {   // Apply hitcapsule group set to template copy for saving.
+                        anim_frame_action::s_editor_state.working_timeline_copy
+                            ->hitcapsule_group_set_template =
+                            anim_frame_action::s_editor_state.working_model_animator
+                                ->get_anim_frame_action_data_handle()
+                                .hitcapsule_group_set;
+
+                        // Save changes.
                         json working_timeline_copy_as_json;
                         anim_frame_action::s_editor_state.working_timeline_copy
                             ->serialize(anim_frame_action::SERIAL_MODE_SERIALIZE,
@@ -453,7 +460,14 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                 }
                 ImGui::SameLine();
                 if (ImGui::Button("Discard changes"))
-                {   // Discard changes by loading the same timeline again.
+                {   // Replace group set with original template to reset changes.
+                    anim_frame_action::s_editor_state.working_model_animator
+                        ->get_anim_frame_action_data_handle()
+                        .hitcapsule_group_set.replace_and_reregister(
+                            anim_frame_action::s_editor_state.working_timeline_copy
+                                ->hitcapsule_group_set_template);
+
+                    // Discard changes by loading the same timeline again.
                     s_load_selected_timeline = true;
                 }
             }
