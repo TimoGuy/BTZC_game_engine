@@ -217,4 +217,12 @@ while (running_game_loop)
     - [x] Make dirty more strict, where you can't change the anim state while it's dirty
         - [x] Tooltip for that too.
 
-- [ ] Write and use batched version of `emplace_debug_line()` for `emplace_debug_line_based_capsule()` inner func.
+- [ ] ~~Write and use batched version of `emplace_debug_line()` for `emplace_debug_line_based_capsule()` inner func.~~
+    - Do this in the future.
+
+
+- [ ] Make simple viewport changing buttons for +-X, +-Y, +-Z positions.
+    - This is for making editing the hitcylinders easier.
+
+- [ ] Add the hitcapsule group sets into game mode.
+    - [ ] Have multiple sets interact with each other.
