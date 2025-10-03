@@ -573,7 +573,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
             ImGui::Text("JOJJOJOJOJOOJ #%llu", cap_grp_idx);
 
             ImGui::BeginDisabled();
-            
+
             bool cap_grp_enabled{ cap_grp.is_enabled() };
             ImGui::Checkbox("Enabled", &cap_grp_enabled);
 
@@ -598,9 +598,10 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                              std::to_string(global_capsule_id_idx))
                                 .c_str(),
                             capsule.origin_a.raw,
-                            0.1f))
+                            0.0125f))
                     {
                         glm_vec3_copy(capsule.origin_a.raw, capsule.calcd_origin_a);
+                        anim_frame_action::s_editor_state.is_working_timeline_dirty = true;
                     }
 
                     if (ImGui::DragFloat3(
@@ -608,16 +609,20 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                              std::to_string(global_capsule_id_idx))
                                 .c_str(),
                             capsule.origin_b.raw,
-                            0.1f))
+                            0.0125f))
                     {
                         glm_vec3_copy(capsule.origin_b.raw, capsule.calcd_origin_b);
+                        anim_frame_action::s_editor_state.is_working_timeline_dirty = true;
                     }
 
-                    ImGui::DragFloat(("radius##hitcapsule_grp_set_hitcapsule_grp_hitcapsule"
-                                      + std::to_string(global_capsule_id_idx))
-                                         .c_str(),
-                                     &capsule.radius,
-                                     0.05f);
+                    if (ImGui::DragFloat(("radius##hitcapsule_grp_set_hitcapsule_grp_hitcapsule" +
+                                          std::to_string(global_capsule_id_idx))
+                                             .c_str(),
+                                         &capsule.radius,
+                                         0.0125f))
+                    {
+                        anim_frame_action::s_editor_state.is_working_timeline_dirty = true;
+                    }
 
                     ImGui::TreePop();
                 }
@@ -677,7 +682,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
             anim_frame_action::s_editor_state.is_working_timeline_dirty)
         {   // Set tooltip if disabled.
             ImGui::SetTooltip(
-                "Working timeline is dirty. Switching animation clip\n"
+                "Working timeline is dirty. Changing animation clip\n"
                 "is disabled until changes are saved or discarded.");
         }
 
