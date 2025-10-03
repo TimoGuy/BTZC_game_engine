@@ -583,66 +583,70 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
         size_t cap_grp_idx{ 0 };
         size_t global_capsule_id_idx{ 0 };
         for (auto& cap_grp : hitcapsule_grp_set.get_hitcapsule_groups())
-        {   // 
-            ImGui::Text("JOJJOJOJOJOOJ #%llu", cap_grp_idx);
+        {
+            if (ImGui::CollapsingHeader(
+                    ("Hitcapsule group #" + std::to_string(cap_grp_idx)).c_str(),
+                    ImGuiTreeNodeFlags_DefaultOpen))
+            {   // Gui for hitcapsule group.
+                ImGui::BeginDisabled();
 
-            ImGui::BeginDisabled();
+                bool cap_grp_enabled{ cap_grp.is_enabled() };
+                ImGui::Checkbox("Enabled", &cap_grp_enabled);
 
-            bool cap_grp_enabled{ cap_grp.is_enabled() };
-            ImGui::Checkbox("Enabled", &cap_grp_enabled);
+                int32_t cap_grp_type{ cap_grp.get_type() };
+                ImGui::Combo("Type", &cap_grp_type, "Receive hurt\0Give hurt\0");
 
-            int32_t cap_grp_type{ cap_grp.get_type() };
-            ImGui::Combo("Type", &cap_grp_type, "Receive hurt\0Give hurt\0");
+                ImGui::EndDisabled();
 
-            ImGui::EndDisabled();
+                ImGui::SeparatorText("Capsules within group");
 
-            ImGui::SeparatorText("Capsules within group");
+                size_t cap_idx{ 0 };
+                for (auto& capsule : cap_grp.get_capsules())
+                {
+                    if (ImGui::TreeNodeEx(reinterpret_cast<void*>(global_capsule_id_idx),
+                                          0,
+                                          "group[%llu].capsules[%llu]",
+                                          cap_grp_idx,
+                                          cap_idx))
+                    {   // Editing params for capsules.
+                        if (ImGui::DragFloat3(
+                                ("origin_a##hitcapsule_grp_set_hitcapsule_grp_hitcapsule" +
+                                 std::to_string(global_capsule_id_idx))
+                                    .c_str(),
+                                capsule.origin_a.raw,
+                                0.0125f))
+                        {
+                            glm_vec3_copy(capsule.origin_a.raw, capsule.calcd_origin_a);
+                            anim_frame_action::s_editor_state.is_working_timeline_dirty = true;
+                        }
 
-            size_t cap_idx{ 0 };
-            for (auto& capsule : cap_grp.get_capsules())
-            {
-                if (ImGui::TreeNodeEx(reinterpret_cast<void*>(global_capsule_id_idx),
-                                      0,
-                                      "group[%llu].capsules[%llu]",
-                                      cap_grp_idx,
-                                      cap_idx))
-                {   // Editing params for capsules.
-                    if (ImGui::DragFloat3(
-                            ("origin_a##hitcapsule_grp_set_hitcapsule_grp_hitcapsule" +
-                             std::to_string(global_capsule_id_idx))
-                                .c_str(),
-                            capsule.origin_a.raw,
-                            0.0125f))
-                    {
-                        glm_vec3_copy(capsule.origin_a.raw, capsule.calcd_origin_a);
-                        anim_frame_action::s_editor_state.is_working_timeline_dirty = true;
+                        if (ImGui::DragFloat3(
+                                ("origin_b##hitcapsule_grp_set_hitcapsule_grp_hitcapsule" +
+                                 std::to_string(global_capsule_id_idx))
+                                    .c_str(),
+                                capsule.origin_b.raw,
+                                0.0125f))
+                        {
+                            glm_vec3_copy(capsule.origin_b.raw, capsule.calcd_origin_b);
+                            anim_frame_action::s_editor_state.is_working_timeline_dirty = true;
+                        }
+
+                        if (ImGui::DragFloat(
+                                ("radius##hitcapsule_grp_set_hitcapsule_grp_hitcapsule" +
+                                 std::to_string(global_capsule_id_idx))
+                                    .c_str(),
+                                &capsule.radius,
+                                0.0125f))
+                        {
+                            anim_frame_action::s_editor_state.is_working_timeline_dirty = true;
+                        }
+
+                        ImGui::TreePop();
                     }
 
-                    if (ImGui::DragFloat3(
-                            ("origin_b##hitcapsule_grp_set_hitcapsule_grp_hitcapsule" +
-                             std::to_string(global_capsule_id_idx))
-                                .c_str(),
-                            capsule.origin_b.raw,
-                            0.0125f))
-                    {
-                        glm_vec3_copy(capsule.origin_b.raw, capsule.calcd_origin_b);
-                        anim_frame_action::s_editor_state.is_working_timeline_dirty = true;
-                    }
-
-                    if (ImGui::DragFloat(("radius##hitcapsule_grp_set_hitcapsule_grp_hitcapsule" +
-                                          std::to_string(global_capsule_id_idx))
-                                             .c_str(),
-                                         &capsule.radius,
-                                         0.0125f))
-                    {
-                        anim_frame_action::s_editor_state.is_working_timeline_dirty = true;
-                    }
-
-                    ImGui::TreePop();
+                    cap_idx++;
+                    global_capsule_id_idx++;
                 }
-
-                cap_idx++;
-                global_capsule_id_idx++;
             }
 
             cap_grp_idx++;
