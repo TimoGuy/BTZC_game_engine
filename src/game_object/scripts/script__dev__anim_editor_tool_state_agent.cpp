@@ -101,13 +101,6 @@ void BT::Scripts::Script__dev__anim_editor_tool_state_agent::on_pre_render(float
             // Force animator to get rebuilt immediately.
             m_working_anim_state_idx = (uint32_t)-1;
             anim_frame_action::s_editor_state.selected_anim_state_idx = 0;  // @HARDCODE: First anim.
-
-#if 0
-            // Assign a temp configuration and finish deformed model rend obj.
-            animator->configure_animator_states({});
-            anim_frame_action::s_editor_state.working_model_animator = animator.get();
-            rend_obj.set_model_animator(std::move(animator));
-#endif // 0
         }
         else
         {   // Add non-deformed model and print warning.

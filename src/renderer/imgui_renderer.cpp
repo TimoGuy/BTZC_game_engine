@@ -393,7 +393,8 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
     ImGui::Begin("Timeline select");
     {
         static bool s_load_selected_timeline{ true };
-        if (ImGui::Button("Refresh list") || enter)
+        if (ImGui::Button("Refresh list") ||
+            enter)
         {   // Reset timeline selection and load first one from refreshed list.
             s_selected_timeline_idx = 0;
             s_all_timeline_names = anim_frame_action::Bank::get_all_names();
