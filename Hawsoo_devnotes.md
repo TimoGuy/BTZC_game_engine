@@ -220,6 +220,9 @@ while (running_game_loop)
 - [ ] ~~Write and use batched version of `emplace_debug_line()` for `emplace_debug_line_based_capsule()` inner func.~~
     - Do this in the future.
 
+- [x] Fix reloading back into imgui anim frame data editor context
+    - It's the issue w using static vars everywhere I think.
+
 - [ ] Add the hitcapsule group sets into game mode.
     - [ ] Have multiple sets interact with each other.
 
