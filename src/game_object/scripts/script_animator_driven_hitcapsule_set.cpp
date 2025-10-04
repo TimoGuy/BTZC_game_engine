@@ -48,12 +48,13 @@ public:
                            .checkout_render_obj_by_key({ m_rend_obj_key })
                            .front() };
 
-        rend_obj->get_model_animator()->get_anim_frame_action_data_handle()
-            .assign_hitcapsule_enabled_flags();
+        auto& model_animator{ *rend_obj->get_model_animator() };
+
+        model_animator.get_anim_frame_action_data_handle().assign_hitcapsule_enabled_flags();
 
         std::vector<mat4s> joint_matrices;
-        rend_obj->get_model_animator()->get_anim_floored_frame_pose(joint_matrices);
-        rend_obj->get_model_animator()->get_anim_frame_action_data_handle()
+        model_animator.get_anim_floored_frame_pose(joint_matrices);
+        model_animator.get_anim_frame_action_data_handle()
             .update_hitcapsule_transform_to_joint_mats(joint_matrices);
 
         rend_obj_pool.return_render_objs({ rend_obj });

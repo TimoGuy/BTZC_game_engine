@@ -172,7 +172,14 @@
                     "animator_template": "SlimeGirl.btanitor"
                 }
             },
-            "scripts": [],
+            "scripts": [
+                {
+                    "script_datas": {
+                        "render_obj": "fa2a0c0c-cfd4-47a7-b4e7-01dbbd3b3537"
+                    },
+                    "script_type": "script_animator_driven_hitcapsule_set"
+                }
+            ],
             "transform": {
                 "global": {
                     "position": [

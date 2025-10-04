@@ -88,6 +88,10 @@ void BT::Render_object::scene_serialize(Scene_serialization_mode mode, json& nod
                 .load_animator_template_into_animator(*animator,
                                                       anim_template_name);
 
+            // @THEA: @NOCHECKIN: @HERE: @TODO: Setup `configure_anim_frame_action_controls()` here.
+            animator->configure_anim_frame_action_controls(const anim_frame_action::Runtime_data_controls *anim_frame_action_controls);
+            ////////////////////////////////////////////////////////////////////////////////////////
+
             set_model_animator(std::move(animator));
         }
         else

@@ -233,6 +233,9 @@ void BT::Scripts::Script__dev__anim_editor_tool_state_agent::on_pre_render(float
 
                 case anim_frame_action::Runtime_controllable_data::CTRL_DATA_TYPE_RISING_EDGE_EVENT:
                     // Activate any events.
+                    // @TODO: This should be in its own script for processing each event
+                    //   individually. E.g.: If there's an sfx script it will watch the reeve data
+                    //   handle for the sfx and check `check_if_rising_edge_occurred()` for it.
                     (void)anim_frame_action::s_editor_state.working_model_animator
                         ->get_anim_frame_action_data_handle()
                         .get_reeve_data_handle(label)

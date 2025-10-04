@@ -224,6 +224,9 @@ while (running_game_loop)
     - It's the issue w using static vars everywhere I think.
 
 - [ ] Add the hitcapsule group sets into game mode.
+    - [ ] ~~Assign `model_animator`.`m_anim_frame_action_controls` with valid controls.~~
+    - [ ] ~~Assign `model_animator`.`m_anim_frame_action_data`.`hitcapsule_group_set` with hitcapsule group set.~~
+    = [ ] (@NOTE: These two vars^^ are taken care of with this func call) Configure animator with `configure_anim_frame_action_controls()`
     - [ ] Have multiple sets interact with each other.
 
 > @FUTURE: Pull "hitcapsule_group_set" out of .btafa file.
