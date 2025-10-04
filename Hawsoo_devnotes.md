@@ -223,5 +223,7 @@ while (running_game_loop)
 - [ ] Add the hitcapsule group sets into game mode.
     - [ ] Have multiple sets interact with each other.
 
+> @FUTURE: Pull "hitcapsule_group_set" out of .btafa file.
+
 - [ ] Make simple viewport changing buttons for +-X, +-Y, +-Z positions.
     - This is for making editing the hitcylinders easier.
