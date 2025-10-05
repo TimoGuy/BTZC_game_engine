@@ -676,9 +676,25 @@ void BT::Camera::update_frontend_orthographic(Input_handler::State const& input_
     // Process dragging mode.
     if (fr_ortho.is_dragging_cam)
     {   // Eval basis vectors of camera view.
-        vec3 basis_x{ 1, 0, 0 };
-        vec3 basis_y{ 0, 1, 0 };
-        vec3 basis_z{ 0, 0, 1 };
+        vec3 basis_x;
+        vec3 basis_y;
+        vec3 basis_z;
+        {
+            glm_vec3_copy(fr_ortho.look_direction, basis_z);
+
+            vec3 up{ 0.0f, 1.0f, 0.0f };
+            if (std::abs(camera.view_direction[0]) < 1e-6f &&
+                std::abs(camera.view_direction[1]) > 0.5f &&
+                std::abs(camera.view_direction[2]) < 1e-6f)
+            {
+                glm_vec3_copy(vec3{ 0.0f, 0.0f, 1.0f }, up);
+            }
+
+            glm_vec3_crossn(basis_z, up, basis_x);
+            glm_vec3_crossn(basis_x, basis_z, basis_y);
+
+            glm_vec3_negate(basis_x);
+        }
 
         // Drag.
         vec2 cooked_cam_drag_delta;
