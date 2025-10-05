@@ -174,8 +174,9 @@ void BT::anim_frame_action::Runtime_controllable_data
     }
 }
 
-void BT::anim_frame_action::Runtime_controllable_data
-    ::update_hitcapsule_transform_to_joint_mats(std::vector<mat4s> const& joint_matrices)
+void BT::anim_frame_action::Runtime_controllable_data::update_hitcapsule_transforms(
+    mat4 base_transform,
+    std::vector<mat4s> const& joint_matrices)
 {
     auto& hitcapsule_grps{ hitcapsule_group_set.get_hitcapsule_groups() };
     for (auto& hitcapsule_grp : hitcapsule_grps)
@@ -183,7 +184,7 @@ void BT::anim_frame_action::Runtime_controllable_data
         auto& hitcapsules{ hitcapsule_grp.get_capsules() };
         for (auto& hitcapsule : hitcapsules)
         {   // Update hitcapsule to follow attached joint matrices.
-            hitcapsule.update_transform_joint_mats(joint_matrices);
+            hitcapsule.update_transform(base_transform, joint_matrices);
         }
     }
 }

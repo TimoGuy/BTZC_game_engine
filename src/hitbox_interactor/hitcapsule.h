@@ -24,7 +24,7 @@ struct Hitcapsule
 
     // Calculated info.
     vec3    calcd_origin_a;       // Set to `origin_a` on init. Updated to connect to joint mat in
-                                  // `update_transform_joint_mats`.
+                                  // `update_transform`.
     vec3    calcd_origin_b;       // Similar to `calcd_origin_a`.
     float_t calcd_orig_pts_dist;  // Calculated from `calcd_origin_a/b`.
 
@@ -32,7 +32,7 @@ struct Hitcapsule
     size_t  calcd_bone_mat_idx_2{ (size_t)-1 };  // -1 means same as `calcd_bone_mat_idx`.
 
     void init_calc_info(Model_animator const& animator);
-    void update_transform_joint_mats(std::vector<mat4s> const& joint_matrices);
+    void update_transform(mat4 base_transform, std::vector<mat4s> const& joint_matrices);
     void calc_orig_pt_distance();
 
     // Submits debug render representation of this capsule, with provided `color`.

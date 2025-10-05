@@ -25,26 +25,51 @@ void BT::Hitcapsule::init_calc_info(Model_animator const& animator)
     calc_orig_pt_distance();
 }
 
-void BT::Hitcapsule::update_transform_joint_mats(std::vector<mat4s> const& joint_matrices)
-{   // Do nothing if no connecting bone idx.
-    if (calcd_bone_mat_idx == (size_t)-1)
-        return;
+void BT::Hitcapsule::update_transform(mat4 base_transform, std::vector<mat4s> const& joint_matrices)
+{
+    static auto s_eval_combined_transforms_fn = [](size_t connecting_bone_mat_idx,
+                                                   size_t connecting_bone_mat_idx_2,
+                                                   mat4 base_transform,
+                                                   std::vector<mat4s> const& joint_matrices,
+                                                   mat4& out_combined_trans,
+                                                   mat4& out_combined_trans_2) {
+        if (connecting_bone_mat_idx == (size_t)-1)
+        {
+            glm_mat4_copy(base_transform, out_combined_trans);
+            glm_mat4_copy(out_combined_trans, out_combined_trans_2);
+        }
+        else
+        {
+            glm_mat4_mul(base_transform,
+                         const_cast<vec4*>(joint_matrices[connecting_bone_mat_idx].raw),
+                         out_combined_trans);
 
-    // Use 1st connecting bone idx.
-    size_t connecting_bone_mat_idx{ calcd_bone_mat_idx };
-    glm_mat4_mulv3(const_cast<vec4*>(joint_matrices[connecting_bone_mat_idx].raw),
-                   origin_a.raw,
-                   1.0f,
-                   calcd_origin_a);
+            // Second connecting bone.
+            if (connecting_bone_mat_idx_2 == (size_t)-1)
+            {
+                glm_mat4_copy(out_combined_trans, out_combined_trans_2);
+            }
+            else
+            {
+                glm_mat4_mul(base_transform,
+                             const_cast<vec4*>(joint_matrices[connecting_bone_mat_idx_2].raw),
+                             out_combined_trans_2);
+            }
+        }
+    };
 
-    // Use 2nd connecting bone idx if available. If not, use 1st one here too.
-    if (calcd_bone_mat_idx_2 != (size_t)-1)
-        connecting_bone_mat_idx = calcd_bone_mat_idx_2;
+    // Update capsule origins with combined transform(s).
+    mat4 combined_trans;
+    mat4 combined_trans_2;
+    s_eval_combined_transforms_fn(calcd_bone_mat_idx,
+                                  calcd_bone_mat_idx_2,
+                                  base_transform,
+                                  joint_matrices,
+                                  combined_trans,
+                                  combined_trans_2);
 
-    glm_mat4_mulv3(const_cast<vec4*>(joint_matrices[connecting_bone_mat_idx].raw),
-                   origin_b.raw,
-                   1.0f,
-                   calcd_origin_b);
+    glm_mat4_mulv3(combined_trans, origin_a.raw, 1.0f, calcd_origin_a);
+    glm_mat4_mulv3(combined_trans_2, origin_b.raw, 1.0f, calcd_origin_b);
 
     // Recalc origin point dependent vars.
     calc_orig_pt_distance();

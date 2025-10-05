@@ -1,6 +1,7 @@
 #include "logger.h"
 #include "scripts.h"
 
+#include "../game_object/game_object.h"
 #include "../renderer/renderer.h"
 // #include "../renderer/mesh.h"
 // #include "../renderer/model_animator.h"
@@ -52,10 +53,15 @@ public:
 
         model_animator.get_anim_frame_action_data_handle().assign_hitcapsule_enabled_flags();
 
+        mat4 game_obj_trans;
+        rend_obj->get_owning_game_obj().get_transform_handle().get_transform_as_mat4(game_obj_trans);
+
         std::vector<mat4s> joint_matrices;
         model_animator.get_anim_floored_frame_pose(joint_matrices);
-        model_animator.get_anim_frame_action_data_handle()
-            .update_hitcapsule_transform_to_joint_mats(joint_matrices);
+
+        model_animator.get_anim_frame_action_data_handle().update_hitcapsule_transforms(
+            game_obj_trans,
+            joint_matrices);
 
         rend_obj_pool.return_render_objs({ rend_obj });
     }

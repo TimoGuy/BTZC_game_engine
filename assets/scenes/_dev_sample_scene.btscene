@@ -169,7 +169,8 @@
                 "renderable": {
                     "model_name": "SlimeGirl",
                     "type": "Deformed_model",
-                    "animator_template": "SlimeGirl.btanitor"
+                    "animator_template": "SlimeGirl.btanitor",
+                    "anim_frame_action_ctrls": "SlimeGirl.btafa"
                 }
             },
             "scripts": [

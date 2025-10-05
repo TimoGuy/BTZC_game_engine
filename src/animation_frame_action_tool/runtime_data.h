@@ -236,9 +236,10 @@ public:
     // the runtime controllable data enabled flags.
     void assign_hitcapsule_enabled_flags();
 
-    // Updates hitcapsule transforms to `joint_matrices[x]` where `x` is
-    // the connecting bone matrix index.
-    void update_hitcapsule_transform_to_joint_mats(std::vector<mat4s> const& joint_matrices);
+    // Updates hitcapsule transforms to `joint_matrices[x]` where `x` is the connecting bone matrix
+    // index. Supply a game object transform in `base_transform`.
+    void update_hitcapsule_transforms(mat4 base_transform,
+                                      std::vector<mat4s> const& joint_matrices);
 };
 
 // Data controls.

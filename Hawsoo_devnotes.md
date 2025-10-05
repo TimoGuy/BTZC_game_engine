@@ -223,13 +223,27 @@ while (running_game_loop)
 - [x] Fix reloading back into imgui anim frame data editor context
     - It's the issue w using static vars everywhere I think.
 
-- [ ] Add the hitcapsule group sets into game mode.
+- [x] Add the hitcapsule group sets into game mode.
     - [ ] ~~Assign `model_animator`.`m_anim_frame_action_controls` with valid controls.~~
     - [ ] ~~Assign `model_animator`.`m_anim_frame_action_data`.`hitcapsule_group_set` with hitcapsule group set.~~
-    = [ ] (@NOTE: These two vars^^ are taken care of with this func call) Configure animator with `configure_anim_frame_action_controls()`
-    - [ ] Have multiple sets interact with each other.
+    - [x] (@NOTE: These two vars^^ are taken care of with this func call) Configure animator with `configure_anim_frame_action_controls()`
+    - [ ] ~~Have multiple sets interact with each other.~~
+        - Do this in the future!
+
+- [x] BUGFIX: For some reason processing script list mutation requests crashes.
+    - Answer: capturing `this` in the static lambda actually breaks if something else wants to be used. So I just removed the lambda.
 
 > @FUTURE: Pull "hitcapsule_group_set" out of .btafa file.
 
+
+## Misc things I want please please please.
+
 - [ ] Make simple viewport changing buttons for +-X, +-Y, +-Z positions.
     - This is for making editing the hitcylinders easier.
+
+- [ ] Remove "change viewport with f1" button from main viewport.
+
+
+## Use simple anim dude and make dummy character.
+
+

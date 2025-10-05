@@ -207,15 +207,16 @@ void BT::Game_object::process_script_list_mutation_requests()
     std::lock_guard<std::mutex> lock{ m_mutate_script_requests_mutex };
 
     // Process removals.
-    static auto s_remove_script_fn = [this](std::string const& script_type) {
-        auto script_type_enum{ Scripts::Helper_funcs::get_script_type_from_name(script_type) };
+    for (auto& remove_req : m_remove_script_requests)
+    {
+        auto script_type_enum{ Scripts::Helper_funcs::get_script_type_from_name(remove_req) };
 
         bool success{ false };
 
         for (size_t idx = 0; idx < m_scripts.size(); idx++)
         {
             if (m_scripts[idx]->get_type() == script_type_enum)
-            {   // Erase!
+            {  // Erase!
                 m_scripts.erase(m_scripts.begin() + idx);
                 success = true;
                 break;
@@ -225,16 +226,10 @@ void BT::Game_object::process_script_list_mutation_requests()
 
         if (!success)
         {
-            logger::printef(
-                logger::WARN,
-                "`remove_script()` did not find attached script type: %s",
-                script_type.c_str());
+            logger::printef(logger::WARN,
+                            "`remove_script()` did not find attached script type: %s",
+                            remove_req.c_str());
         }
-    };
-
-    for (auto& remove_req : m_remove_script_requests)
-    {
-        s_remove_script_fn(remove_req);
     }
 
     // Process additions.

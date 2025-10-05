@@ -16,6 +16,11 @@
                     "ctrl_item_idx": 2,
                     "end_frame": 38,
                     "start_frame": 34
+                },
+                {
+                    "ctrl_item_idx": 5,
+                    "end_frame": 58,
+                    "start_frame": 18
                 }
             ],
             "state_name": "st_idle"
@@ -76,6 +81,9 @@
         },
         {
             "name": "hitcapsule_group_0_enabled:ov:true"
+        },
+        {
+            "name": "hitcapsule_group_1_enabled:ov:true"
         }
     ],
     "hitcapsule_group_set": {
@@ -101,7 +109,7 @@
                         "connecting_bone_name": "Upper Arm.R",
                         "connecting_bone_name_2": "",
                         "origin_a": [
-                            -0.1,
+                            -0.10000000149011612,
                             1.5,
                             0.0
                         ],
@@ -110,7 +118,7 @@
                             1.5,
                             0.0
                         ],
-                        "radius": 0.1
+                        "radius": 0.10000000149011612
                     },
                     {
                         "connecting_bone_name": "Forearm.R",
@@ -125,11 +133,32 @@
                             1.5,
                             0.0
                         ],
-                        "radius": 0.1
+                        "radius": 0.10000000149011612
                     }
                 ],
-                "enabled": true,
+                "enabled": false,
                 "type": 0
+            },
+            {
+                "capsules": [
+                    {
+                        "connecting_bone_name": "Hand Attachment",
+                        "connecting_bone_name_2": "",
+                        "origin_a": [
+                            -0.824999988079071,
+                            1.475000023841858,
+                            1.0499999523162842
+                        ],
+                        "origin_b": [
+                            -0.824999988079071,
+                            1.475000023841858,
+                            0.07500000298023224
+                        ],
+                        "radius": 0.10000000149011612
+                    }
+                ],
+                "enabled": false,
+                "type": 1
             }
         ]
     }

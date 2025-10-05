@@ -377,7 +377,7 @@ void BT::Scripts::Script_player_character_movement::on_pre_render(float_t delta_
 
     // Write angle to game object.
     versor new_rot;
-    glm_quat(new_rot, lerped_facing_angle + glm_rad(180.0f), 0.0f, 1.0f, 0.0f);
+    glm_quat(new_rot, lerped_facing_angle, 0.0f, 1.0f, 0.0f);
 
     auto game_obj{ m_game_obj_pool.get_one_no_lock(m_apply_facing_angle_game_obj_key) };
     game_obj->get_transform_handle().set_local_rot(new_rot);

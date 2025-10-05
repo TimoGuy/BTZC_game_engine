@@ -448,8 +448,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                         // Save to disk.
                         std::ofstream f{
                             BTZC_GAME_ENGINE_ASSET_ANIM_FRAME_ACTIONS_PATH
-                            + timeline_name
-                            + ".btafa" };
+                            + timeline_name };
                         f << working_timeline_copy_as_json.dump(4);
                     }
 
@@ -593,10 +592,13 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                 ImGui::BeginDisabled();
 
                 bool cap_grp_enabled{ cap_grp.is_enabled() };
-                ImGui::Checkbox("Enabled", &cap_grp_enabled);
+                ImGui::Checkbox(("Enabled##" + std::to_string(global_capsule_id_idx)).c_str(),
+                                &cap_grp_enabled);
 
                 int32_t cap_grp_type{ cap_grp.get_type() };
-                ImGui::Combo("Type", &cap_grp_type, "Receive hurt\0Give hurt\0");
+                ImGui::Combo(("Type##" + std::to_string(global_capsule_id_idx)).c_str(),
+                             &cap_grp_type,
+                             "Receive hurt\0Give hurt\0");
 
                 ImGui::EndDisabled();
 
