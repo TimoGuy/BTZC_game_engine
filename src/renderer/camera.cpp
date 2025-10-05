@@ -2,6 +2,7 @@
 
 #include "../game_object/game_object.h"
 #include "../input_handler/input_handler.h"
+#include "../renderer/imgui_renderer.h"
 #include "cglm/cam.h"
 #include "cglm/cglm.h"
 #include "cglm/euler.h"
@@ -11,9 +12,11 @@
 #include "cglm/vec3.h"
 #include "imgui.h"
 #include "logger.h"
+
 #include <array>
 #include <cmath>
 #include <memory>
+#include <sstream>
 #include <string>
 
 using std::array;
@@ -91,7 +94,7 @@ struct Camera::Data
             float_t sensitivity_y{ 0.0125f * 0.25f * 0.25f };
             float_t orbit_x_auto_turn_disable_time{ 0.5f };
             float_t orbit_x_auto_turn_speed{ 1.0f };
-            float_t orbit_x_auto_turn_max_influence_magnitude{ 5.0f }; // @THOUGHT: Should this be based off the input instead of the effective velocity?
+            float_t orbit_x_auto_turn_max_influence_magnitude{ 5.0f };  // @THOUGHT: Should this be based off the input instead of the effective velocity?
             float_t cam_distance{ 10.0f };
             float_t cam_return_to_distance_speed{ 10.0f };
             float_t follow_offset_y{ 1.0f };
@@ -111,8 +114,14 @@ struct Camera::Data
             float_t view_bounds_height{ 5 };
             float_t view_bounds_depth{ 20 };
             float_t focus_pos_distance{ 10 };
+            float_t drag_sensitivity{ 0.0025f * 0.75f };  // This is about right.
+            float_t move_z_speed{ 15.0f };
+
             vec3 focus_position{ 0, 0, 0 };
             vec3 look_direction{ 0, 0, 1 };
+
+            bool prev_rclick{ false };
+            bool is_dragging_cam{ false };
         } orthographic;
     } frontend;
 };
@@ -297,8 +306,24 @@ void BT::Camera::update_frontend(Input_handler::State const& input_state,
 
 bool BT::Camera::is_mouse_captured()
 {
-    return (m_data->frontend.state ==
-                Data::Frontend::FRONTEND_CAMERA_STATE_CAPTURE_FLY);
+    return (m_data->frontend.state == Data::Frontend::FRONTEND_CAMERA_STATE_CAPTURE_FLY);
+}
+
+bool BT::Camera::is_ortho_cam_dragging()
+{
+    return (m_data->frontend.state == Data::Frontend::FRONTEND_CAMERA_STATE_ORTHO &&
+            m_data->frontend.orthographic.is_dragging_cam);
+}
+
+std::string BT::Camera::get_ortho_cam_dragging_tooltip_text() const
+{
+    std::stringstream ss;
+    ss.precision(3);
+    ss << "Press WS to move camera along forward axis.\n"
+       << "cam_pos={ " << m_data->camera.position[0] << ", "
+       << m_data->camera.position[1] << ", "
+       << m_data->camera.position[2] << " }";
+    return ss.str();
 }
 
 void BT::Camera::request_cam_state_static()
@@ -477,7 +502,7 @@ void BT::Camera::update_frontend_capture_fly(Input_handler::State const& input_s
                    0.0f,
                    camera.view_direction);
 
-    // @NOTE: Need a normalization step at the end from float inaccuracy over time.
+    // @NOTE: Need a normalization step at the end to prevent float inaccuracy over time.
     glm_vec3_normalize(camera.view_direction);
 
     vec2 cooked_mvt;
@@ -628,20 +653,58 @@ void BT::Camera::update_frontend_orthographic(Input_handler::State const& input_
     if (!first)
     {   // On entering this state.
         m_data->is_cam_ortho = true;
+        m_data->frontend.orthographic.prev_rclick = false;
+        m_data->frontend.orthographic.is_dragging_cam = false;
     }
 
-
-
-
-
-
-    // Write camera ortho bounds.
     auto& camera{ m_data->camera };
     auto& camera_ortho{ m_data->camera_ortho };
     auto& fr_ortho{ m_data->frontend.orthographic };
 
     float_t view_bounds_width{ fr_ortho.view_bounds_height * camera.aspect_ratio };
-    
+
+    auto on_rclick_press{ !fr_ortho.prev_rclick &&
+                          input_state.le_rclick_cam.val };
+    auto on_rclick_release{ fr_ortho.prev_rclick &&
+                            !input_state.le_rclick_cam.val };
+    fr_ortho.prev_rclick = input_state.le_rclick_cam.val;
+
+    // Update dragging state.
+    if (on_rclick_press) fr_ortho.is_dragging_cam = true;
+    if (on_rclick_release) fr_ortho.is_dragging_cam = false;
+
+    // Process dragging mode.
+    if (fr_ortho.is_dragging_cam)
+    {   // Eval basis vectors of camera view.
+        vec3 basis_x{ 1, 0, 0 };
+        vec3 basis_y{ 0, 1, 0 };
+        vec3 basis_z{ 0, 0, 1 };
+
+        // Drag.
+        vec2 cooked_cam_drag_delta;
+        glm_vec2_scale(vec2{ input_state.look_delta.x.val, input_state.look_delta.y.val },
+                       fr_ortho.drag_sensitivity * fr_ortho.view_bounds_height,
+                       cooked_cam_drag_delta);
+
+        glm_vec3_muladds(basis_x, cooked_cam_drag_delta[0], fr_ortho.focus_position);
+        glm_vec3_muladds(basis_y, cooked_cam_drag_delta[1], fr_ortho.focus_position);
+
+        // Move along z vector.
+        float_t move_z{ input_state.move.y.val * fr_ortho.move_z_speed * delta_time };
+        glm_vec3_muladds(basis_z, move_z, fr_ortho.focus_position);
+    }
+
+    // Zoom in/out.
+    if (m_data->is_hovering_over_game_viewport)
+    {
+        float_t scale_factor{ 1.0f - (input_state.ui_scroll_delta.val * 0.1f) };
+        m_data->frontend.orthographic.view_bounds_height *= scale_factor;
+    }
+
+
+
+
+    // Write camera ortho bounds.
     camera_ortho.view_bounds_aabb[0][0] = -view_bounds_width * 0.5f;
     camera_ortho.view_bounds_aabb[1][0] = view_bounds_width * 0.5f;
     camera_ortho.view_bounds_aabb[0][1] = -fr_ortho.view_bounds_height * 0.5f;

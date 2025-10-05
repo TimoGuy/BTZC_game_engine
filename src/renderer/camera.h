@@ -44,6 +44,8 @@ public:
     bool is_follow_orbit();
     void update_frontend(Input_handler::State const& input_state, float_t delta_time);
     bool is_mouse_captured();
+    bool is_ortho_cam_dragging();
+    std::string get_ortho_cam_dragging_tooltip_text() const;
 
     void request_cam_state_static();
     void request_cam_state_follow_orbit();

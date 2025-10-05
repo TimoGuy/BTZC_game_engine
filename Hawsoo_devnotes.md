@@ -240,6 +240,11 @@ while (running_game_loop)
 
 - [ ] Make simple viewport changing buttons for +-X, +-Y, +-Z positions.
     - This is for making editing the hitcylinders easier.
+    - [x] Initial
+    - [ ] Zoom and move.
+        - Right click to click 
+        - [x] Basic works.
+        - [ ] Calc basis vectors correctly.
 
 - [ ] Remove "change viewport with f1" button from main viewport.
 

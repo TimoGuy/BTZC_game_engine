@@ -6,6 +6,7 @@
 #include "../game_object/game_object.h"
 #include "../input_handler/input_codes.h"
 #include "../input_handler/input_handler.h"
+#include "../service_finder/service_finder.h"
 #include "camera.h"
 #include "cglm/util.h"
 #include "debug_render_job.h"
@@ -16,6 +17,7 @@
 #include "mesh.h"
 #include "misc/cpp/imgui_stdlib.h"
 #include "model_animator.h"  // @CHECK: @NOCHECKIN: Is this needed?
+
 #include <array>
 #include <cmath>
 #include <cstdint>
@@ -24,6 +26,11 @@
 #include <string>
 #include <vector>
 
+
+BT::ImGui_renderer::ImGui_renderer()
+{
+    BT_SERVICE_FINDER_ADD_SERVICE(ImGui_renderer, this);
+}
 
 void BT::ImGui_renderer::set_selected_game_obj(Game_object* game_obj)
 {
@@ -307,6 +314,21 @@ void BT::ImGui_renderer::render_imgui(float_t delta_time)
 
         // Allow ImGuizmo to accept inputs from this window.
         ImGuizmo::SetAlternativeWindow(ImGui::GetCurrentWindow());
+
+        // Show tooltip popup for when orthographic camera is dragging.
+        static bool s_prev_ortho_cam_dragging{ false };
+        if (m_camera->is_ortho_cam_dragging())
+        {
+            ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeAll);
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 8, 8 });
+            ImGui::SetTooltip("%s", m_camera->get_ortho_cam_dragging_tooltip_text().c_str());
+            ImGui::PopStyleVar();
+        }
+        else if (s_prev_ortho_cam_dragging)
+        {   // Reset cursor back to default after dragging.
+            ImGui::SetMouseCursor(ImGuiMouseCursor_Arrow);
+        }
+        s_prev_ortho_cam_dragging = m_camera->is_ortho_cam_dragging();
     }
     ImGui::End();
     ImGui::PopStyleVar();
