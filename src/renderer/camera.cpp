@@ -108,7 +108,7 @@ struct Camera::Data
 
         struct Orthographic
         {
-            float_t view_bounds_height{ 10 };
+            float_t view_bounds_height{ 5 };
             float_t view_bounds_depth{ 20 };
             float_t focus_pos_distance{ 10 };
             vec3 focus_position{ 0, 0, 0 };
