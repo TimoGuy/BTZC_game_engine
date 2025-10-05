@@ -75,9 +75,8 @@ struct Camera::Data
         bool prev_f1_pressed{ false };
         bool prev_rclick_cam{ false };
 
-        bool request_cam_state_static{ false };
-        bool request_cam_state_follow_orbit{ false };
-        bool request_cam_state_ortho{ false };
+        uint8_t request_cam_state{ (uint8_t)-1 };
+        void clear_request_cam_state() { request_cam_state = (uint8_t)-1; }
 
         struct Capture_fly
         {
@@ -304,12 +303,12 @@ bool BT::Camera::is_mouse_captured()
 
 void BT::Camera::request_cam_state_static()
 {
-    m_data->frontend.request_cam_state_static = true;
+    m_data->frontend.request_cam_state = Data::Frontend::FRONTEND_CAMERA_STATE_STATIC;
 }
 
 void BT::Camera::request_cam_state_follow_orbit()
 {
-    m_data->frontend.request_cam_state_follow_orbit = true;
+    m_data->frontend.request_cam_state = Data::Frontend::FRONTEND_CAMERA_STATE_FOLLOW_ORBIT;
 }
 
 void BT::Camera::request_cam_state_ortho(vec3 focus_position,
@@ -318,7 +317,7 @@ void BT::Camera::request_cam_state_ortho(vec3 focus_position,
     glm_vec3_copy(focus_position, m_data->frontend.orthographic.focus_position);
     glm_vec3_copy(look_direction, m_data->frontend.orthographic.look_direction);
 
-    m_data->frontend.request_cam_state_ortho = true;
+    m_data->frontend.request_cam_state = Data::Frontend::FRONTEND_CAMERA_STATE_ORTHO;
 }
 
 // ImGui.
@@ -414,16 +413,17 @@ void BT::Camera::update_frontend_static(Input_handler::State const& input_state,
                                         bool first)
 {
     // Interstate checks.
-    if (m_data->frontend.request_cam_state_follow_orbit || (first && on_press_le_f1))
+    if (m_data->frontend.request_cam_state == Data::Frontend::FRONTEND_CAMERA_STATE_FOLLOW_ORBIT ||
+        (first && on_press_le_f1))
     {
         change_frontend_state(Data::Frontend::FRONTEND_CAMERA_STATE_FOLLOW_ORBIT);
-        m_data->frontend.request_cam_state_follow_orbit = false;
+        m_data->frontend.clear_request_cam_state();
     }
 
-    if (m_data->frontend.request_cam_state_ortho)
+    if (m_data->frontend.request_cam_state == Data::Frontend::FRONTEND_CAMERA_STATE_ORTHO)
     {
         change_frontend_state(Data::Frontend::FRONTEND_CAMERA_STATE_ORTHO);
-        m_data->frontend.request_cam_state_ortho = false;
+        m_data->frontend.clear_request_cam_state();
     }
 
     if (m_data->is_hovering_over_game_viewport && on_press_le_rclick_cam)
@@ -497,9 +497,9 @@ void BT::Camera::update_frontend_capture_fly(Input_handler::State const& input_s
         input_state.le_move_world_y_axis.val * capture_fly.speed * delta_time;
 
     // Interstate checks.
-    if (m_data->frontend.request_cam_state_follow_orbit)
+    if (m_data->frontend.request_cam_state == Data::Frontend::FRONTEND_CAMERA_STATE_FOLLOW_ORBIT)
     {
-        m_data->frontend.request_cam_state_follow_orbit = false;
+        m_data->frontend.clear_request_cam_state();
     }
     if (on_release_le_rclick_cam)
     {
@@ -658,15 +658,11 @@ void BT::Camera::update_frontend_orthographic(Input_handler::State const& input_
 
 
     // Interstate checks.
-    if (m_data->frontend.request_cam_state_static)
+    if (m_data->frontend.request_cam_state == Data::Frontend::FRONTEND_CAMERA_STATE_STATIC)
     {
         m_data->is_cam_ortho = false;  // Leave with cam ortho disabled.
 
         change_frontend_state(Data::Frontend::FRONTEND_CAMERA_STATE_STATIC);
-        m_data->frontend.request_cam_state_static = false;
     }
-    if (m_data->frontend.request_cam_state_ortho)
-    {
-        m_data->frontend.request_cam_state_ortho = false;
-    }
+    m_data->frontend.clear_request_cam_state();
 }
