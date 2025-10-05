@@ -2,6 +2,7 @@
 
 #include "../game_object/game_object.h"
 #include "../input_handler/input_handler.h"
+#include "cglm/cam.h"
 #include "cglm/cglm.h"
 #include "cglm/euler.h"
 #include "cglm/mat3.h"
@@ -28,6 +29,8 @@ struct Camera::Data
     bool is_hovering_over_game_viewport{ false };
     function<void(bool)> cursor_lock_fn;
 
+    bool is_cam_ortho{ false };
+
     struct Camera_3D
     {
         float_t fov;
@@ -37,6 +40,12 @@ struct Camera::Data
         vec3 position;
         vec3 view_direction;
     } camera;
+
+    struct Camera_ortho
+    {
+        vec3 view_bounds_aabb[2];
+        // @NOTE: Uses `position` and `view_direction` from `Camera_3D`.
+    } camera_ortho;
 
     struct Camera_matrices_cache
     {
@@ -52,25 +61,29 @@ struct Camera::Data
             FRONTEND_CAMERA_STATE_STATIC = 0,
             FRONTEND_CAMERA_STATE_CAPTURE_FLY,
             FRONTEND_CAMERA_STATE_FOLLOW_ORBIT,
+            FRONTEND_CAMERA_STATE_ORTHO,
             NUM_FRONTEND_CAMERA_STATES
         } state = FRONTEND_CAMERA_STATE_STATIC;
 
-        inline static array<string, NUM_FRONTEND_CAMERA_STATES> s_state_strs{
+        static constexpr array<char const* const, NUM_FRONTEND_CAMERA_STATES> s_state_strs{
             "STATIC",
             "CAPTURE FLY",
             "ORBIT",
+            "ORTHOGRAPHIC",
         };
 
         bool prev_f1_pressed{ false };
         bool prev_rclick_cam{ false };
+
+        bool request_cam_state_static{ false };
+        bool request_cam_state_follow_orbit{ false };
+        bool request_cam_state_ortho{ false };
 
         struct Capture_fly
         {
             float_t sensitivity{ 0.1f };
             float_t speed{ 20.0f };
         } capture_fly;
-
-        bool request_follow_orbit{ false };
 
         struct Follow_orbit
         {
@@ -93,6 +106,15 @@ struct Camera::Data
             float_t auto_turn_disable_timer{ 0.0f };
             float_t current_cam_distance;
         } follow_orbit;
+
+        struct Orthographic
+        {
+            float_t view_bounds_height{ 10 };
+            float_t view_bounds_depth{ 20 };
+            float_t focus_pos_distance{ 10 };
+            vec3 focus_position{ 0, 0, 0 };
+            vec3 look_direction{ 0, 0, 1 };
+        } orthographic;
     } frontend;
 };
 
@@ -147,13 +169,28 @@ void BT::Camera::update_camera_matrices()
     auto& camera{ m_data->camera };
     auto& cache{ m_data->camera_matrices_cache };
 
-    // Calculate projection matrix.
-    glm_perspective(camera.fov,
-                    camera.aspect_ratio,
-                    camera.z_near,
-                    camera.z_far,
-                    cache.projection);
-    cache.projection[1][1] *= -1.0f;  // Fix neg-Y issue.
+    if (m_data->is_cam_ortho)
+    {   // Calculate orthographic projection matrix.
+        auto& camera_ortho{ m_data->camera_ortho };
+        glm_ortho(camera_ortho.view_bounds_aabb[0][0],
+                  camera_ortho.view_bounds_aabb[1][0],
+                  camera_ortho.view_bounds_aabb[0][1],
+                  camera_ortho.view_bounds_aabb[1][1],
+                  camera_ortho.view_bounds_aabb[0][2],
+                  camera_ortho.view_bounds_aabb[1][2],
+                  cache.projection);
+        cache.projection[1][1] *= -1.0f;  // Fix neg-Y issue.
+    }
+    else
+    {
+        // Calculate projection matrix.
+        glm_perspective(camera.fov,
+                        camera.aspect_ratio,
+                        camera.z_near,
+                        camera.z_far,
+                        cache.projection);
+        cache.projection[1][1] *= -1.0f;  // Fix neg-Y issue.
+    }
 
     // Calculate view matrix.
     using std::abs;
@@ -201,11 +238,6 @@ BT::UUID BT::Camera::get_follow_object()
     return m_data->frontend.follow_orbit.game_object_ref;
 }
 
-void BT::Camera::request_follow_orbit()
-{
-    m_data->frontend.request_follow_orbit = true;
-}
-
 bool BT::Camera::is_capture_fly()
 {
     return (m_data->frontend.state == Data::Frontend::FRONTEND_CAMERA_STATE_CAPTURE_FLY);
@@ -250,6 +282,10 @@ void BT::Camera::update_frontend(Input_handler::State const& input_state,
                 update_frontend_follow_orbit(input_state, delta_time, on_press_le_f1, first);
                 break;
 
+            case Data::Frontend::FRONTEND_CAMERA_STATE_ORTHO:
+                update_frontend_orthographic(input_state, delta_time, first);
+                break;
+
             default:
                 // Unsupported state attempted to be handled.
                 assert(false);
@@ -266,6 +302,25 @@ bool BT::Camera::is_mouse_captured()
                 Data::Frontend::FRONTEND_CAMERA_STATE_CAPTURE_FLY);
 }
 
+void BT::Camera::request_cam_state_static()
+{
+    m_data->frontend.request_cam_state_static = true;
+}
+
+void BT::Camera::request_cam_state_follow_orbit()
+{
+    m_data->frontend.request_cam_state_follow_orbit = true;
+}
+
+void BT::Camera::request_cam_state_ortho(vec3 focus_position,
+                                         vec3 look_direction)
+{
+    glm_vec3_copy(focus_position, m_data->frontend.orthographic.focus_position);
+    glm_vec3_copy(look_direction, m_data->frontend.orthographic.look_direction);
+
+    m_data->frontend.request_cam_state_ortho = true;
+}
+
 // ImGui.
 void BT::Camera::set_hovering_over_game_viewport(bool hovering)
 {
@@ -279,7 +334,7 @@ void BT::Camera::render_imgui(std::function<std::string(char const* const)> cons
     ImGui::Begin(window_name_w_context_fn("Camera properties").c_str());
     ImGui::PushItemWidth(ImGui::GetFontSize() * -10);
     {
-        ImGui::Text("Mode: %s", Data::Frontend::s_state_strs[m_data->frontend.state].c_str());
+        ImGui::Text("Mode: %s", Data::Frontend::s_state_strs[m_data->frontend.state]);
         ImGui::Text("aspect_ratio: %.3f", camera.aspect_ratio);
 
         float_t fov_deg{ glm_deg(camera.fov) };
@@ -359,10 +414,16 @@ void BT::Camera::update_frontend_static(Input_handler::State const& input_state,
                                         bool first)
 {
     // Interstate checks.
-    if (m_data->frontend.request_follow_orbit || (first && on_press_le_f1))
+    if (m_data->frontend.request_cam_state_follow_orbit || (first && on_press_le_f1))
     {
         change_frontend_state(Data::Frontend::FRONTEND_CAMERA_STATE_FOLLOW_ORBIT);
-        m_data->frontend.request_follow_orbit = false;
+        m_data->frontend.request_cam_state_follow_orbit = false;
+    }
+
+    if (m_data->frontend.request_cam_state_ortho)
+    {
+        change_frontend_state(Data::Frontend::FRONTEND_CAMERA_STATE_ORTHO);
+        m_data->frontend.request_cam_state_ortho = false;
     }
 
     if (m_data->is_hovering_over_game_viewport && on_press_le_rclick_cam)
@@ -436,9 +497,9 @@ void BT::Camera::update_frontend_capture_fly(Input_handler::State const& input_s
         input_state.le_move_world_y_axis.val * capture_fly.speed * delta_time;
 
     // Interstate checks.
-    if (m_data->frontend.request_follow_orbit)
+    if (m_data->frontend.request_cam_state_follow_orbit)
     {
-        m_data->frontend.request_follow_orbit = false;
+        m_data->frontend.request_cam_state_follow_orbit = false;
     }
     if (on_release_le_rclick_cam)
     {
@@ -557,5 +618,55 @@ void BT::Camera::update_frontend_follow_orbit(Input_handler::State const& input_
     if (first && on_press_le_f1)
     {
         change_frontend_state(Data::Frontend::FRONTEND_CAMERA_STATE_STATIC);
+    }
+}
+
+void BT::Camera::update_frontend_orthographic(Input_handler::State const& input_state,
+                                              float_t delta_time,
+                                              bool first)
+{
+    if (!first)
+    {   // On entering this state.
+        m_data->is_cam_ortho = true;
+    }
+
+
+
+
+
+
+    // Write camera ortho bounds.
+    auto& camera{ m_data->camera };
+    auto& camera_ortho{ m_data->camera_ortho };
+    auto& fr_ortho{ m_data->frontend.orthographic };
+
+    float_t view_bounds_width{ fr_ortho.view_bounds_height * camera.aspect_ratio };
+    
+    camera_ortho.view_bounds_aabb[0][0] = -view_bounds_width * 0.5f;
+    camera_ortho.view_bounds_aabb[1][0] = view_bounds_width * 0.5f;
+    camera_ortho.view_bounds_aabb[0][1] = -fr_ortho.view_bounds_height * 0.5f;
+    camera_ortho.view_bounds_aabb[1][1] = fr_ortho.view_bounds_height * 0.5f;
+    camera_ortho.view_bounds_aabb[0][2] = 0;
+    camera_ortho.view_bounds_aabb[1][2] = fr_ortho.view_bounds_depth;
+
+    // Space camera position away from focus pos.
+    glm_vec3_copy(fr_ortho.focus_position, camera.position);
+    glm_vec3_muladds(fr_ortho.look_direction, -fr_ortho.focus_pos_distance, camera.position);
+
+    // Write look direction.
+    glm_vec3_copy(fr_ortho.look_direction, camera.view_direction);
+
+
+    // Interstate checks.
+    if (m_data->frontend.request_cam_state_static)
+    {
+        m_data->is_cam_ortho = false;  // Leave with cam ortho disabled.
+
+        change_frontend_state(Data::Frontend::FRONTEND_CAMERA_STATE_STATIC);
+        m_data->frontend.request_cam_state_static = false;
+    }
+    if (m_data->frontend.request_cam_state_ortho)
+    {
+        m_data->frontend.request_cam_state_ortho = false;
     }
 }

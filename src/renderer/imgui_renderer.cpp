@@ -18,6 +18,7 @@
 #include "model_animator.h"  // @CHECK: @NOCHECKIN: Is this needed?
 #include <array>
 #include <cmath>
+#include <cstdint>
 #include <cstring>
 #include <fstream>
 #include <string>
@@ -167,6 +168,32 @@ void BT::ImGui_renderer::render_imgui(float_t delta_time)
     {
         static bool s_on_play_switch_to_player_camera{ true };
 
+        enum : int32_t
+        {
+            EDITOR_VIEWPORT_VIEW_3D = 0,
+            EDITOR_VIEWPORT_VIEW_ORTHO_POS_X,
+            EDITOR_VIEWPORT_VIEW_ORTHO_POS_Y,
+            EDITOR_VIEWPORT_VIEW_ORTHO_POS_Z,
+            EDITOR_VIEWPORT_VIEW_ORTHO_NEG_X,
+            EDITOR_VIEWPORT_VIEW_ORTHO_NEG_Y,
+            EDITOR_VIEWPORT_VIEW_ORTHO_NEG_Z,
+            NUM_EDITOR_VIEWPORT_VIEWS
+        };
+        constexpr std::array<char const* const, NUM_EDITOR_VIEWPORT_VIEWS>
+        k_editor_viewport_view_names{
+            "View 3D"          "##Editor_viewport_view_names",
+            "View ortho +X"    "##Editor_viewport_view_names",
+            "View ortho +Y"    "##Editor_viewport_view_names",
+            "View ortho +Z"    "##Editor_viewport_view_names",
+            "View ortho -X"    "##Editor_viewport_view_names",
+            "View ortho -Y"    "##Editor_viewport_view_names",
+            "View ortho -Z"    "##Editor_viewport_view_names",
+        };
+        static int32_t s_editor_viewport_view{ EDITOR_VIEWPORT_VIEW_3D };
+
+        constexpr float_t k_wide_spacing{ 16 };
+
+
         // Force padding.
         ImGui::NewLine();  // @TODO: Doesn't work for vert padding.
         ImGui::SameLine();
@@ -179,12 +206,49 @@ void BT::ImGui_renderer::render_imgui(float_t delta_time)
             ImGui::Button("Stop");
         ImGui::EndDisabled();
 
-        ImGui::SameLine();
+        // Game play status.
+        ImGui::SameLine(0, k_wide_spacing);
         ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 0.5f), "Playing");
 
         ImGui::SameLine();
         ImGui::Text("%.1f FPS (%.3f ms)", io.Framerate, (1000.0f / io.Framerate));
 
+        // Viewport views.
+        ImGui::SameLine(0, k_wide_spacing);
+
+        ImGui::BeginDisabled(m_camera->is_follow_orbit() || m_camera->is_capture_fly());
+        if (ImGui::Button("Change view.."))
+            ImGui::OpenPopup("Popup_menu_for_change_view");
+        ImGui::EndDisabled();
+
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 16, 8 });
+        if (ImGui::BeginPopup("Popup_menu_for_change_view"))
+        {   // Change view popup.
+            for (size_t i = 0; i < NUM_EDITOR_VIEWPORT_VIEWS; i++)
+            {
+                if (ImGui::RadioButton(k_editor_viewport_view_names[i],
+                                       i == s_editor_viewport_view))
+                {   // Update viewport view.
+                    if (i == EDITOR_VIEWPORT_VIEW_3D)
+                    {
+                        m_camera->request_cam_state_static();
+                    }
+                    else
+                    {
+                        vec3s focus_pos{ 0, 0, 0 };
+                        vec3s look_dir{ 0, 0, 1 };
+                        m_camera->request_cam_state_ortho(focus_pos.raw, look_dir.raw);
+                    }
+
+                    s_editor_viewport_view = i;
+                }
+            }
+
+            ImGui::EndPopup();
+        }
+        ImGui::PopStyleVar();
+
+        // Right side.
         static float_t s_toggle_player_cam_btn_width{ 0 };
         static float_t s_player_cam_options_btn_width{ 0 };
 
@@ -195,7 +259,7 @@ void BT::ImGui_renderer::render_imgui(float_t delta_time)
                                 "Switch to player cam (F1)" :
                                 "Exit player cam (F1)")))
         {
-            m_camera->request_follow_orbit();
+            m_camera->request_cam_state_follow_orbit();
         }
         s_toggle_player_cam_btn_width = ImGui::GetItemRectSize().x;
 
@@ -206,21 +270,21 @@ void BT::ImGui_renderer::render_imgui(float_t delta_time)
         s_player_cam_options_btn_width = ImGui::GetItemRectSize().x;
 
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 4, 4 });
-            if (ImGui::BeginPopup("Popup_menu_for_switch_to_player_cam"))
+        if (ImGui::BeginPopup("Popup_menu_for_switch_to_player_cam"))
+        {
+            ImGui::Checkbox("Auto switch to player cam on play.",
+                            &s_on_play_switch_to_player_camera);
+
+            int32_t s_gizmo_trans_space_selection{ Game_object::get_imgui_gizmo_trans_space() };
+            if (ImGui::Combo("Gizmo transform space",
+                             &s_gizmo_trans_space_selection,
+                             "World space\0Local space\0"))
             {
-                ImGui::Checkbox("Auto switch to player cam on play.", &s_on_play_switch_to_player_camera);
-
-                int32_t s_gizmo_trans_space_selection{
-                    Game_object::get_imgui_gizmo_trans_space() };
-                if (ImGui::Combo("Gizmo transform space",
-                                    &s_gizmo_trans_space_selection,
-                                    "World space\0Local space\0"))
-                {
-                    Game_object::set_imgui_gizmo_trans_space(s_gizmo_trans_space_selection);
-                }
-
-                ImGui::EndPopup();
+                Game_object::set_imgui_gizmo_trans_space(s_gizmo_trans_space_selection);
             }
+
+            ImGui::EndPopup();
+        }
         ImGui::PopStyleVar();
 
         // Image of game view.

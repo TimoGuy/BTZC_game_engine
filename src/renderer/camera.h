@@ -40,11 +40,14 @@ public:
     // Camera frontend.
     void set_follow_object(UUID game_object_ref);
     UUID get_follow_object();
-    void request_follow_orbit();
     bool is_capture_fly();
     bool is_follow_orbit();
     void update_frontend(Input_handler::State const& input_state, float_t delta_time);
     bool is_mouse_captured();
+
+    void request_cam_state_static();
+    void request_cam_state_follow_orbit();
+    void request_cam_state_ortho(vec3 focus_position, vec3 look_direction);
 
     // ImGui.
     void set_hovering_over_game_viewport(bool hovering);
@@ -66,6 +69,9 @@ private:
     void update_frontend_follow_orbit(Input_handler::State const& input_state,
                                       float_t delta_time,
                                       bool on_press_le_f1,
+                                      bool first);
+    void update_frontend_orthographic(Input_handler::State const& input_state,
+                                      float_t delta_time,
                                       bool first);
 };
 
