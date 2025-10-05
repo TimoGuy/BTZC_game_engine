@@ -236,7 +236,21 @@ void BT::ImGui_renderer::render_imgui(float_t delta_time)
                     else
                     {
                         vec3s focus_pos{ 0, 0, 0 };
-                        vec3s look_dir{ 0, 0, 1 };
+                        vec3s look_dir;
+                        switch (i)
+                        {
+                            case EDITOR_VIEWPORT_VIEW_ORTHO_POS_X: look_dir = { 1, 0, 0 }; break;
+                            case EDITOR_VIEWPORT_VIEW_ORTHO_POS_Y: look_dir = { 0, 1, 0 }; break;
+                            case EDITOR_VIEWPORT_VIEW_ORTHO_POS_Z: look_dir = { 0, 0, 1 }; break;
+                            case EDITOR_VIEWPORT_VIEW_ORTHO_NEG_X: look_dir = { -1, 0, 0 }; break;
+                            case EDITOR_VIEWPORT_VIEW_ORTHO_NEG_Y: look_dir = { 0, -1, 0 }; break;
+                            case EDITOR_VIEWPORT_VIEW_ORTHO_NEG_Z: look_dir = { 0, 0, -1 }; break;
+
+                            default:
+                                // Invalid viewport view passed in.
+                                assert(false);
+                                break;
+                        }
                         m_camera->request_cam_state_ortho(focus_pos.raw, look_dir.raw);
                     }
 
