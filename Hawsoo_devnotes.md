@@ -246,7 +246,7 @@ while (running_game_loop)
         - [x] Basic works.
         - [x] Calc basis vectors correctly.
 
-- [ ] Remove "change viewport with f1" button from main viewport.
+- [ ] ~~Remove "change viewport with f1" button from main viewport.~~
 
 
 ## Use simple anim dude and make dummy character.
