@@ -251,4 +251,7 @@ while (running_game_loop)
 
 ## Use simple anim dude and make dummy character.
 
+- [x] Make simple sample anim.
+- [x] Create capsules and integrate into the btafa and btanitor systems.
 
+- [ ] BUGFIX root bone motion disappeared for some reason.

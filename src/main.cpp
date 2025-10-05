@@ -159,6 +159,10 @@ int32_t main()
         "probuilder_example",
         make_unique<BT::Model>(BTZC_GAME_ENGINE_ASSET_MODEL_PATH "probuilder_example.obj",
                                "textured_material"));
+    BT::Model_bank::emplace_model(
+        "simple_combat_char",
+        make_unique<BT::Model>(BTZC_GAME_ENGINE_ASSET_MODEL_PATH "simple_combat_char.glb",
+                               "textured_material"));
     BT::Model_bank::emplace_model(  // @NOCHECKIN: REMOVE THIS MODEL ONCE DONE TESTING SKINNING (and remove from `s_scene_as_json`).
         "SlimeGirl",
         make_unique<BT::Model>(BTZC_GAME_ENGINE_ASSET_MODEL_PATH "SlimeGirl.glb",
@@ -177,6 +181,7 @@ int32_t main()
     //     ...
     // ]
     std::vector<std::string> const afa_names{
+        "simple_combat_char",
         "SlimeGirl",
     };
     for (auto const& afa_name : afa_names)
