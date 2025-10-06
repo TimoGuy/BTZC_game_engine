@@ -268,3 +268,43 @@ while (running_game_loop)
 - ^^The above^^, I don't think I'll worry about it right now. Since there are things like mouse camera controls, mouse clicking and typing (i guess just UI interation stuff?) that I don't want to run inside the simulation thread, I'll need to think about this some more.
     - I think the main point I was trying to make above is that having the hitcapsules be updated inconsistently is sucky. It should be super consistent, and not depend on the render timing of the animator (since it grabs the animator's `m_time` and gets the floored frame and uses that, but it still has to depend on `m_time` which is a render-thread updated variable.).
     - If i were to redo this engine, I would definitely just make everything a fixed timestep and have rendering run right after simulation. Then when I want to separate out the rendering into its own thread, then I would choose how stuff gets divvied up, but for the most part everything is simulator-thread driven and then the render thread lerps the provided values.
+
+- [ ] Create script for character controller movement but without the input from player.
+- [ ] Add another dummy character that plays the same anim as player.
+
+- [ ] Write the hitcapsule group sets interact w each other.
+    > @NOTE: This is kind of the order of checking I think would be good for the interaction.
+    - [x] Cancel check if same hitcapsule group set.
+    - [ ] Cancel check if hitcapsule group set A does not have any enabled hitcapsule (give hurt).
+    - [ ] Cancel check if hitcapsule group set B does not have any enabled hitcapsule (receive hurt).
+        - @NOTE: For iframes, the animation should disable the receive-hurt hitcapsule.
+        - @REPLY: Or wait, would a different method be better? For debouncing hits, bc that's needed too tho.
+
+    - [ ] Create bounding sphere for both interacting sets (set A's enabled hitcapsule (give hurt), and set B's enabled hitcapsule (receive hurt))
+        - For each set of hitcapsules:
+            - Gather all `calcd_origin_a` and `calcd_origin_b` and find the midpoint.
+            - Find the radius of the bounding sphere by taking each capsule, taking the distance of each origin, adding `radius` to the distance, and then finding the max of the radius-included distances.
+
+    - [ ] Compare the bounding spheres to see if they collide. Cancel if they don't. Continue if they do.
+
+    - [ ] Check each individual hitcapsule in set A with all of the others in set B. `O(N^2)` unfortu (^_^;)
+        - For each hitcapsule pair, create their respective bounding sphere, so for each one:
+            - Find the midpoint between `calcd_origin_a` and `calcd_origin_b` for the bounding sphere.
+            - Find the radius of the bounding sphere with:
+                ```cpp
+                bounding_sphere_radius = (glm_vec3_distance(capsule.calcd_origin_a,
+                                                            capsule.calcd_origin_b)
+                                          * 0.5f)
+                                         + capsule.radius;
+                ```
+        - Then if the bounding sphere check succeeds, check the actual real capsule-to-capsule check.
+            - @TODO look up a reference for this!!!!!
+
+    - [ ] If the real capsule-to-capsule check succeeds, then `break;` and show that the overlap occurred.
+        - This is where the callbacks or event for "got hit" would get triggered or something.
+        - Mmmmm maybe the callback would be as the form of both game objects having a `script_hitcapsule_processing` script, both those scripts get searched and found, and then for set A's game obj's script, the "you hit a hitcapsule, deal hurt" func gets called, with set B's game obj's script supplied as a parameter so that inside that "deal hurt" func it calls set B's script's "i got hurt" with all the hurt stats, with set A's script, in case set B's script calls an "i was parrying" call.
+            > This interaction could get simplified with data, but maybe having scripts could be good... ahh but having a way to send messages like this is gonna be kinda hard I think. The way described above would work if the `find_script()` func was sophisticated and could find a script attached to the game object that has a certain interface tho.
+            >
+            > Maybe then "interface groups" would be a useful thing to attach to scripts? Or like a script tag system? And `find_script_by_tag()` or something.
+
+- [ ] REFACTOR: Delete the `calc_orig_pt_distance()` method in hitcapsule bc this info is really only needed when doing the actual collision and isn't needed most of the time.
