@@ -1,16 +1,16 @@
 {
     "animator_states": [
         {
-            "state_name": "_DEBUG_STATE",
-            "anim_name": "0_TPose",
+            "state_name": "st_attack_0",
+            "anim_name": "Sample_attack",
             "speed": 1.0,
             "loop": true
         },
         {
-            "state_name": "st_attack_0",
-            "anim_name": "Sample_attack",
+            "state_name": "_DEBUG_STATE",
+            "anim_name": "0_TPose",
             "speed": 1.0,
-            "loop": false
+            "loop": true
         }
     ],
     "transition_states": []

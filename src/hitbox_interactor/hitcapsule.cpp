@@ -87,7 +87,8 @@ void BT::Hitcapsule::emplace_debug_render_repr(vec4 color) const
         const_cast<float_t*>(calcd_origin_b),
         radius,
         color,
-        0.03f);
+        0.5f);
+        // 0.03f);
 }
 
 

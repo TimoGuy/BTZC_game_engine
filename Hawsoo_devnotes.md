@@ -256,4 +256,15 @@ while (running_game_loop)
 - [x] Make simple sample anim.
 - [x] Create capsules and integrate into the btafa and btanitor systems.
 
-- [ ] BUGFIX root bone motion disappeared for some reason.
+- [x] BUGFIX root bone motion disappeared for some reason.
+    - Ummm, ig it was a blender bug? Bc closing and reopening just fixed it.
+
+> I realize that I think the simulation thread of the game needs to hold the master timing. I think that rendering should be its own thing and then the simulation needs to be the sole proprietor of everything. I think having animators move extremely consistently (i.e. on an integer frame tick instead of float increments), ESPECIALLY the ones that have hitcapsules attached to them, is necessary for good swordplay.
+>
+> So basically, the game runs unhindered on the main thread for simulation. Once two simulations are done running, then a perpetual render job is started, where it has its own `deltatime`, thread, etc. It is started at the beginning of the first simulation (time 0.0), and it should theoretically not catch up to the simulation thread. If that happens, then the render thread should clamp its global `time` to right before the frame it's waiting on.
+>
+> But then, the issue comes: what hz should this run at? 30? 40? 50? 60? It needs to be a set number to be consistent. To high and it'll be harder to run too.
+
+- ^^The above^^, I don't think I'll worry about it right now. Since there are things like mouse camera controls, mouse clicking and typing (i guess just UI interation stuff?) that I don't want to run inside the simulation thread, I'll need to think about this some more.
+    - I think the main point I was trying to make above is that having the hitcapsules be updated inconsistently is sucky. It should be super consistent, and not depend on the render timing of the animator (since it grabs the animator's `m_time` and gets the floored frame and uses that, but it still has to depend on `m_time` which is a render-thread updated variable.).
+    - If i were to redo this engine, I would definitely just make everything a fixed timestep and have rendering run right after simulation. Then when I want to separate out the rendering into its own thread, then I would choose how stuff gets divvied up, but for the most part everything is simulator-thread driven and then the render thread lerps the provided values.
