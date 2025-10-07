@@ -87,8 +87,12 @@ void BT::Hitcapsule::emplace_debug_render_repr(vec4 color) const
         const_cast<float_t*>(calcd_origin_b),
         radius,
         color,
+#define BT_HITCAPSULE_DEBUG_RENDER_REPRESENTATION_LONG_HOLD 0
+#if BT_HITCAPSULE_DEBUG_RENDER_REPRESENTATION_LONG_HOLD
         0.5f);
-        // 0.03f);
+#else
+        0.03f);
+#endif
 }
 
 
