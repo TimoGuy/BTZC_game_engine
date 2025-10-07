@@ -56,6 +56,9 @@ public:
         mat4 game_obj_trans;
         rend_obj->get_owning_game_obj().get_transform_handle().get_transform_as_mat4(game_obj_trans);
 
+        // @TODO: @FIXME: If this could be physics thread dependent instead of having to depend on
+        // the timing of the render thread, then that would be wonderful. It would be sooo much more
+        // consistent  -Thea 2025/10/07
         std::vector<mat4s> joint_matrices;
         model_animator.get_anim_floored_frame_pose(joint_matrices);
 

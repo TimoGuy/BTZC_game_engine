@@ -79,7 +79,7 @@ void BT::ImGui_renderer::render_imgui(float_t delta_time)
         &ImGui_renderer::render_imgui__level_editor_context,
         &ImGui_renderer::render_imgui__animation_frame_data_editor_context,
     };
-    static Editor_context s_current_editor_context{ Editor_context(1) };
+    static Editor_context s_current_editor_context{ Editor_context(0) };
 
     static auto const s_window_name_w_context_fn = [](char const* const name) {
         return (std::string(name)

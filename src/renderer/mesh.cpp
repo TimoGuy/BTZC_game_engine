@@ -994,9 +994,12 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
             if (abs(deviation) > 1e-6f)
             {
                 logger::printef(logger::WARN,
-                                "Animation length does not match the %.3f hz animation cutting "
-                                "requirement (deviation: %0.6f). Will extend animation clip until "
-                                "the cutting requirement is fulfilled.",
+                                "(model: \"%s\", anim_name: \"%s\") Animation length does not "
+                                "match the %.3f hz animation cutting requirement "
+                                "(deviation: %0.6f). Will extend animation clip until the cutting "
+                                "requirement is fulfilled.",
+                                fname.c_str(),
+                                anim_name.c_str(),
                                 Model_joint_animation::k_frames_per_second,
                                 deviation);
                 // @NOCHECKIN: Don't assert on this warning for now.

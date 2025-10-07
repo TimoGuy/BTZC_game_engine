@@ -1,6 +1,18 @@
 {
     "animator_states": [
         {
+            "state_name": "st_idle",
+            "anim_name": "Idle",
+            "speed": 1.0,
+            "loop": true
+        },
+        {
+            "state_name": "st_running",
+            "anim_name": "Running",
+            "speed": 1.0,
+            "loop": true
+        },
+        {
             "state_name": "st_attack_0",
             "anim_name": "Sample_attack",
             "speed": 1.0,
