@@ -249,7 +249,7 @@ while (running_game_loop)
 - [ ] ~~Remove "change viewport with f1" button from main viewport.~~
 
 
-## Use simple anim dude and make dummy character.
+## Use simple anim dude and make dummy character and create fighting animation movesets.
 
 > Cece suggested naming the dummy character "Frank-e", so I'll name them that.
 
@@ -270,6 +270,7 @@ while (running_game_loop)
     - If i were to redo this engine, I would definitely just make everything a fixed timestep and have rendering run right after simulation. Then when I want to separate out the rendering into its own thread, then I would choose how stuff gets divvied up, but for the most part everything is simulator-thread driven and then the render thread lerps the provided values.
 
 - [ ] Create script for character controller movement but without the input from player.
+    - [ ] Perhaps this could just be a script that sends its data to another script? Maybe there could be a connections type thing? Mmmmm maybe provide a `on_start()` func for scripts where they could get the script that they need to send to and stuff?
 - [ ] Add another dummy character that plays the same anim as player.
 
 - [ ] Write the hitcapsule group sets interact w each other.

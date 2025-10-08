@@ -513,8 +513,8 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
     - [x] Change animation frames and physics to 60hz instead of 50hz. (This allows for a 1:1 experience for 60fps gamers, but it will definitely be harder on the system)
     - [x] Animation authoring tool window. (So it lists out all the animations and one can be clicked to be edited and events and variable override times can get added to the animation. The variable overrides and events are integer frames.)
     - [x] Make custom hit/hurt capsule physics implementation (just doing overlaps), so that don't have to rely on jolt physics quite as much.
-    - [ ] Use simple anim dude and make dummy character.
-    - [ ] Use simple anim dude and create fighting animation movesets.
+    - [ ] Use simple anim dude and make dummy character and create fighting animation movesets.
+    - [ ] 
 
 1. ~~Unity to this engine migration.~~
     - [x] Import scene as yaml structure.
