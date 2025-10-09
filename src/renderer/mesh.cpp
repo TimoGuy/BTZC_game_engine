@@ -959,7 +959,6 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
                                                    channel.nodeIndex.value()),
                                                channel.path);
                 }
-
             }
         }
 
