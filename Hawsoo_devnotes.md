@@ -269,8 +269,54 @@ while (running_game_loop)
     - I think the main point I was trying to make above is that having the hitcapsules be updated inconsistently is sucky. It should be super consistent, and not depend on the render timing of the animator (since it grabs the animator's `m_time` and gets the floored frame and uses that, but it still has to depend on `m_time` which is a render-thread updated variable.).
     - If i were to redo this engine, I would definitely just make everything a fixed timestep and have rendering run right after simulation. Then when I want to separate out the rendering into its own thread, then I would choose how stuff gets divvied up, but for the most part everything is simulator-thread driven and then the render thread lerps the provided values.
 
+>-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+>                SCRIPT REFORM
+>-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+- Basic plan for the script reform:
+    ```cpp
+    auto& hecs_system{ find_service<HECS_system>() };
+
+    // Adding a struct.
+    hecs_system.emplace_struct("Struct_type",   // Struct typename as str.
+                               Struct_type{});  // Struct default data.
+
+    // Add a system (kind of like the script but doesn't belong to gameobjects/entities).
+    hecs_system.emplace_system("Concrete_system_type",       // System typename as str.
+                               std::unique_ptr<System_ifc>(  // Unique instance of system as ifc ptr.
+                                   new Concrete_system_type())
+                               { "Struct_type",              // List of required structs (checked when entity is added to system).
+                                 "Struct_type_2" });
+
+    // Add system ordering (@NOTE: if this is omitted for a struct, then it's a free for all for
+    // every system using the struct; that would be the ideal for structs that aren't
+    // accessed/written multiple times in an entity).
+    hecs_system.add_struct_system_order("Struct_type_69",                  // Struct typename.
+                                        { { "Concrete_system_type_222" },  // All system typenames that use `Struct_type_69`, placed in an order.
+                                          { "Concrete_system_type_555",
+                                            "Concrete_system_type_666" } });  // @NOTE: both `555` and `666` can be run at the same time, but if an entity is added to both `555` and `666` then an error occurs.
+
+    // Creating an entity.
+    hecs_system.create_entity("Entity_name",             // Entity name.
+                              { "Struct_type",           // Structs allocated for new entity.
+                                "Struct_type_2",
+                                "Struct_type_3" },
+                              { "Concrete_system_type",  // Systems to add entity to.
+                                "Concrete_system_type_2" });
+
+    ```
+
+- [ ] Emplace everything into a `string->size_t` for the struct name for deserialization.
+- [ ] Attach structs and scripts to gameobject
+    - [ ] When gameobjects are added to the script execution pool,
+
+
+
+
+- [ ] 
 - [ ] Create script for character controller movement but without the input from player.
     - [ ] Perhaps this could just be a script that sends its data to another script? Maybe there could be a connections type thing? Mmmmm maybe provide a `on_start()` func for scripts where they could get the script that they need to send to and stuff?
+>-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
 - [ ] Add another dummy character that plays the same anim as player.
 
 - [ ] Write the hitcapsule group sets interact w each other.
