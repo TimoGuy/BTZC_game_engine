@@ -8,7 +8,9 @@
 #include "../uuid/uuid_ifc.h"
 #include "cglm/affine.h"
 #include "cglm/quat.h"
+#include "component_registry.h"
 #include "scripts/scripts.h"
+
 #include <atomic>
 #include <functional>
 #include <memory>
@@ -17,6 +19,7 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
+
 
 using std::atomic_bool;
 using std::atomic_uint8_t;
@@ -215,7 +218,10 @@ private:
     string m_name;
     UUID m_phys_obj_key;
     UUID m_rend_obj_key;
-    vector<unique_ptr<Scripts::Script_ifc>> m_scripts;
+    
+    // vector<unique_ptr<Scripts::Script_ifc>> m_scripts;  @NOCHECKIN: @THEA
+    component::Component_list m_component_list;
+    // @TODO: ^^Keep^^ this in mind as the replac ///////  @NOCHECKIN: @THEA
 
     // @WARNING: Not for production code.
     std::vector<std::string> m_remove_script_requests;

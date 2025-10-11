@@ -302,7 +302,6 @@ while (running_game_loop)
                                 "Struct_type_3" },
                               { "Concrete_system_type",  // Systems to add entity to.
                                 "Concrete_system_type_2" });
-
     ```
 
 - [ ] Emplace everything into a `string->size_t` for the struct name for deserialization.
