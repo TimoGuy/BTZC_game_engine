@@ -191,7 +191,7 @@ void BT::Scripts::Script_player_character_movement::on_pre_physics(float_t physi
                                          ground_normal,
                                          is_crouched);
 
-	up_rotation = JPH::Quat::sEulerAngles(JPH::Vec3(0, 0, 0));  // @NOCHECKIN: Overriding the up rot.
+    up_rotation = JPH::Quat::sEulerAngles(JPH::Vec3(0, 0, 0));  // @NOCHECKIN: Overriding the up rot.
 
     // Transform input to world space.
     vec3 cam_forward;
