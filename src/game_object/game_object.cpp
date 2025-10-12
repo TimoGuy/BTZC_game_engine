@@ -10,12 +10,12 @@
 #include "cglm/mat4.h"
 #include "cglm/quat.h"
 #include "cglm/vec3.h"
+#include "component_registry.h"
 #include "imgui_internal.h"
 #include "imgui.h"
 #include "ImGuizmo.h"
 #include "logger.h"
 #include "misc/cpp/imgui_stdlib.h"
-#include "scripts/scripts.h"
 #include <atomic>
 #include <cassert>
 #include <mutex>
@@ -187,6 +187,7 @@ BT::Game_object::~Game_object()
     // @NOTE: Taking care of the hierarchy for children is handled by `Game_object_pool::remove()`.
 }
 
+#if 0
 void BT::Game_object::run_pre_physics_scripts(float_t physics_delta_time)
 {
     for (auto& script : m_scripts)
@@ -247,6 +248,11 @@ void BT::Game_object::process_script_list_mutation_requests()
     // Clear requests.
     m_remove_script_requests.clear();
     m_add_script_requests.clear();
+}
+#endif  // 0
+void BT::Game_object::process_change_requests()
+{
+    m_component_list.commit_change_requests();
 }
 
 void BT::Game_object::set_name(string&& name)
@@ -332,12 +338,14 @@ void BT::Game_object::propagate_transform_changes(Game_object* parent_game_objec
 void BT::Game_object::scene_serialize(Scene_serialization_mode mode, json& node_ref)
 {
     m_transform.scene_serialize(mode, node_ref["transform"]);
+    m_component_list.scene_serialize(mode, node_ref["component_list"]);
 
     if (mode == SCENE_SERIAL_MODE_SERIALIZE)
     {
         node_ref["name"] = m_name;
         node_ref["guid"] = UUID_helper::to_pretty_repr(get_uuid());
 
+        #if 0
         node_ref["scripts"] = json::array();
         size_t scripts_idx{ 0 };
         for (auto& script : m_scripts)
@@ -345,6 +353,7 @@ void BT::Game_object::scene_serialize(Scene_serialization_mode mode, json& node_
             Scripts::serialize_script(script.get(),
                                       node_ref["scripts"][scripts_idx++]);
         }
+        #endif  // 0
 
         if (m_parent.is_nil())
             node_ref["parent"] = nullptr;
@@ -390,6 +399,7 @@ void BT::Game_object::scene_serialize(Scene_serialization_mode mode, json& node_
         m_name = node_ref["name"];
         assign_uuid(node_ref["guid"], true);
 
+        #if 0
         if (!node_ref["scripts"].is_null())
         {
             assert(node_ref["scripts"].is_array());
@@ -400,6 +410,7 @@ void BT::Game_object::scene_serialize(Scene_serialization_mode mode, json& node_
                 process_script_list_mutation_requests();  // For immediately adding.
             }
         }
+        #endif  // 0
 
         m_parent = (node_ref["parent"].is_null() ?
                     UUID() :
@@ -437,6 +448,7 @@ void BT::Game_object::scene_serialize(Scene_serialization_mode mode, json& node_
     }
 }
 
+#if 0
 void BT::Game_object::add_script(json& node_ref)
 {
     std::lock_guard<std::mutex> lock{ m_mutate_script_requests_mutex };
@@ -448,6 +460,7 @@ void BT::Game_object::remove_script(std::string const& script_type)
     std::lock_guard<std::mutex> lock{ m_mutate_script_requests_mutex };
     m_remove_script_requests.emplace_back(script_type);
 }
+#endif  // 0
 
 
 namespace

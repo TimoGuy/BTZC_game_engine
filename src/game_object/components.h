@@ -17,7 +17,7 @@
 namespace BT
 {
 
-/// Forward declarations.
+/// Forward declarations ---------------------------------------------------------------------------
 class Model;
 class Model_animator;
 class Hitcapsule_group_set;
@@ -29,7 +29,7 @@ namespace anim_frame_action
 {
 struct Runtime_data_controls;
 }
-///----------------------
+///-------------------------------------------------------------------------------------------------
 
 namespace component_system
 {

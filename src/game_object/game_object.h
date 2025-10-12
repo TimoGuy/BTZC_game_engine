@@ -159,6 +159,7 @@ private:
 
 class Game_object_pool;
 
+/// The entity in the ECS. Holds the render object, physics object, and a component list.
 class Game_object : public Scene_serialization_ifc, public UUID_ifc
 {
 public:
@@ -181,6 +182,8 @@ public:
     // Processes thru all requests for mutating the script list, removing first.
     void process_script_list_mutation_requests();
     #endif  // 0
+    /// Commits any changes, including component list changes.
+    void process_change_requests();
 
     void set_name(string&& name);
     string get_name();

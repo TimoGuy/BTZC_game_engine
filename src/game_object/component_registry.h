@@ -4,6 +4,8 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
+#include "../scene/scene_serialization_ifc.h"
+
 #include <cstdint>
 #include <string>
 #include <typeindex>
@@ -21,7 +23,7 @@ namespace component_system
 
 /// List of components for game objects. Automatically gets registered in the `Registry` so that the
 /// `Registry` can query for `Component_list`s.
-class Component_list
+class Component_list : public Scene_serialization_ifc
 {
 public:
     Component_list(Game_object& attached_game_obj);
@@ -61,6 +63,14 @@ public:
         assert(false);
     }
 
+    /// Commits staged changes to the component list during this.
+    /// @details There needs to be a buffer with stored requested changes and then have them be
+    ///          committed so that the changes to component lists only happen at one moment in time,
+    ///          so that systems in the ECS can depend on entities and components being immutable
+    ///          (meaning just the containers that hold entities and components, bc data in
+    ///          components is mutable for systems) at least during the time the systems run.
+    void commit_change_requests();
+
     /// Gets a reference to the data of the component.
     template<typename T>
     T& get_component_handle()
@@ -68,6 +78,9 @@ public:
         size_t data_offset{ m_type_to_data_offset_map.at(std::type_index(typeid(T))) };
         return *reinterpret_cast<T*>(&m_components_datas[data_offset]);
     }
+
+    // Scene_serialization_ifc
+    void scene_serialize(Scene_serialization_mode mode, json& node_ref) override;
 
 private:
     Game_object& m_attached_game_obj;

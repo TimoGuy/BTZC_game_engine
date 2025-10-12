@@ -23,6 +23,19 @@ BT::component_system::Component_list::~Component_list()
     service_finder::find_service<Registry>().remove_component_list(this);
 }
 
+void BT::component_system::Component_list::commit_change_requests()
+{
+    // @TODO
+    assert(false);
+}
+
+void BT::component_system::Component_list::scene_serialize(Scene_serialization_mode mode,
+                                                           json& node_ref) /*override*/
+{
+    // @TODO
+    assert(false);
+}
+
 
 BT::component_system::Registry::Registry()
 {

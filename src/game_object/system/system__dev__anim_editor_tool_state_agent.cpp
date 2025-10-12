@@ -110,28 +110,32 @@ void BT::component_system::system::System__dev__anim_editor_tool_state_agent::in
                 anim_frame_action::s_editor_state.working_model_animator = animator.get();
                 rend_obj.set_model_animator(std::move(animator));
 
-                // Create hitcapsule set driver script onto gameobject.
-                static auto s_script_type_str{
-                    Scripts::Helper_funcs::get_script_name_from_type(
-                        SCRIPT_TYPE_animator_driven_hitcapsule_set) };
+                // @TODO: @NOCHECKIN: @THEA: Create the functionality vvbelowvv but as
+                // systems/components.
+                assert(false);
 
-                static auto s_script_creation_fn = [](UUID render_obj_key) {
-                    json node_ref = {};
-                    node_ref["script_type"] = s_script_type_str;
-                    node_ref["script_datas"]["render_obj"] =
-                        UUID_helper::to_pretty_repr(render_obj_key);
+                // // Create hitcapsule set driver script onto gameobject.
+                // static auto s_script_type_str{
+                //     Scripts::Helper_funcs::get_script_name_from_type(
+                //         SCRIPT_TYPE_animator_driven_hitcapsule_set) };
 
-                    return node_ref;
-                };
+                // static auto s_script_creation_fn = [](UUID render_obj_key) {
+                //     json node_ref = {};
+                //     node_ref["script_type"] = s_script_type_str;
+                //     node_ref["script_datas"]["render_obj"] =
+                //         UUID_helper::to_pretty_repr(render_obj_key);
 
-                auto& game_obj_pool{ service_finder::find_service<Game_object_pool>() };
+                //     return node_ref;
+                // };
 
-                auto& game_obj{ *game_obj_pool.get_one_no_lock(m_game_obj_key) };
+                // auto& game_obj_pool{ service_finder::find_service<Game_object_pool>() };
 
-                game_obj.remove_script(s_script_type_str);
+                // auto& game_obj{ *game_obj_pool.get_one_no_lock(m_game_obj_key) };
 
-                auto creation_json = s_script_creation_fn(m_render_obj_key);
-                game_obj.add_script(creation_json);
+                // game_obj.remove_script(s_script_type_str);
+
+                // auto creation_json = s_script_creation_fn(m_render_obj_key);
+                // game_obj.add_script(creation_json);
             }
 
             // Set animator state.
