@@ -46,6 +46,7 @@ void BT::component_system::Registry::register_all_components()
     REGISTER_COMPONENT(Component_model_animator);
     REGISTER_COMPONENT(Component_hitcapsule_group_set);
     REGISTER_COMPONENT(Component_char_con_movement_state);
+    REGISTER_COMPONENT(Component_anim_editor_tool_communicator_state);
     // ---------------------------------------------------------------------------------------------
 
     #undef REGISTER_COMPONENT
