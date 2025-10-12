@@ -24,11 +24,13 @@
 #include "render_object.h"
 #include "renderer.h"
 #include "stb_image.h"
-#include <algorithm>
-#include <memory>
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
 #include "stb_image_resize2.h"
 #include "texture.h"
+
+#include <array>
+#include <algorithm>
+#include <memory>
 #include <cassert>
 #include <gl/gl.h>
 #include <mutex>
@@ -446,7 +448,7 @@ void BT::Renderer::Impl::create_window_with_gfx_context(string const& title)
     // @NOTE: 16x16 and 48x48 icons for windows are the best sizes w/ the different
     //   sizes for windows (taskbar (esp. XL size) and decorated window).
     // @WORKAROUND: only provide the 48x48 icon. The 16x16 icon suffers but oh well.
-    constexpr array<uint32_t, 1> k_wanted_icon_sizes{ 48 };
+    constexpr std::array<uint32_t, 1> k_wanted_icon_sizes{ 48 };
     vector<GLFWimage> window_icons;
     for (uint32_t wanted_size : k_wanted_icon_sizes)
     {
