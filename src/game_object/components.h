@@ -21,12 +21,15 @@ namespace BT
 class Model;
 class Model_animator;
 class Hitcapsule_group_set;
+class Physics_object;
 class Physics_object_type_impl_ifc;
 class Render_object;
+
 namespace anim_frame_action
 {
 struct Runtime_data_controls;
 }
+///----------------------
 
 namespace component_system
 {
@@ -41,10 +44,13 @@ struct Component_hitcapsule_group_set
     Hitcapsule_group_set* hitcapsule_grp_set{ nullptr };
 };
 
+struct Component_physics_object
+{
+    Physics_object* phys_obj{ nullptr };
+};
+
 struct Component_char_con_movement_state
 {
-    Physics_object_type_impl_ifc* char_con_impl{ nullptr };
-
     // Input history.
     bool prev_jump_pressed{ false };
     bool prev_crouch_pressed{ false };

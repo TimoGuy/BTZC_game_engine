@@ -28,7 +28,8 @@ enum : int32_t
 
 BT::component_system::system::System_player_character_movement::System_player_character_movement()
     : System_ifc({
-          Component_list_query::compile_query_string("(Component_char_con_movement_state)"),
+          Component_list_query::compile_query_string(
+              "(Component_physics_object && Component_char_con_movement_state)"),
       })
 {   // @NOTE: Do not remove adding concrete class to service finder!!
     BT_SERVICE_FINDER_ADD_SERVICE(System_player_character_movement, this);
@@ -283,6 +284,9 @@ void BT::component_system::system::System_player_character_movement::invoke_syst
 
     for (auto comp_list : comp_lists_per_query[Q_IDX_COMP_LISTS_WITH_CHAR_CON_MVT_STATE])
     {   // Get component handles.
+        auto& comp_phys_obj{
+            comp_list->get_component_handle<Component_physics_object>()
+        };
         auto& comp_char_con_mvt_state{
             comp_list->get_component_handle<Component_char_con_movement_state>()
         };
@@ -291,7 +295,7 @@ void BT::component_system::system::System_player_character_movement::invoke_syst
         // Physics_object* phys_obj{ m_phys_engine.checkout_physics_object(m_phys_obj_key) };
 
         // Tick and get character status.
-        auto char_con_impl{ comp_char_con_mvt_state.char_con_impl };
+        auto char_con_impl{ comp_phys_obj.phys_obj->get_impl() };
 
         JPH::Vec3 ground_velocity;
         JPH::Vec3 linear_velocity;

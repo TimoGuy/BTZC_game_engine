@@ -40,7 +40,10 @@
 // // // void BT::component_system::system::__SYSTEM_CLASS_NAME_HERE__::invoke_system_inner(
 // // //     Component_lists_per_query&& comp_lists_per_query) const /*override*/
 // // // {
-// // //     // @TODO: Add code here!
+// // //     for (auto comp_list : comp_lists_per_query[Q_IDX_COMP_LISTS_WITH_])
+// // //     {
+// // //         // @TODO: Add code here!
+// // //     }
 // // // }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma once

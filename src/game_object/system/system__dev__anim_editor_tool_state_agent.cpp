@@ -40,6 +40,8 @@ BT::component_system::system::System__dev__anim_editor_tool_state_agent::
 void BT::component_system::system::System__dev__anim_editor_tool_state_agent::invoke_system_inner(
     Component_lists_per_query&& comp_lists_per_query) const /*override*/
 {
+    assert(comp_lists_per_query[Q_IDX_COMP_LISTS_WITH_AFA_EDITOR_COMM].size() <= 1);
+
     for (auto comp_list : comp_lists_per_query[Q_IDX_COMP_LISTS_WITH_AFA_EDITOR_COMM])
     {   // Get component handles.
         auto& comp_afa_comm_state{
