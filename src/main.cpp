@@ -4,6 +4,7 @@
 #include "cglm/mat4.h"
 #include "renderer/camera.h"
 #include "game_object/component_registry.h"
+#include "game_object/system/concrete_systems.h"
 #include "game_object/game_object.h"
 #include "hitbox_interactor/hitcapsule.h"
 #include "input_handler/input_handler.h"
@@ -29,6 +30,7 @@
 #include "renderer/shader.h"  // @DEBUG
 #include "renderer/texture.h"  // @DEBUG
 #include "scene/scene_serialization_ifc.h"
+#include "service_finder/service_finder.h"
 #include "timer/timer.h"
 #include "timer/watchdog_timer.h"
 #include "uuid/uuid.h"
@@ -44,8 +46,18 @@ int32_t main()
 {
     BT::Watchdog_timer main_watchdog;
 
+    // ---- Initialization of entity component system --------------------------------------------------------------
     BT::component_system::Registry main_component_registry;
     main_component_registry.register_all_components();
+
+    BT::component_system::system::System__dev__anim_editor_tool_state_agent main_system_sdaetsa;
+    BT::component_system::system::System_animator_driven_hitcapsule_set main_system_sadhs;
+    BT::component_system::system::System_apply_phys_xform_to_rend_obj main_system_sapxtro;
+    BT::component_system::system::System_player_character_movement main_system_spcm;
+
+    #define INVOKE_SYSTEM(_sys_type)                                                               \
+        BT::service_finder::find_service<BT::component_system::system::_sys_type>().invoke_system()
+    // ---------------------------------------------------------------------------------------------
 
     BT::Input_handler main_input_handler;
     BT::ImGui_renderer main_renderer_imgui_renderer;
@@ -348,11 +360,15 @@ int32_t main()
 
         main_physics_engine.accumulate_delta_time(delta_time);
         while (main_physics_engine.calc_wants_to_tick())
-        {   // Run all pre-physics scripts.
+        {   // Run all pre-physics systems.
+            #if 0
             for (auto game_obj : all_game_objs)
             {
                 game_obj->run_pre_physics_scripts(main_physics_engine.k_simulation_delta_time);
             }
+            #endif  // 0
+            INVOKE_SYSTEM(System_player_character_movement);
+            INVOKE_SYSTEM(System_animator_driven_hitcapsule_set);
 
             // Update physics.
             main_physics_engine.update_physics();
@@ -362,11 +378,15 @@ int32_t main()
         }
 
         main_physics_engine.calc_interpolation_alpha();
-        {   // Run all pre-render scripts.
+        {   // Run all pre-render systems.
+            #if 0
             for (auto game_obj : all_game_objs)
             {
                 game_obj->run_pre_render_scripts(delta_time);
             }
+            #endif  // 0
+            INVOKE_SYSTEM(System__dev__anim_editor_tool_state_agent);
+            INVOKE_SYSTEM(System_apply_phys_xform_to_rend_obj);
 
             main_renderer.render(delta_time, [&]() {
                 // Render selected game obj.

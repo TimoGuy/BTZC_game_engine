@@ -43,10 +43,9 @@ void BT::component_system::Registry::register_all_components()
         } while (false);
 
     // ---- List of components to register ---------------------------------------------------------
-    REGISTER_COMPONENT(Component_render_object);
     REGISTER_COMPONENT(Component_model_animator);
     REGISTER_COMPONENT(Component_hitcapsule_group_set);
-    REGISTER_COMPONENT(Character_controller_move_delta);
+    REGISTER_COMPONENT(Component_char_con_movement_state);
     // ---------------------------------------------------------------------------------------------
 
     #undef REGISTER_COMPONENT

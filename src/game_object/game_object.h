@@ -171,12 +171,16 @@ public:
     static void set_imgui_gizmo_trans_space(int32_t trans_space) { s_imgui_gizmo_trans_space = trans_space; }
     static int32_t get_imgui_gizmo_trans_space() { return s_imgui_gizmo_trans_space; }
 
+    #if 0
     void run_pre_physics_scripts(float_t physics_delta_time);
     void run_pre_render_scripts(float_t delta_time);
+    #endif  // 0
 
+    #if 0
     // @WARNING: Not for production code.
     // Processes thru all requests for mutating the script list, removing first.
     void process_script_list_mutation_requests();
+    #endif  // 0
 
     void set_name(string&& name);
     string get_name();
@@ -193,6 +197,7 @@ public:
     // Scene_serialization_ifc.
     void scene_serialize(Scene_serialization_mode mode, json& node_ref) override;
 
+    #if 0
     // @WARNING: Not for production code.
     // Adds a script dynamically to this gameobject.
     void add_script(json& node_ref);
@@ -200,6 +205,7 @@ public:
     // @WARNING: Not for production code.
     // Removes a script dynamically from this gameobject.
     void remove_script(std::string const& script_type);
+    #endif  // 0
 
     void render_imgui_local_transform();
     void render_imgui_transform_gizmo();
@@ -222,12 +228,14 @@ private:
     component_system::Component_list m_component_list;
     // @TODO: ^^Keep^^ this in mind as the replac ///////  @NOCHECKIN: @THEA
 
+    #if 0
     // @WARNING: Not for production code.
     std::vector<std::string> m_remove_script_requests;
     // @WARNING: Not for production code.
     std::vector<json> m_add_script_requests;
     // @WARNING: Not for production code.
     std::mutex m_mutate_script_requests_mutex;
+    #endif  // 0
 
     UUID m_parent;
     vector<UUID> m_children;

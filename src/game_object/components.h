@@ -4,12 +4,14 @@
 ///
 /// @details Steps for adding a component:
 ///            1. Here, create a struct in the `component` namespace.
-///            2. Go to `component_registry.cpp`.
-///            3. There, add struct to ECS in `register_all_components()` func using the macro.
+///            2. Go to `component_registry.cpp`. There, add struct to ECS in
+///               `register_all_components()` func using the macro.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
 #include "cglm/types.h"
+
+#include <array>
 
 
 namespace BT
@@ -18,6 +20,7 @@ namespace BT
 /// Forward declarations.
 class Model_animator;
 class Hitcapsule_group_set;
+class Physics_object_type_impl_ifc;
 
 namespace component_system
 {
@@ -32,9 +35,46 @@ struct Component_hitcapsule_group_set
     Hitcapsule_group_set* hitcapsule_grp_set;
 };
 
-struct Character_controller_move_delta
+struct Component_char_con_movement_state
 {
-    vec3 move_delta;
+    Physics_object_type_impl_ifc* char_con_impl;
+
+    // Input history.
+    bool prev_jump_pressed{ false };
+    bool prev_crouch_pressed{ false };
+
+    // Settings.
+    float_t crouched_speed{ 5.0f };
+    float_t standing_speed{ 15.0f };
+
+    float_t grounded_acceleration{ 80.0f };
+    float_t grounded_deceleration{ 120.0f };
+
+    struct Contextual_turn_speed
+    {
+        float_t turn_speed;
+        float_t max_speed_of_context;
+    };
+    std::array<Contextual_turn_speed, 3> grounded_turn_speeds{
+        Contextual_turn_speed{ 1000000.0f, crouched_speed + 0.1f },
+        Contextual_turn_speed{ 10.0f, standing_speed + 0.1f },
+        Contextual_turn_speed{ 5.0f, 50.0f } };
+
+    float_t airborne_acceleration{ 60.0f };
+    float_t airborne_turn_speed{ 7.5f };
+    float_t jump_speed{ 30.0f };
+
+    struct Grounded_state
+    {
+        float_t speed{ 0.0f };
+        float_t facing_angle{ 0.0f };
+        bool    turnaround_enabled{ false };
+    } grounded_state;
+
+    struct Airborne_state
+    {
+        float_t input_facing_angle{ 0.0f };
+    } airborne_state;
 };
 
 }  // namespace component_system
