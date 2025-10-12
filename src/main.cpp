@@ -3,8 +3,8 @@
 #include "cglm/cglm.h"
 #include "cglm/mat4.h"
 #include "renderer/camera.h"
+#include "game_object/component_registry.h"
 #include "game_object/game_object.h"
-#include "game_object/scripts/scripts.h"
 #include "hitbox_interactor/hitcapsule.h"
 #include "input_handler/input_handler.h"
 #include "Jolt/Jolt.h"  // @DEBUG
@@ -43,6 +43,9 @@ using std::unique_ptr;
 int32_t main()
 {
     BT::Watchdog_timer main_watchdog;
+
+    BT::component_system::Registry main_component_registry;
+    main_component_registry.register_all_components();
 
     BT::Input_handler main_input_handler;
     BT::ImGui_renderer main_renderer_imgui_renderer;

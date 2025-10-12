@@ -1,3 +1,24 @@
+#include "concrete_systems.h"
+
+#include "../../service_finder/service_finder.h"
+
+
+BT::component_system::system::System_apply_phys_xform_to_rend_obj::
+    System_apply_phys_xform_to_rend_obj()
+    : System_ifc({})
+{   // @NOTE: Do not remove adding concrete class to service finder!!
+    BT_SERVICE_FINDER_ADD_SERVICE(System_apply_phys_xform_to_rend_obj, this);
+}
+
+void BT::component_system::system::System_apply_phys_xform_to_rend_obj::invoke_system_inner(
+    Component_lists_per_query&& comp_lists_per_query) const /*override*/
+{
+    // @TODO: Add code here!
+}
+
+
+
+#if 0
 #include "scripts.h"
 
 #include "../game_object.h"
@@ -80,3 +101,4 @@ void BT::Scripts::Script_apply_phys_xform_to_rend_obj::on_pre_render(float_t del
     game_obj->get_transform_handle().set_global_pos_rot(position, rotation);
     game_obj->propagate_transform_changes();
 }
+#endif  // 0

@@ -14,13 +14,28 @@
 
 namespace BT
 {
-namespace component
+
+/// Forward declarations.
+class Model_animator;
+class Hitcapsule_group_set;
+
+namespace component_system
 {
+
+struct Component_model_animator
+{
+    Model_animator* animator;
+};
+
+struct Component_hitcapsule_group_set
+{
+    Hitcapsule_group_set* hitcapsule_grp_set;
+};
 
 struct Character_controller_move_delta
 {
     vec3 move_delta;
 };
 
-}  // namespace component
+}  // namespace component_system
 }  // namespace BT

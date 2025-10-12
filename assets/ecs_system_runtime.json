@@ -1,0 +1,11 @@
+{
+    "run_groups": [
+        {
+            "group_name": "simulation_group",
+            "system_run_order": [
+                ["mutate_scene_system"],
+                ["asdfasdfasdf", ""]
+            ]
+        }
+    ]
+}

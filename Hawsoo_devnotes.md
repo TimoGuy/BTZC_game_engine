@@ -300,12 +300,23 @@ while (running_game_loop)
                               { "Struct_type",           // Structs allocated for new entity.
                                 "Struct_type_2",
                                 "Struct_type_3" },
-                              { "Concrete_system_type",  // Systems to add entity to.
-                                "Concrete_system_type_2" });
+    //                          { "Concrete_system_type",  // Systems to add entity to.
+    //                            "Concrete_system_type_2" }
+                              );  // ^^No more adding systems. I'm gonna try to go thru with ECS.
+
+    // Querying for an entity.
+    Concrete_system::invoke_system() override
+    {
+        static auto const k_query{
+            component::System_helpers::compile_query_string(
+                "(Struct_type_2 && Struct_type_3 && Struct_player && !Struct_deku_scrub)") };
+        auto comp_lists{ service_finder::find_service<component::Registry>()
+                             .query_component_lists(k_query) };
+    }
     ```
 
 - [ ] Emplace everything into a `string->size_t` for the struct name for deserialization.
-- [ ] Attach structs and scripts to gameobject
+- [ ] Attach structs ~~and scripts~~ to gameobject
     - [ ] When gameobjects are added to the script execution pool,
 
 

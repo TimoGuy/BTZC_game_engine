@@ -1,3 +1,28 @@
+#include "concrete_systems.h"
+
+#include "../../service_finder/service_finder.h"
+
+
+BT::component_system::system::System__dev__anim_editor_tool_state_agent::
+    System__dev__anim_editor_tool_state_agent()
+    : System_ifc({})
+{   // @NOTE: Do not remove adding concrete class to service finder!!
+    BT_SERVICE_FINDER_ADD_SERVICE(System__dev__anim_editor_tool_state_agent, this);
+}
+
+void BT::component_system::system::System__dev__anim_editor_tool_state_agent::invoke_system_inner(
+    Component_lists_per_query&& comp_lists_per_query) const /*override*/
+{
+}
+
+
+
+
+
+
+
+
+#if 0
 #include "logger.h"
 #include "scripts.h"
 
@@ -250,3 +275,4 @@ void BT::Scripts::Script__dev__anim_editor_tool_state_agent::on_pre_render(float
 
     m_renderer.get_render_object_pool().return_render_objs({ &rend_obj });
 }
+#endif  // 0

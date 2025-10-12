@@ -61,16 +61,17 @@ set(MAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/animation_frame_action_tool/runtime_data.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/animation_frame_action_tool/runtime_data.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/btzc_game_engine.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/component_registry.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/component_registry.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/components.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/game_object.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/game_object.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/list_of_scripts_begin.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/list_of_scripts_end.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/script__dev__anim_editor_tool_state_agent.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/script_animator_driven_hitcapsule_set.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/script_apply_phys_xform_to_rend_obj.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/script_player_character_movement.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/scripts.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/scripts/serialization.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/system/system_ifc.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/UNUSED_serialization.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/hitbox_interactor/hitcapsule.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/hitbox_interactor/hitcapsule.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/input_handler/input_codes.h

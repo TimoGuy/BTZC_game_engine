@@ -169,6 +169,7 @@ BT::Game_object::Game_object(Input_handler& input_handler,
     , m_phys_engine(phys_engine)
     , m_renderer(renderer)
     , m_obj_pool(obj_pool)
+    , m_component_list(*this)
 {
 }
 

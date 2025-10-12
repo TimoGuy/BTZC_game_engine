@@ -1,14 +1,14 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/// @brief Registry of component lists
+/// @brief Registry of component lists so that component lists can get queried. A component list is
+///        a list of components packed into a byte list.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
 #include <cstdint>
 #include <string>
+#include <typeindex>
 #include <unordered_map>
 #include <vector>
-#include <type_traits>
-#include <typeindex>
 
 
 namespace BT
@@ -16,7 +16,7 @@ namespace BT
 
 class Game_object;
 
-namespace component
+namespace component_system
 {
 
 /// List of components for game objects. Automatically gets registered in the `Registry` so that the
@@ -32,12 +32,21 @@ public:
     Component_list& operator=(const Component_list&) = delete;
     Component_list& operator=(Component_list&&)      = delete;
 
+    /// Gets the attached game object (the game object that owns this component list).
+    Game_object& get_attached_game_obj()
+    {
+        return m_attached_game_obj;
+    }
+
     /// Adds component with a value.
     template<typename T>
     void add_component(T init_value)
     {
         size_t data_offset{ m_components_datas.size() };
-        m_type_to_data_offset_map.emplace(std::type_index(typeid(T)), data_offset);
+        auto result{ m_type_to_data_offset_map.emplace(std::type_index(typeid(T)), data_offset) };
+
+        // Make sure that emplace successfully occurred.
+        assert(result.second);
 
         m_components_datas.resize(m_components_datas.size() + sizeof(T));
         get_component_handle<T>() = init_value;
@@ -67,6 +76,9 @@ private:
     std::vector<uint8_t> m_components_datas;  // Components are stored as bytes inside here.
 };
 
+/// Forward declare.
+struct Component_list_query;
+
 /// Registers and stores components in the ECS. Used for querying component lists.
 class Registry
 {
@@ -83,7 +95,7 @@ public:
 
     void add_component_list(Component_list* comp_list);
     void remove_component_list(Component_list* comp_list);
-    std::vector<Component_list*> query_component_lists();  // @TODO: figure out the asdfasdfasdf interface.
+    std::vector<Component_list*> query_component_lists(Component_list_query const& query);
 
 private:
     // Registered components.
@@ -100,5 +112,5 @@ private:
     std::vector<Component_list*> m_added_component_lists;
 };
 
-}  // namespace component
+}  // namespace component_system
 }  // namespace BT

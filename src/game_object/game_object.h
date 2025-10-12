@@ -9,7 +9,6 @@
 #include "cglm/affine.h"
 #include "cglm/quat.h"
 #include "component_registry.h"
-#include "scripts/scripts.h"
 
 #include <atomic>
 #include <functional>
@@ -220,7 +219,7 @@ private:
     UUID m_rend_obj_key;
     
     // vector<unique_ptr<Scripts::Script_ifc>> m_scripts;  @NOCHECKIN: @THEA
-    component::Component_list m_component_list;
+    component_system::Component_list m_component_list;
     // @TODO: ^^Keep^^ this in mind as the replac ///////  @NOCHECKIN: @THEA
 
     // @WARNING: Not for production code.

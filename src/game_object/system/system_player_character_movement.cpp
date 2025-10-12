@@ -1,3 +1,25 @@
+#include "concrete_systems.h"
+
+#include "../../service_finder/service_finder.h"
+
+
+BT::component_system::system::System_player_character_movement::System_player_character_movement()
+    : System_ifc({})
+{   // @NOTE: Do not remove adding concrete class to service finder!!
+    BT_SERVICE_FINDER_ADD_SERVICE(System_player_character_movement, this);
+}
+
+void BT::component_system::system::System_player_character_movement::invoke_system_inner(
+    Component_lists_per_query&& comp_lists_per_query) const /*override*/
+{
+    // @TODO: Add code here!
+}
+
+
+
+
+
+#if 0
 #include "cglm/quat.h"
 #include "scripts.h"
 
@@ -610,3 +632,4 @@ BT::Scripts::Script_player_character_movement
 
     return { resized_to_radius_box_velo, flat_input_dir };
 }
+#endif  // 0
