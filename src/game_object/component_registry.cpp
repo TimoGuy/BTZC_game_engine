@@ -66,6 +66,12 @@ void BT::component_system::Registry::register_all_components()
     #undef REGISTER_COMPONENT
 }
 
+BT::component_system::Registry::Component_metadata const& BT::component_system::Registry::
+    find_component_metadata_by_typename_str(std::string const& typename_str)
+{
+    return m_components[m_component_name_to_list_idx_map.at(typename_str)];
+}
+
 void BT::component_system::Registry::add_component_list(Component_list* comp_list)
 {
     if (std::find(m_added_component_lists.begin(), m_added_component_lists.end(), comp_list) ==

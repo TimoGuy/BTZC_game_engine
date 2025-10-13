@@ -106,6 +106,14 @@ public:
 
     void register_all_components();
 
+    struct Component_metadata
+    {
+        size_t component_idx;
+        std::type_index typename_id_idx;
+    };
+    Component_metadata const& find_component_metadata_by_typename_str(
+        std::string const& typename_str);
+
     void add_component_list(Component_list* comp_list);
     void remove_component_list(Component_list* comp_list);
     std::vector<Component_list*> query_component_lists(Component_list_query const& query);
@@ -113,12 +121,6 @@ public:
 private:
     // Registered components.
     std::unordered_map<std::string, size_t> m_component_name_to_list_idx_map;
-
-    struct Component_metadata
-    {
-        size_t component_idx;
-        std::type_index typename_id_idx;
-    };
     std::vector<Component_metadata> m_components;
 
     // Registered component lists.

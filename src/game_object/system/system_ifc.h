@@ -4,7 +4,6 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include <memory>
 #include <string>
 #include <typeindex>
 #include <vector>
@@ -27,7 +26,9 @@ struct Component_list_query
     /// Queries component list whether it matches the query.
     bool query_component_list_match(Component_list const& comp_list) const;
 
-private:
+
+
+
     #if 0
     struct Logic_group
     {
@@ -69,7 +70,65 @@ private:
     std::vector<Logic_term> logic_terms;
     #endif  // 0
 
-    
+
+
+
+
+
+    struct Input_val_struct_existance
+    {
+        Input_val_struct_existance(std::type_index struct_typename, size_t result_write_idx)
+            : struct_typename(struct_typename)
+            , result_write_idx(result_write_idx)
+        {
+        }
+
+        /// Typename to check for existance in an entity.
+        /// Write existance result into calculation table.
+        std::type_index struct_typename;
+
+        size_t result_write_idx;
+    };
+    /// Before calc ops happen, input vals are inserted
+    /// (this is for checking whether a struct exists)
+    std::vector<Input_val_struct_existance> input_vals_struct_existances;
+
+    struct Input_val_const_bool
+    {
+        /// Constant value to write into calculation table.
+        bool const_bool;
+
+        size_t result_write_idx;
+    };
+    /// Before calc ops happen, input vals are inserted
+    /// (this is for const bool values)
+    std::vector<Input_val_const_bool> input_vals_const_bools;
+
+    struct Calculation_operation
+    {   /// Calculation operation type.
+        /// Note that `OR_TYPE_NOT` only requires one operand.
+        enum Op_type
+        {
+            OP_TYPE_NOT,  // !
+            OP_TYPE_AND,  // &&
+            OP_TYPE_OR,   // ||
+        } logical_operator;
+
+        /// Operands to pull for the calculation. Sometimes both aren't used.
+        size_t operands[2];
+
+        size_t result_write_idx;
+    };
+
+    /// Once all input vals are inserted, then all calculation operations are run.
+    std::vector<Calculation_operation> calc_operations;
+
+    /// Once all calc ops are run, this reads the final value for whether the query succeeded.
+    size_t final_result_read_idx{ (size_t)-1 };
+
+    /// In order to fit all the input and calculated values, this is the number of bools required
+    /// for the calculation table.
+    size_t calc_table_size_required{ 0 };
 };
 
 /// Interface for ECS system.
