@@ -290,13 +290,34 @@ bool BT::component_system::Component_list_query::query_component_list_match(
     }
 
     // Run operations.
-    // @TODO
+    for (auto& calc_op : calc_operations)
+    {
+        switch (calc_op.logical_operator)
+        {
+        case Calculation_operation::OP_TYPE_NOT:
+            calc_table[calc_op.result_write_idx] =
+                !static_cast<bool>(calc_table[calc_op.operands[0]]);
+            break;
+        case Calculation_operation::OP_TYPE_AND:
+            calc_table[calc_op.result_write_idx] =
+                (static_cast<bool>(calc_table[calc_op.operands[0]]) &&
+                 static_cast<bool>(calc_table[calc_op.operands[1]]));
+            break;
+        case Calculation_operation::OP_TYPE_OR:
+            calc_table[calc_op.result_write_idx] =
+                (static_cast<bool>(calc_table[calc_op.operands[0]]) ||
+                 static_cast<bool>(calc_table[calc_op.operands[1]]));
+            break;
+
+        default:
+            // Unsupported logical operator.
+            assert(false);
+            break;
+        }
+    }
 
     // Read result.
-    // @TODO
-
-    // @TODO
-    assert(false);
+    return static_cast<bool>(calc_table[final_result_read_idx]);
 }
 
 
@@ -307,12 +328,17 @@ BT::component_system::System_ifc::System_ifc(std::vector<Component_list_query>&&
 
 void BT::component_system::System_ifc::invoke_system() const
 {
-    // Get component lists for each query.
-    // @TODO
+    auto& registry{ service_finder::find_service<Registry>() };
 
-    // @TODO
-    assert(false);
+    Component_lists_per_query clpq;
+    clpq.reserve(m_comp_list_queries.size());
+
+    // Get component lists for each query.
+    for (auto& query : m_comp_list_queries)
+    {
+        clpq.emplace_back(registry.query_component_lists(query));
+    }
 
     // Call inner system with query results.
-    invoke_system_inner({});
+    invoke_system_inner(std::move(clpq));
 }
