@@ -4,6 +4,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
+#include <memory>
 #include <string>
 #include <typeindex>
 #include <vector>
@@ -26,6 +27,8 @@ struct Component_list_query
     /// Queries component list whether it matches the query.
     bool query_component_list_match(Component_list const& comp_list) const;
 
+private:
+    #if 0
     struct Logic_group
     {
         enum Operator : int32_t
@@ -44,6 +47,7 @@ struct Component_list_query
     {
         enum Term_type : int32_t
         {
+            TERM_CONST_TRUE,  // @NOTE: Use `BOOL_OP_NOT` to make this const False.
             TERM_STRUCT_TYPENAME,
             TERM_RESULT,
         } term_type;
@@ -63,6 +67,9 @@ struct Component_list_query
         bool result;
     };
     std::vector<Logic_term> logic_terms;
+    #endif  // 0
+
+    
 };
 
 /// Interface for ECS system.
