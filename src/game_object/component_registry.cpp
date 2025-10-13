@@ -29,6 +29,12 @@ void BT::component_system::Component_list::commit_change_requests()
     assert(false);
 }
 
+bool BT::component_system::Component_list::check_component_exists(
+    std::type_index comp_typename_idx) const
+{
+    return (m_type_to_data_offset_map.find(comp_typename_idx) != m_type_to_data_offset_map.end());
+}
+
 void BT::component_system::Component_list::scene_serialize(Scene_serialization_mode mode,
                                                            json& node_ref) /*override*/
 {

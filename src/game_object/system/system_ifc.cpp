@@ -274,6 +274,27 @@ BT::component_system::Component_list_query BT::component_system::Component_list_
 bool BT::component_system::Component_list_query::query_component_list_match(
     Component_list const& comp_list) const
 {
+    std::vector<char> calc_table(calc_table_size_required);  // `char` is used to avoid `bool`
+                                                             // template specialization (which is
+                                                             // very very slow).
+    // Insert input vals.
+    for (auto& in_val_se : input_vals_struct_existances)
+    {
+        calc_table[in_val_se.result_write_idx] =
+            comp_list.check_component_exists(in_val_se.struct_typename);
+    }
+
+    for (auto& in_val_cb : input_vals_const_bools)
+    {
+        calc_table[in_val_cb.result_write_idx] = in_val_cb.const_bool;
+    }
+
+    // Run operations.
+    // @TODO
+
+    // Read result.
+    // @TODO
+
     // @TODO
     assert(false);
 }
@@ -286,8 +307,12 @@ BT::component_system::System_ifc::System_ifc(std::vector<Component_list_query>&&
 
 void BT::component_system::System_ifc::invoke_system() const
 {
+    // Get component lists for each query.
+    // @TODO
+
     // @TODO
     assert(false);
 
+    // Call inner system with query results.
     invoke_system_inner({});
 }

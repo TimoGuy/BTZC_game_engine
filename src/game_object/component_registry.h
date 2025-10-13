@@ -79,6 +79,9 @@ public:
         return *reinterpret_cast<T*>(&m_components_datas[data_offset]);
     }
 
+    /// Checks whether component is in component list.
+    bool check_component_exists(std::type_index comp_typename_idx) const;
+
     // Scene_serialization_ifc
     void scene_serialize(Scene_serialization_mode mode, json& node_ref) override;
 
