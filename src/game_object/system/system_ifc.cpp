@@ -18,8 +18,15 @@ bool BT::component_system::Component_list_query::query_component_list_match(
 }
 
 
+BT::component_system::System_ifc::System_ifc(std::vector<Component_list_query>&& comp_list_queries)
+    : m_comp_list_queries(std::move(comp_list_queries))
+{
+}
+
 void BT::component_system::System_ifc::invoke_system() const
 {
     // @TODO
     assert(false);
+
+    invoke_system_inner({});
 }
