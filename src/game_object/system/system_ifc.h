@@ -26,54 +26,7 @@ struct Component_list_query
     /// Queries component list whether it matches the query.
     bool query_component_list_match(Component_list const& comp_list) const;
 
-
-
-
-    #if 0
-    struct Logic_group
-    {
-        enum Operator : int32_t
-        {
-            LOGIC_AND,
-            LOGIC_OR,
-        } logical_operator;
-
-        /// Idx in `logic_terms` to write result to.
-        /// @note If this is set to `-1`, then the result is the final result.
-        size_t result_write_idx;
-    };
-    std::vector<Logic_group> logic_groups;
-
-    struct Logic_term
-    {
-        enum Term_type : int32_t
-        {
-            TERM_CONST_TRUE,  // @NOTE: Use `BOOL_OP_NOT` to make this const False.
-            TERM_STRUCT_TYPENAME,
-            TERM_RESULT,
-        } term_type;
-
-        enum Boolean_op : int32_t
-        {
-            BOOL_OP_NORMAL,
-            BOOL_OP_NOT,  // The not operator `!`.
-        } bool_op;
-
-        /// Typename to check for existance in an entity.
-        /// @note Not applicable unless `TERM_STRUCT_TYPENAME`.
-        std::type_index struct_typename;
-
-        /// Stored result written by a `Logic_group`.
-        /// @note Not applicable unless `TERM_RESULT`.
-        bool result;
-    };
-    std::vector<Logic_term> logic_terms;
-    #endif  // 0
-
-
-
-
-
+    // ---- Compiled query data --------------------------------------------------------------------
 
     struct Input_val_struct_existance
     {
