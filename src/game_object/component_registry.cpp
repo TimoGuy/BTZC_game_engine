@@ -38,6 +38,36 @@ bool BT::component_system::Component_list::check_component_exists(
 void BT::component_system::Component_list::scene_serialize(Scene_serialization_mode mode,
                                                            json& node_ref) /*override*/
 {
+    auto& registry{ service_finder::find_service<Registry>() };
+
+    if (mode == SCENE_SERIAL_MODE_SERIALIZE)
+    {
+        node_ref = json::array();
+        size_t idx{ 0 };
+        for (auto it : m_type_to_data_offset_map)
+        {   // Find string of component type id.
+            auto comp_typename{ registry.find_typename_str_by_component_typeid(it.first) };
+
+            node_ref[idx]["typename"] = comp_typename;
+
+            idx++;
+        }
+    }
+    else if (mode == SCENE_SERIAL_MODE_DESERIALIZE)
+    {
+        bool is_valid_array{ !node_ref.is_null() && node_ref.is_array() };
+        if (!is_valid_array)
+        {   // Error: list of components is not a list.
+            assert(false);
+            return;
+        }
+        for (auto component_json : node_ref)
+        {   // Run default add component func.
+            registry.find_component_metadata_by_typename_str(component_json["typename"])
+                .default_add_component_fn(*this);
+        }
+    }
+
     // @TODO
     assert(false);
 }
@@ -58,7 +88,14 @@ void BT::component_system::Registry::register_all_components()
             size_t next_component_idx{ m_components.size() };                                       \
             m_component_name_to_list_idx_map.emplace(#_typename, next_component_idx);               \
                                                                                                     \
-            m_components.emplace_back(next_component_idx, std::type_index(typeid(_typename)));      \
+            m_components.emplace_back(next_component_idx,                                           \
+                                      std::type_index(typeid(_typename)),                           \
+                                      [](Component_list& comp_list) {                               \
+                                          comp_list.add_component<_typename>(_typename{});          \
+                                      },                                                            \
+                                      [](Component_list& comp_list) {                               \
+                                          comp_list.remove_component<_typename>();                  \
+                                      });                                                           \
         } while (false);
 
     // ---- List of components to register ---------------------------------------------------------
@@ -73,9 +110,26 @@ void BT::component_system::Registry::register_all_components()
 }
 
 BT::component_system::Registry::Component_metadata const& BT::component_system::Registry::
-    find_component_metadata_by_typename_str(std::string const& typename_str)
+    find_component_metadata_by_typename_str(std::string const& typename_str) const
 {
     return m_components[m_component_name_to_list_idx_map.at(typename_str)];
+}
+
+std::string BT::component_system::Registry::find_typename_str_by_component_typeid(
+    std::type_index comp_typeid_idx) const
+{   // @NOTE: this is a lot more inefficient then the other direction but hopefully this just
+    // doesn't get called too too often eh!
+    for (auto& comp : m_components)
+        if (comp.typename_id_idx == comp_typeid_idx)
+            for (auto it : m_component_name_to_list_idx_map)
+                if (it.second == comp.component_idx)
+                {   // Found string equivalent!
+                    return it.first;
+                }
+
+    // Failed to find string equivalent of typeid idx.
+    assert(false);
+    return "";
 }
 
 void BT::component_system::Registry::add_component_list(Component_list* comp_list)

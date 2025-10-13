@@ -315,9 +315,14 @@ while (running_game_loop)
     }
     ```
 
-- [ ] Emplace everything into a `string->size_t` for the struct name for deserialization.
-- [ ] Attach structs ~~and scripts~~ to gameobject
-    - [ ] When gameobjects are added to the script execution pool,
+- [x] Emplace everything into a `string->size_t` for the struct name for deserialization.
+- [x] Attach structs ~~and scripts~~ to gameobject
+    - [ ] ~~When gameobjects are added to the script execution pool,~~
+
+- [ ] @THINK: How should components like `Component_model_animator` work, where it just has a pointer to an animator?
+    - It definitely feels like that's probably not the best way of doing it. Bc then it's really just something that can't be serialized.
+    - [x] @FOR_NOW: Just load it up as nullptr values.
+    - [ ] Edit the `.btscene` files to change scripts to components (refer to new systems to see what components to include).
 
 
 

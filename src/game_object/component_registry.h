@@ -7,6 +7,7 @@
 #include "../scene/scene_serialization_ifc.h"
 
 #include <cstdint>
+#include <functional>
 #include <string>
 #include <typeindex>
 #include <unordered_map>
@@ -113,9 +114,13 @@ public:
     {
         size_t component_idx;
         std::type_index typename_id_idx;
+
+        std::function<void(Component_list&)> default_add_component_fn;
+        std::function<void(Component_list&)> default_remove_component_fn;
     };
     Component_metadata const& find_component_metadata_by_typename_str(
-        std::string const& typename_str);
+        std::string const& typename_str) const;
+    std::string find_typename_str_by_component_typeid(std::type_index comp_typeid_idx) const;
 
     void add_component_list(Component_list* comp_list);
     void remove_component_list(Component_list* comp_list);
