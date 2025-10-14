@@ -84,7 +84,7 @@ void BT::component_system::Registry::register_all_components()
 
     #define REGISTER_COMPONENT(_typename)                                                           \
         do                                                                                          \
-        {                                                                                           \
+        {   /* Insert component into registry. */                                                   \
             size_t next_component_idx{ m_components.size() };                                       \
             m_component_name_to_list_idx_map.emplace(#_typename, next_component_idx);               \
                                                                                                     \
@@ -96,6 +96,14 @@ void BT::component_system::Registry::register_all_components()
                                       [](Component_list& comp_list) {                               \
                                           comp_list.remove_component<_typename>();                  \
                                       });                                                           \
+                                                                                                    \
+            /* Ensure that serialization/deserialization works with struct. */                      \
+            _typename default_inst{};                                                               \
+            _typename round_tripped{ json(default_inst).get<_typename>() };                         \
+            if (memcmp(&default_inst, &round_tripped, sizeof(_typename)) != 0)                      \
+            {                                                                                       \
+                assert(false);                                                                      \
+            }                                                                                       \
         } while (false);
 
     // ---- List of components to register ---------------------------------------------------------
