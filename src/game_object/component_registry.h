@@ -5,6 +5,7 @@
 #pragma once
 
 #include "../scene/scene_serialization_ifc.h"
+#include "nlohmann/detail/macro_scope.hpp"
 
 #include <cstdint>
 #include <functional>
@@ -24,10 +25,11 @@ namespace component_system
 
 /// List of components for game objects. Automatically gets registered in the `Registry` so that the
 /// `Registry` can query for `Component_list`s.
-class Component_list : public Scene_serialization_ifc
+class Component_list // : public Scene_serialization_ifc
 {
 public:
-    Component_list(Game_object& attached_game_obj);
+    Component_list();
+    // Component_list(Game_object& attached_game_obj);
     ~Component_list();
 
     Component_list(const Component_list&)            = delete;
@@ -35,11 +37,11 @@ public:
     Component_list& operator=(const Component_list&) = delete;
     Component_list& operator=(Component_list&&)      = delete;
 
-    /// Gets the attached game object (the game object that owns this component list).
-    Game_object& get_attached_game_obj()
-    {
-        return m_attached_game_obj;
-    }
+    // /// Gets the attached game object (the game object that owns this component list).
+    // Game_object& get_attached_game_obj()
+    // {
+    //     return m_attached_game_obj;
+    // }
 
     /// Adds component with a value.
     template<typename T>
@@ -83,14 +85,37 @@ public:
     /// Checks whether component is in component list.
     bool check_component_exists(std::type_index comp_typename_idx) const;
 
-    // Scene_serialization_ifc
-    void scene_serialize(Scene_serialization_mode mode, json& node_ref) override;
+    // // Scene_serialization_ifc
+    // void scene_serialize(Scene_serialization_mode mode, json& node_ref) override;
 
 private:
-    Game_object& m_attached_game_obj;
+    // Game_object& m_attached_game_obj;
 
     std::unordered_map<std::type_index, size_t> m_type_to_data_offset_map;
     std::vector<uint8_t> m_components_datas;  // Components are stored as bytes inside here.
+
+public:
+    /// Serialization/deserialization
+    /// @NOTE: Copied from `NLOHMANN_DEFINE_TYPE_INTRUSIVE()` and modified.
+    template<typename BasicJsonType,
+             nlohmann::detail::enable_if_t<nlohmann::detail::is_basic_json<BasicJsonType>::value,
+                                           int> = 0>
+    friend void to_json(BasicJsonType& nlohmann_json_j, const Component_list& nlohmann_json_t)
+    {
+        // @TODO: DEFINE THISvv
+        assert(false);
+        // nlohmann_json_j["m_type_to_data_offset_map"] = nlohmann_json_t.m_type_to_data_offset_map;
+    }
+    template<typename BasicJsonType,
+             nlohmann::detail::enable_if_t<nlohmann::detail::is_basic_json<BasicJsonType>::value,
+                                           int> = 0>
+    friend void from_json(const BasicJsonType& nlohmann_json_j, Component_list& nlohmann_json_t)
+    {
+        // @TODO: DEFINE THISvv
+        assert(false);
+        // nlohmann_json_j.at("m_type_to_data_offset_map")
+        //     .get_to(nlohmann_json_t.m_type_to_data_offset_map);
+    }
 };
 
 /// Forward declare.

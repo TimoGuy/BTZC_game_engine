@@ -63,6 +63,7 @@ set(MAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/btzc_game_engine.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/component_registry.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/component_registry.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/components.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/components.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/game_object.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/game_object.h

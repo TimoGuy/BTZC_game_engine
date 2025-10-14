@@ -192,7 +192,7 @@ struct Runtime_controllable_data
 
 private:
     // Lookup reading/writing handle for data.
-    std::unordered_map<Controllable_data_label, Overridable_data<float_t>> m_data_floats{
+    std::unordered_map<Controllable_data_label, Overridable_data<float_t>> data_floats{
         #define X_float(name, def_val)  { CTRL_DATA_LABEL_##name, Overridable_data<float_t>(def_val) },
         #define X__bool(name, def_val)
         #define X_reeve(name)
@@ -201,7 +201,7 @@ private:
         #undef X__bool
         #undef X_reeve
     };
-    std::unordered_map<Controllable_data_label, Overridable_data<bool>> m_data_bools{
+    std::unordered_map<Controllable_data_label, Overridable_data<bool>> data_bools{
         #define X_float(name, def_val)
         #define X__bool(name, def_val)  { CTRL_DATA_LABEL_##name, Overridable_data<bool>(def_val) },
         #define X_reeve(name)
@@ -210,7 +210,7 @@ private:
         #undef X__bool
         #undef X_reeve
     };
-    std::unordered_map<Controllable_data_label, Rising_edge_event> m_data_reeves{
+    std::unordered_map<Controllable_data_label, Rising_edge_event> data_reeves{
         #define X_float(name, def_val)
         #define X__bool(name, def_val)
         #define X_reeve(name)           { CTRL_DATA_LABEL_##name, Rising_edge_event{} },
@@ -240,6 +240,11 @@ public:
     // index. Supply a game object transform in `base_transform`.
     void update_hitcapsule_transforms(mat4 base_transform,
                                       std::vector<mat4s> const& joint_matrices);
+
+public:
+    /// Serialization/deserialization.
+    NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Runtime_controllable_data,
+                                       hitcapsule_group_set);
 };
 
 // Data controls.
@@ -275,7 +280,7 @@ struct Runtime_data_controls
 
     Hitcapsule_group_set hitcapsule_group_set_template;
 
-    void serialize(Serialization_mode mode, json& node_ref);
+    // void serialize(Serialization_mode mode, json& node_ref);
 
     void calculate_all_ctrl_item_types();
 };

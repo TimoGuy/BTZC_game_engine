@@ -6,6 +6,8 @@
 ///            1. Here, create a struct in the `component` namespace.
 ///            2. Go to `component_registry.cpp`. There, add struct to ECS in
 ///               `register_all_components()` func using the macro.
+///            3. (OPTIONAL) if declared any methods inside the struct, define them in
+///               `components.cpp`
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
@@ -13,6 +15,7 @@
 #include "nlohmann/json.hpp"
 
 #include <array>
+#include <string>
 
 using json = nlohmann::json;
 
@@ -37,50 +40,39 @@ struct Runtime_data_controls;
 namespace component_system
 {
 
-// @NOCHECKIN: @THEA: DELETE ME!!!!
-struct Jojoweeooweeoo
-{
-    int32_t asdf{ 0 };
-
-    /// Serialization/deserialization.
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(
-        Jojoweeooweeoo,
-        asdf
-    );
-};
-
 struct Component_model_animator
 {
-    Model_animator* animator{ nullptr };
+    ~Component_model_animator();
+
+    std::string animatable_model_name;
+    std::string animator_template_name;
+    std::string anim_frame_action_ctrls;
 
     /// Serialization/deserialization.
     NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(
         Component_model_animator,
-        animator
+        animatable_model_name,
+        animator_template_name
     );
+
+    /// Builds and returns `product`.
+    Model_animator& get_product();
+
+private:
+    /// Fully built component.
+    Model_animator* product{ nullptr };  // Use owning raw pointer for serialization compatibility.
 };
 
-struct Component_hitcapsule_group_set
-{
-    Hitcapsule_group_set* hitcapsule_grp_set{ nullptr };
+// struct Component_physics_object
+// {
+//     Physics_object* phys_obj{ nullptr };
 
-    /// Serialization/deserialization.
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(
-        Component_hitcapsule_group_set,
-        hitcapsule_grp_set
-    );
-};
-
-struct Component_physics_object
-{
-    Physics_object* phys_obj{ nullptr };
-
-    /// Serialization/deserialization.
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(
-        Component_physics_object,
-        phys_obj
-    );
-};
+//     /// Serialization/deserialization.
+//     NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(
+//         Component_physics_object,
+//         phys_obj
+//     );
+// };
 
 struct Component_char_con_movement_state
 {
@@ -166,6 +158,7 @@ struct Component_anim_editor_tool_communicator_state
     Render_object* rend_obj{ nullptr };
 
     Model const* prev_working_model{ nullptr };
+
     uint32_t working_anim_state_idx{ (uint32_t)-1 };
     size_t prev_anim_frame{ (size_t)-1 };
 
@@ -174,11 +167,8 @@ struct Component_anim_editor_tool_communicator_state
     /// Serialization/deserialization.
     NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(
         Component_anim_editor_tool_communicator_state,
-        rend_obj,
-        prev_working_model,
         working_anim_state_idx,
-        prev_anim_frame,
-        prev_working_timeline_copy
+        prev_anim_frame
     );
 };
 

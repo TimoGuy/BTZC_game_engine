@@ -7,6 +7,7 @@
 #include "../components.h"
 #include "../game_object.h"
 #include "../renderer/model_animator.h"
+#include "../hitbox_interactor/hitcapsule.h"
 #include "system_ifc.h"
 
 
@@ -24,7 +25,7 @@ BT::component_system::system::System_animator_driven_hitcapsule_set::
     : System_ifc({
           Component_list_query::compile_query_string(
               "(Component_model_animator && "
-              "Component_hitcapsule_group_set)"),
+              "Hitcapsule_group_set)"),
       })
 {   // @NOTE: Do not remove adding concrete class to service finder!!
     BT_SERVICE_FINDER_ADD_SERVICE(System_animator_driven_hitcapsule_set, this);
@@ -37,25 +38,26 @@ void BT::component_system::system::System_animator_driven_hitcapsule_set::invoke
     {   // Get component handles.
         auto& comp_animator{ comp_list->get_component_handle<Component_model_animator>() };
         auto& comp_hitcapsule_grp_set{
-            comp_list->get_component_handle<Component_hitcapsule_group_set>()
+            comp_list->get_component_handle<Hitcapsule_group_set>()
         };
 
         // Update whether capsules are enabled and keep capsules attached to connecting bone in
         // animator.
-        comp_animator.animator->get_anim_frame_action_data_handle()
+        comp_animator.get_product().get_anim_frame_action_data_handle()
             .assign_hitcapsule_enabled_flags();
 
         mat4 game_obj_trans;
-        comp_list->get_attached_game_obj().get_transform_handle().get_transform_as_mat4(
-            game_obj_trans);
+        assert(false);  // @TODO: FIX THISvvv
+        // comp_list->get_attached_game_obj().get_transform_handle().get_transform_as_mat4(
+        //     game_obj_trans);
 
         // @TODO: @FIXME: If this could be physics thread dependent instead of having to depend on
         // the timing of the render thread, then that would be wonderful. It would be sooo much more
         // consistent  -Thea 2025/10/07
         std::vector<mat4s> joint_matrices;
-        comp_animator.animator->get_anim_floored_frame_pose(joint_matrices);
+        comp_animator.get_product().get_anim_floored_frame_pose(joint_matrices);
 
-        comp_animator.animator->get_anim_frame_action_data_handle().update_hitcapsule_transforms(
+        comp_animator.get_product().get_anim_frame_action_data_handle().update_hitcapsule_transforms(
             game_obj_trans,
             joint_matrices);
     }

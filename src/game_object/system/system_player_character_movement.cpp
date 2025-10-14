@@ -28,8 +28,10 @@ enum : int32_t
 
 BT::component_system::system::System_player_character_movement::System_player_character_movement()
     : System_ifc({
+        //   Component_list_query::compile_query_string(
+        //       "(Component_physics_object && Component_char_con_movement_state)"),
           Component_list_query::compile_query_string(
-              "(Component_physics_object && Component_char_con_movement_state)"),
+              "(false && Component_char_con_movement_state)"),
       })
 {   // @NOTE: Do not remove adding concrete class to service finder!!
     BT_SERVICE_FINDER_ADD_SERVICE(System_player_character_movement, this);
@@ -274,218 +276,219 @@ void process_midair_jump_interactions(
 void BT::component_system::system::System_player_character_movement::invoke_system_inner(
     Component_lists_per_query&& comp_lists_per_query) const /*override*/
 {   // Get data from services.
-    auto const& input_state{ service_finder::find_service<Input_handler>().get_input_state() };
-    auto camera{ service_finder::find_service<Renderer>().get_camera_obj() };
-    auto const& physics_gravity{
-        reinterpret_cast<JPH::PhysicsSystem*>(
-            service_finder::find_service<Physics_engine>().get_physics_system_ptr())
-            ->GetGravity()
-    };
+    assert(false);  // @TODO: FIX THISvvv
+    // auto const& input_state{ service_finder::find_service<Input_handler>().get_input_state() };
+    // auto camera{ service_finder::find_service<Renderer>().get_camera_obj() };
+    // auto const& physics_gravity{
+    //     reinterpret_cast<JPH::PhysicsSystem*>(
+    //         service_finder::find_service<Physics_engine>().get_physics_system_ptr())
+    //         ->GetGravity()
+    // };
 
-    for (auto comp_list : comp_lists_per_query[Q_IDX_COMP_LISTS_WITH_CHAR_CON_MVT_STATE])
-    {   // Get component handles.
-        auto& comp_phys_obj{
-            comp_list->get_component_handle<Component_physics_object>()
-        };
-        auto& comp_char_con_mvt_state{
-            comp_list->get_component_handle<Component_char_con_movement_state>()
-        };
+    // for (auto comp_list : comp_lists_per_query[Q_IDX_COMP_LISTS_WITH_CHAR_CON_MVT_STATE])
+    // {   // Get component handles.
+    //     auto& comp_phys_obj{
+    //         comp_list->get_component_handle<Component_physics_object>()
+    //     };
+    //     auto& comp_char_con_mvt_state{
+    //         comp_list->get_component_handle<Component_char_con_movement_state>()
+    //     };
 
-        // @NOCHECKIN: @THEA.
-        // Physics_object* phys_obj{ m_phys_engine.checkout_physics_object(m_phys_obj_key) };
+    //     // @NOCHECKIN: @THEA.
+    //     // Physics_object* phys_obj{ m_phys_engine.checkout_physics_object(m_phys_obj_key) };
 
-        // Tick and get character status.
-        auto char_con_impl{ comp_phys_obj.phys_obj->get_impl() };
+    //     // Tick and get character status.
+    //     auto char_con_impl{ comp_phys_obj.phys_obj->get_impl() };
 
-        JPH::Vec3 ground_velocity;
-        JPH::Vec3 linear_velocity;
-        JPH::Vec3 up_direction;
-        JPH::Quat up_rotation;
-        bool is_supported;
-        JPH::CharacterVirtual::EGroundState ground_state;
-        JPH::Vec3 ground_normal;
-        bool is_crouched;
-        char_con_impl->tick_fetch_cc_status(ground_velocity,
-                                            linear_velocity,
-                                            up_direction,
-                                            up_rotation,
-                                            is_supported,
-                                            ground_state,
-                                            ground_normal,
-                                            is_crouched);
+    //     JPH::Vec3 ground_velocity;
+    //     JPH::Vec3 linear_velocity;
+    //     JPH::Vec3 up_direction;
+    //     JPH::Quat up_rotation;
+    //     bool is_supported;
+    //     JPH::CharacterVirtual::EGroundState ground_state;
+    //     JPH::Vec3 ground_normal;
+    //     bool is_crouched;
+    //     char_con_impl->tick_fetch_cc_status(ground_velocity,
+    //                                         linear_velocity,
+    //                                         up_direction,
+    //                                         up_rotation,
+    //                                         is_supported,
+    //                                         ground_state,
+    //                                         ground_normal,
+    //                                         is_crouched);
 
-        up_rotation = JPH::Quat::sEulerAngles(JPH::Vec3(0, 0, 0));  // @NOCHECKIN: Overriding the up rot.
+    //     up_rotation = JPH::Quat::sEulerAngles(JPH::Vec3(0, 0, 0));  // @NOCHECKIN: Overriding the up rot.
 
-        // Transform input to world space.
-        vec3 cam_forward;
-        camera->get_view_direction(cam_forward);
-        cam_forward[1] = 0.0f;
-        glm_vec3_normalize(cam_forward);
+    //     // Transform input to world space.
+    //     vec3 cam_forward;
+    //     camera->get_view_direction(cam_forward);
+    //     cam_forward[1] = 0.0f;
+    //     glm_vec3_normalize(cam_forward);
 
-        vec3 cam_right;
-        glm_vec3_crossn(cam_forward, vec3{ 0.0f, 1.0f, 0.0f }, cam_right);
+    //     vec3 cam_right;
+    //     glm_vec3_crossn(cam_forward, vec3{ 0.0f, 1.0f, 0.0f }, cam_right);
 
-        vec3 move_input_world = GLM_VEC3_ZERO_INIT;
-        glm_vec3_muladds(cam_right, input_state.move.x.val, move_input_world);
-        glm_vec3_muladds(cam_forward, input_state.move.y.val, move_input_world);
-        move_input_world[1] = 0.0f;
+    //     vec3 move_input_world = GLM_VEC3_ZERO_INIT;
+    //     glm_vec3_muladds(cam_right, input_state.move.x.val, move_input_world);
+    //     glm_vec3_muladds(cam_forward, input_state.move.y.val, move_input_world);
+    //     move_input_world[1] = 0.0f;
 
-        if (!camera->is_follow_orbit())
-            // Remove all input if not the orbit camera mode.
-            glm_vec3_zero(move_input_world);
-        else if (glm_vec3_norm2(move_input_world) > 1.0f)
-            // Clamp top input amount.
-            glm_vec3_normalize(move_input_world);
+    //     if (!camera->is_follow_orbit())
+    //         // Remove all input if not the orbit camera mode.
+    //         glm_vec3_zero(move_input_world);
+    //     else if (glm_vec3_norm2(move_input_world) > 1.0f)
+    //         // Clamp top input amount.
+    //         glm_vec3_normalize(move_input_world);
 
-        // Change input into desired velocity.
-        JPH::Vec3 desired_velocity{ move_input_world[0], 0.0f, move_input_world[2] };
-        desired_velocity *=
-            (char_con_impl->get_cc_stance() ? comp_char_con_mvt_state.crouched_speed
-                                            : comp_char_con_mvt_state.standing_speed);
+    //     // Change input into desired velocity.
+    //     JPH::Vec3 desired_velocity{ move_input_world[0], 0.0f, move_input_world[2] };
+    //     desired_velocity *=
+    //         (char_con_impl->get_cc_stance() ? comp_char_con_mvt_state.crouched_speed
+    //                                         : comp_char_con_mvt_state.standing_speed);
 
-        // Extra input checks.
-        bool on_jump_press{ input_state.jump.val &&
-                            !comp_char_con_mvt_state.prev_jump_pressed };
-        comp_char_con_mvt_state.prev_jump_pressed = input_state.jump.val;
+    //     // Extra input checks.
+    //     bool on_jump_press{ input_state.jump.val &&
+    //                         !comp_char_con_mvt_state.prev_jump_pressed };
+    //     comp_char_con_mvt_state.prev_jump_pressed = input_state.jump.val;
 
-        bool on_crouch_press{ input_state.crouch.val &&
-                              !comp_char_con_mvt_state.prev_crouch_pressed };
-        comp_char_con_mvt_state.prev_crouch_pressed = input_state.crouch.val;
+    //     bool on_crouch_press{ input_state.crouch.val &&
+    //                           !comp_char_con_mvt_state.prev_crouch_pressed };
+    //     comp_char_con_mvt_state.prev_crouch_pressed = input_state.crouch.val;
 
-        ////////////////////////////////////////////////////////////////////////////////////////////
+    //     ////////////////////////////////////////////////////////////////////////////////////////////
 
-        // Find movement state.
-        JPH::Vec3 current_vertical_velocity = linear_velocity.Dot(up_direction) * up_direction;
-        bool is_grounded{ ground_state == JPH::CharacterVirtual::EGroundState::OnGround &&
-                          (current_vertical_velocity.GetY() - ground_velocity.GetY()) < 0.1f &&
-                          !char_con_impl->is_cc_slope_too_steep(ground_normal) };
+    //     // Find movement state.
+    //     JPH::Vec3 current_vertical_velocity = linear_velocity.Dot(up_direction) * up_direction;
+    //     bool is_grounded{ ground_state == JPH::CharacterVirtual::EGroundState::OnGround &&
+    //                       (current_vertical_velocity.GetY() - ground_velocity.GetY()) < 0.1f &&
+    //                       !char_con_impl->is_cc_slope_too_steep(ground_normal) };
 
-        // Calc and apply desired velocity.
-        JPH::Vec3 new_velocity;
-        if (is_grounded)
-        {   // Grounded.
-            new_velocity = ground_velocity;
+    //     // Calc and apply desired velocity.
+    //     JPH::Vec3 new_velocity;
+    //     if (is_grounded)
+    //     {   // Grounded.
+    //         new_velocity = ground_velocity;
 
-            if (on_crouch_press || (char_con_impl->get_cc_stance() && on_jump_press))
-            {   // Toggle crouching.
-                char_con_impl->set_cc_stance(!char_con_impl->get_cc_stance());
-            }
-            else if (!char_con_impl->get_cc_stance() && on_jump_press)
-            {   // Jump.
-                new_velocity += comp_char_con_mvt_state.jump_speed * up_direction;
-            }
-        }
-        else
-        {   // Start with previous tick velocity.
-            new_velocity = current_vertical_velocity;
+    //         if (on_crouch_press || (char_con_impl->get_cc_stance() && on_jump_press))
+    //         {   // Toggle crouching.
+    //             char_con_impl->set_cc_stance(!char_con_impl->get_cc_stance());
+    //         }
+    //         else if (!char_con_impl->get_cc_stance() && on_jump_press)
+    //         {   // Jump.
+    //             new_velocity += comp_char_con_mvt_state.jump_speed * up_direction;
+    //         }
+    //     }
+    //     else
+    //     {   // Start with previous tick velocity.
+    //         new_velocity = current_vertical_velocity;
 
-            if (char_con_impl->get_cc_stance())
-            {   // Leave crouching stance automatically.
-                char_con_impl->set_cc_stance(false);
-            }
+    //         if (char_con_impl->get_cc_stance())
+    //         {   // Leave crouching stance automatically.
+    //             char_con_impl->set_cc_stance(false);
+    //         }
 
-            if (on_jump_press)
-            {
-                process_midair_jump_interactions(comp_char_con_mvt_state, char_con_impl, up_direction, new_velocity);
-            }
-        }
+    //         if (on_jump_press)
+    //         {
+    //             process_midair_jump_interactions(comp_char_con_mvt_state, char_con_impl, up_direction, new_velocity);
+    //         }
+    //     }
 
-        // Desired velocity.
-        float_t display_facing_angle;
-        if (is_grounded)
-        {   // Grounded turn & speed movement.
-            if (glm_vec3_norm2(move_input_world) > 1e-6f * 1e-6f)
-                apply_grounded_facing_angle(comp_char_con_mvt_state, desired_velocity);
+    //     // Desired velocity.
+    //     float_t display_facing_angle;
+    //     if (is_grounded)
+    //     {   // Grounded turn & speed movement.
+    //         if (glm_vec3_norm2(move_input_world) > 1e-6f * 1e-6f)
+    //             apply_grounded_facing_angle(comp_char_con_mvt_state, desired_velocity);
 
-            apply_grounded_linear_speed(comp_char_con_mvt_state, desired_velocity);
+    //         apply_grounded_linear_speed(comp_char_con_mvt_state, desired_velocity);
 
-            new_velocity += JPH::Vec3{ sinf(comp_char_con_mvt_state.grounded_state.facing_angle) *
-                                           comp_char_con_mvt_state.grounded_state.speed,
-                                       0.0f,
-                                       cosf(comp_char_con_mvt_state.grounded_state.facing_angle) *
-                                           comp_char_con_mvt_state.grounded_state.speed };
+    //         new_velocity += JPH::Vec3{ sinf(comp_char_con_mvt_state.grounded_state.facing_angle) *
+    //                                        comp_char_con_mvt_state.grounded_state.speed,
+    //                                    0.0f,
+    //                                    cosf(comp_char_con_mvt_state.grounded_state.facing_angle) *
+    //                                        comp_char_con_mvt_state.grounded_state.speed };
 
-            // Keep airborne state up to date.
-            comp_char_con_mvt_state.airborne_state.input_facing_angle = comp_char_con_mvt_state.grounded_state.facing_angle;
+    //         // Keep airborne state up to date.
+    //         comp_char_con_mvt_state.airborne_state.input_facing_angle = comp_char_con_mvt_state.grounded_state.facing_angle;
 
-            display_facing_angle = comp_char_con_mvt_state.grounded_state.facing_angle;
-        }
-        else
-        {   // Move towards desired velocity.
-            JPH::Vec3 flat_linear_velo{ linear_velocity.GetX(),
-                                        0.0f,
-                                        linear_velocity.GetZ() };
-            JPH::Vec3 delta_velocity{ desired_velocity - flat_linear_velo };
+    //         display_facing_angle = comp_char_con_mvt_state.grounded_state.facing_angle;
+    //     }
+    //     else
+    //     {   // Move towards desired velocity.
+    //         JPH::Vec3 flat_linear_velo{ linear_velocity.GetX(),
+    //                                     0.0f,
+    //                                     linear_velocity.GetZ() };
+    //         JPH::Vec3 delta_velocity{ desired_velocity - flat_linear_velo };
 
-            float_t airborne_accel{ comp_char_con_mvt_state.airborne_acceleration *
-                                    Physics_engine::k_simulation_delta_time };
-            if (delta_velocity.LengthSq() > airborne_accel * airborne_accel)
-            {
-                delta_velocity = delta_velocity.Normalized() * airborne_accel;
-            }
+    //         float_t airborne_accel{ comp_char_con_mvt_state.airborne_acceleration *
+    //                                 Physics_engine::k_simulation_delta_time };
+    //         if (delta_velocity.LengthSq() > airborne_accel * airborne_accel)
+    //         {
+    //             delta_velocity = delta_velocity.Normalized() * airborne_accel;
+    //         }
 
-            JPH::Vec3 effective_velocity{ flat_linear_velo + delta_velocity };
-            new_velocity += effective_velocity;
+    //         JPH::Vec3 effective_velocity{ flat_linear_velo + delta_velocity };
+    //         new_velocity += effective_velocity;
 
-            if (glm_vec3_norm2(move_input_world) > 1e-6f * 1e-6f)
-            {   // Move towards input angle.
-                float_t desired_facing_angle{ atan2f(move_input_world[0], move_input_world[2]) };
-                float_t delta_direction{
-                    desired_facing_angle - comp_char_con_mvt_state.airborne_state.input_facing_angle
-                };
-                while (delta_direction > glm_rad(180.0f)) delta_direction -= glm_rad(360.0f);
-                while (delta_direction <= glm_rad(-180.0f)) delta_direction += glm_rad(360.0f);
+    //         if (glm_vec3_norm2(move_input_world) > 1e-6f * 1e-6f)
+    //         {   // Move towards input angle.
+    //             float_t desired_facing_angle{ atan2f(move_input_world[0], move_input_world[2]) };
+    //             float_t delta_direction{
+    //                 desired_facing_angle - comp_char_con_mvt_state.airborne_state.input_facing_angle
+    //             };
+    //             while (delta_direction > glm_rad(180.0f)) delta_direction -= glm_rad(360.0f);
+    //             while (delta_direction <= glm_rad(-180.0f)) delta_direction += glm_rad(360.0f);
 
-                float_t max_turn_delta{ comp_char_con_mvt_state.airborne_turn_speed *
-                                        Physics_engine::k_simulation_delta_time };
-                if (abs(delta_direction) > max_turn_delta)
-                {
-                    // Limit turn speed.
-                    delta_direction = max_turn_delta * glm_signf(delta_direction);
-                }
+    //             float_t max_turn_delta{ comp_char_con_mvt_state.airborne_turn_speed *
+    //                                     Physics_engine::k_simulation_delta_time };
+    //             if (abs(delta_direction) > max_turn_delta)
+    //             {
+    //                 // Limit turn speed.
+    //                 delta_direction = max_turn_delta * glm_signf(delta_direction);
+    //             }
 
-                comp_char_con_mvt_state.airborne_state.input_facing_angle += delta_direction;
-            }
+    //             comp_char_con_mvt_state.airborne_state.input_facing_angle += delta_direction;
+    //         }
 
-            // Keep grounded state up to date.
-            comp_char_con_mvt_state.grounded_state.speed = effective_velocity.Length();
-            if (effective_velocity.IsNearZero())
-                comp_char_con_mvt_state.grounded_state.facing_angle =
-                    comp_char_con_mvt_state.airborne_state.input_facing_angle;
-            else
-                comp_char_con_mvt_state.grounded_state.facing_angle =
-                    atan2f(effective_velocity.GetX(), effective_velocity.GetZ());
+    //         // Keep grounded state up to date.
+    //         comp_char_con_mvt_state.grounded_state.speed = effective_velocity.Length();
+    //         if (effective_velocity.IsNearZero())
+    //             comp_char_con_mvt_state.grounded_state.facing_angle =
+    //                 comp_char_con_mvt_state.airborne_state.input_facing_angle;
+    //         else
+    //             comp_char_con_mvt_state.grounded_state.facing_angle =
+    //                 atan2f(effective_velocity.GetX(), effective_velocity.GetZ());
 
-            comp_char_con_mvt_state.grounded_state.turnaround_enabled = false;
+    //         comp_char_con_mvt_state.grounded_state.turnaround_enabled = false;
 
-            display_facing_angle = comp_char_con_mvt_state.airborne_state.input_facing_angle;
-        }
+    //         display_facing_angle = comp_char_con_mvt_state.airborne_state.input_facing_angle;
+    //     }
 
-        // Apply to character.
-        new_velocity += (up_rotation * physics_gravity) * Physics_engine::k_simulation_delta_time;
-        char_con_impl->set_cc_allow_sliding(is_grounded &&
-                                            (comp_char_con_mvt_state.grounded_state.speed > 1e-6f));
-        char_con_impl->set_cc_velocity(new_velocity);
+    //     // Apply to character.
+    //     new_velocity += (up_rotation * physics_gravity) * Physics_engine::k_simulation_delta_time;
+    //     char_con_impl->set_cc_allow_sliding(is_grounded &&
+    //                                         (comp_char_con_mvt_state.grounded_state.speed > 1e-6f));
+    //     char_con_impl->set_cc_velocity(new_velocity);
 
-        // Finish.
-        // m_phys_engine.return_physics_object(phys_obj);
+    //     // Finish.
+    //     // m_phys_engine.return_physics_object(phys_obj);
 
 
 
-        // @TODO: @NOCHEKCIN: Implement a super simple facing direction.
-        assert(false);
+    //     // @TODO: @NOCHEKCIN: Implement a super simple facing direction.
+    //     assert(false);
 
-        // {   // Write new facing direction.
-        //     auto& rs{ m_rendering_state };
-        //     lock_guard<mutex> lock{ rs.access_mutex };
-        //     rs.facing_angle_render_triple_buffer[rs.write_pos] = display_facing_angle;
+    //     // {   // Write new facing direction.
+    //     //     auto& rs{ m_rendering_state };
+    //     //     lock_guard<mutex> lock{ rs.access_mutex };
+    //     //     rs.facing_angle_render_triple_buffer[rs.write_pos] = display_facing_angle;
 
-        //     auto temp{ rs.read_a_pos };
-        //     rs.read_a_pos = rs.read_b_pos;
-        //     rs.read_b_pos = rs.write_pos;
-        //     rs.write_pos = temp;
-        // }
-    }
+    //     //     auto temp{ rs.read_a_pos };
+    //     //     rs.read_a_pos = rs.read_b_pos;
+    //     //     rs.read_b_pos = rs.write_pos;
+    //     //     rs.write_pos = temp;
+    //     // }
+    // }
 }
 
 

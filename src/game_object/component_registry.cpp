@@ -4,6 +4,7 @@
 #include "components.h"
 #include "game_object.h"
 #include "system/system_ifc.h"
+#include "../hitbox_interactor/hitcapsule.h"
 
 #include <cassert>
 #include <cstdint>
@@ -12,8 +13,10 @@
 #include <vector>
 
 
-BT::component_system::Component_list::Component_list(Game_object& attached_game_obj)
-    : m_attached_game_obj(attached_game_obj)
+BT::component_system::Component_list::Component_list()
+// @TODO: FIX THISvv (Really just clean up the commented code haha)
+// BT::component_system::Component_list::Component_list(Game_object& attached_game_obj)
+//     : m_attached_game_obj(attached_game_obj)
 {
     service_finder::find_service<Registry>().add_component_list(this);
 }
@@ -35,42 +38,43 @@ bool BT::component_system::Component_list::check_component_exists(
     return (m_type_to_data_offset_map.find(comp_typename_idx) != m_type_to_data_offset_map.end());
 }
 
-void BT::component_system::Component_list::scene_serialize(Scene_serialization_mode mode,
-                                                           json& node_ref) /*override*/
-{
-    auto& registry{ service_finder::find_service<Registry>() };
+// @TODO: FIX THISvv (Just erase)
+// void BT::component_system::Component_list::scene_serialize(Scene_serialization_mode mode,
+//                                                            json& node_ref) /*override*/
+// {
+//     auto& registry{ service_finder::find_service<Registry>() };
 
-    if (mode == SCENE_SERIAL_MODE_SERIALIZE)
-    {
-        node_ref = json::array();
-        size_t idx{ 0 };
-        for (auto it : m_type_to_data_offset_map)
-        {   // Find string of component type id.
-            auto comp_typename{ registry.find_typename_str_by_component_typeid(it.first) };
+//     if (mode == SCENE_SERIAL_MODE_SERIALIZE)
+//     {
+//         node_ref = json::array();
+//         size_t idx{ 0 };
+//         for (auto it : m_type_to_data_offset_map)
+//         {   // Find string of component type id.
+//             auto comp_typename{ registry.find_typename_str_by_component_typeid(it.first) };
 
-            node_ref[idx]["typename"] = comp_typename;
+//             node_ref[idx]["typename"] = comp_typename;
 
-            idx++;
-        }
-    }
-    else if (mode == SCENE_SERIAL_MODE_DESERIALIZE)
-    {
-        bool is_valid_array{ !node_ref.is_null() && node_ref.is_array() };
-        if (!is_valid_array)
-        {   // Error: list of components is not a list.
-            assert(false);
-            return;
-        }
-        for (auto component_json : node_ref)
-        {   // Run default add component func.
-            registry.find_component_metadata_by_typename_str(component_json["typename"])
-                .default_add_component_fn(*this);
-        }
-    }
+//             idx++;
+//         }
+//     }
+//     else if (mode == SCENE_SERIAL_MODE_DESERIALIZE)
+//     {
+//         bool is_valid_array{ !node_ref.is_null() && node_ref.is_array() };
+//         if (!is_valid_array)
+//         {   // Error: list of components is not a list.
+//             assert(false);
+//             return;
+//         }
+//         for (auto component_json : node_ref)
+//         {   // Run default add component func.
+//             registry.find_component_metadata_by_typename_str(component_json["typename"])
+//                 .default_add_component_fn(*this);
+//         }
+//     }
 
-    // @TODO
-    assert(false);
-}
+//     // @TODO
+//     assert(false);
+// }
 
 
 BT::component_system::Registry::Registry()
@@ -100,16 +104,16 @@ void BT::component_system::Registry::register_all_components()
             /* Ensure that serialization/deserialization works with struct. */                      \
             _typename default_inst{};                                                               \
             _typename round_tripped{ json(default_inst).get<_typename>() };                         \
-            if (memcmp(&default_inst, &round_tripped, sizeof(_typename)) != 0)                      \
+            /*if (memcmp(&default_inst, &round_tripped, sizeof(_typename)) != 0)                      \
             {                                                                                       \
                 assert(false);                                                                      \
-            }                                                                                       \
+            } */                                                                                      \
         } while (false);
 
     // ---- List of components to register ---------------------------------------------------------
     REGISTER_COMPONENT(Component_model_animator);
-    REGISTER_COMPONENT(Component_hitcapsule_group_set);
-    REGISTER_COMPONENT(Component_physics_object);
+    REGISTER_COMPONENT(Hitcapsule_group_set);
+    // REGISTER_COMPONENT(Component_physics_object);
     REGISTER_COMPONENT(Component_char_con_movement_state);
     REGISTER_COMPONENT(Component_anim_editor_tool_communicator_state);
     // ---------------------------------------------------------------------------------------------

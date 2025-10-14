@@ -169,8 +169,9 @@ BT::Game_object::Game_object(Input_handler& input_handler,
     , m_phys_engine(phys_engine)
     , m_renderer(renderer)
     , m_obj_pool(obj_pool)
-    , m_component_list(*this)
+    // , m_component_list(*this)
 {
+    assert(false);  // @TODO: FIX THIS^^  (// , m_component_list(*this))
 }
 
 BT::Game_object::~Game_object()
@@ -338,7 +339,9 @@ void BT::Game_object::propagate_transform_changes(Game_object* parent_game_objec
 void BT::Game_object::scene_serialize(Scene_serialization_mode mode, json& node_ref)
 {
     m_transform.scene_serialize(mode, node_ref["transform"]);
-    m_component_list.scene_serialize(mode, node_ref["component_list"]);
+    // @TODO: FIX THISvv
+    assert(false);
+    // m_component_list.scene_serialize(mode, node_ref["component_list"]);
 
     if (mode == SCENE_SERIAL_MODE_SERIALIZE)
     {

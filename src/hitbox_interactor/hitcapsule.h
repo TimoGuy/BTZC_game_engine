@@ -1,11 +1,37 @@
 #pragma once
 
-#include "../scene/scene_serialization_ifc.h"
+// #include "../scene/scene_serialization_ifc.h"
 #include "cglm/types-struct.h"
+#include "nlohmann/json.hpp"
 
 #include <string>
 #include <vector>
 #include <unordered_set>
+
+using json = nlohmann::json;
+
+
+// -------------------------------------------------------------------------------------------------
+template<
+    typename BasicJsonType,
+    nlohmann::detail::enable_if_t<nlohmann::detail::is_basic_json<BasicJsonType>::value, int> = 0>
+void to_json(BasicJsonType& nlohmann_json_j, const vec3s& nlohmann_json_t)
+{
+    nlohmann_json_j["x"] = nlohmann_json_t.x;
+    nlohmann_json_j["y"] = nlohmann_json_t.y;
+    nlohmann_json_j["z"] = nlohmann_json_t.z;
+}
+
+template<
+    typename BasicJsonType,
+    nlohmann::detail::enable_if_t<nlohmann::detail::is_basic_json<BasicJsonType>::value, int> = 0>
+void from_json(const BasicJsonType& nlohmann_json_j, vec3s& nlohmann_json_t)
+{
+    nlohmann_json_j.at("x").get_to(nlohmann_json_t.x);
+    nlohmann_json_j.at("y").get_to(nlohmann_json_t.y);
+    nlohmann_json_j.at("z").get_to(nlohmann_json_t.z);
+}
+// -------------------------------------------------------------------------------------------------
 
 
 namespace BT
@@ -21,6 +47,14 @@ struct Hitcapsule
 
     std::string connecting_bone_name{ "" };  // Leave empty str for no bone connection.
     std::string connecting_bone_name_2{ "" };  // Leave empty str for same as `connecting_bone_name`.
+
+    /// Serialization/deserialization.
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(Hitcapsule,
+                                   origin_a,
+                                   origin_b,
+                                   radius,
+                                   connecting_bone_name,
+                                   connecting_bone_name_2);
 
     // Calculated info.
     vec3    calcd_origin_a;       // Set to `origin_a` on init. Updated to connect to joint mat in
@@ -48,9 +82,9 @@ public:
         HITBOX_TYPE_GIVE_HURT,
     };
 
-    Hitcapsule_group(bool enabled,
-                     Type type,
-                     std::vector<Hitcapsule>&& capsules);
+    // Hitcapsule_group(bool enabled,
+    //                  Type type,
+    //                  std::vector<Hitcapsule>&& capsules);
 
     void set_enabled(bool enabled);
     bool is_enabled();
@@ -62,19 +96,21 @@ public:
     void emplace_debug_render_repr() const;
 
 private:
-    bool m_enabled;
-    Type m_type;
+    bool m_enabled{ false };
+    Type m_type{ 0 };
     std::vector<Hitcapsule> m_capsules;
 
-    void copy_into_me();
+public:
+    /// Serialization/deserialization.
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(Hitcapsule_group, m_enabled, m_type, m_capsules);
 };
 
-class Hitcapsule_group_set : public Scene_serialization_ifc
+class Hitcapsule_group_set // : public Scene_serialization_ifc
 {
 public:
     ~Hitcapsule_group_set();
 
-    void scene_serialize(Scene_serialization_mode mode, json& node_ref) override;
+    // void scene_serialize(Scene_serialization_mode mode, json& node_ref) override;
 
     void replace_and_reregister(Hitcapsule_group_set const& other);
     void connect_animator(Model_animator const& animator);
@@ -86,7 +122,12 @@ public:
 
 private:
     std::vector<Hitcapsule_group> m_hitcapsule_grps;
+    bool m_is_connected_to_animator{ false };
     bool m_is_registered_in_overlap_solver{ false };
+
+public:
+    /// Serialization/deserialization.
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(Hitcapsule_group_set, m_hitcapsule_grps);
 };
 
 class Hitcapsule_group_overlap_solver

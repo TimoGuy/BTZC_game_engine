@@ -542,9 +542,10 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
 
                         // Save changes.
                         json working_timeline_copy_as_json;
-                        anim_frame_action::s_editor_state.working_timeline_copy
-                            ->serialize(anim_frame_action::SERIAL_MODE_SERIALIZE,
-                                        working_timeline_copy_as_json);
+                        assert(false);  // @TODO: FIX THIS
+                        // anim_frame_action::s_editor_state.working_timeline_copy
+                        //     ->serialize(anim_frame_action::SERIAL_MODE_SERIALIZE,
+                        //                 working_timeline_copy_as_json);
 
                         // Save to disk.
                         std::ofstream f{

@@ -319,6 +319,8 @@ while (running_game_loop)
 - [x] Attach structs ~~and scripts~~ to gameobject
     - [ ] ~~When gameobjects are added to the script execution pool,~~
 
+- [x] OVERHAUL: Change a lot of things to use `NLOHMANN_DEFINE_TYPE_INTRUSIVE()` instead of `Scene_serialization_ifc`
+
 - [ ] @THINK: How should components like `Component_model_animator` work, where it just has a pointer to an animator?
     - It definitely feels like that's probably not the best way of doing it. Bc then it's really just something that can't be serialized.
     - [x] @FOR_NOW: Just load it up as nullptr values.
