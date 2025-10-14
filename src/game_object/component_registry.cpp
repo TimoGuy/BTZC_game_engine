@@ -101,13 +101,22 @@ void BT::component_system::Registry::register_all_components()
                                           comp_list.remove_component<_typename>();                  \
                                       });                                                           \
                                                                                                     \
-            /* Ensure that serialization/deserialization works with struct. */                      \
+            /* Ensure that serialization/deserialization works with struct.                    */   \
+            /* @NOTE: `volatile` used to force evaluation (I think it works?)                  */   \
+            /* @NOTE: `volatile` could not be applied directly to the type since it caused the */   \
+            /*        json serialization/deserialization to not recognize the type anymore.    */   \
+            volatile size_t force_run_1{ 0 };                                                       \
+            volatile size_t force_run_2{ 0 };                                                       \
             _typename default_inst{};                                                               \
             _typename round_tripped{ json(default_inst).get<_typename>() };                         \
-            /*if (memcmp(&default_inst, &round_tripped, sizeof(_typename)) != 0)                      \
+                                                                                                    \
+            force_run_1 = reinterpret_cast<size_t>(&default_inst);                                  \
+            force_run_2 = reinterpret_cast<size_t>(&round_tripped);                                 \
+                                                                                                    \
+            if (force_run_1 == 0 || force_run_2 == 0)                                               \
             {                                                                                       \
                 assert(false);                                                                      \
-            } */                                                                                      \
+            }                                                                                       \
         } while (false);
 
     // ---- List of components to register ---------------------------------------------------------
