@@ -86,7 +86,7 @@ void BT::component_system::Registry::register_all_components()
 {   // Make sure that this function only runs once.
     assert(m_components.empty());
 
-    #define REGISTER_COMPONENT(_typename)                                                           \
+    #define REGISTER_COMPONENT_NO_SERIALIZATION(_typename)                                          \
         do                                                                                          \
         {   /* Insert component into registry. */                                                   \
             size_t next_component_idx{ m_components.size() };                                       \
@@ -94,8 +94,26 @@ void BT::component_system::Registry::register_all_components()
                                                                                                     \
             m_components.emplace_back(next_component_idx,                                           \
                                       std::type_index(typeid(_typename)),                           \
-                                      [](Component_list& comp_list) {                               \
-                                          comp_list.add_component<_typename>(_typename{});          \
+                                      [](Component_list&, json&) {},                                \
+                                      [](Component_list&, json&) {},                                \
+                                      [](Component_list&) {});                                      \
+        } while (false);
+
+    #define REGISTER_COMPONENT_WITH_SERIALIZATION(_typename)                                        \
+        do                                                                                          \
+        {   /* Insert component into registry. */                                                   \
+            size_t next_component_idx{ m_components.size() };                                       \
+            m_component_name_to_list_idx_map.emplace(#_typename, next_component_idx);               \
+                                                                                                    \
+            m_components.emplace_back(next_component_idx,                                           \
+                                      std::type_index(typeid(_typename)),                           \
+                                      [](Component_list& comp_list, json& node_ref) {               \
+                                          comp_list.add_component<_typename>(                       \
+                                              node_ref.get<_typename>());                           \
+                                      },                                                            \
+                                      [](Component_list& comp_list, json& node_ref) {               \
+                                          node_ref =                                                \
+                                              json(comp_list.get_component_handle<_typename>());    \
                                       },                                                            \
                                       [](Component_list& comp_list) {                               \
                                           comp_list.remove_component<_typename>();                  \
@@ -120,11 +138,11 @@ void BT::component_system::Registry::register_all_components()
         } while (false);
 
     // ---- List of components to register ---------------------------------------------------------
-    REGISTER_COMPONENT(Component_model_animator);
-    REGISTER_COMPONENT(Hitcapsule_group_set);
+    REGISTER_COMPONENT_WITH_SERIALIZATION(Component_model_animator);
+    REGISTER_COMPONENT_WITH_SERIALIZATION(Hitcapsule_group_set);
     // REGISTER_COMPONENT(Component_physics_object);
-    REGISTER_COMPONENT(Component_char_con_movement_state);
-    REGISTER_COMPONENT(Component_anim_editor_tool_communicator_state);
+    REGISTER_COMPONENT_WITH_SERIALIZATION(Component_char_con_movement_state);
+    REGISTER_COMPONENT_WITH_SERIALIZATION(Component_anim_editor_tool_communicator_state);
     // ---------------------------------------------------------------------------------------------
 
     #undef REGISTER_COMPONENT

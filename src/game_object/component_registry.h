@@ -140,8 +140,9 @@ public:
         size_t component_idx;
         std::type_index typename_id_idx;
 
-        std::function<void(Component_list&)> default_add_component_fn;
-        std::function<void(Component_list&)> default_remove_component_fn;
+        std::function<void(Component_list&, json&)> add_component_from_json_fn;
+        std::function<void(Component_list&, json&)> serialize_component_to_json_fn;
+        std::function<void(Component_list&)> remove_component_fn;
     };
     Component_metadata const& find_component_metadata_by_typename_str(
         std::string const& typename_str) const;
