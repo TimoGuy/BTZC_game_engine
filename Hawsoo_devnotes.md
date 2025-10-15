@@ -327,6 +327,23 @@ while (running_game_loop)
     - [ ] Edit the `.btscene` files to change scripts to components (refer to new systems to see what components to include).
 
 
+- [x] OVERHAUL: Create new entity pool that doesn't reallocate its size.
+    - Add-removes are immediate since we're doing systems now.
+
+- [ ] OVERHAUL: Change these things into components
+    - Transform (serializable)
+    - Render object (partial serializable)
+        - Needs to be built in case deformed model.
+    - Physics object (partial serializable)
+        - Needs to be built depending on the physics obj type.
+
+- [ ] OVERHAUL: Remake game_object/entity type.
+    - Don't require a bunch of services upfront. Use service finder.
+
+
+
+
+
 
 
 - [ ] 

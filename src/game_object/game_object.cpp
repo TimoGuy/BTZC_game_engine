@@ -18,6 +18,7 @@
 #include "misc/cpp/imgui_stdlib.h"
 #include <atomic>
 #include <cassert>
+#include <corecrt_math_defines.h>
 #include <mutex>
 
 using std::atomic_uint8_t;
@@ -614,495 +615,573 @@ void BT::Game_object::render_imgui_transform_gizmo()
 }
 
 
-// Game_object_pool.
-BT::Game_object_pool::Game_object_pool()
-{
-    BT_SERVICE_FINDER_ADD_SERVICE(BT::Game_object_pool, this);
-}
+// // Game_object_pool.
+// BT::Game_object_pool::Game_object_pool()
+// {
+//     BT_SERVICE_FINDER_ADD_SERVICE(BT::Game_object_pool, this);
+// }
 
-void BT::Game_object_pool::set_callback_fn(
-    function<unique_ptr<Game_object>()>&& create_new_empty_game_obj_callback_fn)
-{
-    m_create_new_empty_game_obj_callback_fn = std::move(create_new_empty_game_obj_callback_fn);
-}
+// void BT::Game_object_pool::set_callback_fn(
+//     function<unique_ptr<Game_object>()>&& create_new_empty_game_obj_callback_fn)
+// {
+//     m_create_new_empty_game_obj_callback_fn = std::move(create_new_empty_game_obj_callback_fn);
+// }
 
-BT::UUID BT::Game_object_pool::emplace(unique_ptr<Game_object>&& game_object)
-{
-    wait_until_free_then_block();
-    UUID uuid{ emplace_no_lock(std::move(game_object)) };
-    unblock();
+// BT::UUID BT::Game_object_pool::emplace(unique_ptr<Game_object>&& game_object)
+// {
+//     wait_until_free_then_block();
+//     UUID uuid{ emplace_no_lock(std::move(game_object)) };
+//     unblock();
 
-    return uuid;
-}
+//     return uuid;
+// }
 
-void BT::Game_object_pool::remove(UUID key)
-{
-    wait_until_free_then_block();
-    if (m_game_objects.find(key) == m_game_objects.end())
-    {
-        // Fail bc key was invalid.
-        assert(false);
-        return;
-    }
+// void BT::Game_object_pool::remove(UUID key)
+// {
+//     wait_until_free_then_block();
+//     if (m_game_objects.find(key) == m_game_objects.end())
+//     {
+//         // Fail bc key was invalid.
+//         assert(false);
+//         return;
+//     }
 
-    auto& removing_game_obj{ m_game_objects.at(key) };
-    if (removing_game_obj->get_parent_uuid().is_nil())
-        // Remove self from root level if self is one.
-        remove_root_level_status(key);
+//     auto& removing_game_obj{ m_game_objects.at(key) };
+//     if (removing_game_obj->get_parent_uuid().is_nil())
+//         // Remove self from root level if self is one.
+//         remove_root_level_status(key);
 
-    for (auto child_uuid : removing_game_obj->get_children_uuids())
-    {   // Sever parent-child relationship and set child to root level obj.
-        removing_game_obj->remove_child(*m_game_objects.at(child_uuid));
-        m_root_level_game_objects_ordering.emplace_back(child_uuid);
-    }
+//     for (auto child_uuid : removing_game_obj->get_children_uuids())
+//     {   // Sever parent-child relationship and set child to root level obj.
+//         removing_game_obj->remove_child(*m_game_objects.at(child_uuid));
+//         m_root_level_game_objects_ordering.emplace_back(child_uuid);
+//     }
 
-    m_game_objects.erase(key);
-    unblock();
-}
+//     m_game_objects.erase(key);
+//     unblock();
+// }
 
-vector<BT::Game_object*> const BT::Game_object_pool::checkout_all_as_list()
-{
-    wait_until_free_then_block();
-    return get_all_as_list_no_lock();
-}
+// vector<BT::Game_object*> const BT::Game_object_pool::checkout_all_as_list()
+// {
+//     wait_until_free_then_block();
+//     return get_all_as_list_no_lock();
+// }
 
-vector<BT::Game_object*> const BT::Game_object_pool::get_all_as_list_no_lock()
-{
-    vector<Game_object*> all_game_objs;
-    all_game_objs.reserve(m_game_objects.size());
+// vector<BT::Game_object*> const BT::Game_object_pool::get_all_as_list_no_lock()
+// {
+//     vector<Game_object*> all_game_objs;
+//     all_game_objs.reserve(m_game_objects.size());
 
-    for (auto it = m_game_objects.begin(); it != m_game_objects.end(); it++)
-    {
-        all_game_objs.emplace_back(it->second.get());
-    }
+//     for (auto it = m_game_objects.begin(); it != m_game_objects.end(); it++)
+//     {
+//         all_game_objs.emplace_back(it->second.get());
+//     }
 
-    return all_game_objs;
-}
+//     return all_game_objs;
+// }
 
-BT::Game_object* BT::Game_object_pool::checkout_one(UUID uuid)
-{
-    wait_until_free_then_block();
-    return get_one_no_lock(uuid);
-}
+// BT::Game_object* BT::Game_object_pool::checkout_one(UUID uuid)
+// {
+//     wait_until_free_then_block();
+//     return get_one_no_lock(uuid);
+// }
 
-BT::Game_object* BT::Game_object_pool::get_one_no_lock(UUID uuid)
-{
-    if (m_game_objects.find(uuid) == m_game_objects.end())
-    {
-        logger::printef(logger::ERROR, "UUID was invalid: %s", UUID_helper::to_pretty_repr(uuid).c_str());
-        assert(false);
-        return nullptr;
-    }
+// BT::Game_object* BT::Game_object_pool::get_one_no_lock(UUID uuid)
+// {
+//     if (m_game_objects.find(uuid) == m_game_objects.end())
+//     {
+//         logger::printef(logger::ERROR, "UUID was invalid: %s", UUID_helper::to_pretty_repr(uuid).c_str());
+//         assert(false);
+//         return nullptr;
+//     }
 
-    return m_game_objects.at(uuid).get();
-}
+//     return m_game_objects.at(uuid).get();
+// }
 
-void BT::Game_object_pool::return_list(vector<Game_object*> const&& all_as_list)
-{
-    // Assumed that this is the end of using the gameobject list.
-    // @TODO: Prevent misuse of this function.
-    // (@IDEA: Make it so that instead of a vector use a class that has a release function or a dtor)
-    // @COPYPASTA.
-    (void)all_as_list;
-    unblock();
-}
+// void BT::Game_object_pool::return_list(vector<Game_object*> const&& all_as_list)
+// {
+//     // Assumed that this is the end of using the gameobject list.
+//     // @TODO: Prevent misuse of this function.
+//     // (@IDEA: Make it so that instead of a vector use a class that has a release function or a dtor)
+//     // @COPYPASTA.
+//     (void)all_as_list;
+//     unblock();
+// }
 
-// Scene_serialization_ifc.
-void BT::Game_object_pool::scene_serialize(Scene_serialization_mode mode, json& node_ref)
-{
-    if (mode == SCENE_SERIAL_MODE_SERIALIZE)
-    {
+// // Scene_serialization_ifc.
+// void BT::Game_object_pool::scene_serialize(Scene_serialization_mode mode, json& node_ref)
+// {
+//     if (mode == SCENE_SERIAL_MODE_SERIALIZE)
+//     {
 
-    }
-    else if (mode == SCENE_SERIAL_MODE_DESERIALIZE)
-    {
+//     }
+//     else if (mode == SCENE_SERIAL_MODE_DESERIALIZE)
+//     {
         
-    }
-}
+//     }
+// }
 
-// Debug ImGui.
-namespace
-{
+// // Debug ImGui.
+// namespace
+// {
 
-struct Hierarchy_node
-{
-    bool is_root{ true };
-    BT::Game_object* game_obj{ nullptr };
-    vector<Hierarchy_node*> children;
-};
+// struct Hierarchy_node
+// {
+//     bool is_root{ true };
+//     BT::Game_object* game_obj{ nullptr };
+//     vector<Hierarchy_node*> children;
+// };
 
-}  // namespace
+// }  // namespace
 
-void BT::Game_object_pool::render_imgui_scene_hierarchy()
-{
-    // @NOTE: Called from `renderer.render()` so game objs already checked out.
-    // wait_until_free_then_block();
+// void BT::Game_object_pool::render_imgui_scene_hierarchy()
+// {
+//     // @NOTE: Called from `renderer.render()` so game objs already checked out.
+//     // wait_until_free_then_block();
     
-    // Gather structured hierarchy.
-    vector<Hierarchy_node> flat_scene_hierarchy;
-    vector<Hierarchy_node*> root_nodes_scene_hierarchy;
+//     // Gather structured hierarchy.
+//     vector<Hierarchy_node> flat_scene_hierarchy;
+//     vector<Hierarchy_node*> root_nodes_scene_hierarchy;
 
-    for (auto& game_obj : m_game_objects)
-        flat_scene_hierarchy.emplace_back(true,
-                                     game_obj.second.get());
+//     for (auto& game_obj : m_game_objects)
+//         flat_scene_hierarchy.emplace_back(true,
+//                                      game_obj.second.get());
 
-    for (auto& scene_node : flat_scene_hierarchy)
-        root_nodes_scene_hierarchy.emplace_back(&scene_node);
+//     for (auto& scene_node : flat_scene_hierarchy)
+//         root_nodes_scene_hierarchy.emplace_back(&scene_node);
     
-    for (auto& scene_node : flat_scene_hierarchy)
-        for(auto child_uuid : scene_node.game_obj->get_children_uuids())
-            for (size_t i = 0; i < root_nodes_scene_hierarchy.size(); i++)
-            {
-                auto root_node{ root_nodes_scene_hierarchy[i] };
-                if (child_uuid == root_node->game_obj->get_uuid())
-                {
-                    // Turns out wasn't a root node.
-                    root_node->is_root = false;
-                    scene_node.children.emplace_back(root_node);
-                    root_nodes_scene_hierarchy.erase(root_nodes_scene_hierarchy.begin() + i);
-                    break;
-                }
-            }
+//     for (auto& scene_node : flat_scene_hierarchy)
+//         for(auto child_uuid : scene_node.game_obj->get_children_uuids())
+//             for (size_t i = 0; i < root_nodes_scene_hierarchy.size(); i++)
+//             {
+//                 auto root_node{ root_nodes_scene_hierarchy[i] };
+//                 if (child_uuid == root_node->game_obj->get_uuid())
+//                 {
+//                     // Turns out wasn't a root node.
+//                     root_node->is_root = false;
+//                     scene_node.children.emplace_back(root_node);
+//                     root_nodes_scene_hierarchy.erase(root_nodes_scene_hierarchy.begin() + i);
+//                     break;
+//                 }
+//             }
     
-    // Reorder root nodes list according to provided uuid list.
-    assert(m_root_level_game_objects_ordering.size() == root_nodes_scene_hierarchy.size());
-    vector<Hierarchy_node*> root_nodes_ordered_scene_hierarchy;
-    root_nodes_ordered_scene_hierarchy.reserve(root_nodes_scene_hierarchy.size());
-    for (auto root_uuid : m_root_level_game_objects_ordering)
-        for (auto it = root_nodes_scene_hierarchy.begin(); it != root_nodes_scene_hierarchy.end(); it++)
-        {
-            auto root_node{ *it };
-            if (root_uuid == root_node->game_obj->get_uuid())
-            {
-                // Move to the back of the ordered list.
-                root_nodes_ordered_scene_hierarchy.emplace_back(root_node);
-            }
-        }
-    assert(root_nodes_scene_hierarchy.size() == root_nodes_ordered_scene_hierarchy.size());
-    root_nodes_scene_hierarchy.clear();
+//     // Reorder root nodes list according to provided uuid list.
+//     assert(m_root_level_game_objects_ordering.size() == root_nodes_scene_hierarchy.size());
+//     vector<Hierarchy_node*> root_nodes_ordered_scene_hierarchy;
+//     root_nodes_ordered_scene_hierarchy.reserve(root_nodes_scene_hierarchy.size());
+//     for (auto root_uuid : m_root_level_game_objects_ordering)
+//         for (auto it = root_nodes_scene_hierarchy.begin(); it != root_nodes_scene_hierarchy.end(); it++)
+//         {
+//             auto root_node{ *it };
+//             if (root_uuid == root_node->game_obj->get_uuid())
+//             {
+//                 // Move to the back of the ordered list.
+//                 root_nodes_ordered_scene_hierarchy.emplace_back(root_node);
+//             }
+//         }
+//     assert(root_nodes_scene_hierarchy.size() == root_nodes_ordered_scene_hierarchy.size());
+//     root_nodes_scene_hierarchy.clear();
 
-    // Draw out scene hierarchy.
-    auto next_id{ reinterpret_cast<intptr_t>(this) };
-    ImGui::Begin("Scene hierarchy");
+//     // Draw out scene hierarchy.
+//     auto next_id{ reinterpret_cast<intptr_t>(this) };
+//     ImGui::Begin("Scene hierarchy");
 
-    // Reset selected obj when clicking.
-    if (ImGui::IsMouseClicked(0) && ImGui::IsWindowHovered())
-        m_selected_game_obj = UUID();
+//     // Reset selected obj when clicking.
+//     if (ImGui::IsMouseClicked(0) && ImGui::IsWindowHovered())
+//         m_selected_game_obj = UUID();
 
-    if (ImGui::Button("Create new empty##create_new_game_obj"))
-    {
-        // Create new empty game obj.
-        emplace_no_lock(m_create_new_empty_game_obj_callback_fn());
-    }
+//     if (ImGui::Button("Create new empty##create_new_game_obj"))
+//     {
+//         // Create new empty game obj.
+//         emplace_no_lock(m_create_new_empty_game_obj_callback_fn());
+//     }
 
-    ImGui::Separator();
+//     ImGui::Separator();
 
-    ImGui::PushStyleVarY(ImGuiStyleVar_ItemSpacing, 0.0f);
+//     ImGui::PushStyleVarY(ImGuiStyleVar_ItemSpacing, 0.0f);
 
-    Modify_scene_hierarchy_action modify_action;
+//     Modify_scene_hierarchy_action modify_action;
 
-    // Draw scene nodes.
-    for (auto root_node : root_nodes_ordered_scene_hierarchy)
-    {
-        render_imgui_scene_hierarchy_node_recursive(root_node, modify_action, next_id);
-    }
+//     // Draw scene nodes.
+//     for (auto root_node : root_nodes_ordered_scene_hierarchy)
+//     {
+//         render_imgui_scene_hierarchy_node_recursive(root_node, modify_action, next_id);
+//     }
 
-    // Some helper macros.
-    #define IMGUI_DRAGDROP_ACTIVE_DISABLE_BLOCK_BEGIN  bool __hawsoo_is_dragdropactive = ImGui::IsDragDropActive(); if (!__hawsoo_is_dragdropactive) ImGui::BeginDisabled()
-    #define IMGUI_DRAGDROP_ACTIVE_DISABLE_BLOCK_END    if (!__hawsoo_is_dragdropactive) ImGui::EndDisabled()
+//     // Some helper macros.
+//     #define IMGUI_DRAGDROP_ACTIVE_DISABLE_BLOCK_BEGIN  bool __hawsoo_is_dragdropactive = ImGui::IsDragDropActive(); if (!__hawsoo_is_dragdropactive) ImGui::BeginDisabled()
+//     #define IMGUI_DRAGDROP_ACTIVE_DISABLE_BLOCK_END    if (!__hawsoo_is_dragdropactive) ImGui::EndDisabled()
 
-    // Draw final after node.
-    IMGUI_DRAGDROP_ACTIVE_DISABLE_BLOCK_BEGIN;
-    ImGui::PushStyleColor(ImGuiCol_Button, 0x00000000);
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, 0x00000000);
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, 0x00000000);
-    ImGui::ButtonEx(("##between_node_button__" + std::to_string(next_id)).c_str(),
-                    ImVec2(ImGui::GetContentRegionAvail().x,
-                        max(6.0f, ImGui::GetContentRegionAvail().y)),
-                    ImGuiButtonFlags_NoNavFocus);
-    ImGui::PopStyleColor(3);
-    if (ImGui::BeginDragDropTarget())
-    {
-        ImGuiDragDropFlags drop_target_flags = 0;
-        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_GAMEOBJ_TREENODE", drop_target_flags))
-        {
-            modify_action.commit = true;
-            modify_action.type = Modify_scene_hierarchy_action::INSERT_AT_END;
-            modify_action.modifying_object = *reinterpret_cast<UUID*>(payload->Data);
-        }
-        ImGui::EndDragDropTarget();
-    }
-    IMGUI_DRAGDROP_ACTIVE_DISABLE_BLOCK_END;
+//     // Draw final after node.
+//     IMGUI_DRAGDROP_ACTIVE_DISABLE_BLOCK_BEGIN;
+//     ImGui::PushStyleColor(ImGuiCol_Button, 0x00000000);
+//     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, 0x00000000);
+//     ImGui::PushStyleColor(ImGuiCol_ButtonActive, 0x00000000);
+//     ImGui::ButtonEx(("##between_node_button__" + std::to_string(next_id)).c_str(),
+//                     ImVec2(ImGui::GetContentRegionAvail().x,
+//                         max(6.0f, ImGui::GetContentRegionAvail().y)),
+//                     ImGuiButtonFlags_NoNavFocus);
+//     ImGui::PopStyleColor(3);
+//     if (ImGui::BeginDragDropTarget())
+//     {
+//         ImGuiDragDropFlags drop_target_flags = 0;
+//         if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_GAMEOBJ_TREENODE", drop_target_flags))
+//         {
+//             modify_action.commit = true;
+//             modify_action.type = Modify_scene_hierarchy_action::INSERT_AT_END;
+//             modify_action.modifying_object = *reinterpret_cast<UUID*>(payload->Data);
+//         }
+//         ImGui::EndDragDropTarget();
+//     }
+//     IMGUI_DRAGDROP_ACTIVE_DISABLE_BLOCK_END;
 
-    ImGui::PopStyleVar();
+//     ImGui::PopStyleVar();
 
-    ImGui::End();
+//     ImGui::End();
 
-    // Draw out inspector (if >0 objs are selected).
-    ImGui::Begin("Properties inspector");
-    if (!m_selected_game_obj.is_nil())
-    {
-        auto game_obj{ m_game_objects.at(m_selected_game_obj).get() };
+//     // Draw out inspector (if >0 objs are selected).
+//     ImGui::Begin("Properties inspector");
+//     if (!m_selected_game_obj.is_nil())
+//     {
+//         auto game_obj{ m_game_objects.at(m_selected_game_obj).get() };
 
-        auto name{ game_obj->get_name() };
-        if (ImGui::InputText("Name", &name))
-            game_obj->set_name(std::move(name));
+//         auto name{ game_obj->get_name() };
+//         if (ImGui::InputText("Name", &name))
+//             game_obj->set_name(std::move(name));
 
-        ImGui::Text("UUID: %s", UUID_helper::to_pretty_repr(game_obj->get_uuid()).c_str());
+//         ImGui::Text("UUID: %s", UUID_helper::to_pretty_repr(game_obj->get_uuid()).c_str());
 
-        if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
-        {
-            game_obj->render_imgui_local_transform();
-        }
+//         if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
+//         {
+//             game_obj->render_imgui_local_transform();
+//         }
 
-        game_obj->render_imgui_transform_gizmo();
-    }
-    else
-    {
-        ImGui::Text("Select a game object to inspect its properties.");
-    }
-    ImGui::End();
+//         game_obj->render_imgui_transform_gizmo();
+//     }
+//     else
+//     {
+//         ImGui::Text("Select a game object to inspect its properties.");
+//     }
+//     ImGui::End();
 
-    // Commit modify action if made.
-    if (modify_action.commit)
-    {
-        switch (modify_action.type)
-        {
-            case Modify_scene_hierarchy_action::INSERT_AS_CHILD:
-            {
-                auto& modifying_obj_game_obj{
-                    m_game_objects.at(modify_action.modifying_object) };
+//     // Commit modify action if made.
+//     if (modify_action.commit)
+//     {
+//         switch (modify_action.type)
+//         {
+//             case Modify_scene_hierarchy_action::INSERT_AS_CHILD:
+//             {
+//                 auto& modifying_obj_game_obj{
+//                     m_game_objects.at(modify_action.modifying_object) };
 
-                // @COPYPASTA: Appears 3 times vv.
-                if (modifying_obj_game_obj->get_parent_uuid().is_nil())
-                    remove_root_level_status(modifying_obj_game_obj->get_uuid());
-                else
-                {
-                    // Goto parent of `modifying_object` and sever parent-child relationship.
-                    m_game_objects.at(modifying_obj_game_obj->get_parent_uuid())
-                        ->remove_child(*modifying_obj_game_obj);
-                }
-                // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+//                 // @COPYPASTA: Appears 3 times vv.
+//                 if (modifying_obj_game_obj->get_parent_uuid().is_nil())
+//                     remove_root_level_status(modifying_obj_game_obj->get_uuid());
+//                 else
+//                 {
+//                     // Goto parent of `modifying_object` and sever parent-child relationship.
+//                     m_game_objects.at(modifying_obj_game_obj->get_parent_uuid())
+//                         ->remove_child(*modifying_obj_game_obj);
+//                 }
+//                 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-                // Add new parent-child relationship.
-                m_game_objects.at(modify_action.anchor_subject)
-                    ->insert_child(*modifying_obj_game_obj);
-                break;
-            }
+//                 // Add new parent-child relationship.
+//                 m_game_objects.at(modify_action.anchor_subject)
+//                     ->insert_child(*modifying_obj_game_obj);
+//                 break;
+//             }
 
-            case Modify_scene_hierarchy_action::INSERT_BEFORE:
-            {
-                if (modify_action.modifying_object == modify_action.anchor_subject)
-                    // Cancel operation if moving the object to the same exact place.
-                    break;
+//             case Modify_scene_hierarchy_action::INSERT_BEFORE:
+//             {
+//                 if (modify_action.modifying_object == modify_action.anchor_subject)
+//                     // Cancel operation if moving the object to the same exact place.
+//                     break;
 
-                auto& modifying_obj_game_obj{
-                    m_game_objects.at(modify_action.modifying_object) };
+//                 auto& modifying_obj_game_obj{
+//                     m_game_objects.at(modify_action.modifying_object) };
 
-                // @COPYPASTA: Appears 3 times vv.
-                if (modifying_obj_game_obj->get_parent_uuid().is_nil())
-                    remove_root_level_status(modifying_obj_game_obj->get_uuid());
-                else
-                {
-                    // Goto parent of `modifying_object` and sever parent-child relationship.
-                    m_game_objects.at(modifying_obj_game_obj->get_parent_uuid())
-                        ->remove_child(*modifying_obj_game_obj);
-                }
-                // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+//                 // @COPYPASTA: Appears 3 times vv.
+//                 if (modifying_obj_game_obj->get_parent_uuid().is_nil())
+//                     remove_root_level_status(modifying_obj_game_obj->get_uuid());
+//                 else
+//                 {
+//                     // Goto parent of `modifying_object` and sever parent-child relationship.
+//                     m_game_objects.at(modifying_obj_game_obj->get_parent_uuid())
+//                         ->remove_child(*modifying_obj_game_obj);
+//                 }
+//                 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-                auto anchor_parent_uuid{
-                    m_game_objects.at(modify_action.anchor_subject)->get_parent_uuid() };
-                if (anchor_parent_uuid.is_nil())
-                {
-                    // Add game object as a root level object.
-                    for (auto it = m_root_level_game_objects_ordering.begin();
-                         it != m_root_level_game_objects_ordering.end(); it++)
-                        if (*it == modify_action.anchor_subject)
-                        {
-                            // Insert placement to before this index.
-                            m_root_level_game_objects_ordering.emplace(
-                                it,
-                                modifying_obj_game_obj->get_uuid());
-                            break;
-                        }
-                }
-                else
-                {
-                    // Add new parent-child relationship (so that modify-GO is sibling of anchor-GO).
-                    size_t position{ 0 };
-                    auto& anchor_parent_game_obj{ m_game_objects.at(anchor_parent_uuid) };
-                    auto children_uuids{ anchor_parent_game_obj->get_children_uuids() };
-                    for (; position < children_uuids.size(); position++)
-                        if (children_uuids[position] == modify_action.anchor_subject)
-                        {
-                            m_game_objects.at(anchor_parent_uuid)
-                                ->insert_child(*modifying_obj_game_obj, position);
-                            break;
-                        }
-                }
+//                 auto anchor_parent_uuid{
+//                     m_game_objects.at(modify_action.anchor_subject)->get_parent_uuid() };
+//                 if (anchor_parent_uuid.is_nil())
+//                 {
+//                     // Add game object as a root level object.
+//                     for (auto it = m_root_level_game_objects_ordering.begin();
+//                          it != m_root_level_game_objects_ordering.end(); it++)
+//                         if (*it == modify_action.anchor_subject)
+//                         {
+//                             // Insert placement to before this index.
+//                             m_root_level_game_objects_ordering.emplace(
+//                                 it,
+//                                 modifying_obj_game_obj->get_uuid());
+//                             break;
+//                         }
+//                 }
+//                 else
+//                 {
+//                     // Add new parent-child relationship (so that modify-GO is sibling of anchor-GO).
+//                     size_t position{ 0 };
+//                     auto& anchor_parent_game_obj{ m_game_objects.at(anchor_parent_uuid) };
+//                     auto children_uuids{ anchor_parent_game_obj->get_children_uuids() };
+//                     for (; position < children_uuids.size(); position++)
+//                         if (children_uuids[position] == modify_action.anchor_subject)
+//                         {
+//                             m_game_objects.at(anchor_parent_uuid)
+//                                 ->insert_child(*modifying_obj_game_obj, position);
+//                             break;
+//                         }
+//                 }
 
-                break;
-            }
+//                 break;
+//             }
 
-            case Modify_scene_hierarchy_action::INSERT_AT_END:
-            {
-                auto& modifying_obj_game_obj{
-                    m_game_objects.at(modify_action.modifying_object) };
+//             case Modify_scene_hierarchy_action::INSERT_AT_END:
+//             {
+//                 auto& modifying_obj_game_obj{
+//                     m_game_objects.at(modify_action.modifying_object) };
 
-                // @COPYPASTA: Appears 3 times vv.
-                if (modifying_obj_game_obj->get_parent_uuid().is_nil())
-                    remove_root_level_status(modifying_obj_game_obj->get_uuid());
-                else
-                {
-                    // Goto parent of `modifying_object` and sever parent-child relationship.
-                    m_game_objects.at(modifying_obj_game_obj->get_parent_uuid())
-                        ->remove_child(*modifying_obj_game_obj);
-                }
-                // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+//                 // @COPYPASTA: Appears 3 times vv.
+//                 if (modifying_obj_game_obj->get_parent_uuid().is_nil())
+//                     remove_root_level_status(modifying_obj_game_obj->get_uuid());
+//                 else
+//                 {
+//                     // Goto parent of `modifying_object` and sever parent-child relationship.
+//                     m_game_objects.at(modifying_obj_game_obj->get_parent_uuid())
+//                         ->remove_child(*modifying_obj_game_obj);
+//                 }
+//                 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-                // Add game object as a root level object at end.
-                m_root_level_game_objects_ordering.emplace_back(modifying_obj_game_obj->get_uuid());
+//                 // Add game object as a root level object at end.
+//                 m_root_level_game_objects_ordering.emplace_back(modifying_obj_game_obj->get_uuid());
 
-                break;
-            }
+//                 break;
+//             }
 
-            default:
-                assert(false);
-                break;
-        }
-    }
+//             default:
+//                 assert(false);
+//                 break;
+//         }
+//     }
 
-    // @NOTE: Called from `renderer.render()` so game objs already checked out.
-    // unblock();
+//     // @NOTE: Called from `renderer.render()` so game objs already checked out.
+//     // unblock();
+// }
+
+// BT::UUID BT::Game_object_pool::emplace_no_lock(unique_ptr<Game_object>&& game_object)
+// {
+//     UUID uuid{ game_object->get_uuid() };
+//     if (uuid.is_nil())
+//     {
+//         logger::printe(logger::ERROR, "Invalid UUID passed in.");
+//         assert(false);
+//     }
+
+//     if (game_object->get_parent_uuid().is_nil())
+//     {
+//         // Add game object as a root level object.
+//         m_root_level_game_objects_ordering.emplace_back(uuid);
+//     }
+
+//     m_game_objects.emplace(uuid, std::move(game_object));
+
+//     return uuid;
+// }
+
+// void BT::Game_object_pool::remove_root_level_status(UUID key)
+// {
+//     m_root_level_game_objects_ordering.erase(
+//         std::remove(m_root_level_game_objects_ordering.begin(),
+//                     m_root_level_game_objects_ordering.end(),
+//                     key),
+//         m_root_level_game_objects_ordering.end());
+// }
+
+// void BT::Game_object_pool::render_imgui_scene_hierarchy_node_recursive(
+//     void* node_void_ptr, Modify_scene_hierarchy_action& modify_action, intptr_t& next_id)
+// {
+//     auto node{ reinterpret_cast<Hierarchy_node*>(node_void_ptr) };  // I like the stink.  -Thea 2025/06/03
+
+//     constexpr ImGuiTreeNodeFlags k_base_flags{ ImGuiTreeNodeFlags_SpanAvailWidth |
+//                                                ImGuiTreeNodeFlags_DrawLinesToNodes |
+//                                                ImGuiTreeNodeFlags_OpenOnDoubleClick |
+//                                                ImGuiTreeNodeFlags_OpenOnArrow |
+//                                                ImGuiTreeNodeFlags_DefaultOpen };
+//     ImGuiTreeNodeFlags node_flags{ k_base_flags };
+
+//     auto cur_uuid{ node->game_obj->get_uuid() };
+//     if (cur_uuid == m_selected_game_obj)
+//         node_flags |= ImGuiTreeNodeFlags_Selected;
+
+//     auto const& child_nodes{ node->children };
+//     bool treat_as_leaf_node{ child_nodes.empty() };
+//     if (treat_as_leaf_node)
+//         node_flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+
+//     // Draw between/before node.
+//     IMGUI_DRAGDROP_ACTIVE_DISABLE_BLOCK_BEGIN;
+//     ImGui::PushStyleColor(ImGuiCol_Button, 0x00000000);
+//     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, 0x00000000);
+//     ImGui::PushStyleColor(ImGuiCol_ButtonActive, 0x00000000);
+//     ImGui::ButtonEx(("##between_node_button__" + std::to_string(next_id)).c_str(),
+//                     ImVec2(ImGui::GetContentRegionAvail().x, 6),
+//                     ImGuiButtonFlags_NoNavFocus);
+//     ImGui::PopStyleColor(3);
+//     if (ImGui::BeginDragDropTarget())
+//     {
+//         ImGuiDragDropFlags drop_target_flags = 0;
+//         if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_GAMEOBJ_TREENODE", drop_target_flags))
+//         {
+//             modify_action.commit = true;
+//             modify_action.type = Modify_scene_hierarchy_action::INSERT_BEFORE;
+//             modify_action.anchor_subject = node->game_obj->get_uuid();
+//             modify_action.modifying_object = *reinterpret_cast<UUID*>(payload->Data);
+//         }
+//         ImGui::EndDragDropTarget();
+//     }
+//     IMGUI_DRAGDROP_ACTIVE_DISABLE_BLOCK_END;
+
+//     // Draw my node.
+//     bool tree_node_open = ImGui::TreeNodeEx(reinterpret_cast<void*>(next_id),
+//                                             node_flags,
+//                                             "%s",
+//                                             node->game_obj->get_name().c_str());
+//     if (ImGui::IsItemClicked())
+//         m_selected_game_obj = cur_uuid;
+//     if (ImGui::BeginDragDropSource())
+//     {
+//         ImGui::SetDragDropPayload("_GAMEOBJ_TREENODE", &m_selected_game_obj, sizeof(m_selected_game_obj));
+//         ImGui::Text("This is a drag and drop source");
+//         ImGui::EndDragDropSource();
+//     }
+//     if (ImGui::BeginDragDropTarget())
+//     {
+//         ImGuiDragDropFlags drop_target_flags = 0;
+//         if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_GAMEOBJ_TREENODE", drop_target_flags))
+//         {
+//             modify_action.commit = true;
+//             modify_action.type = Modify_scene_hierarchy_action::INSERT_AS_CHILD;
+//             modify_action.anchor_subject = node->game_obj->get_uuid();
+//             modify_action.modifying_object = *reinterpret_cast<UUID*>(payload->Data);
+//         }
+//         ImGui::EndDragDropTarget();
+//     }
+
+//     // Increment id.
+//     next_id++;
+
+//     if (tree_node_open && !treat_as_leaf_node)
+//     {
+//         // Draw children nodes.
+//         for (auto child_node : child_nodes)
+//         {
+//             render_imgui_scene_hierarchy_node_recursive(child_node, modify_action, next_id);
+//         }
+//         ImGui::TreePop();
+//     }
+// }
+
+// // Synchronization.
+// void BT::Game_object_pool::wait_until_free_then_block()
+// {
+//     while (true)
+//     {
+//         bool unblocked{ false };
+//         if (m_blocked.compare_exchange_weak(unblocked, true))
+//         {   // Exchange succeeded and is now in blocking state.
+//             break;
+//         }
+//     }
+// }
+
+// void BT::Game_object_pool::unblock()
+// {
+//     m_blocked.store(false);
+// }
+
+
+BT::Entity_pool::Entity_pool()
+{
+    BT_SERVICE_FINDER_ADD_SERVICE(Entity_pool, this);
 }
 
-BT::UUID BT::Game_object_pool::emplace_no_lock(unique_ptr<Game_object>&& game_object)
+BT::Game_object& BT::Entity_pool::create_entity()
 {
-    UUID uuid{ game_object->get_uuid() };
-    if (uuid.is_nil())
-    {
-        logger::printe(logger::ERROR, "Invalid UUID passed in.");
-        assert(false);
-    }
-
-    if (game_object->get_parent_uuid().is_nil())
-    {
-        // Add game object as a root level object.
-        m_root_level_game_objects_ordering.emplace_back(uuid);
-    }
-
-    m_game_objects.emplace(uuid, std::move(game_object));
-
-    return uuid;
+    return create_entity(UUID_helper::generate_uuid());
 }
 
-void BT::Game_object_pool::remove_root_level_status(UUID key)
-{
-    m_root_level_game_objects_ordering.erase(
-        std::remove(m_root_level_game_objects_ordering.begin(),
-                    m_root_level_game_objects_ordering.end(),
-                    key),
-        m_root_level_game_objects_ordering.end());
-}
+BT::Game_object& BT::Entity_pool::create_entity(UUID uuid)
+{   // Find unallocated spot.
+    auto original_pos{ m_next_counter };
+    size_t found_pos{ (size_t)-1 };
 
-void BT::Game_object_pool::render_imgui_scene_hierarchy_node_recursive(
-    void* node_void_ptr, Modify_scene_hierarchy_action& modify_action, intptr_t& next_id)
-{
-    auto node{ reinterpret_cast<Hierarchy_node*>(node_void_ptr) };  // I like the stink.  -Thea 2025/06/03
-
-    constexpr ImGuiTreeNodeFlags k_base_flags{ ImGuiTreeNodeFlags_SpanAvailWidth |
-                                               ImGuiTreeNodeFlags_DrawLinesToNodes |
-                                               ImGuiTreeNodeFlags_OpenOnDoubleClick |
-                                               ImGuiTreeNodeFlags_OpenOnArrow |
-                                               ImGuiTreeNodeFlags_DefaultOpen };
-    ImGuiTreeNodeFlags node_flags{ k_base_flags };
-
-    auto cur_uuid{ node->game_obj->get_uuid() };
-    if (cur_uuid == m_selected_game_obj)
-        node_flags |= ImGuiTreeNodeFlags_Selected;
-
-    auto const& child_nodes{ node->children };
-    bool treat_as_leaf_node{ child_nodes.empty() };
-    if (treat_as_leaf_node)
-        node_flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
-
-    // Draw between/before node.
-    IMGUI_DRAGDROP_ACTIVE_DISABLE_BLOCK_BEGIN;
-    ImGui::PushStyleColor(ImGuiCol_Button, 0x00000000);
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, 0x00000000);
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, 0x00000000);
-    ImGui::ButtonEx(("##between_node_button__" + std::to_string(next_id)).c_str(),
-                    ImVec2(ImGui::GetContentRegionAvail().x, 6),
-                    ImGuiButtonFlags_NoNavFocus);
-    ImGui::PopStyleColor(3);
-    if (ImGui::BeginDragDropTarget())
-    {
-        ImGuiDragDropFlags drop_target_flags = 0;
-        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_GAMEOBJ_TREENODE", drop_target_flags))
+    while (found_pos == -1)
+    {   // Look to see if spot is taken.
+        if (!m_pool_array.at(m_next_counter).exists)
         {
-            modify_action.commit = true;
-            modify_action.type = Modify_scene_hierarchy_action::INSERT_BEFORE;
-            modify_action.anchor_subject = node->game_obj->get_uuid();
-            modify_action.modifying_object = *reinterpret_cast<UUID*>(payload->Data);
+            found_pos = m_next_counter;
         }
-        ImGui::EndDragDropTarget();
-    }
-    IMGUI_DRAGDROP_ACTIVE_DISABLE_BLOCK_END;
 
-    // Draw my node.
-    bool tree_node_open = ImGui::TreeNodeEx(reinterpret_cast<void*>(next_id),
-                                            node_flags,
-                                            "%s",
-                                            node->game_obj->get_name().c_str());
-    if (ImGui::IsItemClicked())
-        m_selected_game_obj = cur_uuid;
-    if (ImGui::BeginDragDropSource())
-    {
-        ImGui::SetDragDropPayload("_GAMEOBJ_TREENODE", &m_selected_game_obj, sizeof(m_selected_game_obj));
-        ImGui::Text("This is a drag and drop source");
-        ImGui::EndDragDropSource();
-    }
-    if (ImGui::BeginDragDropTarget())
-    {
-        ImGuiDragDropFlags drop_target_flags = 0;
-        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_GAMEOBJ_TREENODE", drop_target_flags))
-        {
-            modify_action.commit = true;
-            modify_action.type = Modify_scene_hierarchy_action::INSERT_AS_CHILD;
-            modify_action.anchor_subject = node->game_obj->get_uuid();
-            modify_action.modifying_object = *reinterpret_cast<UUID*>(payload->Data);
-        }
-        ImGui::EndDragDropTarget();
-    }
+        // Progress counter.
+        m_next_counter = (m_next_counter + 1) % k_pool_size;
 
-    // Increment id.
-    next_id++;
-
-    if (tree_node_open && !treat_as_leaf_node)
-    {
-        // Draw children nodes.
-        for (auto child_node : child_nodes)
-        {
-            render_imgui_scene_hierarchy_node_recursive(child_node, modify_action, next_id);
-        }
-        ImGui::TreePop();
-    }
-}
-
-// Synchronization.
-void BT::Game_object_pool::wait_until_free_then_block()
-{
-    while (true)
-    {
-        bool unblocked{ false };
-        if (m_blocked.compare_exchange_weak(unblocked, true))
-        {   // Exchange succeeded and is now in blocking state.
+        if (m_next_counter == original_pos)
+        {   // Searched the whole array and wrapped around.
+            assert(false);
+            throw new std::exception("Pool is full.");
             break;
         }
     }
+
+    // Claim unallocated spot.
+    auto& elem{ m_pool_array.at(found_pos) };
+    elem.elem = Game_object{ uuid };  // Reconstruct new elem.
+    elem.version_num++;  // New construction, new version num.
+    elem.exists = true;
+
+    // Generate key and add element.
+    Elem_key new_key{ .version_num = elem.version_num,
+                      .array_idx = static_cast<uint32_t>(found_pos) };
+    m_uuid_to_key_map.emplace(uuid, new_key);
 }
 
-void BT::Game_object_pool::unblock()
+void BT::Entity_pool::destroy_entity(UUID uuid)
 {
-    m_blocked.store(false);
+    auto elem_key{ m_uuid_to_key_map.at(uuid) };
+    auto& elem{ get_elem_by_key(elem_key) };  // Checks that version numbers match.
+
+    // Delete element (@NOTE: This doesn't clean up or reconstruct the element).
+    elem.exists = false;
+    m_uuid_to_key_map.erase(uuid);
+
+    // To try to fix fragmentation, point to this position to fill it next.
+    m_next_counter = elem_key.array_idx;
+}
+
+
+BT::Game_object& BT::Entity_pool::get_entity_handle(UUID uuid)
+{
+    auto elem_key{ m_uuid_to_key_map.at(uuid) };
+    return get_elem_by_key(elem_key).elem;
+}
+
+BT::Entity_pool::Versioned_elem& BT::Entity_pool::get_elem_by_key(Elem_key key)
+{   // Check to make sure that version numbers line up.
+    auto& elem{ m_pool_array.at(key.array_idx) };
+    if (!elem.exists || elem.version_num != key.version_num)
+    {   // Error.
+        assert(false);
+        throw new std::exception("Elem key is invalid, or element does not exist.");
+    }
+
+    return elem;
 }

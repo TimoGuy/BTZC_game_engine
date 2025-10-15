@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../btzc_game_engine.h"
 #include "../input_handler/input_handler.h"
 #include "../physics_engine/physics_engine.h"
 #include "../physics_engine/rvec3.h"
@@ -11,6 +12,7 @@
 #include "component_registry.h"
 
 #include <atomic>
+#include <cmath>
 #include <functional>
 #include <memory>
 #include <mutex>
@@ -244,72 +246,138 @@ private:
     vector<UUID> m_children;
 };
 
-// vv See below ~~@COPYPASTA. See "mesh.h" "material.h" "shader.h"~~
-// @NOTE: Not quite copypasta. It's a little bit different.
-class Game_object_pool : public Scene_serialization_ifc
+// // vv See below ~~@COPYPASTA. See "mesh.h" "material.h" "shader.h"~~
+// // @NOTE: Not quite copypasta. It's a little bit different.
+// class Game_object_pool : public Scene_serialization_ifc
+// {
+// public:
+//     Game_object_pool();
+
+//     void set_callback_fn(function<unique_ptr<Game_object>()>&& create_new_empty_game_obj_callback_fn);
+
+//     UUID emplace(unique_ptr<Game_object>&& game_object);
+//     void remove(UUID key);
+
+//     vector<Game_object*> const checkout_all_as_list();
+//     vector<Game_object*> const get_all_as_list_no_lock();
+//     Game_object* checkout_one(UUID key);
+//     Game_object* get_one_no_lock(UUID key);
+//     void return_list(vector<Game_object*> const&& all_as_list);
+
+//     // Scene_serialization_ifc.
+//     void scene_serialize(Scene_serialization_mode mode, json& node_ref) override;
+
+//     // Debug ImGui.
+//     void render_imgui_scene_hierarchy();
+
+//     void set_selected_game_obj(Game_object* game_object)
+//     {
+//         m_selected_game_obj = (game_object ? game_object->get_uuid() : UUID());
+//     }
+
+//     UUID get_selected_game_obj() { return m_selected_game_obj; }
+
+// private:
+//     UUID emplace_no_lock(unique_ptr<Game_object>&& game_object);
+
+//     void remove_root_level_status(UUID key);
+
+//     bool validate_game_object_hierarchy();
+
+//     unordered_map<UUID, unique_ptr<Game_object>> m_game_objects;
+//     vector<UUID> m_root_level_game_objects_ordering;
+
+//     // Synchronization.
+//     atomic_bool m_blocked{ false };
+
+//     void wait_until_free_then_block();
+//     void unblock();
+
+//     // Debug ImGui data.
+//     struct Modify_scene_hierarchy_action
+//     {
+//         bool commit{ false };
+//         enum Action_type
+//         {
+//             INSERT_AS_CHILD,
+//             INSERT_BEFORE,
+//             INSERT_AT_END,
+//         } type;
+//         UUID anchor_subject;
+//         UUID modifying_object;
+//     };
+
+//     function<unique_ptr<Game_object>()> m_create_new_empty_game_obj_callback_fn;
+//     UUID m_selected_game_obj;
+//     void render_imgui_scene_hierarchy_node_recursive(void* node_void_ptr,
+//                                                      Modify_scene_hierarchy_action& modify_action,
+//                                                      intptr_t& next_id);
+// };
+
+/// Pool of entities (Game objects).
+/// Basic non-thread-safe pool of entities that has a fixed size and uses a set of keys for lookup.
+/// Mutation only occurs during a system invocation, so outside of the system invocation add/remove
+/// commands are only requests.
+class Entity_pool
 {
 public:
-    Game_object_pool();
+    Entity_pool();
 
-    void set_callback_fn(function<unique_ptr<Game_object>()>&& create_new_empty_game_obj_callback_fn);
+    /// Creates a new entity immediately. Generates a new UUID.
+    Game_object& create_entity();
+    /// Creates a new entity immediately. Assigns new entity the given UUID.
+    Game_object& create_entity(UUID uuid);
+    /// Destroys an entity immediately.
+    void destroy_entity(UUID uuid);
 
-    UUID emplace(unique_ptr<Game_object>&& game_object);
-    void remove(UUID key);
+    /// Finds entity that has the given UUID. Errors if not found.
+    Game_object& get_entity_handle(UUID uuid);
 
-    vector<Game_object*> const checkout_all_as_list();
-    vector<Game_object*> const get_all_as_list_no_lock();
-    Game_object* checkout_one(UUID key);
-    Game_object* get_one_no_lock(UUID key);
-    void return_list(vector<Game_object*> const&& all_as_list);
-
-    // Scene_serialization_ifc.
-    void scene_serialize(Scene_serialization_mode mode, json& node_ref) override;
-
-    // Debug ImGui.
-    void render_imgui_scene_hierarchy();
-
-    void set_selected_game_obj(Game_object* game_object)
-    {
-        m_selected_game_obj = (game_object ? game_object->get_uuid() : UUID());
-    }
-
-    UUID get_selected_game_obj() { return m_selected_game_obj; }
+    static constexpr size_t k_pool_size{ BTZC_GAME_ENGINE_SETTING_ENTITY_POOL_POOL_SIZE };
 
 private:
-    UUID emplace_no_lock(unique_ptr<Game_object>&& game_object);
-
-    void remove_root_level_status(UUID key);
-
-    bool validate_game_object_hierarchy();
-
-    unordered_map<UUID, unique_ptr<Game_object>> m_game_objects;
-    vector<UUID> m_root_level_game_objects_ordering;
-
-    // Synchronization.
-    atomic_bool m_blocked{ false };
-
-    void wait_until_free_then_block();
-    void unblock();
-
-    // Debug ImGui data.
-    struct Modify_scene_hierarchy_action
+    /// Simple heap-allocated array of elements.
+    template<class T, size_t N>
+    class Heap_array
     {
-        bool commit{ false };
-        enum Action_type
-        {
-            INSERT_AS_CHILD,
-            INSERT_BEFORE,
-            INSERT_AT_END,
-        } type;
-        UUID anchor_subject;
-        UUID modifying_object;
+    public:     Heap_array() { m_elems = new T[N]{}; }
+                ~Heap_array() { delete m_elems; }
+
+                T& at(size_t idx) { assert(idx < N);
+                                    return m_elems[idx]; }
+                constexpr size_t size() const { return N; }
+    private:    T* m_elems;
     };
 
-    function<unique_ptr<Game_object>()> m_create_new_empty_game_obj_callback_fn;
-    UUID m_selected_game_obj;
-    void render_imgui_scene_hierarchy_node_recursive(void* node_void_ptr,
-                                                     Modify_scene_hierarchy_action& modify_action,
-                                                     intptr_t& next_id);
+    struct Versioned_elem
+    {
+        bool exists{ false };
+        uint32_t version_num{ 0 };  // @IDEA: Could pack the `exists` into 0th bit, and might force a bad version check there too, saving unpacking (^_^;)  -Thea 2025/10/15
+        Game_object elem;
+    };
+    /// Backend array of elements.
+    Heap_array<Versioned_elem, k_pool_size> m_pool_array;
+
+    /// Idx to fill in next in `m_pool_array`.
+    /// Note: this is to try to fix fragmentation issues.
+    size_t m_next_counter{ 0 };
+
+    /// Custom key type.
+    struct Elem_key
+    {
+        uint32_t version_num;
+        uint32_t array_idx;
+    };
+    // Ensure that key type is space efficient.
+    static_assert(sizeof(Elem_key) == 8);
+    // Ensure that pool size is less than `Elem_key::array_idx` max value (2^32 = 0x100000000).
+    static_assert(0x100000000 >= k_pool_size);
+
+    /// Map to lookup registered elements.
+    std::unordered_map<UUID, Elem_key> m_uuid_to_key_map;
+
+    /// Looks up element from pool array, comparing version numbers.
+    Versioned_elem& get_elem_by_key(Elem_key key);
 };
 
 }  // namespace BT
