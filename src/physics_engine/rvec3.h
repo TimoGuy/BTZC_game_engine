@@ -1,13 +1,17 @@
 #pragma once
 
-#include "Jolt/Jolt.h"
-#include "Jolt/Math/Real.h"
-using JPH::Real;
+#include <cmath>
 
 
 namespace BT
 {
 
-using rvec3 = JPH::Real[3];
+#if BTZC_GAME_ENGINE_SETTING_REAL_TYPE_USES_DBL_PRECISION
+using Real = double_t;
+#else
+using Real = float_t;
+#endif  // BTZC_GAME_ENGINE_SETTING_REAL_TYPE_USES_DBL_PRECISION
+
+using rvec3 = Real[3];
 
 }  // namespace BT

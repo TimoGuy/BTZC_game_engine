@@ -2,10 +2,12 @@
 
 // Uses https://github.com/mariusbancila/stduuid (MIT License)
 #include "../../third_party/stduuid/include/uuid.h"
+#include "nlohmann/json.hpp"
 
 #include <cassert>
 #include <string>
 
+using json = nlohmann::json;
 using std::string;
 
 
@@ -33,5 +35,25 @@ inline static UUID to_UUID(string const& pretty_uuid)
 }
 
 }  // namespace UUID_helper
+
+// ---- UUID serialization -------------------------------------------------------------------------
+template<
+    typename BasicJsonType,
+    nlohmann::detail::enable_if_t<nlohmann::detail::is_basic_json<BasicJsonType>::value, int> = 0>
+void to_json(BasicJsonType& nlohmann_json_j, const UUID& nlohmann_json_t)
+{
+    nlohmann_json_j["uuid_str"] = UUID_helper::to_pretty_repr(nlohmann_json_t);
+}
+
+template<
+    typename BasicJsonType,
+    nlohmann::detail::enable_if_t<nlohmann::detail::is_basic_json<BasicJsonType>::value, int> = 0>
+void from_json(const BasicJsonType& nlohmann_json_j, UUID& nlohmann_json_t)
+{
+    std::string uuid_str;
+    nlohmann_json_j.at("uuid_str").get_to(uuid_str);
+    nlohmann_json_t = UUID_helper::to_UUID(uuid_str);
+}
+// -------------------------------------------------------------------------------------------------
 
 }  // namespace BT

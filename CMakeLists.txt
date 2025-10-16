@@ -50,6 +50,7 @@ set(DEPENDENCY_INCLUDE_DIRS
 add_subdirectory(third_party/fastgltf)
 add_subdirectory(third_party/fmt)
 add_subdirectory(third_party/glfw)
+set(DOUBLE_PRECISION ON CACHE BOOL "Use double precision math" FORCE)  # Use double precision for large, open world physics.
 add_subdirectory(third_party/JoltPhysics/Build)
 add_subdirectory(third_party/json)
 add_subdirectory(third_party/stduuid)

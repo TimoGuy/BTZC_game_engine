@@ -13,9 +13,11 @@
 
 #include "cglm/types.h"
 #include "nlohmann/json.hpp"
+#include "../uuid/uuid.h"
 
 #include <array>
 #include <string>
+#include <vector>
 
 using json = nlohmann::json;
 
@@ -39,6 +41,22 @@ struct Runtime_data_controls;
 
 namespace component_system
 {
+
+struct Component_transform
+{   // Parent-child relationships for transform hierarchy.
+    UUID parent_entity;
+    std::vector<UUID> children_entities;
+
+    // Global transform.
+    
+
+    /// Serialization/deserialization.
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(
+        Component_transform,
+        parent_entity,
+        children_entities
+    );
+};
 
 struct Component_model_animator
 {
