@@ -138,6 +138,7 @@ void BT::component_system::Registry::register_all_components()
         } while (false);
 
     // ---- List of components to register ---------------------------------------------------------
+    REGISTER_COMPONENT_WITH_SERIALIZATION(Component_transform);
     REGISTER_COMPONENT_WITH_SERIALIZATION(Component_model_animator);
     REGISTER_COMPONENT_WITH_SERIALIZATION(Hitcapsule_group_set);
     // REGISTER_COMPONENT(Component_physics_object);

@@ -11,9 +11,10 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include "cglm/types.h"
+#include "cglm/types-struct.h"
 #include "nlohmann/json.hpp"
 #include "../uuid/uuid.h"
+#include "../physics_engine/rvec3.h"
 
 #include <array>
 #include <string>
@@ -48,13 +49,18 @@ struct Component_transform
     std::vector<UUID> children_entities;
 
     // Global transform.
-    
+    rvec3s  position{ 0, 0, 0 };
+    versors rotation{ 0, 0, 0, 1 };
+    vec3s   scale{ 1, 1, 1 };
 
     /// Serialization/deserialization.
     NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(
         Component_transform,
         parent_entity,
-        children_entities
+        children_entities,
+        position,
+        rotation,
+        scale
     );
 };
 
