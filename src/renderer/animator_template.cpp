@@ -3,9 +3,7 @@
 #include "../btzc_game_engine.h"
 #include "../renderer/model_animator.h"
 #include "../service_finder/service_finder.h"
-
-#include "nlohmann/json.hpp"
-using json = nlohmann::json;
+#include "btjson.h"
 
 #include <fstream>
 

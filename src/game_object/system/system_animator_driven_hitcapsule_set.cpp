@@ -68,7 +68,7 @@ void BT::component_system::system::System_animator_driven_hitcapsule_set::invoke
 
 
 #if 0
-#include "logger.h"
+#include "btlogger.h"
 #include "scripts.h"
 
 #include "../game_object/game_object.h"
@@ -79,7 +79,7 @@ void BT::component_system::system::System_animator_driven_hitcapsule_set::invoke
 #include "../hitbox_interactor/hitcapsule.h"
 #include "../service_finder/service_finder.h"
 #include "../uuid/uuid.h"
-#include "cglm/types-struct.h"
+#include "btglm.h"
 // #include <memory>
 #include <vector>
 

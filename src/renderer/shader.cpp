@@ -1,7 +1,7 @@
 #include "shader.h"
 
 #include "glad/glad.h"
-#include "logger.h"
+#include "btlogger.h"
 #include <cassert>
 #include <filesystem>
 #include <fstream>

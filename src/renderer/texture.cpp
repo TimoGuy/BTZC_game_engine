@@ -2,7 +2,7 @@
 
 // @NOTE: This should be abstract but is actually a specialization of OpenGL code.
 #include "glad/glad.h"
-#include "logger.h"
+#include "btlogger.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #include <cassert>

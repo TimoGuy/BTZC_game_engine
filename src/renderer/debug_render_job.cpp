@@ -2,10 +2,9 @@
 
 #include "../uuid/uuid.h"
 #include "../renderer/mesh.h"
-#include "cglm/vec3.h"
-#include "cglm/vec4.h"
+#include "btglm.h"
 #include "glad/glad.h"
-#include "logger.h"
+#include "btlogger.h"
 #include <array>
 #include <cassert>
 #include <memory>

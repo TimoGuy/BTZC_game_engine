@@ -3,15 +3,9 @@
 #include "../game_object/game_object.h"
 #include "../input_handler/input_handler.h"
 #include "../renderer/imgui_renderer.h"
-#include "cglm/cam.h"
-#include "cglm/cglm.h"
-#include "cglm/euler.h"
-#include "cglm/mat3.h"
-#include "cglm/mat4.h"
-#include "cglm/util.h"
-#include "cglm/vec3.h"
+#include "btglm.h"
 #include "imgui.h"
-#include "logger.h"
+#include "btlogger.h"
 
 #include <array>
 #include <cmath>

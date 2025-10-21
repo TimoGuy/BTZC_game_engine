@@ -496,7 +496,6 @@ void BT::component_system::system::System_player_character_movement::invoke_syst
 
 
 #if 0
-#include "cglm/quat.h"
 #include "scripts.h"
 
 #include "../game_object.h"
@@ -505,13 +504,12 @@ void BT::component_system::system::System_player_character_movement::invoke_syst
 #include "../physics_engine/raycast_helper.h"
 #include "../renderer/camera.h"
 #include "../renderer/renderer.h"
-#include "cglm/util.h"
-#include "cglm/vec3.h"
+#include "btglm.h"
 #include "Jolt/Jolt.h"
 #include "Jolt/Math/Real.h"
 #include "Jolt/Math/Vec3.h"
 #include "Jolt/Physics/PhysicsSystem.h"
-#include "logger.h"
+#include "btlogger.h"
 #include <array>
 #include <memory>
 #include <mutex>

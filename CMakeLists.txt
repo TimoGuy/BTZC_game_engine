@@ -61,6 +61,10 @@ set(MAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/animation_frame_action_tool/editor_state.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/animation_frame_action_tool/runtime_data.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/animation_frame_action_tool/runtime_data.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/bt_lib/btglm.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/bt_lib/btjson.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/bt_lib/btlogger.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/bt_lib/btlogger.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/btzc_game_engine.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/component_registry.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/component_registry.h
@@ -81,8 +85,6 @@ set(MAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/input_handler/input_codes.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/input_handler/input_handler.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/input_handler/input_handler.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/logger/logger.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/logger/logger.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_engine_impl_custom_listeners.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_engine_impl_error_callbacks.h
@@ -100,7 +102,6 @@ set(MAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_object.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/raycast_helper.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/raycast_helper.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/rvec3.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/animator_template.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/animator_template.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/camera_read_ifc.h
@@ -201,7 +202,7 @@ add_executable(${PROJECT_NAME}
 
 target_include_directories(${PROJECT_NAME}
     PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/logger
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/bt_lib
         ${DEPENDENCY_INCLUDE_DIRS})
 
 target_link_libraries(${PROJECT_NAME}

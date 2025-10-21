@@ -1,11 +1,8 @@
 #include "model_animator.h"
 
 #include "../animation_frame_action_tool/runtime_data.h"
-#include "cglm/affine.h"
-#include "cglm/mat4.h"
-#include "cglm/quat.h"
-#include "cglm/vec3.h"
-#include "logger.h"
+#include "btglm.h"
+#include "btlogger.h"
 #include "mesh.h"
 #include <algorithm>
 #include <cmath>

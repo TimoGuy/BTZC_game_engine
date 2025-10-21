@@ -9,7 +9,7 @@
 #include "Jolt/Physics/Body/BodyInterface.h"
 #include "Jolt/Physics/PhysicsSystem.h"
 #include "Jolt/RegisterTypes.h"
-#include "logger.h"
+#include "btlogger.h"
 #include "physics_engine.h"
 #include "physics_engine_impl_error_callbacks.h"
 #include <memory>

@@ -1,7 +1,6 @@
 #pragma once
 
-#include "cglm/cglm.h"
-#include "cglm/struct.h"
+#include "btglm.h"
 #include "material.h"
 #include <string>
 #include "model_animator.h"

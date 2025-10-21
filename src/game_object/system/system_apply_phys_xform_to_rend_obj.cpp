@@ -63,8 +63,7 @@ void BT::component_system::system::System_apply_phys_xform_to_rend_obj::invoke_s
 #include "../game_object.h"
 #include "../physics_engine/physics_engine.h"
 #include "../physics_engine/physics_object.h"
-#include "cglm/affine.h"
-#include "cglm/quat.h"
+#include "btglm.h"
 #include <memory>
 
 using std::unique_ptr;

@@ -3,9 +3,8 @@
 #include "../game_object/game_object.h"
 #include "../service_finder/service_finder.h"
 #include "animator_template.h"
-#include "cglm/affine.h"
-#include "cglm/cglm.h"
-#include "logger.h"
+#include "btglm.h"
+#include "btlogger.h"
 #include "mesh.h"
 
 

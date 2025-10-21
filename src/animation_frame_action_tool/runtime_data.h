@@ -1,13 +1,11 @@
 #pragma once
 
 #include "../hitbox_interactor/hitcapsule.h"
-#include "cglm/types-struct.h"
-#include "nlohmann/json.hpp"
+#include "btglm.h"
+#include "btjson.h"
 #include <string>
 #include <unordered_map>
 #include <vector>
-
-using json = nlohmann::json;
 
 
 namespace BT

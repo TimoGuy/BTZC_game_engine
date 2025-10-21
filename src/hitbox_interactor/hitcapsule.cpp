@@ -3,8 +3,8 @@
 #include "../renderer/debug_render_job.h"
 #include "../renderer/model_animator.h"
 #include "../service_finder/service_finder.h"
-#include "cglm/vec3.h"
-#include "logger.h"
+#include "btglm.h"
+#include "btlogger.h"
 
 #include <cassert>
 

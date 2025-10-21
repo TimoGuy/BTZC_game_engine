@@ -11,10 +11,9 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include "cglm/types-struct.h"
-#include "nlohmann/json.hpp"
 #include "../uuid/uuid.h"
-#include "../physics_engine/rvec3.h"
+#include "btjson.h"
+#include "btglm.h"
 
 #include <array>
 #include <string>

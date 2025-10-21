@@ -2,13 +2,12 @@
 
 #include "../scene/scene_serialization_ifc.h"
 #include "../uuid/uuid_ifc.h"
-#include "cglm/cglm.h"
 #include "Jolt/Jolt.h"
 #include "Jolt/Math/MathTypes.h"
 #include "Jolt/Math/Quat.h"
 #include "Jolt/Physics/Body/MotionType.h"
 #include "Jolt/Physics/Character/CharacterVirtual.h"
-#include "rvec3.h"
+#include "btglm.h"
 #include <atomic>
 #include <cassert>
 #include <memory>

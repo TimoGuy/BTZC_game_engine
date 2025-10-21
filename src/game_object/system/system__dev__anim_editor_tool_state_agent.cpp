@@ -11,7 +11,7 @@
 #include "../component_registry.h"
 #include "../components.h"
 #include "../game_object.h"
-#include "logger.h"
+#include "btlogger.h"
 #include "system_ifc.h"
 
 #include <memory>
@@ -230,7 +230,7 @@ void BT::component_system::system::System__dev__anim_editor_tool_state_agent::in
 
 
 #if 0
-#include "logger.h"
+#include "btlogger.h"
 #include "scripts.h"
 
 #include "../animation_frame_action_tool/editor_state.h"

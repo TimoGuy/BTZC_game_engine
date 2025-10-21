@@ -13,8 +13,8 @@
 #include "Jolt/Physics/Body/MotionType.h"
 #include "Jolt/Physics/Collision/Shape/MeshShape.h"
 #include "Jolt/Physics/EActivation.h"
-#include "cglm/affine.h"
-#include "logger.h"
+#include "btglm.h"
+#include "btlogger.h"
 #include "physics_engine.h"
 #include "physics_engine_impl_layers.h"
 #include <cassert>

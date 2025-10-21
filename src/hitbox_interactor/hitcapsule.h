@@ -1,14 +1,12 @@
 #pragma once
 
 // #include "../scene/scene_serialization_ifc.h"
-#include "cglm/types-struct.h"
-#include "nlohmann/json.hpp"
+#include "btglm.h"
+#include "btjson.h"
 
 #include <string>
 #include <vector>
 #include <unordered_set>
-
-using json = nlohmann::json;
 
 
 // -------------------------------------------------------------------------------------------------

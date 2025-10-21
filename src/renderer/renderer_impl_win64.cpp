@@ -1,8 +1,6 @@
 #include "renderer_impl_win64.h"
 
-#include "cglm/mat4.h"
-#include "cglm/vec3.h"
-#include "cglm/cglm.h"
+#include "btglm.h"
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
@@ -17,7 +15,7 @@
 #include "../input_handler/input_handler.h"
 #include "../game_object/game_object.h"
 #include "debug_render_job.h"
-#include "logger.h"
+#include "btlogger.h"
 #include "material.h"
 #include "material_impl_debug_picking.h"
 #include "material_impl_debug_lines.h"

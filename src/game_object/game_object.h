@@ -3,12 +3,10 @@
 #include "../btzc_game_engine.h"
 #include "../input_handler/input_handler.h"
 #include "../physics_engine/physics_engine.h"
-#include "../physics_engine/rvec3.h"
 #include "../renderer/renderer.h"
 #include "../scene/scene_serialization_ifc.h"
 #include "../uuid/uuid_ifc.h"
-#include "cglm/affine.h"
-#include "cglm/quat.h"
+#include "btglm.h"
 #include "component_registry.h"
 
 #include <atomic>
@@ -20,6 +18,7 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
+
 
 
 using std::atomic_bool;

@@ -1,8 +1,7 @@
 #pragma once
 
 #include "../uuid/uuid.h"
-#include "cglm/mat4.h"
-#include "cglm/types.h"
+#include "btglm.h"
 #include <array>
 #include <atomic>
 #include <cstdint>

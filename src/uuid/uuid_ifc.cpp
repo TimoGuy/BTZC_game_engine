@@ -1,7 +1,7 @@
 #include "uuid_ifc.h"
 
 #include "../../third_party/stduuid/include/uuid.h"
-#include "logger.h"
+#include "btlogger.h"
 #include "uuid.h"
 #include <cassert>
 

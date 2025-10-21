@@ -2,7 +2,7 @@
 
 // Uses https://github.com/mariusbancila/stduuid (MIT License)
 #include "../../third_party/stduuid/include/uuid.h"
-#include "nlohmann/json.hpp"
+#include "btjson.h"
 
 #include <cassert>
 #include <string>

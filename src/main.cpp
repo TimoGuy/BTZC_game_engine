@@ -1,7 +1,6 @@
 #include "animation_frame_action_tool/runtime_data.h"
 #include "btzc_game_engine.h"
-#include "cglm/cglm.h"
-#include "cglm/mat4.h"
+#include "btglm.h"
 #include "renderer/camera.h"
 #include "game_object/component_registry.h"
 #include "game_object/system/concrete_systems.h"
@@ -11,7 +10,7 @@
 #include "Jolt/Jolt.h"  // @DEBUG
 #include "Jolt/Math/Real.h"  // @DEBUG
 #include "Jolt/Math/Quat.h"  // @DEBUG
-#include "logger/logger.h"
+#include "btlogger.h"
 #include "physics_engine/physics_engine.h"
 #include "physics_engine/physics_object.h"
 #include "physics_engine/raycast_helper.h"

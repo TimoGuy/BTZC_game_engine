@@ -1,10 +1,7 @@
 #pragma once
 
 #include "../animation_frame_action_tool/runtime_data.h"
-#include "cglm/mat4.h"
-#include "cglm/types-struct.h"
-#include "cglm/types.h"
-#include "cglm/util.h"
+#include "btglm.h"
 #include <atomic>
 #include <limits>
 #include <string>
