@@ -9,29 +9,6 @@
 #include <unordered_set>
 
 
-// -------------------------------------------------------------------------------------------------
-template<
-    typename BasicJsonType,
-    nlohmann::detail::enable_if_t<nlohmann::detail::is_basic_json<BasicJsonType>::value, int> = 0>
-void to_json(BasicJsonType& nlohmann_json_j, const vec3s& nlohmann_json_t)
-{
-    nlohmann_json_j["x"] = nlohmann_json_t.x;
-    nlohmann_json_j["y"] = nlohmann_json_t.y;
-    nlohmann_json_j["z"] = nlohmann_json_t.z;
-}
-
-template<
-    typename BasicJsonType,
-    nlohmann::detail::enable_if_t<nlohmann::detail::is_basic_json<BasicJsonType>::value, int> = 0>
-void from_json(const BasicJsonType& nlohmann_json_j, vec3s& nlohmann_json_t)
-{
-    nlohmann_json_j.at("x").get_to(nlohmann_json_t.x);
-    nlohmann_json_j.at("y").get_to(nlohmann_json_t.y);
-    nlohmann_json_j.at("z").get_to(nlohmann_json_t.z);
-}
-// -------------------------------------------------------------------------------------------------
-
-
 namespace BT
 {
 

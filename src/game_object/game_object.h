@@ -132,9 +132,9 @@ public:
     {
         assert(m_dirty_flag == k_not_dirty);
         // @TODO: Include camera partitioning. Or camera position subtraction.
-        glm_translate_make(out_transform, vec3{ m_global_transform.position[0],
-                                                m_global_transform.position[1],
-                                                m_global_transform.position[2] });
+        glm_translate_make(out_transform, vec3{ static_cast<float_t>(m_global_transform.position[0]),
+                                                static_cast<float_t>(m_global_transform.position[1]),
+                                                static_cast<float_t>(m_global_transform.position[2]) });
         glm_quat_rotate(out_transform, m_global_transform.rotation, out_transform);
         glm_scale(out_transform, m_global_transform.scale);
     }

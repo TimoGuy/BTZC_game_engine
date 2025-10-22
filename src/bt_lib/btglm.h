@@ -9,14 +9,26 @@
 
 
 /// Whether to use double or single precision for real type.
+//  @NOTE: There's an issue where `using rvec3 = real_t[3];` causes errors. This is due to the type
+//         alias being something not quite the same type. It shows up as `AKA double[3]` in clang.
+//         Due to this, it cannot be used in initializer lists. So using a typedef actually sets the
+//         type to the other type without any soft aliases, thus causing no issue when using in an
+//         initializer list.
+//           -Thea 2025/10/21
+#ifdef BTZC_REAL_TYPE
+#error This macro `BTZC_REAL_TYPE` already defined!!!
+#endif  // BTZC_REAL_TYPE
+
 #if BTZC_GAME_ENGINE_SETTING_REAL_TYPE_USES_DBL_PRECISION
-using real_t = double_t;
+#define BTZC_REAL_TYPE double_t
 #else
-using real_t = float_t;
+#define BTZC_REAL_TYPE float_t
 #endif  // BTZC_GAME_ENGINE_SETTING_REAL_TYPE_USES_DBL_PRECISION
 
-/// Real vec3.
-using rvec3 = real_t[3];
+typedef BTZC_REAL_TYPE real_t;
+typedef BTZC_REAL_TYPE rvec3[3];
+#undef BTZC_REAL_TYPE
+
 
 union rvec3s
 {
