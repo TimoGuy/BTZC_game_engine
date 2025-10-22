@@ -4,6 +4,9 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
+#include "refactor_to_entt.h"
+#if !BTZC_REFACTOR_TO_ENTT
+
 #include "../scene/scene_serialization_ifc.h"
 #include "nlohmann/detail/macro_scope.hpp"
 
@@ -163,3 +166,5 @@ private:
 
 }  // namespace component_system
 }  // namespace BT
+
+#endif  // !BTZC_REFACTOR_TO_ENTT

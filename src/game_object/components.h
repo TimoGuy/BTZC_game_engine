@@ -11,6 +11,9 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
+#include "refactor_to_entt.h"
+#if !BTZC_REFACTOR_TO_ENTT
+
 #include "../uuid/uuid.h"
 #include "btjson.h"
 #include "btglm.h"
@@ -195,3 +198,5 @@ struct Component_anim_editor_tool_communicator_state
 
 }  // namespace component_system
 }  // namespace BT
+
+#endif  // !BTZC_REFACTOR_TO_ENTT

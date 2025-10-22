@@ -1,3 +1,6 @@
+#include "refactor_to_entt.h"
+#if !BTZC_REFACTOR_TO_ENTT
+
 #include "system_ifc.h"
 
 #include "../../service_finder/service_finder.h"
@@ -342,3 +345,5 @@ void BT::component_system::System_ifc::invoke_system() const
     // Call inner system with query results.
     invoke_system_inner(std::move(clpq));
 }
+
+#endif  // !BTZC_REFACTOR_TO_ENTT
