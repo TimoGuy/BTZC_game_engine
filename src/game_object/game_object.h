@@ -1,5 +1,8 @@
 #pragma once
 
+#include "refactor_to_entt.h"
+#if !BTZC_REFACTOR_TO_ENTT
+
 #include "../btzc_game_engine.h"
 #include "../input_handler/input_handler.h"
 #include "../physics_engine/physics_engine.h"
@@ -378,3 +381,5 @@ private:
 };
 
 }  // namespace BT
+
+#endif  // !BTZC_REFACTOR_TO_ENTT

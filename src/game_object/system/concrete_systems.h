@@ -48,6 +48,10 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
+#include "refactor_to_entt.h"
+#if !BTZC_REFACTOR_TO_ENTT
+
+
 #include "system_ifc.h"
 
 
@@ -89,3 +93,5 @@ BT_COMP_SYS_SYS_SYSTEM_CONCRETE_CLASS(System_player_character_movement)
 }  // namespace system
 }  // namespace component_system
 }  // namespace BT
+
+#endif  // !BTZC_REFACTOR_TO_ENTT

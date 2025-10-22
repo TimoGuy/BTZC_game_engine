@@ -74,12 +74,12 @@ set(MAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/game_object.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/game_object.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/system/concrete_systems.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/system/system__dev__anim_editor_tool_state_agent.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/system/system_animator_driven_hitcapsule_set.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/system/system_apply_phys_xform_to_rend_obj.cpp
+    # ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/system/system__dev__anim_editor_tool_state_agent.cpp  @TEMP: To reduce errors for refactor.
+    # ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/system/system_animator_driven_hitcapsule_set.cpp  @TEMP: To reduce errors for refactor.
+    # ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/system/system_apply_phys_xform_to_rend_obj.cpp  @TEMP: To reduce errors for refactor.
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/system/system_ifc.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/system/system_ifc.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/system/system_player_character_movement.cpp
+    # ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/system/system_player_character_movement.cpp  @TEMP: To reduce errors for refactor.
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/UNUSED_serialization.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/transform.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/propagate_changed_transforms.h

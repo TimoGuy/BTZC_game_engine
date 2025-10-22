@@ -1,3 +1,6 @@
+#include "refactor_to_entt.h"
+#if !BTZC_REFACTOR_TO_ENTT
+
 #include "component_registry.h"
 
 #include "../service_finder/service_finder.h"
@@ -214,3 +217,5 @@ BT::component_system::Registry::query_component_lists(Component_list_query const
 
     return comp_lists;
 }
+
+#endif  // !BTZC_REFACTOR_TO_ENTT

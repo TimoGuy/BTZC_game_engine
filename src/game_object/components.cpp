@@ -1,3 +1,6 @@
+#include "refactor_to_entt.h"
+#if !BTZC_REFACTOR_TO_ENTT
+
 #include "components.h"
 
 #include "../renderer/animator_template.h"
@@ -28,3 +31,5 @@ BT::Model_animator& BT::component_system::Component_model_animator::get_product(
 
     return *product;
 }
+
+#endif  // !BTZC_REFACTOR_TO_ENTT

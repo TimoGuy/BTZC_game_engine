@@ -5,6 +5,7 @@
 #include "game_object/component_registry.h"
 #include "game_object/system/concrete_systems.h"
 #include "game_object/game_object.h"
+#include "game_system_logic/system/propagate_changed_transforms.h"
 #include "hitbox_interactor/hitcapsule.h"
 #include "input_handler/input_handler.h"
 #include "Jolt/Jolt.h"  // @DEBUG
@@ -14,6 +15,7 @@
 #include "physics_engine/physics_engine.h"
 #include "physics_engine/physics_object.h"
 #include "physics_engine/raycast_helper.h"
+#include "refactor_to_entt.h"
 #include "renderer/animator_template.h"
 #include "renderer/imgui_renderer.h"  // @DEBUG
 #include "renderer/material.h"  // @DEBUG
@@ -36,6 +38,7 @@
 #include <cstdint>
 #include <memory>
 #include <fstream>  // @DEBUG
+#include <entt/entity/registry.hpp>
 
 using std::make_unique;
 using std::unique_ptr;
@@ -45,6 +48,10 @@ int32_t main()
 {
     BT::Watchdog_timer main_watchdog;
 
+#if BTZC_REFACTOR_TO_ENTT
+    /// Super duper dummy erasure thing @INCOMPLETE
+    #define INVOKE_SYSTEM(_)
+#else
     // ---- Initialization of entity component system --------------------------------------------------------------
     BT::component_system::Registry main_component_registry;
     main_component_registry.register_all_components();
@@ -57,6 +64,7 @@ int32_t main()
     #define INVOKE_SYSTEM(_sys_type)                                                               \
         BT::service_finder::find_service<BT::component_system::system::_sys_type>().invoke_system()
     // ---------------------------------------------------------------------------------------------
+#endif  // !BTZC_REFACTOR_TO_ENTT
 
     BT::Input_handler main_input_handler;
     BT::ImGui_renderer main_renderer_imgui_renderer;
@@ -251,6 +259,10 @@ int32_t main()
     // Hitcapsule solver.
     BT::Hitcapsule_group_overlap_solver hitcapsule_solver;
 
+#if BTZC_REFACTOR_TO_ENTT
+    // ECS registry.
+    entt::registry ecs_registry;
+#else
     // Game objects.
     BT::Game_object_pool game_object_pool;
     game_object_pool.set_callback_fn([&]() {
@@ -265,6 +277,7 @@ int32_t main()
     });
 
     main_renderer.get_camera_obj()->set_game_object_pool(game_object_pool);
+#endif  // !BTZC_REFACTOR_TO_ENTT
 
     // Setup scene serialization IO helper.
     BT::scene_serialization_io_helper::set_load_scene_callbacks(
@@ -355,19 +368,22 @@ int32_t main()
             main_physics_engine.limit_delta_time(
                 main_timer.calc_delta_time());
 
+        #if !BTZC_REFACTOR_TO_ENTT
         auto const all_game_objs{ game_object_pool.checkout_all_as_list() };
+        #endif  // !BTZC_REFACTOR_TO_ENTT
 
         main_physics_engine.accumulate_delta_time(delta_time);
         while (main_physics_engine.calc_wants_to_tick())
         {   // Run all pre-physics systems.
-            #if 0
+            #if !BTZC_REFACTOR_TO_ENTT
             for (auto game_obj : all_game_objs)
             {
                 game_obj->run_pre_physics_scripts(main_physics_engine.k_simulation_delta_time);
             }
-            #endif  // 0
+            #endif  // !BTZC_REFACTOR_TO_ENTT
             INVOKE_SYSTEM(System_player_character_movement);
             INVOKE_SYSTEM(System_animator_driven_hitcapsule_set);
+            BT::system::propagate_changed_transforms(ecs_registry);  // Does there need to be 2 of these system invocations???  -Thea 2025/10/22
 
             // Update physics.
             main_physics_engine.update_physics();
@@ -378,17 +394,19 @@ int32_t main()
 
         main_physics_engine.calc_interpolation_alpha();
         {   // Run all pre-render systems.
-            #if 0
+            #if !BTZC_REFACTOR_TO_ENTT
             for (auto game_obj : all_game_objs)
             {
                 game_obj->run_pre_render_scripts(delta_time);
             }
-            #endif  // 0
+            #endif  // !BTZC_REFACTOR_TO_ENTT
             INVOKE_SYSTEM(System__dev__anim_editor_tool_state_agent);
             INVOKE_SYSTEM(System_apply_phys_xform_to_rend_obj);
+            BT::system::propagate_changed_transforms(ecs_registry);  // Does there need to be 2 of these system invocations???  -Thea 2025/10/22
 
             main_renderer.render(delta_time, [&]() {
                 // Render selected game obj.
+                #if !BTZC_REFACTOR_TO_ENTT
                 auto selected_game_obj{ game_object_pool.get_selected_game_obj() };
                 if (!selected_game_obj.is_nil())
                 {
@@ -410,15 +428,18 @@ int32_t main()
                         main_renderer.get_render_object_pool().return_render_objs({ rend_obj });
                     }
                 }
+                #endif  // !BTZC_REFACTOR_TO_ENTT
             });
         }
 
+        #if !BTZC_REFACTOR_TO_ENTT
         for (auto game_obj : all_game_objs)
         {   // Updates game obj and inner parts if any changes are detected.
             game_obj->process_change_requests();
         }
 
         game_object_pool.return_list(std::move(all_game_objs));
+        #endif  // !BTZC_REFACTOR_TO_ENTT
 
         // Tick level loading.
         main_scene_switcher.process_scene_load_request();

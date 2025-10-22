@@ -1,3 +1,6 @@
+#include "refactor_to_entt.h"
+#if !BTZC_REFACTOR_TO_ENTT
+
 #include "game_object.h"
 
 #include "../input_handler/input_handler.h"
@@ -1181,3 +1184,5 @@ BT::Entity_pool::Versioned_elem& BT::Entity_pool::get_elem_by_key(Elem_key key)
 
     return elem;
 }
+
+#endif  // !BTZC_REFACTOR_TO_ENTT
