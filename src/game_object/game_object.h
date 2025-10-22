@@ -19,8 +19,6 @@
 #include <utility>
 #include <vector>
 
-
-
 using std::atomic_bool;
 using std::atomic_uint8_t;
 using std::atomic_uint64_t;

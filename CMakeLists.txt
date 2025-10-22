@@ -35,6 +35,7 @@ set(ASSET_DIR
 # Dependencies.
 set(DEPENDENCY_INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/cglm/include  # Header only.
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/entt/src  # Header only.
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/fastgltf/include
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/fmt/include
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glad/include
@@ -102,6 +103,7 @@ set(MAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_object.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/raycast_helper.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/raycast_helper.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/refactor_to_entt.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/animator_template.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/animator_template.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/camera_read_ifc.h
@@ -202,6 +204,7 @@ add_executable(${PROJECT_NAME}
 
 target_include_directories(${PROJECT_NAME}
     PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
         ${CMAKE_CURRENT_SOURCE_DIR}/src/bt_lib
         ${DEPENDENCY_INCLUDE_DIRS})
 

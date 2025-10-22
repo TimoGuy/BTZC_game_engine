@@ -75,6 +75,7 @@ if __name__ == '__main__':
         find_missing_src_entry_in_src_entries(src_entries, existing_files)
 
     # Print result.
-    print('==== MISSING ENTRIES ============================================')
+    if len(files_missing_in_src_entries) > 0:
+        print('==== MISSING ENTRIES ============================================')
     for missing_file in files_missing_in_src_entries:
         print(missing_file)
