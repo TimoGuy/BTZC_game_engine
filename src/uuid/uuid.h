@@ -7,7 +7,6 @@
 #include <cassert>
 #include <string>
 
-using json = nlohmann::json;
 using std::string;
 
 
