@@ -3,6 +3,7 @@
 #include "btglm.h"
 #include "btjson.h"
 
+#include <entt/entity/entity.hpp>
 #include <entt/entity/fwd.hpp>
 
 
@@ -29,10 +30,10 @@ struct Transform
 /// References to other entities connected to this transform within the transform hierarchy.
 struct Transform_hierarchy
 {
-    entt::entity parent_entity;
+    entt::entity parent_entity{ entt::null };
     std::vector<entt::entity> children_entities;
 
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(
         Transform_hierarchy,
         parent_entity,
         children_entities
@@ -41,7 +42,9 @@ struct Transform_hierarchy
 
 /// Tag that transform was changed (this is used for transform propagation thru the hierarchy).
 struct Transform_changed
-{
+{   /// For calculating delta transform.
+    /// @NOTE: Do not overwrite if this component already exists.
+    Transform prev_transform;
 };
 
 }  // namespace component
