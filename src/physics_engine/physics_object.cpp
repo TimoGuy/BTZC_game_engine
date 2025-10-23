@@ -1,5 +1,7 @@
 #include "physics_object.h"
 
+#include "refactor_to_entt.h"
+
 #include "../game_object/game_object.h"
 #include "../renderer/mesh.h"
 #include "Jolt/Jolt.h"
@@ -68,6 +70,7 @@ unique_ptr<BT::Physics_object> BT::Physics_object::create_physics_object_from_se
     unique_ptr<Physics_object> new_phys_obj{ nullptr };
     switch (type)
     {
+#if !BTZC_REFACTOR_TO_ENTT
         case PHYSICS_OBJECT_TYPE_TRIANGLE_MESH:
             new_phys_obj = create_triangle_mesh(game_obj,
                                                 phys_engine,
@@ -89,6 +92,7 @@ unique_ptr<BT::Physics_object> BT::Physics_object::create_physics_object_from_se
                                             { json_to_vec3(node_ref["init_transform"][0]),
                                               json_to_quat(node_ref["init_transform"][1]) });
             break;
+#endif  // !BTZC_REFACTOR_TO_ENTT
 
         default:
             logger::printef(logger::ERROR, "Unknown phys obj type: %u", type);
@@ -201,6 +205,7 @@ void BT::Physics_object::get_transform_for_game_obj(rvec3& out_position, versor&
     }
 }
 
+#if !BTZC_REFACTOR_TO_ENTT
 // Scene_serialization_ifc.
 void BT::Physics_object::scene_serialize(Scene_serialization_mode mode, json& node_ref)
 {
@@ -230,3 +235,4 @@ void BT::Physics_object::scene_serialize(Scene_serialization_mode mode, json& no
         assert(false);
     }
 }
+#endif  // !BTZC_REFACTOR_TO_ENTT

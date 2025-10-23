@@ -36,7 +36,12 @@ enum Render_layer : uint8_t
 
 class Physics_object;
 
-class Render_object : public Scene_serialization_ifc, public UUID_ifc
+class Render_object
+#if BTZC_REFACTOR_TO_ENTT
+    : public UUID_ifc
+#else
+    : public Scene_serialization_ifc, public UUID_ifc
+#endif  // !BTZC_REFACTOR_TO_ENTT
 {
 public:
     Render_object(Game_object& game_obj,
@@ -74,8 +79,10 @@ public:
     void render(Render_layer active_layers,
                 Material_ifc* override_material = nullptr);
 
+#if !BTZC_REFACTOR_TO_ENTT
     // Scene_serialization_ifc.
     void scene_serialize(Scene_serialization_mode mode, json& node_ref) override;
+#endif  // !BTZC_REFACTOR_TO_ENTT
 
 private:
     Game_object& m_game_obj;

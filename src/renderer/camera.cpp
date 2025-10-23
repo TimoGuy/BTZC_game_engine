@@ -1,5 +1,7 @@
 #include "camera.h"
 
+#include "refactor_to_entt.h"
+
 #include "../game_object/game_object.h"
 #include "../input_handler/input_handler.h"
 #include "../renderer/imgui_renderer.h"
@@ -536,6 +538,7 @@ void BT::Camera::update_frontend_follow_orbit(Input_handler::State const& input_
 
     vec3 mvt_velocity{ 0.0f, 0.0f, 0.0f };
 
+#if !BTZC_REFACTOR_TO_ENTT
     if (!fo.game_object_ref.is_nil())
     {   // Follow game object with camera.
         auto game_obj{ fo.game_object_pool->get_one_no_lock(fo.game_object_ref) };
@@ -552,6 +555,7 @@ void BT::Camera::update_frontend_follow_orbit(Input_handler::State const& input_
         glm_vec3_sub(fo.current_follow_pos, from_follow_pos, mvt_velocity);
         glm_vec3_scale(mvt_velocity, 1.0f / delta_time, mvt_velocity);
     }
+#endif  // !BTZC_REFACTOR_TO_ENTT
 
     float_t auto_turn_delta{ 0.0f };
     mvt_velocity[1] = 0.0f;

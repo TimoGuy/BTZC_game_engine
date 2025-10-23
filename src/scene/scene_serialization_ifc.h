@@ -1,5 +1,8 @@
 #pragma once
 
+#include "refactor_to_entt.h"
+#if !BTZC_REFACTOR_TO_ENTT
+
 #include "../uuid/uuid.h"
 #include "btjson.h"
 #include <functional>
@@ -46,3 +49,5 @@ void write_scene_to_disk(std::string const& scene_name,
 }  // namespace scene_serialization_io_helper
 
 }  // namespace BT
+
+#endif  // !BTZC_REFACTOR_TO_ENTT

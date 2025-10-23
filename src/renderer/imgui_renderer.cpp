@@ -1,5 +1,7 @@
 #include "imgui_renderer.h"
 
+#include "refactor_to_entt.h"
+
 #include "../animation_frame_action_tool/editor_state.h"
 #include "../animation_frame_action_tool/runtime_data.h"
 #include "../btzc_game_engine.h"
@@ -34,7 +36,11 @@ BT::ImGui_renderer::ImGui_renderer()
 
 void BT::ImGui_renderer::set_selected_game_obj(Game_object* game_obj)
 {
+#if BTZC_REFACTOR_TO_ENTT
+    assert(false);  // Implement!!
+#else
     m_game_obj_pool->set_selected_game_obj(game_obj);
+#endif  // BTZC_REFACTOR_TO_ENTT
 }
 
 void BT::ImGui_renderer::render_imgui(float_t delta_time)
@@ -98,11 +104,13 @@ void BT::ImGui_renderer::render_imgui(float_t delta_time)
                 // Serialize scene.
                 json root = {};
                 size_t game_obj_idx{ 0 };
+#if !BTZC_REFACTOR_TO_ENTT
                 auto const game_objs{ m_game_obj_pool->get_all_as_list_no_lock() };
                 for (auto game_obj : game_objs)
                 {
                     game_obj->scene_serialize(BT::SCENE_SERIAL_MODE_SERIALIZE, root[game_obj_idx++]);
                 }
+#endif  // !BTZC_REFACTOR_TO_ENTT
 
                 // Save to disk.
                 std::ofstream f{ BTZC_GAME_ENGINE_ASSET_SCENE_PATH "sumthin_cumming_outta_me.btscene" };
@@ -297,6 +305,7 @@ void BT::ImGui_renderer::render_imgui(float_t delta_time)
             ImGui::Checkbox("Auto switch to player cam on play.",
                             &s_on_play_switch_to_player_camera);
 
+#if !BTZC_REFACTOR_TO_ENTT
             int32_t s_gizmo_trans_space_selection{ Game_object::get_imgui_gizmo_trans_space() };
             if (ImGui::Combo("Gizmo transform space",
                              &s_gizmo_trans_space_selection,
@@ -304,13 +313,16 @@ void BT::ImGui_renderer::render_imgui(float_t delta_time)
             {
                 Game_object::set_imgui_gizmo_trans_space(s_gizmo_trans_space_selection);
             }
+#endif  // !BTZC_REFACTOR_TO_ENTT
 
             ImGui::EndPopup();
         }
         ImGui::PopStyleVar();
 
+#if !BTZC_REFACTOR_TO_ENTT
         // Image of game view.
         m_renderer->render_imgui_game_view();
+#endif  // !BTZC_REFACTOR_TO_ENTT
 
         // Allow ImGuizmo to accept inputs from this window.
         ImGuizmo::SetAlternativeWindow(ImGui::GetCurrentWindow());
@@ -467,8 +479,10 @@ void BT::ImGui_renderer::render_imgui__level_editor_context(bool enter, float_t 
     }
     ImGui::End();
 
+#if !BTZC_REFACTOR_TO_ENTT
     // Scene hierarchy.
     m_game_obj_pool->render_imgui_scene_hierarchy();
+#endif  // !BTZC_REFACTOR_TO_ENTT
 
     // Game obj palette.
     ImGui::Begin("Game obj palette");

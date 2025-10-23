@@ -110,11 +110,13 @@ BT::Raycast_helper::raycast(JPH::RVec3Arg origin, JPH::Vec3Arg direction_and_mag
     if (return_result.success)
         glm_vec4_copy(vec4{ 1.0f, 0.0f, 0.0f, 1.0f }, color_1);
     JPH::RVec3 pos_2{ origin + direction_and_magnitude };
+#if !BTZC_REFACTOR_TO_ENTT
     get_main_debug_line_pool()
         .emplace_debug_line({ { origin.GetX(), origin.GetY(), origin.GetZ() },
                               { pos_2.GetX(), pos_2.GetY(), pos_2.GetZ() },
                               { color_1[0], color_1[1], color_1[2], color_1[3] },
                               { 0.85f, 0.85f, 0.85f, 1.0f} });
+#endif  // !BTZC_REFACTOR_TO_ENTT
 
     return return_result;
 }

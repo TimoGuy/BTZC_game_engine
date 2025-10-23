@@ -51,8 +51,10 @@ public:
     Physics_transform read_transform() override;
     void update_debug_mesh() override;
 
+#if !BTZC_REFACTOR_TO_ENTT
     // Scene_serialization_ifc.
     void scene_serialize(Scene_serialization_mode mode, json& node_ref) override;
+#endif  // !BTZC_REFACTOR_TO_ENTT
 
     // Character contact listener.
     void OnAdjustBodyVelocity(JPH::CharacterVirtual const* inCharacter,

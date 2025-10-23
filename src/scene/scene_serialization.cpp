@@ -1,3 +1,6 @@
+#include "refactor_to_entt.h"
+#if !BTZC_REFACTOR_TO_ENTT
+
 #include "scene_serialization_ifc.h"
 
 #include "../btzc_game_engine.h"
@@ -70,3 +73,5 @@ void BT::scene_serialization_io_helper::write_scene_to_disk(
     std::ofstream f{ BTZC_GAME_ENGINE_ASSET_SCENE_PATH + scene_name };
     f << root.dump(4);
 }
+
+#endif  // !BTZC_REFACTOR_TO_ENTT

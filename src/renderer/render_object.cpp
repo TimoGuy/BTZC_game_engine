@@ -46,11 +46,16 @@ void BT::Render_object::render(Render_layer active_layers,
     if (m_layer & active_layers)
     {
         mat4 transform;
+#if BTZC_REFACTOR_TO_ENTT
+        assert(false);  // @TODO implement.
+#else
         m_game_obj.get_transform_handle().get_transform_as_mat4(transform);
+#endif  // !BTZC_REFACTOR_TO_ENTT
         m_renderable->render(transform, override_material);
     }
 }
 
+#if !BTZC_REFACTOR_TO_ENTT
 // Scene_serialization_ifc.
 void BT::Render_object::scene_serialize(Scene_serialization_mode mode, json& node_ref)
 {
@@ -103,6 +108,7 @@ void BT::Render_object::scene_serialize(Scene_serialization_mode mode, json& nod
         m_layer = Render_layer(static_cast<uint8_t>(node_ref["render_layer"]));
     }
 }
+#endif  // !BTZC_REFACTOR_TO_ENTT
 
 BT::UUID BT::Render_object_pool::emplace(Render_object&& rend_obj)
 {

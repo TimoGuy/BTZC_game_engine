@@ -279,6 +279,7 @@ int32_t main()
     main_renderer.get_camera_obj()->set_game_object_pool(game_object_pool);
 #endif  // !BTZC_REFACTOR_TO_ENTT
 
+#if !BTZC_REFACTOR_TO_ENTT
     // Setup scene serialization IO helper.
     BT::scene_serialization_io_helper::set_load_scene_callbacks(
         [&]() {
@@ -293,6 +294,7 @@ int32_t main()
         [&](BT::UUID follow_obj) {
             main_renderer.get_camera_obj()->set_follow_object(follow_obj);
         });
+#endif  // !BTZC_REFACTOR_TO_ENTT
 
     // Load default scene.
     class Scene_switching_cache
@@ -316,6 +318,9 @@ int32_t main()
                     BT::Timer perf_timer;
                     perf_timer.start_timer();
 
+#if BTZC_REFACTOR_TO_ENTT
+                    assert(false);  // @TODO implement.
+#else
                     // Unload whole scene.
                     auto const all_game_objs{ m_game_object_pool.get_all_as_list_no_lock() };
                     for (auto game_obj : all_game_objs)
@@ -325,6 +330,7 @@ int32_t main()
 
                     // Load new scene.
                     BT::scene_serialization_io_helper::load_scene_from_disk(m_scene_name);
+#endif  // !BTZC_REFACTOR_TO_ENTT
 
                     BT::logger::printef(BT::logger::TRACE,
                                         "Switch to scene \"%s\" from disk finished in %.3fms.",
@@ -338,19 +344,26 @@ int32_t main()
                 bool m_new_request;
 
                 BT::Game_object_pool& m_game_object_pool;
-    } main_scene_switcher{ game_object_pool };
+    };
+#if !BTZC_REFACTOR_TO_ENTT
+    Scene_switching_cache main_scene_switcher{ game_object_pool };
     main_scene_switcher.request_new_scene("_dev_sample_scene.btscene");
     main_scene_switcher.process_scene_load_request();
+#endif  // !BTZC_REFACTOR_TO_ENTT
 
     // Setup imgui renderer.
+#if !BTZC_REFACTOR_TO_ENTT
     main_renderer_imgui_renderer.set_game_obj_pool_ref(&game_object_pool);
+#endif  // !BTZC_REFACTOR_TO_ENTT
     main_renderer_imgui_renderer.set_camera_ref(main_renderer.get_camera_obj());
     main_renderer_imgui_renderer.set_renderer_ref(&main_renderer);
     main_renderer_imgui_renderer.set_input_handler_ref(&main_input_handler);
+#if !BTZC_REFACTOR_TO_ENTT
     main_renderer_imgui_renderer.set_switch_scene_callback(
         [&main_scene_switcher](std::string const& new_scene_name) {
             main_scene_switcher.request_new_scene(new_scene_name);
         });
+#endif  // !BTZC_REFACTOR_TO_ENTT
 
     // Timer.
     BT::Timer main_timer;
@@ -441,8 +454,10 @@ int32_t main()
         game_object_pool.return_list(std::move(all_game_objs));
         #endif  // !BTZC_REFACTOR_TO_ENTT
 
+#if !BTZC_REFACTOR_TO_ENTT
         // Tick level loading.
         main_scene_switcher.process_scene_load_request();
+#endif  // !BTZC_REFACTOR_TO_ENTT
 
         if (first_iter)
         {   // Turn off logging to the console.
