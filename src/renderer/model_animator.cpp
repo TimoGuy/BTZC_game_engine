@@ -286,7 +286,7 @@ void BT::Model_animator::configure_anim_frame_action_controls(
     m_anim_frame_action_controls = anim_frame_action_controls;
 
     m_anim_frame_action_data.hitcapsule_group_set.replace_and_reregister(
-        m_anim_frame_action_controls->hitcapsule_group_set_template);
+        m_anim_frame_action_controls->data.hitcapsule_group_set_template);
     m_anim_frame_action_data.hitcapsule_group_set.connect_animator(*this);
 }
 
@@ -349,14 +349,14 @@ void BT::Model_animator::update(float_t delta_time)
 
         // Process anim frame action runtime.
         auto& afa_timeline{ m_anim_frame_action_controls
-                            ->anim_frame_action_timelines[m_current_state_idx] };
+                            ->data.anim_frame_action_timelines[m_current_state_idx] };
 
         m_anim_frame_action_data.clear_all_data_overrides();
 
         for (auto const& region : afa_timeline.regions)
         {
             auto& ctrl_item{
-                m_anim_frame_action_controls->control_items[region.ctrl_item_idx] };
+                m_anim_frame_action_controls->data.control_items[region.ctrl_item_idx] };
             if (ctrl_item.type == anim_frame_action::CTRL_ITEM_TYPE_EVENT_TRIGGER)
             {   // Check if rising edge (start_frame) of event is within prev_time/curr_time.
                 float_t rising_edge_time = region.start_frame

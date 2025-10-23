@@ -211,15 +211,17 @@ std::unordered_map<std::string, size_t> compile_anim_state_name_to_idx_map(
 
 BT::anim_frame_action::Runtime_data_controls::Runtime_data_controls(std::string const& fname)
 {   // @COPYPASTA: See `scene_serialization.cpp` vvvv
-    static auto load_to_json_fn = [](std::string const& fname) {
+    static auto load_to_json_fn = [](std::string const& fname) -> json {
         std::ifstream f{ fname };
         return json::parse(f);
     };
-    json root = load_to_json_fn(fname);
 
-    // @TODO: FIX THIS
-    assert(false);
-    // serialize(SERIAL_MODE_DESERIALIZE, root);
+    // Deserialize json into data.
+    data = Data(load_to_json_fn(fname));
+
+    // Load model from bank.
+    animated_model = Model_bank::get_model(data.animated_model_name);
+    assert(animated_model != nullptr);
 }
 
 // void BT::anim_frame_action::Runtime_data_controls::serialize(
@@ -326,7 +328,7 @@ BT::anim_frame_action::Runtime_data_controls::Runtime_data_controls(std::string 
 
 void BT::anim_frame_action::Runtime_data_controls::calculate_all_ctrl_item_types()
 {
-    for (auto& ctrl_item : control_items)
+    for (auto& ctrl_item : data.control_items)
     {
         std::vector<std::string> tokens;
         {   // Get tokens in ctrl item name.

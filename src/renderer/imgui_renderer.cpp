@@ -549,7 +549,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                     auto const& timeline_name{ s_all_timeline_names[s_selected_timeline_idx] };
                     {   // Apply hitcapsule group set to template copy for saving.
                         anim_frame_action::s_editor_state.working_timeline_copy
-                            ->hitcapsule_group_set_template =
+                            ->data.hitcapsule_group_set_template =
                             anim_frame_action::s_editor_state.working_model_animator
                                 ->get_anim_frame_action_data_handle()
                                 .hitcapsule_group_set;
@@ -582,7 +582,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                         ->get_anim_frame_action_data_handle()
                         .hitcapsule_group_set.replace_and_reregister(
                             anim_frame_action::s_editor_state.working_timeline_copy
-                                ->hitcapsule_group_set_template);
+                                ->data.hitcapsule_group_set_template);
 
                     // Discard changes by loading the same timeline again.
                     s_load_selected_timeline = true;
@@ -601,7 +601,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
             assert(anim_frame_action::s_editor_state.working_timeline_copy != nullptr);
 
             anim_frame_action::s_editor_state.working_model =
-                anim_frame_action::s_editor_state.working_timeline_copy->model;
+                anim_frame_action::s_editor_state.working_timeline_copy->animated_model;
             assert(anim_frame_action::s_editor_state.working_model != nullptr);
 
             anim_frame_action::s_editor_state.is_working_timeline_dirty = false;  // Load from disk so not dirty.
@@ -861,7 +861,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                     m_input_handler->is_key_pressed(BT_KEY_ENTER))
                 {   // Create new ctrl item.
                     auto& afa_ctrl_items{ anim_frame_action::s_editor_state
-                                              .working_timeline_copy->control_items };
+                                              .working_timeline_copy->data.control_items };
                     afa_ctrl_items.emplace_back(s_new_ctrl_item_name_buffer);
 
                     // Ctrl items type calculation.
@@ -906,10 +906,10 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
             ImGui::SetWindowFontScale(1.0f);
 
             auto& afa_ctrl_items{ anim_frame_action::s_editor_state
-                                      .working_timeline_copy->control_items };
+                                      .working_timeline_copy->data.control_items };
             auto& afa_regions{ anim_frame_action::s_editor_state
                                    .working_timeline_copy
-                                   ->anim_frame_action_timelines[
+                                   ->data.anim_frame_action_timelines[
                                        anim_frame_action::s_editor_state.selected_anim_state_idx]
                                    .regions };
 
@@ -1112,7 +1112,8 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                         RIGHT_DRAG,
                     };
                     Select_state sel_state{ Select_state::UNSELECTED };
-                    using Region = anim_frame_action::Runtime_data_controls::Animation_frame_action_timeline::Region;
+                    using Region = anim_frame_action::Runtime_data_controls::Data::
+                        Animation_frame_action_timeline::Region;
                     Region* sel_reg{ nullptr };
                     float_t drag_x_amount{ 0.0f };
                     bool prev_lmb_pressed{ false };
