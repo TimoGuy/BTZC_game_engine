@@ -84,6 +84,8 @@ set(MAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/transform.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/propagate_changed_transforms.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/propagate_changed_transforms.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/world/scene_loader.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/world/scene_loader.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/hitbox_interactor/hitcapsule.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/hitbox_interactor/hitcapsule.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/input_handler/input_codes.h

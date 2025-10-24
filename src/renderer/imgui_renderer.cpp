@@ -9,6 +9,7 @@
 #include "../input_handler/input_codes.h"
 #include "../input_handler/input_handler.h"
 #include "../service_finder/service_finder.h"
+#include "game_system_logic/world/scene_loader.h"
 #include "camera.h"
 #include "btglm.h"
 #include "debug_render_job.h"
@@ -435,7 +436,9 @@ void BT::ImGui_renderer::render_imgui__level_editor_context(bool enter, float_t 
 {
     if (enter)
     {   // Load current loaded level.
-        m_request_switch_scene_callback("_dev_sample_scene.btscene");
+        auto& scene_loader{ service_finder::find_service<world::Scene_loader>() };
+        scene_loader.unload_all_scenes();
+        scene_loader.load_scene("_dev_sample_scene.btscene");
     }
 
     // Level select.
@@ -496,7 +499,10 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
 {
     if (enter)
     {   // Load up editor-specific scene.
-        m_request_switch_scene_callback("_dev_animation_editor_view.btscene");
+        auto& scene_loader{ service_finder::find_service<world::Scene_loader>() };
+        scene_loader.unload_all_scenes();
+        scene_loader.load_scene("_dev_animation_editor_view.btscene");
+
         anim_frame_action::s_editor_state = {};  // Reset editor state.
     }
 

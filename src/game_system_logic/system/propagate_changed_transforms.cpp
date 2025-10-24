@@ -165,6 +165,4 @@ void BT::system::propagate_changed_transforms(entt::registry& reg)
 
     // Mark all transforms as propagated now (i.e. remove "changed" flag).
     reg.clear<component::Transform_changed>();
-
-    assert(false);  // @TODO: implement.
 }

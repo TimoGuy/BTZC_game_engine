@@ -6,6 +6,7 @@
 #include "game_object/system/concrete_systems.h"
 #include "game_object/game_object.h"
 #include "game_system_logic/system/propagate_changed_transforms.h"
+#include "game_system_logic/world/scene_loader.h"
 #include "hitbox_interactor/hitcapsule.h"
 #include "input_handler/input_handler.h"
 #include "Jolt/Jolt.h"  // @DEBUG
@@ -297,6 +298,9 @@ int32_t main()
 #endif  // !BTZC_REFACTOR_TO_ENTT
 
     // Load default scene.
+    BT::world::Scene_loader main_scene_loader;
+
+#if 0
     class Scene_switching_cache
     {   // Simple class for holding scene switching logic.
     public:     Scene_switching_cache(BT::Game_object_pool& game_object_pool)
@@ -350,6 +354,7 @@ int32_t main()
     main_scene_switcher.request_new_scene("_dev_sample_scene.btscene");
     main_scene_switcher.process_scene_load_request();
 #endif  // !BTZC_REFACTOR_TO_ENTT
+#endif  // 0
 
     // Setup imgui renderer.
 #if !BTZC_REFACTOR_TO_ENTT
@@ -454,7 +459,10 @@ int32_t main()
         game_object_pool.return_list(std::move(all_game_objs));
         #endif  // !BTZC_REFACTOR_TO_ENTT
 
-#if !BTZC_REFACTOR_TO_ENTT
+#if BTZC_REFACTOR_TO_ENTT
+        // Tick scene loader.
+        main_scene_loader.process_scene_loading_requests(ecs_registry);
+#else
         // Tick level loading.
         main_scene_switcher.process_scene_load_request();
 #endif  // !BTZC_REFACTOR_TO_ENTT
