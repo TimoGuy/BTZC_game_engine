@@ -4,6 +4,8 @@
 #include "entt/entity/fwd.hpp"
 #include "entt/entity/registry.hpp"
 #include "game_system_logic/component/transform.h"
+#include "game_system_logic/entity_container.h"
+#include "service_finder/service_finder.h"
 
 
 namespace
@@ -103,24 +105,32 @@ component::Transform append_transform(component::Transform const& a, component::
 }
 
 void apply_delta_transform_recursive(auto& view,
+                                     Entity_container& entity_container,
                                      entt::entity entity,
                                      component::Transform const& delta_transform)
 {   // Apply delta trans to self.
     assert(false);  // @TODO implement.
 
     // Search thru transform hierarchy children.
-    auto const& transform_hierarchy{ view.get<component::Transform_hierarchy const>(entity) };
+    auto const& transform_hierarchy{
+        view.template get<component::Transform_hierarchy const>(entity) };
     for (auto entity : transform_hierarchy.children_entities)
     {
-        apply_delta_transform_recursive(view, entity, delta_transform);
+        apply_delta_transform_recursive(view,
+                                        entity_container,
+                                        entity_container.find_entity(entity),
+                                        delta_transform);
     }
 }
 
 }  // namespace
 
 
-void BT::system::propagate_changed_transforms(entt::registry& reg)
+void BT::system::propagate_changed_transforms()
 {
+    auto& entity_container{ service_finder::find_service<Entity_container>() };
+
+    auto& reg{ entity_container.get_ecs_registry() };
     auto changed_trans_view = reg.view<component::Transform,
                                        component::Transform_hierarchy,
                                        component::Transform_changed>();
@@ -159,7 +169,10 @@ void BT::system::propagate_changed_transforms(entt::registry& reg)
 
         for (auto entity : transform_hierarchy.children_entities)
         {
-            apply_delta_transform_recursive(trans_view, entity, delta_transform);
+            apply_delta_transform_recursive(trans_view,
+                                            entity_container,
+                                            entity_container.find_entity(entity),
+                                            delta_transform);
         }
     }
 

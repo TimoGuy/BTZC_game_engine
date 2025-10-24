@@ -1,6 +1,6 @@
 #pragma once
 
-#include "entt/entity/fwd.hpp"
+#include "uuid/uuid.h"
 
 #include <string>
 #include <unordered_map>
@@ -24,10 +24,10 @@ public:
     void unload_all_scenes();
 
     /// Process all requests for scene loading.
-    void process_scene_loading_requests(entt::registry& reg);
+    void process_scene_loading_requests();
 
     /// Data type for containing loaded scenes.
-    using Scene_entity_list_t = std::vector<entt::entity>;
+    using Scene_entity_list_t = std::vector<UUID>;
 
 private:
     std::unordered_map<std::string, Scene_entity_list_t> m_loaded_scenes;

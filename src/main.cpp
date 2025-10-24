@@ -5,6 +5,7 @@
 #include "game_object/component_registry.h"
 #include "game_object/system/concrete_systems.h"
 #include "game_object/game_object.h"
+#include "game_system_logic/entity_container.h"
 #include "game_system_logic/system/propagate_changed_transforms.h"
 #include "game_system_logic/world/scene_loader.h"
 #include "hitbox_interactor/hitcapsule.h"
@@ -39,7 +40,6 @@
 #include <cstdint>
 #include <memory>
 #include <fstream>  // @DEBUG
-#include <entt/entity/registry.hpp>
 
 using std::make_unique;
 using std::unique_ptr;
@@ -261,8 +261,8 @@ int32_t main()
     BT::Hitcapsule_group_overlap_solver hitcapsule_solver;
 
 #if BTZC_REFACTOR_TO_ENTT
-    // ECS registry.
-    entt::registry ecs_registry;
+    // Entity container.
+    BT::Entity_container entity_container;
 #else
     // Game objects.
     BT::Game_object_pool game_object_pool;
@@ -399,9 +399,10 @@ int32_t main()
                 game_obj->run_pre_physics_scripts(main_physics_engine.k_simulation_delta_time);
             }
             #endif  // !BTZC_REFACTOR_TO_ENTT
+
             INVOKE_SYSTEM(System_player_character_movement);
             INVOKE_SYSTEM(System_animator_driven_hitcapsule_set);
-            BT::system::propagate_changed_transforms(ecs_registry);  // Does there need to be 2 of these system invocations???  -Thea 2025/10/22
+            BT::system::propagate_changed_transforms();  // Does there need to be 2 of these system invocations???  -Thea 2025/10/22
 
             // Update physics.
             main_physics_engine.update_physics();
@@ -418,9 +419,10 @@ int32_t main()
                 game_obj->run_pre_render_scripts(delta_time);
             }
             #endif  // !BTZC_REFACTOR_TO_ENTT
+
             INVOKE_SYSTEM(System__dev__anim_editor_tool_state_agent);
             INVOKE_SYSTEM(System_apply_phys_xform_to_rend_obj);
-            BT::system::propagate_changed_transforms(ecs_registry);  // Does there need to be 2 of these system invocations???  -Thea 2025/10/22
+            BT::system::propagate_changed_transforms();  // Does there need to be 2 of these system invocations???  -Thea 2025/10/22
 
             main_renderer.render(delta_time, [&]() {
                 // Render selected game obj.
@@ -461,7 +463,7 @@ int32_t main()
 
 #if BTZC_REFACTOR_TO_ENTT
         // Tick scene loader.
-        main_scene_loader.process_scene_loading_requests(ecs_registry);
+        main_scene_loader.process_scene_loading_requests();
 #else
         // Tick level loading.
         main_scene_switcher.process_scene_load_request();

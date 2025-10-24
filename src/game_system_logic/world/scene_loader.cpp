@@ -2,6 +2,7 @@
 
 #include "btlogger.h"
 #include "entt/entity/registry.hpp"
+#include "game_system_logic/entity_container.h"
 #include "service_finder/service_finder.h"
 
 
@@ -31,19 +32,20 @@ namespace
 using namespace BT;
 using Scene_entity_list_t = world::Scene_loader::Scene_entity_list_t;
 
-void internal_unload_scene(entt::registry& reg,
+void internal_unload_scene(Entity_container& entity_container,
                            std::string const& scene_name,
                            Scene_entity_list_t const& scene_entity_list)
 {   // Destroy all entities associated with scene.
     for (auto entity : scene_entity_list)
     {
-        reg.destroy(entity);
+        entity_container.destroy_entity(entity);
     }
 
     BT_TRACEF("Unloaded scene \"%s\"", scene_name.c_str());
 }
 
-Scene_entity_list_t internal_load_scene(entt::registry& reg, std::string const& scene_name)
+Scene_entity_list_t internal_load_scene(Entity_container& entity_container,
+                                        std::string const& scene_name)
 {   // Deserialize scene into creation list.
 
     // Create entities with components.
@@ -60,13 +62,16 @@ Scene_entity_list_t internal_load_scene(entt::registry& reg, std::string const& 
 }  // namespace
 
 
-void BT::world::Scene_loader::process_scene_loading_requests(entt::registry& reg)
-{   // Process unload request first.
+void BT::world::Scene_loader::process_scene_loading_requests()
+{
+    auto& entity_container{ service_finder::find_service<Entity_container>() };
+
+    // Process unload request first.
     if (m_unload_all_scenes_request)
     {
         for (auto& loaded_scene : m_loaded_scenes)
         {
-            internal_unload_scene(reg, loaded_scene.first, loaded_scene.second);
+            internal_unload_scene(entity_container, loaded_scene.first, loaded_scene.second);
         }
         m_loaded_scenes.clear();
 
@@ -76,7 +81,7 @@ void BT::world::Scene_loader::process_scene_loading_requests(entt::registry& reg
     // Process load requests.
     for (auto& scene_name : m_load_scene_requests)
     {
-        auto created_entity_list{ internal_load_scene(reg, scene_name) };
+        auto created_entity_list{ internal_load_scene(entity_container, scene_name) };
     }
     m_load_scene_requests.clear();
 }

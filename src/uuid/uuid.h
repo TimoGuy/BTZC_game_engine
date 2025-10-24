@@ -13,11 +13,13 @@ using std::string;
 namespace BT
 {
 
+/// `UUID()` creates a null, invalid UUID.
 using UUID = uuids::uuid;
 
 namespace UUID_helper
 {
 
+/// Randomly generates a valid UUID.
 UUID generate_uuid();
 
 inline static string to_pretty_repr(UUID const& my_uuid)

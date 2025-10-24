@@ -2,6 +2,7 @@
 
 #include "btglm.h"
 #include "btjson.h"
+#include "uuid/uuid.h"
 
 #include <entt/entity/entity.hpp>
 #include <entt/entity/fwd.hpp>
@@ -30,8 +31,8 @@ struct Transform
 /// References to other entities connected to this transform within the transform hierarchy.
 struct Transform_hierarchy
 {
-    entt::entity parent_entity{ entt::null };
-    std::vector<entt::entity> children_entities;
+    UUID parent_entity;
+    std::vector<UUID> children_entities;
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(
         Transform_hierarchy,
