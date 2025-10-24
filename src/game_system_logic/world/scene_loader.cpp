@@ -74,9 +74,9 @@ void BT::world::Scene_loader::process_scene_loading_requests(entt::registry& reg
     }
 
     // Process load requests.
-    for (auto& req : m_load_scene_requests)
+    for (auto& scene_name : m_load_scene_requests)
     {
-        auto created_entity_list{ internal_load_scene(reg, req) };
+        auto created_entity_list{ internal_load_scene(reg, scene_name) };
     }
     m_load_scene_requests.clear();
 }
