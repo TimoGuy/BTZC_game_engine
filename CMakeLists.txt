@@ -82,6 +82,8 @@ set(MAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/system/system_ifc.h
     # ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/system/system_player_character_movement.cpp  @TEMP: To reduce errors for refactor.
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/UNUSED_serialization.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/component_registry.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/component_registry.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/entity_metadata.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/transform.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/entity_container.cpp
@@ -90,6 +92,7 @@ set(MAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/propagate_changed_transforms.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/world/scene_loader.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/world/scene_loader.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/world/scene_saver.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/world/scene_serialization.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/world/scene_serialization.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/hitbox_interactor/hitcapsule.cpp

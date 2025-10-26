@@ -1,10 +1,10 @@
 #include "scene_loader.h"
 
 #include "btlogger.h"
-#include "entt/entity/registry.hpp"
+#include "game_system_logic/component/component_registry.h"
 #include "game_system_logic/entity_container.h"
-#include "service_finder/service_finder.h"
 #include "scene_serialization.h"
+#include "service_finder/service_finder.h"
 
 
 BT::world::Scene_loader::Scene_loader()
@@ -56,8 +56,18 @@ Scene_entity_list_t internal_load_scene(Entity_container& entity_container,
     {
         auto ecs_entity = entity_container.create_entity(entity.entity_uuid);
 
-        assert(false);;  // @TODO vv below!!!
-        // entity_container.get_ecs_registry().
+        for (auto& component : entity.components)
+        {
+            // // @TODO: Use this to deduce the type.
+            // component.type_name; assert(false);
+
+            // auto& new_comp{
+            //     entity_container.get_ecs_registry().emplace<component::Transform>(ecs_entity) };
+            // new_comp = component::Transform(component.members_j);
+
+            // Construct component inside entity.
+            component::construct_component(ecs_entity, component.type_name, component.members_j);
+        }
     }
 
     BT_TRACEF("Loaded scene \"%s\"", scene_name.c_str());
