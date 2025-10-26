@@ -88,6 +88,8 @@ set(MAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/transform.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/entity_container.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/entity_container.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/imgui_render_transform_hierarchy_window.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/imgui_render_transform_hierarchy_window.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/propagate_changed_transforms.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/propagate_changed_transforms.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/world/scene_loader.cpp

@@ -11,6 +11,7 @@
 #include "../service_finder/service_finder.h"
 #include "btglm.h"
 #include "btjson.h"
+#include "game_system_logic/system/imgui_render_transform_hierarchy_window.h"
 #include "game_system_logic/world/scene_loader.h"
 #include "camera.h"
 #include "debug_render_job.h"
@@ -483,7 +484,10 @@ void BT::ImGui_renderer::render_imgui__level_editor_context(bool enter, float_t 
     }
     ImGui::End();
 
-#if !BTZC_REFACTOR_TO_ENTT
+#if BTZC_REFACTOR_TO_ENTT
+    // Scene transform hierarchy.
+    system::imgui_render_transform_hierarchy_window(enter);
+#else
     // Scene hierarchy.
     m_game_obj_pool->render_imgui_scene_hierarchy();
 #endif  // !BTZC_REFACTOR_TO_ENTT
