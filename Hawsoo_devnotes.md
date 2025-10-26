@@ -339,8 +339,8 @@ while (running_game_loop)
 - [ ] Have transform graph show up in imgui game object select.
     - [x] Rename to entities window.
     - [x] Stubbed out
-    - [ ] Render floating entities in its own list.
-    - [ ] Render hierarchy entities in its own list (just flat for now).
+    - [x] Render floating entities in its own list.
+    - [x] Render hierarchy entities in its own list (just flat for now).
     - [ ] Hierarchize the entities in the transform hierarchy.
 
 
