@@ -21,7 +21,7 @@ public:
     void destroy_entity(UUID uuid);
 
     /// Gets the ECS inner version of the entity.
-    entt::entity find_entity(UUID uuid);
+    entt::entity find_entity(UUID uuid) const;
 
     /// Gets a handle to the ECS registry.
     /// @warning DO NOT USE `.create()` AND/OR `.destroy()` FUNCTIONS DIRECTLY.

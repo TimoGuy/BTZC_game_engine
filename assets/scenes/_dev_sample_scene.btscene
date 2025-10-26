@@ -1,6 +1,18 @@
 {
     "entities": [
         {
+            "entity_uuid": "019a2251-50bc-7074-8da2-ea4565067327",
+            "components": [
+                {
+                    "type_name": "component::Entity_metadata",
+                    "members_j": {
+                        "name": "My random floating entity woohoo!!!",
+                        "uuid": "019a2251-50bc-7074-8da2-ea4565067327"
+                    }
+                }
+            ]
+        },
+        {
             "entity_uuid": "aae5ebfb-7c2b-49a8-bcb9-658fdea987af",
             "components": [
                 {
@@ -77,9 +89,7 @@
                     "type_name": "component::Transform_hierarchy",
                     "members_j": {
                         "parent_entity": null,
-                        "children_entities": [
-                            "d33f01dc-b0b5-4954-9771-71a1c42e5209"
-                        ]
+                        "children_entities": []
                     }
                 }
             ]
@@ -119,9 +129,7 @@
                     "type_name": "component::Transform_hierarchy",
                     "members_j": {
                         "parent_entity": "aae5ebfb-7c2b-49a8-bcb9-658fdea987af",
-                        "children_entities": [
-                            "d33f01dc-b0b5-4954-9771-71a1c42e5209"
-                        ]
+                        "children_entities": []
                     }
                 }
             ]

@@ -51,7 +51,7 @@ void BT::Entity_container::destroy_entity(UUID uuid)
     m_uuid_to_inner_entity_map.erase(uuid);
 }
 
-entt::entity BT::Entity_container::find_entity(UUID uuid)
+entt::entity BT::Entity_container::find_entity(UUID uuid) const
 {
     entt::entity found_entity{ entt::null };
 

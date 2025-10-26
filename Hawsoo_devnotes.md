@@ -341,7 +341,9 @@ while (running_game_loop)
     - [x] Stubbed out
     - [x] Render floating entities in its own list.
     - [x] Render hierarchy entities in its own list (just flat for now).
-    - [ ] Hierarchize the entities in the transform hierarchy.
+    - [x] Hierarchize the entities in the transform hierarchy.
+    - [x] Include one floating entity.
+    - [ ] Make nodes clickable and have them show up in the inspector
 
 
 - [ ] Next goal: Get stuff rendered onto the screen again~!
