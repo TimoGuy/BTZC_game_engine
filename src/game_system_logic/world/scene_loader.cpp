@@ -4,6 +4,7 @@
 #include "entt/entity/registry.hpp"
 #include "game_system_logic/entity_container.h"
 #include "service_finder/service_finder.h"
+#include "scene_serialization.h"
 
 
 BT::world::Scene_loader::Scene_loader()
@@ -47,12 +48,17 @@ void internal_unload_scene(Entity_container& entity_container,
 Scene_entity_list_t internal_load_scene(Entity_container& entity_container,
                                         std::string const& scene_name)
 {   // Deserialize scene into creation list.
+    auto scene_data{ world::deserialize_scene_data_from_disk(scene_name) };
 
     // Create entities with components.
     Scene_entity_list_t created_entities;
+    for (auto& entity : scene_data.entities)
+    {
+        auto ecs_entity = entity_container.create_entity(entity.entity_uuid);
 
-    // Remap entity id to `entt::entity`
-    assert(false);
+        assert(false);;  // @TODO vv below!!!
+        // entity_container.get_ecs_registry().
+    }
 
     BT_TRACEF("Loaded scene \"%s\"", scene_name.c_str());
 

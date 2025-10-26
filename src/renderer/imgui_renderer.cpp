@@ -9,9 +9,10 @@
 #include "../input_handler/input_codes.h"
 #include "../input_handler/input_handler.h"
 #include "../service_finder/service_finder.h"
+#include "btglm.h"
+#include "btjson.h"
 #include "game_system_logic/world/scene_loader.h"
 #include "camera.h"
-#include "btglm.h"
 #include "debug_render_job.h"
 #include "imgui.h"
 #include "ImGuizmo.h"
@@ -25,7 +26,6 @@
 #include <cmath>
 #include <cstdint>
 #include <cstring>
-#include <fstream>
 #include <string>
 #include <vector>
 
@@ -114,8 +114,9 @@ void BT::ImGui_renderer::render_imgui(float_t delta_time)
 #endif  // !BTZC_REFACTOR_TO_ENTT
 
                 // Save to disk.
-                std::ofstream f{ BTZC_GAME_ENGINE_ASSET_SCENE_PATH "sumthin_cumming_outta_me.btscene" };
-                f << root.dump(4);
+                json_save_to_disk(root,
+                                  BTZC_GAME_ENGINE_ASSET_SCENE_PATH
+                                  "sumthin_cumming_outta_me.btscene");
             }
 
             ImGui::Separator();
@@ -568,10 +569,9 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                         //                 working_timeline_copy_as_json);
 
                         // Save to disk.
-                        std::ofstream f{
-                            BTZC_GAME_ENGINE_ASSET_ANIM_FRAME_ACTIONS_PATH
-                            + timeline_name };
-                        f << working_timeline_copy_as_json.dump(4);
+                        json_save_to_disk(working_timeline_copy_as_json,
+                                          BTZC_GAME_ENGINE_ASSET_ANIM_FRAME_ACTIONS_PATH +
+                                              timeline_name);
                     }
 
                     anim_frame_action::Bank::replace(

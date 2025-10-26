@@ -5,7 +5,7 @@
 #include "../renderer/mesh.h"
 #include "../renderer/model_animator.h"
 #include "../service_finder/service_finder.h"
-#include <fstream>
+#include "btjson.h"
 #include <sstream>
 #include <string>
 #include <unordered_map>
@@ -210,14 +210,9 @@ std::unordered_map<std::string, size_t> compile_anim_state_name_to_idx_map(
 }  // namespace
 
 BT::anim_frame_action::Runtime_data_controls::Runtime_data_controls(std::string const& fname)
-{   // @COPYPASTA: See `scene_serialization.cpp` vvvv
-    static auto load_to_json_fn = [](std::string const& fname) -> json {
-        std::ifstream f{ fname };
-        return json::parse(f);
-    };
-
+{
     // Deserialize json into data.
-    data = Data(load_to_json_fn(fname));
+    data = Data(json_load_from_disk(fname));
 
     // Load model from bank.
     animated_model = Model_bank::get_model(data.animated_model_name);

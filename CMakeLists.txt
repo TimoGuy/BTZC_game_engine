@@ -63,6 +63,7 @@ set(MAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/animation_frame_action_tool/runtime_data.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/animation_frame_action_tool/runtime_data.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/bt_lib/btglm.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/bt_lib/btjson.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/bt_lib/btjson.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/bt_lib/btlogger.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/bt_lib/btlogger.h
@@ -81,6 +82,7 @@ set(MAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/system/system_ifc.h
     # ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/system/system_player_character_movement.cpp  @TEMP: To reduce errors for refactor.
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/UNUSED_serialization.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/entity_metadata.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/transform.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/entity_container.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/entity_container.h
@@ -88,6 +90,8 @@ set(MAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/propagate_changed_transforms.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/world/scene_loader.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/world/scene_loader.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/world/scene_serialization.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/world/scene_serialization.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/hitbox_interactor/hitcapsule.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/hitbox_interactor/hitcapsule.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/input_handler/input_codes.h
