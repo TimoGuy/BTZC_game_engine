@@ -50,7 +50,6 @@ template<
     nlohmann::detail::enable_if_t<nlohmann::detail::is_basic_json<BasicJsonType>::value, int> = 0>
 void to_json(BasicJsonType& nlohmann_json_j, const BT::UUID& nlohmann_json_t)
 {
-    // nlohmann_json_j["uuid_str"] = BT::UUID_helper::to_pretty_repr(nlohmann_json_t);
     nlohmann_json_j = BT::UUID_helper::to_pretty_repr(nlohmann_json_t);
 }
 
@@ -59,11 +58,6 @@ template<
     nlohmann::detail::enable_if_t<nlohmann::detail::is_basic_json<BasicJsonType>::value, int> = 0>
 void from_json(const BasicJsonType& nlohmann_json_j, BT::UUID& nlohmann_json_t)
 {
-    // if (nlohmann_json_j.contains("uuid_str") &&
-    //     !nlohmann_json_j["uuid_str"].is_null() &&
-    //     nlohmann_json_j["uuid_str"].is_string())
-    // {   // Read UUID string.
-    //     std::string uuid_str{ nlohmann_json_j["uuid_str"].get<std::string>() };
     if (!nlohmann_json_j.is_null() &&
         nlohmann_json_j.is_string())
     {   // Read UUID string.
