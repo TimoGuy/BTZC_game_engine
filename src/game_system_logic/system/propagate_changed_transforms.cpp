@@ -140,6 +140,8 @@ void BT::system::propagate_changed_transforms()
     // Calculate delta transforms.
     for (auto entity : changed_trans_view)
     {
+        assert(false);  // @TODO: TEST THIS WHEN ITS WORKING.
+
         auto const& transform{ changed_trans_view.get<component::Transform const>(entity) };
         auto const& transform_hierarchy{
             changed_trans_view.get<component::Transform_hierarchy const>(entity)

@@ -321,24 +321,33 @@ while (running_game_loop)
 
 - [x] OVERHAUL: Change a lot of things to use `NLOHMANN_DEFINE_TYPE_INTRUSIVE()` instead of `Scene_serialization_ifc`
 
-- [ ] @THINK: How should components like `Component_model_animator` work, where it just has a pointer to an animator?
+- [x] @THINK: How should components like `Component_model_animator` work, where it just has a pointer to an animator?
     - It definitely feels like that's probably not the best way of doing it. Bc then it's really just something that can't be serialized.
     - [x] @FOR_NOW: Just load it up as nullptr values.
-    - [ ] Edit the `.btscene` files to change scripts to components (refer to new systems to see what components to include).
-
+    - [x] Edit the `.btscene` files to change scripts to components (refer to new systems to see what components to include).
 
 - [x] OVERHAUL: Create new entity pool that doesn't reallocate its size.
     - Add-removes are immediate since we're doing systems now.
 
-- [ ] OVERHAUL: Change these things into components
-    - Transform (serializable)
-    - Render object (partial serializable)
-        - Needs to be built in case deformed model.
-    - Physics object (partial serializable)
-        - Needs to be built depending on the physics obj type.
+- [x] OVERHAUL: Just switch to using EnTT.
 
-- [ ] OVERHAUL: Remake game_object/entity type.
+- [x] OVERHAUL: Remake game_object/entity type.
     - Don't require a bunch of services upfront. Use service finder.
+
+- [x] Write scene loader to load entities and components from disk.
+
+- [ ] Have transform graph show up in imgui game object select.
+    - [ ] Rename to entities window.
+
+
+- [ ] Next goal: Get stuff rendered onto the screen again~!
+    - [ ] OVERHAUL: Change these things into components
+        - [x] Transform (serializable)
+        - Render object (partial serializable)
+            - Needs to be built in case deformed model.
+        - Physics object (partial serializable)
+            - Needs to be built depending on the physics obj type.
+
 
 
 
