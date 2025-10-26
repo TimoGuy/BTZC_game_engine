@@ -1,0 +1,121 @@
+{
+    "cam_following_game_obj": "aae5fbab-7c2b-49a8-bcb9-658fdea987bf",
+    "game_objects": [
+        {
+            "children": null,
+            "guid": "aae5fbab-7c2b-49a8-bcb9-658fdea987bf",
+            "name": "Anim editor view focus object",
+            "parent": null,
+            "physics_obj": null,
+            "render_obj": {
+                "guid": "fa2a0c0c-cfd4-47a7-b4e7-01dbbd3b3538",
+                "render_layer": 1,
+                "renderable": {
+                    "model_name": "probuilder_example",
+                    "type": "Model"
+                }
+            },
+            "scripts": [
+                {
+                    "script_datas": {
+                        "game_obj_key": "aae5fbab-7c2b-49a8-bcb9-658fdea987bf",
+                        "render_obj_key": "fa2a0c0c-cfd4-47a7-b4e7-01dbbd3b3538"
+                    },
+                    "script_type": "script__dev__anim_editor_tool_state_agent"
+                }
+            ],
+            "transform": {
+                "global": {
+                    "position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "local": {
+                    "position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                }
+            }
+        },
+        {
+            "children": null,
+            "guid": "88a277a7-3481-42e5-a584-e0d06f892d48",
+            "name": "Grid for XZ plane",
+            "parent": null,
+            "physics_obj": null,
+            "render_obj": {
+                "guid": "28914509-4638-4077-9865-c4c3e6994f57",
+                "render_layer": 1,
+                "renderable": {
+                    "model_name": "xz_grid",
+                    "type": "Model"
+                }
+            },
+            "scripts": null,
+            "transform": {
+                "global": {
+                    "position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "local": {
+                    "position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                }
+            }
+        }
+    ]
+}

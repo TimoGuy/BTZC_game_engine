@@ -53,19 +53,13 @@ Scene_entity_list_t internal_load_scene(Entity_container& entity_container,
     // Create entities with components.
     Scene_entity_list_t created_entities;
     for (auto& entity : scene_data.entities)
-    {
+    {   // Assert that the provided UUID is valid.
+        assert(!entity.entity_uuid.is_nil());
+
         auto ecs_entity = entity_container.create_entity(entity.entity_uuid);
 
         for (auto& component : entity.components)
-        {
-            // // @TODO: Use this to deduce the type.
-            // component.type_name; assert(false);
-
-            // auto& new_comp{
-            //     entity_container.get_ecs_registry().emplace<component::Transform>(ecs_entity) };
-            // new_comp = component::Transform(component.members_j);
-
-            // Construct component inside entity.
+        {   // Construct component inside entity.
             component::construct_component(ecs_entity, component.type_name, component.members_j);
         }
     }

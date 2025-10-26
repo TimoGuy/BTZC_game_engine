@@ -33,7 +33,7 @@ void BT::component::register_all_components()
         do                                                                                          \
         {                                                                                           \
             auto type_idx{ std::type_index(typeid(_type)) };                                        \
-            s_type_str_to_type_idx_map.emplace("Transform", type_idx);                              \
+            s_type_str_to_type_idx_map.emplace(#_type, type_idx);                                   \
             s_type_idx_to_construct_comp_fn_map.emplace(type_idx,                                   \
                                                         [](entt::entity ecs_entity,                 \
                                                            json const& members_j) {                 \

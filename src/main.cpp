@@ -6,6 +6,7 @@
 #include "game_object/system/concrete_systems.h"
 #include "game_object/game_object.h"
 #include "game_system_logic/entity_container.h"
+#include "game_system_logic/component/component_registry.h"
 #include "game_system_logic/system/propagate_changed_transforms.h"
 #include "game_system_logic/world/scene_loader.h"
 #include "hitbox_interactor/hitcapsule.h"
@@ -261,6 +262,7 @@ int32_t main()
 
 #if BTZC_REFACTOR_TO_ENTT
     // Entity container.
+    BT::component::register_all_components();
     BT::Entity_container entity_container;
 #else
     // Game objects.

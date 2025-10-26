@@ -1,0 +1,224 @@
+{
+    "cam_following_game_obj": "aae5ebfb-7c2b-49a8-bcb9-658fdea987af",
+    "game_objects": [
+        {
+            "children": [
+                "d33f01dc-b0b5-4954-9771-71a1c42e5209"
+            ],
+            "guid": "aae5ebfb-7c2b-49a8-bcb9-658fdea987af",
+            "name": "My Gay object",
+            "parent": null,
+            "physics_obj": {
+                "crouch_height": 1.0,
+                "guid": "08743552-fff6-49d2-ad15-efbd121ab773",
+                "height": 2.0,
+                "init_transform": [
+                    [
+                        0.0,
+                        5.099999904632568,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ],
+                "interpolate_transform": true,
+                "radius": 0.5,
+                "type": "character_controller"
+            },
+            "render_obj": null,
+            "scripts": [
+                {
+                    "script_datas": {
+                        "apply_facing_angle_game_obj_key": "d33f01dc-b0b5-4954-9771-71a1c42e5209",
+                        "phys_obj_key": "08743552-fff6-49d2-ad15-efbd121ab773"
+                    },
+                    "script_type": "script_player_character_movement"
+                },
+                {
+                    "script_datas": {
+                        "game_obj_key": "aae5ebfb-7c2b-49a8-bcb9-658fdea987af"
+                    },
+                    "script_type": "script_apply_physics_transform_to_render_object"
+                }
+            ],
+            "transform": {
+                "global": {
+                    "position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "local": {
+                    "position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                }
+            }
+        },
+        {
+            "children": [],
+            "guid": "aae5ebfb-7c2b-49a8-bcb9-658fdea987ae",
+            "name": "Static ground geometry",
+            "parent": null,
+            "physics_obj": {
+                "guid": "08743552-fff6-49d2-ad15-efbd121ab772",
+                "init_transform": [
+                    [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                ],
+                "interpolate_transform": false,
+                "model_name": "probuilder_example",
+                "motion_type": 0,
+                "type": "triangle_mesh"
+            },
+            "render_obj": {
+                "guid": "fa2a0c0c-cfd4-47a7-b4e7-01dbbd3b3538",
+                "render_layer": 1,
+                "renderable": {
+                    "model_name": "probuilder_example",
+                    "type": "Model"
+                }
+            },
+            "scripts": [],
+            "transform": {
+                "global": {
+                    "position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "local": {
+                    "position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                }
+            }
+        },
+        {
+            "children": [],
+            "guid": "d33f01dc-b0b5-4954-9771-71a1c42e5209",
+            "name": "Character repr",
+            "parent": "aae5ebfb-7c2b-49a8-bcb9-658fdea987af",
+            "physics_obj": null,
+            "render_obj": {
+                "guid": "fa2a0c0c-cfd4-47a7-b4e7-01dbbd3b3537",
+                "render_layer": 1,
+                "renderable": {
+                    "model_name": "simple_combat_char",
+                    "type": "Deformed_model",
+                    "animator_template": "simple_combat_char.btanitor",
+                    "anim_frame_action_ctrls": "simple_combat_char.btafa"
+                }
+            },
+            "scripts": [
+                {
+                    "script_datas": {
+                        "render_obj": "fa2a0c0c-cfd4-47a7-b4e7-01dbbd3b3537"
+                    },
+                    "script_type": "script_animator_driven_hitcapsule_set"
+                }
+            ],
+            "transform": {
+                "global": {
+                    "position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                "local": {
+                    "position": [
+                        0.0,
+                        -2.980232238769531e-07,
+                        0.0
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                }
+            }
+        }
+    ]
+}
