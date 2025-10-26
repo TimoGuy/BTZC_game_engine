@@ -61,7 +61,7 @@ void from_json(const BasicJsonType& nlohmann_json_j, BT::UUID& nlohmann_json_t)
     if (!nlohmann_json_j.is_null() &&
         nlohmann_json_j.is_string())
     {   // Read UUID string.
-        std::string uuid_str{ nlohmann_json_j.get<std::string>() };
+        std::string uuid_str{ nlohmann_json_j.template get<std::string>() };
         nlohmann_json_t = BT::UUID_helper::to_UUID(uuid_str);
     }
     else
