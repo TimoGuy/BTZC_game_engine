@@ -91,6 +91,15 @@
                         "parent_entity": null,
                         "children_entities": []
                     }
+                },
+                {
+                    "type_name": "component::Render_object_settings",
+                    "members_j": {
+                        "render_layer": 1,
+                        "model_name": "probuilder_example",
+                        "is_deformed": false,
+                        "animator_template_name": ""
+                    }
                 }
             ]
         },
@@ -130,6 +139,15 @@
                     "members_j": {
                         "parent_entity": "aae5ebfb-7c2b-49a8-bcb9-658fdea987af",
                         "children_entities": []
+                    }
+                },
+                {
+                    "type_name": "component::Render_object_settings",
+                    "members_j": {
+                        "render_layer": 1,
+                        "model_name": "simple_combat_char",
+                        "is_deformed": true,
+                        "animator_template_name": "simple_combat_char.btanitor"
                     }
                 }
             ]

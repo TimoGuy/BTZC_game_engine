@@ -3,6 +3,7 @@
 #include "service_finder/service_finder.h"
 #include "game_system_logic/entity_container.h"
 #include "entity_metadata.h"
+#include "render_object_settings.h"
 #include "transform.h"
 
 #include <cassert>
@@ -48,6 +49,7 @@ void BT::component::register_all_components()
 
     //---- All Components --------------------------------------------------------------------------
     REGISTER_COMPONENT(component::Entity_metadata);
+    REGISTER_COMPONENT(component::Render_object_settings);
     REGISTER_COMPONENT(component::Transform);
     REGISTER_COMPONENT(component::Transform_hierarchy);
     //----------------------------------------------------------------------------------------------

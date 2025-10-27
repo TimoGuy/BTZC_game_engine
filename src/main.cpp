@@ -7,6 +7,7 @@
 #include "game_object/game_object.h"
 #include "game_system_logic/entity_container.h"
 #include "game_system_logic/component/component_registry.h"
+#include "game_system_logic/system/process_render_object_lifetime.h"
 #include "game_system_logic/system/propagate_changed_transforms.h"
 #include "game_system_logic/world/scene_loader.h"
 #include "hitbox_interactor/hitcapsule.h"
@@ -424,6 +425,8 @@ int32_t main()
             INVOKE_SYSTEM(System__dev__anim_editor_tool_state_agent);
             INVOKE_SYSTEM(System_apply_phys_xform_to_rend_obj);
             BT::system::propagate_changed_transforms();  // Does there need to be 2 of these system invocations???  -Thea 2025/10/22
+
+            BT::system::process_render_object_lifetime();
 
             main_renderer.render(delta_time, [&]() {
                 // Render selected game obj.
