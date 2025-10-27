@@ -336,14 +336,16 @@ while (running_game_loop)
 
 - [x] Write scene loader to load entities and components from disk.
 
-- [ ] Have transform graph show up in imgui game object select.
+- [x] Have transform graph show up in imgui game object select.
     - [x] Rename to entities window.
     - [x] Stubbed out
     - [x] Render floating entities in its own list.
     - [x] Render hierarchy entities in its own list (just flat for now).
     - [x] Hierarchize the entities in the transform hierarchy.
     - [x] Include one floating entity.
-    - [ ] Make nodes clickable and have them show up in the inspector
+    - [x] Make nodes clickable and have them show up in the inspector
+        - [x] Initial
+        - [x] Have a deselect region at the bottom.
 
 
 - [ ] Next goal: Get stuff rendered onto the screen again~!
@@ -355,7 +357,7 @@ while (running_game_loop)
             - Needs to be built depending on the physics obj type.
 
 
-
+- [ ] 
 
 
 
