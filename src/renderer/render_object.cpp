@@ -1,5 +1,7 @@
 #include "render_object.h"
 
+#include "refactor_to_entt.h"
+
 #include "../game_object/game_object.h"
 #include "../service_finder/service_finder.h"
 #include "animator_template.h"
@@ -8,12 +10,22 @@
 #include "mesh.h"
 
 
-BT::Render_object::Render_object(Game_object& game_obj,
-                                 Render_layer layer,
-                                 Renderable_ifc const* renderable /*= nullptr*/)
+BT::Render_object::Render_object(
+#if !BTZC_REFACTOR_TO_ENTT
+    Game_object& game_obj,
+#endif  // !BTZC_REFACTOR_TO_ENTT
+    Render_layer layer
+#if !BTZC_REFACTOR_TO_ENTT
+    , Renderable_ifc const* renderable /*= nullptr*/
+#endif  // !BTZC_REFACTOR_TO_ENTT
+    )
+#if BTZC_REFACTOR_TO_ENTT
+    : m_layer(layer)
+#else
     : m_game_obj(game_obj)
     , m_layer(layer)
     , m_renderable(renderable)
+#endif  // !BTZC_REFACTOR_TO_ENTT
 {
     // Check that the layer is a single layer, not an aggregate layer.
     constexpr uint32_t k_num_shifts{ sizeof(Render_layer) * 8 };
@@ -45,13 +57,13 @@ void BT::Render_object::render(Render_layer active_layers,
 {
     if (m_layer & active_layers)
     {
-        mat4 transform;
 #if BTZC_REFACTOR_TO_ENTT
-        assert(false);  // @TODO implement.
+        m_renderable->render(m_render_transform, override_material);
 #else
+        mat4 transform;
         m_game_obj.get_transform_handle().get_transform_as_mat4(transform);
-#endif  // !BTZC_REFACTOR_TO_ENTT
         m_renderable->render(transform, override_material);
+#endif  // !BTZC_REFACTOR_TO_ENTT
     }
 }
 
@@ -114,13 +126,21 @@ BT::UUID BT::Render_object_pool::emplace(Render_object&& rend_obj)
 {
     UUID uuid{ rend_obj.get_uuid() };
     if (uuid.is_nil())
+    {   // Create UUID during emplacement.
+        rend_obj.assign_generated_uuid();
+        uuid = rend_obj.get_uuid();
+    }
+    else
     {
-        logger::printe(logger::ERROR, "Invalid UUID passed in.");
+        logger::printe(
+            logger::ERROR,
+            "Pre-generated UUID passed in. Nil UUID expected so it can be created in this step.");
         assert(false);
     }
 
     wait_until_free_then_block();
-    m_render_objects.emplace(uuid, std::move(rend_obj));
+    auto emplace_success{ m_render_objects.emplace(uuid, std::move(rend_obj)).second };
+    assert(emplace_success);  // @TODO: If emplace fails, try generating another UUID.
     unblock();
 
     return uuid;

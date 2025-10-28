@@ -85,13 +85,18 @@ set(MAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/component_registry.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/component_registry.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/entity_metadata.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/render_object_settings.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/transform.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/entity_container.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/entity_container.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/imgui_render_transform_hierarchy_window.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/imgui_render_transform_hierarchy_window.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/process_render_object_lifetime.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/process_render_object_lifetime.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/propagate_changed_transforms.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/propagate_changed_transforms.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/write_render_transforms.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/write_render_transforms.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/world/scene_loader.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/world/scene_loader.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/world/scene_saver.h
@@ -147,6 +152,7 @@ set(MAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/mesh.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/model_animator.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/model_animator.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/render_layer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/render_object.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/render_object.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/renderer_impl_win64.cpp

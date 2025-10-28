@@ -74,6 +74,9 @@ public:
     }
     Model_animator* get_model_animator() { return m_model_animator.get(); }
 
+    /// Read and write handle for render transform.
+    vec4* render_transform() { return m_render_transform; }
+
     void render(Render_layer active_layers,
                 Material_ifc* override_material = nullptr);
 
@@ -90,6 +93,8 @@ private:
     Renderable_ifc const* m_renderable;
     unique_ptr<Deformed_model> m_deformed_model{ nullptr };  // For owning a deformed model (since models are stored in a bank).
     unique_ptr<Model_animator> m_model_animator{ nullptr };
+
+    mat4 m_render_transform = GLM_MAT4_IDENTITY_INIT;
 };
 
 // @COPYPASTA: Not quite copypasta. It's a little bit different.

@@ -9,6 +9,7 @@
 #include "game_system_logic/component/component_registry.h"
 #include "game_system_logic/system/process_render_object_lifetime.h"
 #include "game_system_logic/system/propagate_changed_transforms.h"
+#include "game_system_logic/system/write_render_transforms.h"
 #include "game_system_logic/world/scene_loader.h"
 #include "hitbox_interactor/hitcapsule.h"
 #include "input_handler/input_handler.h"
@@ -423,6 +424,7 @@ int32_t main()
             #endif  // !BTZC_REFACTOR_TO_ENTT
 
             BT::system::process_render_object_lifetime();
+            BT::system::write_render_transforms();
 
             INVOKE_SYSTEM(System__dev__anim_editor_tool_state_agent);
             INVOKE_SYSTEM(System_apply_phys_xform_to_rend_obj);

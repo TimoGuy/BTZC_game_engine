@@ -1,5 +1,6 @@
 #include "process_render_object_lifetime.h"
 
+#include "btlogger.h"
 #include "entt/entity/fwd.hpp"
 #include "entt/entity/registry.hpp"
 #include "game_system_logic/component/render_object_settings.h"
@@ -10,6 +11,7 @@
 #include "renderer/render_object.h"
 #include "renderer/renderer.h"
 #include "service_finder/service_finder.h"
+#include "uuid/uuid.h"
 #include <memory>
 
 
@@ -20,11 +22,7 @@ using namespace BT;
 
 /// Searches thru render objects and finds and deletes 
 void destroy_dangling_render_objects(entt::registry& reg, Render_object_pool& rend_obj_pool)
-{
-
-    assert(false);  // @TODO: TEST
-
-    // Get all UUIDs inside render object pool.
+{   // Get all UUIDs inside render object pool.
     auto all_rend_objs{ rend_obj_pool.checkout_all_render_objs() };
 
     std::unordered_map<UUID, bool> rend_obj_uuid_to_found_tag_map;
@@ -50,6 +48,8 @@ void destroy_dangling_render_objects(entt::registry& reg, Render_object_pool& re
         if (!it.second)
         {   // Remove this UUID since it's dangling.
             rend_obj_pool.remove(it.first);
+            BT_TRACEF("Destroyed and removed \"%s\" from render object pool.",
+                      UUID_helper::to_pretty_repr(it.first).c_str());
         }
 }
 
@@ -58,8 +58,6 @@ void create_staged_render_objects(entt::registry& reg, Render_object_pool& rend_
 {
     auto view{ reg.view<component::Render_object_settings>(
         entt::exclude<component::Created_render_object_reference>) };
-
-    assert(false);  // @TODO: TEST
 
     // Create render objects.
     for (auto entity : view)
@@ -90,6 +88,9 @@ void create_staged_render_objects(entt::registry& reg, Render_object_pool& rend_
 
         // Attach render object id as new component.
         reg.emplace<component::Created_render_object_reference>(entity, rend_obj_uuid);
+
+        BT_TRACEF("Created and emplaced \"%s\" into render object pool.",
+                  UUID_helper::to_pretty_repr(rend_obj_uuid).c_str());
     }
 }
 

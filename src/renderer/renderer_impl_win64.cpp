@@ -1,5 +1,7 @@
 #include "renderer_impl_win64.h"
 
+#include "refactor_to_entt.h"
+
 #include "btglm.h"
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
@@ -761,7 +763,11 @@ void BT::Renderer::Impl::find_owning_game_obj_and_set_as_selected(Render_object*
 
     if (render_object)
     {
+#if BTZC_REFACTOR_TO_ENTT
+        assert(false);  // @TODO: FIGURE OUT WHAT YOU WANNA DOOOOO
+#else
         selected_game_obj = &render_object->get_owning_game_obj();
+#endif  // !BTZC_REFACTOR_TO_ENTT
     }
 
     m_imgui_renderer.set_selected_game_obj(selected_game_obj);
