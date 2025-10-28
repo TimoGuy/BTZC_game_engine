@@ -244,6 +244,66 @@ void internal_imgui_render_entities()
     ImGui::End();
 }
 
+/// Renders gizmo for transforms and updates entity transform if manipulated.
+void internal_imguizmo_transform_gizmo()
+{
+    // @TODO: IMPLEMENT vv
+#if 0
+    ImGuizmo::Enable(!m_renderer.get_camera_obj()->is_mouse_captured());
+
+    mat4 proj;
+    mat4 view;
+    mat4 proj_view;
+    m_renderer.get_camera_obj()->fetch_calculated_camera_matrices(proj, view, proj_view);
+    proj[1][1] *= -1.0f;  // Fix neg-Y issue.
+
+    mat4 transform_mat;
+    m_transform.get_transform_as_mat4(transform_mat);
+
+    vec3 orig_tra;
+    glm_vec3(transform_mat[3], orig_tra);
+
+    static ImGuizmo::OPERATION s_current_gizmo_operation{ ImGuizmo::UNIVERSAL };
+    ImGuizmo::MODE current_gizmo_mode{ s_imgui_gizmo_trans_space == 0 ?
+                                       ImGuizmo::WORLD :
+                                       ImGuizmo::LOCAL };
+
+    if (ImGuizmo::Manipulate(&view[0][0],
+                             &proj[0][0],
+                             s_current_gizmo_operation,
+                             current_gizmo_mode,
+                             &transform_mat[0][0]))
+    {
+        vec4 tra;
+        mat4 rot;
+        vec3 sca;
+        glm_decompose(transform_mat, tra, rot, sca);
+
+        // @NOTE: The position vector is already changed in the mat4 matrix, so
+        //   here is just manually calculating the world pos delta.
+        vec3 delta_tra;
+        glm_vec3_sub(tra, orig_tra, delta_tra);
+
+        rvec3  global_pos;
+        versor global_rot;
+        vec3   global_sca;
+        m_transform.get_global_transform_decomposed_data(global_pos, global_rot, global_sca);
+
+        global_pos[0] += delta_tra[0];
+        global_pos[1] += delta_tra[1];
+        global_pos[2] += delta_tra[2];
+        glm_mat4_quat(rot, global_rot);
+        glm_vec3_copy(sca, global_sca);
+
+        m_transform.set_global_pos_rot_sca(global_pos, global_rot, global_sca);
+
+        propagate_transform_changes();
+
+        s_imgui_trans_gizmo_used = true;
+    }
+#endif  // 0
+}
+
 /// "Properties inspector" window.
 void internal_imgui_render_item_properties_inspector()
 {
@@ -274,7 +334,7 @@ void internal_imgui_render_item_properties_inspector()
         //     game_obj->render_imgui_local_transform();
         // }
 
-        // game_obj->render_imgui_transform_gizmo();
+        internal_imguizmo_transform_gizmo();
     }
     ImGui::End();
 }

@@ -22,6 +22,7 @@
 #include "mesh.h"
 #include "misc/cpp/imgui_stdlib.h"
 #include "model_animator.h"  // @CHECK: @NOCHECKIN: Is this needed?
+#include "renderer.h"
 
 #include <array>
 #include <cmath>
@@ -322,10 +323,8 @@ void BT::ImGui_renderer::render_imgui(float_t delta_time)
         }
         ImGui::PopStyleVar();
 
-#if !BTZC_REFACTOR_TO_ENTT
         // Image of game view.
         m_renderer->render_imgui_game_view();
-#endif  // !BTZC_REFACTOR_TO_ENTT
 
         // Allow ImGuizmo to accept inputs from this window.
         ImGuizmo::SetAlternativeWindow(ImGui::GetCurrentWindow());
