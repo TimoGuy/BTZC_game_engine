@@ -3,6 +3,7 @@
 #include "../physics_engine/physics_engine.h"
 #include "../scene/scene_serialization_ifc.h"
 #include "../uuid/uuid_ifc.h"
+#include "render_layer.h"
 #include "btglm.h"
 #include "material.h"
 #include "mesh.h"
@@ -23,17 +24,6 @@ namespace BT
 {
 
 class Game_object;
-
-enum Render_layer : uint8_t
-{
-    RENDER_LAYER_ALL          = 0b11111111,
-    RENDER_LAYER_NONE         = 0b00000000,
-
-    RENDER_LAYER_DEFAULT      = 0b00000001,
-    RENDER_LAYER_INVISIBLE    = 0b00000010,
-    RENDER_LAYER_LEVEL_EDITOR = 0b00000100,
-};
-
 class Physics_object;
 
 class Render_object
@@ -44,11 +34,19 @@ class Render_object
 #endif  // !BTZC_REFACTOR_TO_ENTT
 {
 public:
-    Render_object(Game_object& game_obj,
-                  Render_layer layer,
-                  Renderable_ifc const* renderable = nullptr);
+    Render_object(
+#if !BTZC_REFACTOR_TO_ENTT
+        Game_object& game_obj,
+#endif  // !BTZC_REFACTOR_TO_ENTT
+        Render_layer layer
+#if !BTZC_REFACTOR_TO_ENTT
+        , Renderable_ifc const* renderable = nullptr
+#endif  // !BTZC_REFACTOR_TO_ENTT
+        );
 
+#if !BTZC_REFACTOR_TO_ENTT
     Game_object& get_owning_game_obj() { return m_game_obj; }
+#endif  // !BTZC_REFACTOR_TO_ENTT
 
     void set_model(Model const* model)
     {
@@ -85,7 +83,9 @@ public:
 #endif  // !BTZC_REFACTOR_TO_ENTT
 
 private:
+#if !BTZC_REFACTOR_TO_ENTT
     Game_object& m_game_obj;
+#endif  // !BTZC_REFACTOR_TO_ENTT
     Render_layer m_layer;
     Renderable_ifc const* m_renderable;
     unique_ptr<Deformed_model> m_deformed_model{ nullptr };  // For owning a deformed model (since models are stored in a bank).

@@ -1,24 +1,15 @@
 #pragma once
 
 #include "btjson.h"
+#include "renderer/render_layer.h"
 #include "uuid/uuid.h"
+
 
 
 namespace BT
 {
 namespace component
 {
-
-/// Bitmask for filtering layers to render.
-enum Render_layer : uint8_t
-{
-    RENDER_LAYER_ALL          = 0b11111111,
-    RENDER_LAYER_NONE         = 0b00000000,
-
-    RENDER_LAYER_DEFAULT      = 0b00000001,
-    RENDER_LAYER_INVISIBLE    = 0b00000010,
-    RENDER_LAYER_LEVEL_EDITOR = 0b00000100,
-};
 
 /// Serializable set of info that shows what kind of render object to create in the renderer.
 struct Render_object_settings

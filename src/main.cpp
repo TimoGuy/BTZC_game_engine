@@ -422,11 +422,11 @@ int32_t main()
             }
             #endif  // !BTZC_REFACTOR_TO_ENTT
 
+            BT::system::process_render_object_lifetime();
+
             INVOKE_SYSTEM(System__dev__anim_editor_tool_state_agent);
             INVOKE_SYSTEM(System_apply_phys_xform_to_rend_obj);
             BT::system::propagate_changed_transforms();  // Does there need to be 2 of these system invocations???  -Thea 2025/10/22
-
-            BT::system::process_render_object_lifetime();
 
             main_renderer.render(delta_time, [&]() {
                 // Render selected game obj.
