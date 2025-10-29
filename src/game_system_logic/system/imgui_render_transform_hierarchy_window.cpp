@@ -317,6 +317,7 @@ void internal_imguizmo_transform_gizmo()
     auto& reg{ service_finder::find_service<Entity_container>().get_ecs_registry() };
 
     ImGuizmo::Enable(!camera.is_mouse_captured());
+
     rvec3s  pos;
     versors rot;
     vec3s   sca;
@@ -324,6 +325,9 @@ void internal_imguizmo_transform_gizmo()
     {
         component::submit_transform_change_helper(reg, s_state.selected_entity, pos, rot, sca);
     }
+
+
+
 
 
     // @TODO: IMPLEMENT vv
