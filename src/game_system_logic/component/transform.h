@@ -40,12 +40,19 @@ struct Transform_hierarchy
     );
 };
 
-/// Tag that transform was changed (this is used for transform propagation thru the hierarchy).
+/// Tag that transform was changed (this is used for transform propagation thru the hierarchy, also
+/// to avoid directly mutating `Transform` component).
 struct Transform_changed
-{   /// For calculating delta transform.
-    /// @NOTE: Do not overwrite if this component already exists.
-    Transform prev_transform;
+{
+    Transform new_transform;
 };
+
+/// Helper function for submitting new transform change.
+void submit_transform_change_helper(entt::registry& reg,
+                                    entt::entity entity,
+                                    rvec3s pos,
+                                    versors rot,
+                                    vec3s sca);
 
 }  // namespace component
 }  // namespace BT

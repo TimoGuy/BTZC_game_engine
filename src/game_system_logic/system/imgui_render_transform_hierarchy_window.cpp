@@ -9,6 +9,8 @@
 #include "imgui_internal.h"
 #include "misc/cpp/imgui_stdlib.h"
 #include "ImGuizmo.h"
+#include "renderer/camera.h"
+#include "renderer/renderer.h"
 #include "service_finder/service_finder.h"
 #include "uuid/uuid.h"
 
@@ -244,9 +246,86 @@ void internal_imgui_render_entities()
     ImGui::End();
 }
 
+/// Draws ImGuizmo's mat4 manipulate gizmo.
+bool internal_imguizmo_manipulate(entt::registry& reg,
+                                  Camera& camera,
+                                  rvec3s& out_pos,
+                                  versors& out_rot,
+                                  vec3s& out_sca)
+{   // Get selected entity transform.
+    auto const ent_transform{ reg.try_get<component::Transform const>(s_state.selected_entity) };
+    if (ent_transform == nullptr)
+    {   // Exit since entity does not have a transform.
+        return false;
+    }
+
+    // Calculate TRS into mat4 transform.
+    // @COPYPASTA: This is the same operation as `write_render_transforms.cpp`
+    mat4 transform;
+    {
+        glm_translate_make(transform,
+                           vec3{ static_cast<float_t>(ent_transform->position.x),
+                                 static_cast<float_t>(ent_transform->position.y),
+                                 static_cast<float_t>(ent_transform->position.z) });
+        glm_quat_rotate(transform, const_cast<float_t*>(ent_transform->rotation.raw), transform);
+        glm_scale(transform, const_cast<float_t*>(ent_transform->scale.raw));
+    }
+
+    // Extract float translation.
+    vec3 orig_flt_tra;
+    glm_vec3(transform[3], orig_flt_tra);
+
+    // Get camera matrices.
+    mat4 proj;
+    mat4 view;
+    mat4 proj_view;
+    camera.fetch_calculated_camera_matrices(proj, view, proj_view);
+    proj[1][1] *= -1.0f;  // Fix neg-Y issue.
+
+    // Draw Imguizmo gizmo.
+    bool manipulated{ false };
+    if (ImGuizmo::Manipulate(&view[0][0],
+                             &proj[0][0],
+                             ImGuizmo::UNIVERSAL,
+                             true ? ImGuizmo::WORLD : ImGuizmo::LOCAL,
+                             &transform[0][0]))
+    {   // Copy result (@NOTE: This is reverse of the TRS->mat4 operation above).
+        vec4 tra;
+        mat4 rot;
+        vec3 sca;
+        glm_decompose(transform, tra, rot, sca);
+
+        out_pos.x = ent_transform->position.x + (tra[0] - orig_flt_tra[0]);
+        out_pos.y = ent_transform->position.y + (tra[1] - orig_flt_tra[1]);
+        out_pos.z = ent_transform->position.z + (tra[2] - orig_flt_tra[2]);
+        glm_mat4_quat(rot, out_rot.raw);
+        glm_vec3_copy(sca, out_sca.raw);
+
+        // Mark as manipulated.
+        manipulated = true;
+    }
+
+    return manipulated;
+}
+
 /// Renders gizmo for transforms and updates entity transform if manipulated.
 void internal_imguizmo_transform_gizmo()
 {
+    auto& renderer{ service_finder::find_service<Renderer>() };
+    auto& camera{ *renderer.get_camera_obj() };
+
+    auto& reg{ service_finder::find_service<Entity_container>().get_ecs_registry() };
+
+    ImGuizmo::Enable(!camera.is_mouse_captured());
+    rvec3s  pos;
+    versors rot;
+    vec3s   sca;
+    if (internal_imguizmo_manipulate(reg, camera, pos, rot, sca))
+    {
+        component::submit_transform_change_helper(reg, s_state.selected_entity, pos, rot, sca);
+    }
+
+
     // @TODO: IMPLEMENT vv
 #if 0
     ImGuizmo::Enable(!m_renderer.get_camera_obj()->is_mouse_captured());

@@ -109,16 +109,17 @@ void apply_delta_transform_recursive(auto& view,
                                      entt::entity entity,
                                      component::Transform const& delta_transform)
 {   // Apply delta trans to self.
-    assert(false);  // @TODO implement.
+    auto& transform{ view.template get<component::Transform>(entity) };
+    transform = append_transform(transform, delta_transform);
 
     // Search thru transform hierarchy children.
     auto const& transform_hierarchy{
         view.template get<component::Transform_hierarchy const>(entity) };
-    for (auto entity : transform_hierarchy.children_entities)
+    for (auto child_entity : transform_hierarchy.children_entities)
     {
         apply_delta_transform_recursive(view,
                                         entity_container,
-                                        entity_container.find_entity(entity),
+                                        entity_container.find_entity(child_entity),
                                         delta_transform);
     }
 }
@@ -140,22 +141,14 @@ void BT::system::propagate_changed_transforms()
     // Calculate delta transforms.
     for (auto entity : changed_trans_view)
     {
-        assert(false);  // @TODO: TEST THIS WHEN ITS WORKING.
-
         auto const& transform{ changed_trans_view.get<component::Transform const>(entity) };
-        auto const& transform_hierarchy{
-            changed_trans_view.get<component::Transform_hierarchy const>(entity)
-        };
         auto& transform_changed{ changed_trans_view.get<component::Transform_changed>(entity) };
 
-        // Invert `prev_transform`.
-        component::Transform inv_prev_transform =
-            inverse_transform(transform_changed.prev_transform);
-
-        // Append current transform to `inv_prev_transform` to get delta transform.
-        // @NOTE: Store the result inside of `prev_transform`, even though it's not technically the
+        // Append current transform to inverse of `transform` to get delta transform.
+        // @NOTE: Store the result inside of `new_transform`, even though it's not technically the
         //        right name for it.
-        transform_changed.prev_transform = append_transform(inv_prev_transform, transform);
+        transform_changed.new_transform =
+            append_transform(inverse_transform(transform), transform_changed.new_transform);
     }
 
     // Propagate transforms with delta transforms.
@@ -167,15 +160,12 @@ void BT::system::propagate_changed_transforms()
         auto const& transform_changed{ changed_trans_view.get<component::Transform_changed>(entity) };
 
         // @NOTE: Prev step inserts delta transform into here teehee.
-        auto const& delta_transform{ transform_changed.prev_transform };
+        auto const& delta_transform{ transform_changed.new_transform };
 
-        for (auto entity : transform_hierarchy.children_entities)
-        {
-            apply_delta_transform_recursive(trans_view,
-                                            entity_container,
-                                            entity_container.find_entity(entity),
-                                            delta_transform);
-        }
+        apply_delta_transform_recursive(trans_view,
+                                        entity_container,
+                                        entity,
+                                        delta_transform);
     }
 
     // Mark all transforms as propagated now (i.e. remove "changed" flag).
