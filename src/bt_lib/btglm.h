@@ -43,6 +43,50 @@ union rvec3s
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(rvec3s, x, y, z);
 
+/// RVec3 funcs.
+inline void btglm_rvec3_copy(rvec3 const v, rvec3 dest)
+{
+    dest[0] = v[0];
+    dest[1] = v[1];
+    dest[2] = v[2];
+}
+
+inline void btglm_rvec3_negate_to(rvec3 const v, rvec3 dest)
+{
+    dest[0] = -v[0];
+    dest[1] = -v[1];
+    dest[2] = -v[2];
+}
+
+inline void btglm_rvec3_add(rvec3 const a, rvec3 const b, rvec3 dest)
+{
+    dest[0] = a[0] + b[0];
+    dest[1] = a[1] + b[1];
+    dest[2] = a[2] + b[2];
+}
+
+inline void btglm_rvec3_scale_v3(rvec3 const v, vec3 const sca, rvec3 dest)
+{
+    dest[0] = v[0] * sca[0];
+    dest[1] = v[1] * sca[1];
+    dest[2] = v[2] * sca[2];
+}
+
+inline void btglm_quat_mul_rvec3(versor const q, rvec3 const v, rvec3 dest)
+{
+    mat3 m;
+    glm_quat_mat3(const_cast<float_t*>(q), m);
+
+    // glm_mat3_mulv(mat3 m, vec3 v, vec3 dest) {
+    rvec3 res;
+    res[0] = m[0][0] * v[0] + m[1][0] * v[1] + m[2][0] * v[2];
+    res[1] = m[0][1] * v[0] + m[1][1] * v[1] + m[2][1] * v[2];
+    res[2] = m[0][2] * v[0] + m[1][2] * v[1] + m[2][2] * v[2];
+    // glm_vec3_copy(res, dest);
+    btglm_rvec3_copy(res, dest);
+    // }
+}
+
 /// Types from cglm.
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(vec2s, x, y);
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(vec3s, x, y, z);

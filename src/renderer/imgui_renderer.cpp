@@ -377,6 +377,9 @@ void BT::ImGui_renderer::render_imgui(float_t delta_time)
 
         ImGui::Separator();
 
+        if (copy_logs)
+            ImGui::LogToClipboard();
+
         ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0, 0, 0, 1));
         ImGui::BeginChild("console_scrolling_region",
                           ImVec2(0, 0), //-footer_height_to_reserve),
@@ -417,6 +420,9 @@ void BT::ImGui_renderer::render_imgui(float_t delta_time)
         }
         ImGui::EndChild();
         ImGui::PopStyleColor();
+
+        if (copy_logs)
+            ImGui::LogFinish();
     }
     ImGui::End();
 

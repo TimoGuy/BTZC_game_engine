@@ -44,7 +44,7 @@ struct Transform_hierarchy
 /// to avoid directly mutating `Transform` component).
 struct Transform_changed
 {
-    Transform new_transform;
+    Transform next_transform;
 };
 
 /// Helper function for submitting new transform change.

@@ -287,7 +287,7 @@ bool internal_imguizmo_manipulate(entt::registry& reg,
     if (ImGuizmo::Manipulate(&view[0][0],
                              &proj[0][0],
                              ImGuizmo::UNIVERSAL,
-                             true ? ImGuizmo::WORLD : ImGuizmo::LOCAL,
+                             false ? ImGuizmo::WORLD : ImGuizmo::LOCAL,
                              &transform[0][0]))
     {   // Copy result (@NOTE: This is reverse of the TRS->mat4 operation above).
         vec4 tra;

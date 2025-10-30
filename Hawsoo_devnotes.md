@@ -351,8 +351,11 @@ while (running_game_loop)
 - [ ] Next goal: Get stuff rendered onto the screen again~!
     - [ ] OVERHAUL: Change these things into components
         - [x] Transform (serializable)
-        - Render object (partial serializable)
+        - [x] Render object (partial serializable)
             - Needs to be built in case deformed model.
+            - [ ] Fix Transform gizmos!
+                - [x] Position, rotation
+                - [ ] Scaling.
         - Physics object (partial serializable)
             - Needs to be built depending on the physics obj type.
 
