@@ -2,6 +2,7 @@
 
 #include "btglm.h"
 #include "btlogger.h"
+#include "timer/timer.h"
 #include "cglm/quat.h"
 #include "entt/entity/fwd.hpp"
 #include "entt/entity/registry.hpp"
@@ -75,9 +76,35 @@ component::Transform inverse_transform(component::Transform const& trans)
         inv_trans.scale.z = 1.0f / trans.scale.z;
 
     // Translation.
-    btglm_rvec3_negate_to(trans.position.raw, inv_trans.position.raw);
-    btglm_rvec3_scale_v3(inv_trans.position.raw, inv_trans.scale.raw, inv_trans.position.raw);
-    btglm_quat_mul_rvec3(inv_trans.rotation.raw, inv_trans.position.raw, inv_trans.position.raw);
+    if constexpr (true)
+    {
+        btglm_rvec3_negate_to(trans.position.raw, inv_trans.position.raw);
+        btglm_rvec3_scale_v3(inv_trans.position.raw, inv_trans.scale.raw, inv_trans.position.raw);
+        btglm_quat_mul_rvec3(inv_trans.rotation.raw, inv_trans.position.raw, inv_trans.position.raw);
+    }
+    else if constexpr (false)
+    {   // My former method (see `game_object.cpp:calc_inverse()`)
+        btglm_quat_mul_rvec3(inv_trans.rotation.raw, trans.position.raw, inv_trans.position.raw);
+        btglm_rvec3_scale_v3(inv_trans.position.raw, inv_trans.scale.raw, inv_trans.position.raw);  // Maybe this???
+        btglm_rvec3_negate_to(inv_trans.position.raw, inv_trans.position.raw);
+    }
+    else if constexpr (false)
+    {   // Idk maybe just negate the pos and that's it???
+        btglm_rvec3_negate_to(trans.position.raw, inv_trans.position.raw);
+    }
+    else if constexpr (false)
+    {   // Maybe just do the same order as `append_transform()`???
+        btglm_rvec3_scale_v3(trans.position.raw, inv_trans.scale.raw, inv_trans.position.raw);
+        btglm_quat_mul_rvec3(inv_trans.rotation.raw, inv_trans.position.raw, inv_trans.position.raw);
+        // btglm_rvec3_add(inv_trans.position.raw, inv_trans.position.raw, inv_trans.position.raw);
+        btglm_rvec3_negate_to(inv_trans.position.raw, inv_trans.position.raw);
+    }
+    else
+    {   // Maybe try the reverse of the method above?
+        btglm_rvec3_negate_to(trans.position.raw, inv_trans.position.raw);
+        btglm_quat_mul_rvec3(inv_trans.rotation.raw, inv_trans.position.raw, inv_trans.position.raw);
+        btglm_rvec3_scale_v3(trans.position.raw, inv_trans.scale.raw, inv_trans.position.raw);
+    }
 
 #endif  // 0
 
@@ -170,20 +197,25 @@ void apply_delta_transform_recursive(auto& view,
     auto& transform{ view.template get<component::Transform>(entity) };
     if (directly_apply)
     {
-        // transform = next_transform;
+        #define DIRECT_WAY 1
+        #if DIRECT_WAY
+
+        transform = next_transform;
+
+        #else
 
         // transform = append_transform(inverse_transform(prev_transform), transform);
         // transform = append_transform(next_transform, transform);
 
 
-#define HAWSOO_TEMP(_label, _trans)                                                                \
-    BT_WARNF(                                                                                      \
-        "%s\npos=(%0.3f, %0.3f, %0.3f)  rot=(%0.3f, %0.3f, %0.3f, %0.3f)  sca=(%0.3f, %0.3f, "     \
-        "%0.3f)",                                                                                  \
-        _label,                                                                                    \
-        _trans.position.x, _trans.position.y, _trans.position.z,                                   \
-        _trans.rotation.x, _trans.rotation.y, _trans.rotation.z, _trans.rotation.w,                \
-        _trans.scale.x, _trans.scale.y, _trans.scale.z)
+        #define HAWSOO_TEMP(_label, _trans)                                                                \
+            BT_WARNF(                                                                                      \
+                "%s\npos=(%0.3f, %0.3f, %0.3f)  rot=(%0.3f, %0.3f, %0.3f, %0.3f)  sca=(%0.3f, %0.3f, "     \
+                "%0.3f)",                                                                                  \
+                _label,                                                                                    \
+                _trans.position.x, _trans.position.y, _trans.position.z,                                   \
+                _trans.rotation.x, _trans.rotation.y, _trans.rotation.z, _trans.rotation.w,                \
+                _trans.scale.x, _trans.scale.y, _trans.scale.z)
 
         // HAWSOO_TEMP("1. `transform`", transform);
         // HAWSOO_TEMP("1. `prev_transform`", prev_transform);
@@ -197,12 +229,19 @@ void apply_delta_transform_recursive(auto& view,
         // HAWSOO_TEMP("2. `next_transform`", next_transform);
         transform = append_transform(next_transform, transform);
         // HAWSOO_TEMP("3. `transform`", transform);
+
+        #endif  // DIRECT_WAY
+        #undef DIRECT_WAY
     }
     else
     {   // Apply inverse of `prev_transform` to get local transform, then apply `next_transform` to
         // get global transform.
+        Timer my_timer;
+        my_timer.start_timer();
         transform = append_transform(inverse_transform(prev_transform), transform);
         transform = append_transform(next_transform, transform);
+        auto delta_time{ my_timer.calc_delta_time() };
+        BT_WARNF("Time to trans (s): %0.12f", delta_time);
 
         // Apply same transformation to the `Transform_changed` if there is one.
         auto trans_changed{ reg.try_get<component::Transform_changed>(entity) };

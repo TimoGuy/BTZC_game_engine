@@ -3,6 +3,7 @@
 #include "../btzc_game_engine.h"
 #include "btjson.h"
 #include "cglm/cglm.h"
+#include "cglm/quat.h"
 #include "cglm/types-struct.h"
 
 #include <cmath>
@@ -75,7 +76,16 @@ inline void btglm_rvec3_scale_v3(rvec3 const v, vec3 const sca, rvec3 dest)
 inline void btglm_quat_mul_rvec3(versor const q, rvec3 const v, rvec3 dest)
 {
     mat3 m;
-    glm_quat_mat3(const_cast<float_t*>(q), m);
+    if constexpr (false)
+    {
+        versor norm_q;
+        glm_quat_normalize_to(const_cast<float_t*>(q), norm_q);
+        glm_quat_mat3(norm_q, m);
+    }
+    else
+    {
+        glm_quat_mat3(const_cast<float_t*>(q), m);
+    }
 
     // glm_mat3_mulv(mat3 m, vec3 v, vec3 dest) {
     rvec3 res;
