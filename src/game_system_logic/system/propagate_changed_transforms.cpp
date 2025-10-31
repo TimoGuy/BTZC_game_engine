@@ -16,6 +16,9 @@ namespace
 
 using namespace BT;
 
+#define ENABLE_INVERSE_TRANSFORM 0
+
+#if ENABLE_INVERSE_TRANSFORM
 /// Inverses TRS transform.
 component::Transform inverse_transform(component::Transform const& trans)
 {
@@ -110,6 +113,48 @@ component::Transform inverse_transform(component::Transform const& trans)
 
     return inv_trans;
 }
+#else
+/// Appends transform, where `a` is parent transform, and `b` is child transform, however, with `a`
+/// being inverted, so it's like `a^-1 * b`.
+component::Transform append_transform_a_inv(component::Transform const& a,
+                                            component::Transform const& b)
+{
+    component::Transform result;
+
+    // Invert scale of `a`.
+    vec3s a_scale_inv = GLM_VEC3_ZERO_INIT;
+    if (!glm_eq(a.scale.x, 0))
+        a_scale_inv.x = 1.0f / a.scale.x;
+    if (!glm_eq(a.scale.y, 0))
+        a_scale_inv.y = 1.0f / a.scale.y;
+    if (!glm_eq(a.scale.z, 0))
+        a_scale_inv.z = 1.0f / a.scale.z;
+
+    // Scale.
+    glm_vec3_mul(a_scale_inv.raw, const_cast<float_t*>(b.scale.raw), result.scale.raw);
+
+    // Invert rotation.
+    versors a_rot_inv;
+    glm_quat_conjugate(const_cast<float_t*>(a.rotation.raw), a_rot_inv.raw);
+
+    // Rotation.
+    // @NOTE: Quats multiply in reverse.
+    glm_quat_mul(const_cast<float_t*>(b.rotation.raw), a_rot_inv.raw, result.rotation.raw);
+    glm_quat_normalize(result.rotation.raw);
+
+    // Translation.
+    // @NOTE: This is kinda the trickiest thing. Kinda undoing what `Translation` does in
+    //        `append_transform()` ig???
+    rvec3s a_tra_neg;
+    btglm_rvec3_negate_to(a.position.raw, a_tra_neg.raw);
+
+    btglm_rvec3_add(b.position.raw, a_tra_neg.raw, result.position.raw);
+    btglm_quat_mul_rvec3(a_rot_inv.raw, result.position.raw, result.position.raw);
+    btglm_rvec3_scale_v3(result.position.raw, a_scale_inv.raw, result.position.raw);
+
+    return result;
+}
+#endif  // ENABLE_INVERSE_TRANSFORM
 
 /// Appends transform, where `a` is parent transform, and `b` is child transform.
 component::Transform append_transform(component::Transform const& a, component::Transform const& b)
@@ -167,9 +212,9 @@ component::Transform append_transform(component::Transform const& a, component::
 
     // Scale.
     glm_vec3_mul(const_cast<float_t*>(a.scale.raw),
-                 const_cast<float*>(b.scale.raw),
+                 const_cast<float_t*>(b.scale.raw),
                  result.scale.raw);
-    
+
     // Rotation.
     // @NOTE: Quats multiply in reverse.
     glm_quat_mul(const_cast<float_t*>(b.rotation.raw),
@@ -183,6 +228,7 @@ component::Transform append_transform(component::Transform const& a, component::
     btglm_rvec3_add(a.position.raw, result.position.raw, result.position.raw);
 
 #endif  // 0
+
     return result;
 }
 
@@ -238,7 +284,11 @@ void apply_delta_transform_recursive(auto& view,
         // get global transform.
         Timer my_timer;
         my_timer.start_timer();
+        #if ENABLE_INVERSE_TRANSFORM
         transform = append_transform(inverse_transform(prev_transform), transform);
+        #else  // ENABLE_INVERSE_TRANSFORM
+        transform = append_transform_a_inv(prev_transform, transform);
+        #endif  // ENABLE_INVERSE_TRANSFORM
         transform = append_transform(next_transform, transform);
         auto delta_time{ my_timer.calc_delta_time() };
         BT_WARNF("Time to trans (s): %0.12f", delta_time);
@@ -248,7 +298,11 @@ void apply_delta_transform_recursive(auto& view,
         if (trans_changed != nullptr)
         {
             auto& next_trans{ trans_changed->next_transform };
+            #if ENABLE_INVERSE_TRANSFORM
             next_trans = append_transform(inverse_transform(prev_transform), next_trans);
+            #else  // ENABLE_INVERSE_TRANSFORM
+            next_trans = append_transform_a_inv(prev_transform, next_trans);
+            #endif  // ENABLE_INVERSE_TRANSFORM
             next_trans = append_transform(next_transform, next_trans);
         }
     }
