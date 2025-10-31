@@ -31,6 +31,7 @@ typedef BTZC_REAL_TYPE rvec3[3];
 #undef BTZC_REAL_TYPE
 
 
+/// Struct RVec3 type.
 union rvec3s
 {
     rvec3 raw;
@@ -43,6 +44,7 @@ union rvec3s
 };
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(rvec3s, x, y, z);
+
 
 /// RVec3 funcs.
 inline void btglm_rvec3_copy(rvec3 const v, rvec3 dest)
@@ -96,6 +98,7 @@ inline void btglm_quat_mul_rvec3(versor const q, rvec3 const v, rvec3 dest)
     btglm_rvec3_copy(res, dest);
     // }
 }
+
 
 /// Types from cglm.
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(vec2s, x, y);
