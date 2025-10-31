@@ -97,30 +97,22 @@ void BT::component::edit::imgui_edit__transform(entt::registry& reg, entt::entit
 
     ImGui::PushID(&transform);
 
-    float_t padding{ 8 * ImGui::GetIO().FontGlobalScale };
+    float_t padding{ 16 * ImGui::GetIO().FontGlobalScale };
+
+    ImGui::PushItemWidth((ImGui::GetContentRegionAvail().x * 0.5f) + (ImGui::GetFontSize() * -10));
 
     // Select transform editing space.
     static int32_t s_transform_type{ 0 };  // 0: Global
                                            // 1: Local
-    ImGui::BeginGroup();
-    {
-        ImGui::SeparatorText("Transform Space");
-        if (ImGui::RadioButton("Global", s_transform_type == 0)) s_transform_type = 0;
-        if (ImGui::RadioButton("Local",  s_transform_type == 1)) s_transform_type = 1;
-    }
-    ImGui::EndGroup();
+    ImGui::Combo("Transform Space", &s_transform_type, "Global\0Local\0");
     ImGui::SameLine(0, padding);
 
     // Select rotation edit type.
     static int32_t s_rotation_type{ 0 };  // 0: Euler
                                           // 1: Quaternion
-    ImGui::BeginGroup();
-    {
-        ImGui::SeparatorText("Rotation type");
-        if (ImGui::RadioButton("Euler in degrees", s_rotation_type == 0)) s_rotation_type = 0;
-        if (ImGui::RadioButton("Quaternion XYZW",  s_rotation_type == 1)) s_rotation_type = 1;
-    }
-    ImGui::EndGroup();
+    ImGui::Combo("Rotation type", &s_rotation_type, "Euler in degrees\0Quaternion XYZW\0");
+
+    ImGui::PopItemWidth();
 
     // Display transform.
     ImGui::SeparatorText("Transform as TRS");
@@ -128,11 +120,16 @@ void BT::component::edit::imgui_edit__transform(entt::registry& reg, entt::entit
     bool changed{ false };
     auto transform_copy{ transform };
 
+    ImGui::PushItemWidth(ImGui::GetFontSize() * -10);
+
+    // Translation.
     changed |= ImGui::DragScalarN("Position", ImGuiDataType_Double, transform_copy.position.raw, 3, 0.1f);
 
+    // Rotation.
     if (s_rotation_type == 0)
     {
         // @INCOMPLETE: @TODO: Make this actually use euler angles (in degrees).
+        // See `game_object.cpp:522` for a good example (since euler angles are unstable when doing multiple calcs).
         changed |= ImGui::DragFloat3("Rotation (Euler)", transform_copy.rotation.raw, 0.1f);
     }
     else if (s_rotation_type == 1)
@@ -144,7 +141,11 @@ void BT::component::edit::imgui_edit__transform(entt::registry& reg, entt::entit
         assert(false);
     }
 
+    // Scale.
+    // @TODO: Ensure that scale does not get <0.001 abs val.
     changed |= ImGui::DragFloat3("Scale", transform_copy.scale.raw, 0.01f);
+
+    ImGui::PopItemWidth();
 
     if (changed)
     {   // Assign new transform as the form of a transform change submission.
