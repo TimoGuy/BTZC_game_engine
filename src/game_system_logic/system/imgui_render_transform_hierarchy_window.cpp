@@ -2,6 +2,7 @@
 
 #include "entt/entity/entity.hpp"
 #include "entt/entity/fwd.hpp"
+#include "game_system_logic/component/component_registry.h"
 #include "game_system_logic/component/entity_metadata.h"
 #include "game_system_logic/component/transform.h"
 #include "game_system_logic/entity_container.h"
@@ -215,6 +216,7 @@ bool internal_imgui_render_entity_transform_hierarchy()
 /// space".
 void internal_imgui_render_deselect_entity_field()
 {
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0);
     ImGui::PushStyleColor(ImGuiCol_Button, 0x00000000);
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, 0x00000000);
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, 0x00000000);
@@ -223,6 +225,7 @@ void internal_imgui_render_deselect_entity_field()
                         std::max(24.0f, ImGui::GetContentRegionAvail().y)),
                     ImGuiButtonFlags_NoNavFocus);
     ImGui::PopStyleColor(3);
+    ImGui::PopStyleVar();
 
     if (ImGui::IsItemClicked())
         s_state.selected_entity = entt::null;
@@ -336,28 +339,9 @@ void internal_imgui_render_item_properties_inspector()
         ImGui::Text("Select something to inspect its properties.");
     }
     else
-    {
-        ImGui::Text("@TODO: IMPLEMENT!!!!.");
-        // assert(false);  // @TODO: Implement!!!
-
-
-
-
-
-        // auto game_obj{ m_game_objects.at(m_selected_game_obj).get() };
-
-        // auto name{ game_obj->get_name() };
-        // if (ImGui::InputText("Name", &name))
-        //     game_obj->set_name(std::move(name));
-
-        // ImGui::Text("UUID: %s", UUID_helper::to_pretty_repr(game_obj->get_uuid()).c_str());
-
-        // if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
-        // {
-        //     game_obj->render_imgui_local_transform();
-        // }
-
+    {   // Inspect properties.
         internal_imguizmo_transform_gizmo();
+        component::imgui_render_components_edit_panes(s_state.selected_entity);
     }
     ImGui::End();
 }

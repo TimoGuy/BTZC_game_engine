@@ -514,7 +514,11 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
     - [x] Animation authoring tool window. (So it lists out all the animations and one can be clicked to be edited and events and variable override times can get added to the animation. The variable overrides and events are integer frames.)
     - [x] Make custom hit/hurt capsule physics implementation (just doing overlaps), so that don't have to rely on jolt physics quite as much.
     - [ ] Use simple anim dude and make dummy character and create fighting animation movesets.
-    - [ ] 
+        - Deferred to fix script system issues (see "Script reform" below).
+            - The reason for this was due to no support to share data between scripts. Big oof.
+    - [ ] Script reform.
+        - Blocks the deferred task above.
+        - @NOTE: ended up deciding to replace with EnTT ecs.
 
 1. ~~Unity to this engine migration.~~
     - [x] Import scene as yaml structure.
