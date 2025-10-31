@@ -364,6 +364,8 @@ while (running_game_loop)
 
 
 - [ ] Inspector window.
+    - [x] Create component-grabbing tech.
+    - [x] Get a few components rendered in.
 
 
 
