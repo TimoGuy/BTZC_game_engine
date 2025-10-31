@@ -353,9 +353,9 @@ while (running_game_loop)
         - [x] Transform (serializable)
         - [x] Render object (partial serializable)
             - Needs to be built in case deformed model.
-            - [ ] Fix Transform gizmos!
+            - [x] Fix Transform gizmos!
                 - [x] Position, rotation
-                - [ ] Scaling.
+                - [x] Scaling. <---- THIS WAS HARD!!!!!
         - Physics object (partial serializable)
             - Needs to be built depending on the physics obj type.
 
