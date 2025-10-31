@@ -138,6 +138,55 @@
                     "type_name": "component::Transform_hierarchy",
                     "members_j": {
                         "parent_entity": "aae5ebfb-7c2b-49a8-bcb9-658fdea987af",
+                        "children_entities": ["019a3906-7e7d-7d56-b661-f6622ac60651"]
+                    }
+                },
+                {
+                    "type_name": "component::Render_object_settings",
+                    "members_j": {
+                        "render_layer": 1,
+                        "model_name": "simple_combat_char",
+                        "is_deformed": true,
+                        "animator_template_name": "simple_combat_char.btanitor"
+                    }
+                }
+            ]
+        },
+        {
+            "entity_uuid": "019a3906-7e7d-7d56-b661-f6622ac60651",
+            "components": [
+                {
+                    "type_name": "component::Entity_metadata",
+                    "members_j": {
+                        "name": "Character repr222 (very gay)",
+                        "uuid": "019a3906-7e7d-7d56-b661-f6622ac60651"
+                    }
+                },
+                {
+                    "type_name": "component::Transform",
+                    "members_j": {
+                        "position": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 5.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0,
+                            "w": 1.0
+                        },
+                        "scale": {
+                            "x": 1.0,
+                            "y": 1.0,
+                            "z": 1.0
+                        }
+                    }
+                },
+                {
+                    "type_name": "component::Transform_hierarchy",
+                    "members_j": {
+                        "parent_entity": "d33f01dc-b0b5-4954-9771-71a1c42e5209",
                         "children_entities": []
                     }
                 },
