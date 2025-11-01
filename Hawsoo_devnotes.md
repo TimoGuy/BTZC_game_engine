@@ -365,12 +365,40 @@ while (running_game_loop)
             - [ ] Get a couple physics objects into the btscene file.
             - [ ] Draw the debug meshes again!
             - [ ] (If doable) get the selected object to be rendered as well!
+                - [ ] Fix picking! (Bc picking just crashes for some reason... it might just be simple as an assert on an undef func?)
+            - [ ] Connect the physics objects to the entity transforms!
+                - This should probably just be its own system that runs after physics calculations finish. I think that would be good eh!
 
 
 - [ ] Inspector window.
     - [x] Create component-grabbing tech.
     - [x] Get a few components rendered in.
 
+- [ ] "Play" button.
+    - There could be an `if` statement for what systems would run with "play" on?
+        > I worry that this would cause bad branching, but hey, branch prediction should figure out the pattern that something's always gonna be a certain way after a few cpu cycles right?
+
+    - [ ] Upon clicking "Play" button
+        - [ ] Save a copy of the current scene being edited prior to setting `s_play_mode = true;`.
+        - [ ] Clear all registrations (mainly `Created_render_object_reference`)
+            - [ ] Change it so that `Deformed_model`s are only allowed when `s_play_mode == true`.
+                - I.e. during the level creation mode/screen, only T-pose models and stuff!!! (static models)
+            - [ ] Change it so that `Physics_object`s in the physics engine only get created when 
+        - [ ] Set `s_play_mode = true;`
+        - [ ] Run!
+            - When running, everything that needs to get created (e.g. render_objs, phys_objs), will still get created in the systems that create them, but this time, since `s_play_mode == true`, then everything will get created correctly!
+    
+    
+> Some thoughts on how there could be parallelization.
+>   Simulation running on one core, and then rendering running on another core, with that bit of sync when adding/removing render objects and passing transforms sim->rend could be good.
+>   And then the remaining cores are worker cores. They're asleep unless there are barriers submitted. They all work to tackle all the jobs in each barrier to finish whole barriers as fast as possible (first come first serve as far as priority).
+>
+>   A system can submit a barrier of jobs (i.e. barriers must be done in order, but the `n` number of jobs in the barrier can be in any order).
+>     After submitting the barrier of jobs, the system will work on the submitted barrier too (when calling on the `barrier.wait()` func), so that there's progress being done on everything at the very least.
+>
+>  There could be more parallelization happening (e.g. having another thread dedicated to some other type of work) (e.g. figuring out what systems depend on each other and running only the ones that depend on each other in order)
+>
+>  Thankfully, I should just implement this single-threaded now first and then profile and think about multithreaded workflows later.
 
 
 
