@@ -6,6 +6,7 @@
 #include "entt/core/type_info.hpp"
 #include "entt/entity/registry.hpp"
 #include "game_system_logic/component/entity_metadata.h"
+#include "game_system_logic/component/physics_object_settings.h"
 #include "game_system_logic/entity_container.h"
 #include "render_object_settings.h"
 #include "service_finder/service_finder.h"
@@ -73,13 +74,17 @@ void BT::component::register_all_components()
         } while(0);
 
     //---- All Components -- @NOTE: Order matters here! --------------------------------------------
-    //----------------       Component typename              Serializable?    ImGui edit func
-    REGISTER_COMPONENT(component::Entity_metadata,                 true,    edit::imgui_edit__entity_metadata);
-    REGISTER_COMPONENT(component::Transform,                       true,    edit::imgui_edit__transform);
-    REGISTER_COMPONENT(component::Transform_hierarchy,             true,    edit::imgui_edit__sample);
-    REGISTER_COMPONENT(component::Transform_changed,               false,   edit::imgui_edit__sample);
-    REGISTER_COMPONENT(component::Render_object_settings,          true,    edit::imgui_edit__sample);
-    REGISTER_COMPONENT(component::Created_render_object_reference, false,   edit::imgui_edit__sample);
+    //----------------       Component typename                        Serializable?    ImGui edit func
+    REGISTER_COMPONENT(component::Entity_metadata,                         true,    edit::imgui_edit__entity_metadata);
+    REGISTER_COMPONENT(component::Transform,                               true,    edit::imgui_edit__transform);
+    REGISTER_COMPONENT(component::Transform_hierarchy,                     true,    edit::imgui_edit__sample);
+    REGISTER_COMPONENT(component::Transform_changed,                       false,   edit::imgui_edit__sample);
+    REGISTER_COMPONENT(component::Render_object_settings,                  true,    edit::imgui_edit__sample);
+    REGISTER_COMPONENT(component::Created_render_object_reference,         false,   edit::imgui_edit__sample);
+    REGISTER_COMPONENT(component::Physics_object_settings,                 true,    edit::imgui_edit__sample);
+    REGISTER_COMPONENT(component::Physics_obj_type_triangle_mesh_settings, true,    edit::imgui_edit__sample);
+    REGISTER_COMPONENT(component::Physics_obj_type_char_con_settings,      true,    edit::imgui_edit__sample);
+    REGISTER_COMPONENT(component::Created_physics_object_reference,        false,   edit::imgui_edit__sample);
     //----------------------------------------------------------------------------------------------
 
     #undef REGISTER_COMPONENT

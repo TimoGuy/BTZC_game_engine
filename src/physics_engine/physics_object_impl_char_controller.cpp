@@ -244,12 +244,9 @@ void BT::Phys_obj_impl_char_controller::update_debug_mesh()
         current_trans.position.GetY() + 0.5f * height + m_radius);
 
     mat4 graphic_trans;
-#if BTZC_REFACTOR_TO_ENTT
-    assert(false);  // @TODO implement.
-#else
-    glm_translate_make(graphic_trans, vec3{ current_trans.position.GetX(),
-                                            current_trans.position.GetY(),
-                                            current_trans.position.GetZ() });
+    glm_translate_make(graphic_trans, vec3{ static_cast<float_t>(current_trans.position.GetX()),
+                                            static_cast<float_t>(current_trans.position.GetY()),
+                                            static_cast<float_t>(current_trans.position.GetZ()) });
     glm_quat_rotate(graphic_trans, versor{ current_trans.rotation.GetX(),
                                            current_trans.rotation.GetY(),
                                            current_trans.rotation.GetZ(),
@@ -257,7 +254,6 @@ void BT::Phys_obj_impl_char_controller::update_debug_mesh()
     glm_scale(graphic_trans, vec3{ m_radius,
                                    0.5f * height + m_radius,
                                    m_radius });
-#endif  // !BTZC_REFACTOR_TO_ENTT
     glm_mat4_copy(graphic_trans,
                   get_main_debug_mesh_pool()
                       .get_debug_mesh_volatile_handle(m_debug_mesh_id).transform);

@@ -362,8 +362,8 @@ while (running_game_loop)
         - Physics object (partial serializable)
             > Needs to be built depending on the physics obj type.
             - [x] Initial.
-            - [ ] Get a couple physics objects into the btscene file.
-            - [ ] Draw the debug meshes again!
+            - [x] Get a couple physics objects into the btscene file.
+            - [x] Draw the debug meshes again!
             - [ ] (If doable) get the selected object to be rendered as well!
                 - [ ] Fix picking! (Bc picking just crashes for some reason... it might just be simple as an assert on an undef func?)
             - [ ] Connect the physics objects to the entity transforms!
@@ -383,7 +383,11 @@ while (running_game_loop)
         - [ ] Clear all registrations (mainly `Created_render_object_reference`)
             - [ ] Change it so that `Deformed_model`s are only allowed when `s_play_mode == true`.
                 - I.e. during the level creation mode/screen, only T-pose models and stuff!!! (static models)
-            - [ ] Change it so that `Physics_object`s in the physics engine only get created when 
+            - [ ] Change it so that `Physics_object`s in the physics engine only get created when `s_play_mode == true`.
+                - This is suuuuper important bc creation of physics objects use the `Transform` as its starting point, and then it takes over the `Transform` while it's active in the entity.
+                - Since you can't really click and drag to move stuff very effectively in the level editor, this is necessary.
+                - Tho, once you're playing, and you wanna just drag stuff around... does that mean you just can't anymore?
+                > I think the above ^^ needs some more thought about if I'll support dragging around physics objs and how?
         - [ ] Set `s_play_mode = true;`
         - [ ] Run!
             - When running, everything that needs to get created (e.g. render_objs, phys_objs), will still get created in the systems that create them, but this time, since `s_play_mode == true`, then everything will get created correctly!

@@ -51,6 +51,20 @@
                             "d33f01dc-b0b5-4954-9771-71a1c42e5209"
                         ]
                     }
+                },
+                {
+                    "type_name": "component::Physics_object_settings",
+                    "members_j": {
+                        "phys_obj_type": 1
+                    }
+                },
+                {
+                    "type_name": "component::Physics_obj_type_char_con_settings",
+                    "members_j": {
+                        "radius": 0.5,
+                        "height": 2.0,
+                        "crouch_height": 1.0
+                    }
                 }
             ]
         },
@@ -99,6 +113,19 @@
                         "model_name": "probuilder_example",
                         "is_deformed": false,
                         "animator_template_name": ""
+                    }
+                },
+                {
+                    "type_name": "component::Physics_object_settings",
+                    "members_j": {
+                        "phys_obj_type": 0
+                    }
+                },
+                {
+                    "type_name": "component::Physics_obj_type_triangle_mesh_settings",
+                    "members_j": {
+                        "model_name": "probuilder_example",
+                        "motion_type": 0
                     }
                 }
             ]

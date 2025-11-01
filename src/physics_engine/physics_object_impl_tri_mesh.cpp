@@ -130,13 +130,10 @@ void BT::Phys_obj_impl_tri_mesh::update_debug_mesh()
 {
     auto current_trans{ read_transform() };
 
-#if BTZC_REFACTOR_TO_ENTT
-    assert(false);  // @TODO: Implement.
-#else
     mat4 graphic_trans;
-    glm_translate_make(graphic_trans, vec3{ current_trans.position.GetX(),
-                                            current_trans.position.GetY(),
-                                            current_trans.position.GetZ() });
+    glm_translate_make(graphic_trans, vec3{ static_cast<float_t>(current_trans.position.GetX()),
+                                            static_cast<float_t>(current_trans.position.GetY()),
+                                            static_cast<float_t>(current_trans.position.GetZ()) });
     glm_quat_rotate(graphic_trans, versor{ current_trans.rotation.GetX(),
                                            current_trans.rotation.GetY(),
                                            current_trans.rotation.GetZ(),
@@ -144,7 +141,6 @@ void BT::Phys_obj_impl_tri_mesh::update_debug_mesh()
     glm_mat4_copy(graphic_trans,
                   get_main_debug_mesh_pool()
                       .get_debug_mesh_volatile_handle(m_debug_mesh_id).transform);
-#endif  // !BTZC_REFACTOR_TO_ENTT
 }
 
 
