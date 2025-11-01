@@ -1,5 +1,7 @@
 #pragma once
 
+#include "refactor_to_entt.h"
+
 #include "../uuid/uuid.h"
 #include "Jolt/Jolt.h"
 #include "Jolt/Math/Float3.h"
@@ -20,7 +22,10 @@ class Model;
 class Phys_obj_impl_tri_mesh : public Physics_object_type_impl_ifc
 {
 public:
-    Phys_obj_impl_tri_mesh(Physics_engine& phys_engine,
+    Phys_obj_impl_tri_mesh(
+                           #if !BTZC_REFACTOR_TO_ENTT
+                           Physics_engine& phys_engine,
+                           #endif  // !BTZC_REFACTOR_TO_ENTT
                            Model const* model,
                            JPH::EMotionType motion_type,
                            Physics_transform&& init_transform);

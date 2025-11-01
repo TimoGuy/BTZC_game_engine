@@ -1,5 +1,7 @@
 #include "physics_object_impl_char_controller.h"
 
+#include "refactor_to_entt.h"
+
 #include "../renderer/debug_render_job.h"
 #include "../renderer/material.h"
 #include "../renderer/mesh.h"
@@ -11,16 +13,22 @@
 #include "Jolt/Physics/Collision/Shape/RotatedTranslatedShape.h"
 #include "Jolt/Physics/PhysicsSystem.h"
 #include "physics_engine_impl_layers.h"
+#include "service_finder/service_finder.h"
 
 
-BT::Phys_obj_impl_char_controller::Phys_obj_impl_char_controller(Physics_engine& phys_engine,
+BT::Phys_obj_impl_char_controller::Phys_obj_impl_char_controller(
+                                                                 #if !BTZC_REFACTOR_TO_ENTT
+                                                                 Physics_engine& phys_engine,
+                                                                 #endif  // !BTZC_REFACTOR_TO_ENTT
                                                                  float_t radius,
                                                                  float_t height,
                                                                  float_t crouch_height,
                                                                  Physics_transform&& init_transform)
+    #if !BTZC_REFACTOR_TO_ENTT
     : m_phys_engine{ phys_engine }
-    , m_phys_system{ *reinterpret_cast<JPH::PhysicsSystem*>(m_phys_engine.get_physics_system_ptr()) }
-    , m_phys_temp_allocator{ *reinterpret_cast<JPH::TempAllocator*>(m_phys_engine.get_physics_temp_allocator_ptr()) }
+    #endif  // !BTZC_REFACTOR_TO_ENTT
+    : m_phys_system{ *reinterpret_cast<JPH::PhysicsSystem*>(service_finder::find_service<Physics_engine>().get_physics_system_ptr()) }
+    , m_phys_temp_allocator{ *reinterpret_cast<JPH::TempAllocator*>(service_finder::find_service<Physics_engine>().get_physics_temp_allocator_ptr()) }
     , m_radius{ radius }
     , m_height{ height - 2.0f * radius }
     , m_crouch_height{ crouch_height - 2.0f * radius }

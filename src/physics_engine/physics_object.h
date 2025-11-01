@@ -43,6 +43,8 @@ struct Physics_transform
 {
     JPH::RVec3 position = JPH::RVec3::sZero();
     JPH::Quat rotation = JPH::Quat::sIdentity();
+    
+    static Physics_transform make_phys_trans(rvec3s pos, versors rot);
 };
 
 class Physics_object_type_impl_ifc
@@ -91,14 +93,20 @@ public:
         Game_object& game_obj,
         Physics_engine& phys_engine,
         json& node_ref);
-    static unique_ptr<Physics_object> create_triangle_mesh(Game_object& game_obj,
+    static unique_ptr<Physics_object> create_triangle_mesh(
+                                                           #if !BTZC_REFACTOR_TO_ENTT
+                                                           Game_object& game_obj,
                                                            Physics_engine& phys_engine,
+                                                           #endif  // !BTZC_REFACTOR_TO_ENTT
                                                            bool interpolate_transform,
                                                            Model const* model,
                                                            JPH::EMotionType motion_type,
                                                            Physics_transform&& init_transform);
-    static unique_ptr<Physics_object> create_character_controller(Game_object& game_obj,
+    static unique_ptr<Physics_object> create_character_controller(
+                                                                  #if !BTZC_REFACTOR_TO_ENTT
+                                                                  Game_object& game_obj,
                                                                   Physics_engine& phys_engine,
+                                                                  #endif  // !BTZC_REFACTOR_TO_ENTT
                                                                   bool interpolate_transform,
                                                                   float_t radius,
                                                                   float_t height,
@@ -107,8 +115,11 @@ public:
 
 private:
     // Required to use a factory function to init.
-    Physics_object(Game_object& game_obj,
+    Physics_object(
+                   #if !BTZC_REFACTOR_TO_ENTT
+                   Game_object& game_obj,
                    Physics_engine const* phys_engine,
+                   #endif  // !BTZC_REFACTOR_TO_ENTT
                    bool interpolate_transform,
                    unique_ptr<Physics_object_type_impl_ifc>&& impl_type);
 public:
@@ -128,8 +139,10 @@ public:
 #endif  // !BTZC_REFACTOR_TO_ENTT
 
 private:
+    #if !BTZC_REFACTOR_TO_ENTT
     Game_object& m_game_obj;
     Physics_engine const* m_phys_engine;
+    #endif  // !BTZC_REFACTOR_TO_ENTT
     bool m_interpolate;
 
     unique_ptr<Physics_object_type_impl_ifc> m_type_pimpl;

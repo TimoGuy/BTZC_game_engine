@@ -90,14 +90,14 @@
     - Bools
         - Override like this: `bool_name:o:true` (For the duration of the region, the bool `bool_name` is set to true, but only overwritten, not persistent (`o`).)
     - Rising-edge events
-        - Show 
+        - Show
 
     - Float names
         - model_opacity: range(0-1), default(1.0)
         - turn_speed: range(>=0), default(0.0)
         - move_speed: range(∞), default(0.0)  <<@NOTE: `move_speed` will cause character to start moving along the facing direction. Knockback is a negative number since this is moving back.
         - gravity_magnitude: range(∞), default(1.0)  <<@NOTE: Gravity is (0.0, -98.0, 0.0), but this value gets multiplied by gravity to get actual gravity applied to this character.
-        - 
+        -
 
     - Bool names
         - is_parry_active: default(false)
@@ -118,7 +118,7 @@
         - play_sfx_hurt_vocalize_human_male_mc
         - play_sfx_guard_receive_hit
         - play_sfx_deflect_receive_hit
-        - 
+        -
 
 - Okay, so it seems like there's a pretty good basis for how the timeline should work.
 
@@ -242,7 +242,7 @@ while (running_game_loop)
     - This is for making editing the hitcylinders easier.
     - [x] Initial
     - [x] Zoom and move.
-        - Right click to click 
+        - Right click to click
         - [x] Basic works.
         - [x] Calc basis vectors correctly.
 
@@ -360,7 +360,11 @@ while (running_game_loop)
                 - [x] Position, rotation
                 - [x] Scaling. <---- THIS WAS HARD!!!!!
         - Physics object (partial serializable)
-            - Needs to be built depending on the physics obj type.
+            > Needs to be built depending on the physics obj type.
+            - [x] Initial.
+            - [ ] Get a couple physics objects into the btscene file.
+            - [ ] Draw the debug meshes again!
+            - [ ] (If doable) get the selected object to be rendered as well!
 
 
 - [ ] Inspector window.
@@ -371,7 +375,7 @@ while (running_game_loop)
 
 
 
-- [ ] 
+- [ ]
 - [ ] Create script for character controller movement but without the input from player.
     - [ ] Perhaps this could just be a script that sends its data to another script? Maybe there could be a connections type thing? Mmmmm maybe provide a `on_start()` func for scripts where they could get the script that they need to send to and stuff?
 >-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-

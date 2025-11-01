@@ -12,6 +12,8 @@
 #include "physics_engine.h"
 #include "physics_object_impl_char_controller.h"
 #include "physics_object_impl_tri_mesh.h"
+#include "service_finder/service_finder.h"
+
 #include <memory>
 #include <string>
 
@@ -48,6 +50,12 @@ void quat_to_json(JPH::Quat rotation, json& node_ref)
 }
 
 }  // namespace
+
+
+BT::Physics_transform BT::Physics_transform::make_phys_trans(rvec3s pos, versors rot)
+{
+    return { JPH::RVec3(pos.x, pos.y, pos.z), JPH::Quat(rot.x, rot.y, rot.z, rot.w) };
+}
 
 unique_ptr<BT::Physics_object> BT::Physics_object::create_physics_object_from_serialization(
     Game_object& game_obj,
@@ -105,24 +113,37 @@ unique_ptr<BT::Physics_object> BT::Physics_object::create_physics_object_from_se
     return new_phys_obj;
 }
 
-unique_ptr<BT::Physics_object> BT::Physics_object::create_triangle_mesh(Game_object& game_obj,
+unique_ptr<BT::Physics_object> BT::Physics_object::create_triangle_mesh(
+                                                                        #if !BTZC_REFACTOR_TO_ENTT
+                                                                        Game_object& game_obj,
                                                                         Physics_engine& phys_engine,
+                                                                        #endif  // !BTZC_REFACTOR_TO_ENTT
                                                                         bool interpolate_transform,
                                                                         Model const* model,
                                                                         JPH::EMotionType motion_type,
                                                                         Physics_transform&& init_transform)
 {
     auto tri_mesh =
-        make_unique<Phys_obj_impl_tri_mesh>(phys_engine,
+        make_unique<Phys_obj_impl_tri_mesh>(
+                                            #if !BTZC_REFACTOR_TO_ENTT
+                                            phys_engine,
+                                            #endif  // !BTZC_REFACTOR_TO_ENTT
                                             model,
                                             motion_type,
                                             std::move(init_transform));
     return unique_ptr<Physics_object>(
-        new Physics_object(game_obj, &phys_engine, interpolate_transform, std::move(tri_mesh)));
+        new Physics_object(
+            #if !BTZC_REFACTOR_TO_ENTT
+            game_obj, &phys_engine,
+            #endif  // !BTZC_REFACTOR_TO_ENTT
+            interpolate_transform, std::move(tri_mesh)));
 }
 
-unique_ptr<BT::Physics_object> BT::Physics_object::create_character_controller(Game_object& game_obj,
+unique_ptr<BT::Physics_object> BT::Physics_object::create_character_controller(
+                                                                               #if !BTZC_REFACTOR_TO_ENTT
+                                                                               Game_object& game_obj,
                                                                                Physics_engine& phys_engine,
+                                                                               #endif  // !BTZC_REFACTOR_TO_ENTT
                                                                                bool interpolate_transform,
                                                                                float_t radius,
                                                                                float_t height,
@@ -130,22 +151,35 @@ unique_ptr<BT::Physics_object> BT::Physics_object::create_character_controller(G
                                                                                Physics_transform&& init_transform)
 {
     auto cc =
-        make_unique<Phys_obj_impl_char_controller>(phys_engine,
+        make_unique<Phys_obj_impl_char_controller>(
+                                                   #if !BTZC_REFACTOR_TO_ENTT
+                                                   phys_engine,
+                                                   #endif  // !BTZC_REFACTOR_TO_ENTT
                                                    radius,
                                                    height,
                                                    crouch_height,
                                                    std::move(init_transform));
     return unique_ptr<Physics_object>(
-        new Physics_object(game_obj, &phys_engine, interpolate_transform, std::move(cc)));
+        new Physics_object(
+            #if !BTZC_REFACTOR_TO_ENTT
+            game_obj, &phys_engine,
+            #endif  // !BTZC_REFACTOR_TO_ENTT
+            interpolate_transform, std::move(cc)));
 }
 
-BT::Physics_object::Physics_object(Game_object& game_obj,
+BT::Physics_object::Physics_object(
+                                   #if !BTZC_REFACTOR_TO_ENTT
+                                   Game_object& game_obj,
                                    Physics_engine const* phys_engine,
+                                   #endif  // !BTZC_REFACTOR_TO_ENTT
                                    bool interpolate_transform,
                                    unique_ptr<Physics_object_type_impl_ifc>&& impl_type)
+    
+    #if !BTZC_REFACTOR_TO_ENTT
     : m_game_obj{ game_obj }
     , m_phys_engine{ phys_engine }
-    , m_interpolate{ interpolate_transform }
+    #endif  // !BTZC_REFACTOR_TO_ENTT
+    : m_interpolate{ interpolate_transform }
     , m_type_pimpl{ std::move(impl_type) }
 {
 }
@@ -181,7 +215,7 @@ void BT::Physics_object::get_transform_for_game_obj(rvec3& out_position, versor&
     if (m_interpolate)
     {
         // Interpolate A and B transforms.
-        float_t lerp_val{ m_phys_engine->get_interpolation_alpha() };
+        float_t lerp_val{ service_finder::find_service<Physics_engine>().get_interpolation_alpha() };  // @TODO: @FIXME: I want this gone since there's not gonna be interpolation between physics and simulation/game thread. They're locked together now.  -Thea 2025/10/31
         auto& trans_a{ m_transform_triple_buffer[(trip_buf_offset + k_trip_buf_read_a) % 3] };
         auto& trans_b{ m_transform_triple_buffer[(trip_buf_offset + k_trip_buf_read_b) % 3] };
 

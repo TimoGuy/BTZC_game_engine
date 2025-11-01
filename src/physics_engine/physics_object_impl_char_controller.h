@@ -1,5 +1,7 @@
 #pragma once
 
+#include "refactor_to_entt.h"
+
 #include "../uuid/uuid.h"
 #include "Jolt/Jolt.h"
 #include "Jolt/Core/TempAllocator.h"
@@ -21,7 +23,10 @@ class Model;
 class Phys_obj_impl_char_controller : public Physics_object_type_impl_ifc, public JPH::CharacterContactListener
 {
 public:
-    Phys_obj_impl_char_controller(Physics_engine& phys_engine,
+    Phys_obj_impl_char_controller(
+                                  #if !BTZC_REFACTOR_TO_ENTT
+                                  Physics_engine& phys_engine,
+                                  #endif  // !BTZC_REFACTOR_TO_ENTT
                                   float_t radius,
                                   float_t height,
                                   float_t crouch_height,
@@ -85,7 +90,9 @@ public:
 
 
 private:
+    #if !BTZC_REFACTOR_TO_ENTT
     Physics_engine& m_phys_engine;
+    #endif  // !BTZC_REFACTOR_TO_ENTT
     JPH::PhysicsSystem& m_phys_system;
     JPH::TempAllocator& m_phys_temp_allocator;
     float_t m_radius;

@@ -12,6 +12,7 @@
 #include "renderer/renderer.h"
 #include "service_finder/service_finder.h"
 #include "uuid/uuid.h"
+
 #include <memory>
 
 
@@ -20,7 +21,7 @@ namespace
 
 using namespace BT;
 
-/// Searches thru render objects and finds and deletes 
+/// Searches thru render objects and finds and deletes dangling ones.
 void destroy_dangling_render_objects(entt::registry& reg, Render_object_pool& rend_obj_pool)
 {   // Get all UUIDs inside render object pool.
     auto all_rend_objs{ rend_obj_pool.checkout_all_render_objs() };
@@ -103,7 +104,7 @@ void BT::system::process_render_object_lifetime()
     auto& rend_obj_pool{ service_finder::find_service<Renderer>().get_render_object_pool() };
 
     // @TODO: Perhaps right @HERE there needs to be a lock on the renderer, since it's basically an
-    //        update to the renderer of "hey here's everything that updated". 
+    //        update to the renderer of "hey here's everything that updated".
 
     destroy_dangling_render_objects(reg, rend_obj_pool);
     create_staged_render_objects(reg, rend_obj_pool);

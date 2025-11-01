@@ -19,14 +19,18 @@
 #include "btlogger.h"
 #include "physics_engine.h"
 #include "physics_engine_impl_layers.h"
+#include "service_finder/service_finder.h"
 #include <cassert>
 
 
-BT::Phys_obj_impl_tri_mesh::Phys_obj_impl_tri_mesh(Physics_engine& phys_engine,
+BT::Phys_obj_impl_tri_mesh::Phys_obj_impl_tri_mesh(
+                                                   #if !BTZC_REFACTOR_TO_ENTT
+                                                   Physics_engine& phys_engine,
+                                                   #endif  // !BTZC_REFACTOR_TO_ENTT
                                                    Model const* model,
                                                    JPH::EMotionType motion_type,
                                                    Physics_transform&& init_transform)
-    : m_phys_body_ifc{ *reinterpret_cast<JPH::BodyInterface*>(phys_engine.get_physics_body_ifc()) }
+    : m_phys_body_ifc{ *reinterpret_cast<JPH::BodyInterface*>(service_finder::find_service<Physics_engine>().get_physics_body_ifc()) }
     , m_model{ model }
     , m_can_move{ motion_type == JPH::EMotionType::Kinematic }
 {

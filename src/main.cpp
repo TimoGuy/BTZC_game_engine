@@ -7,6 +7,7 @@
 #include "game_object/game_object.h"
 #include "game_system_logic/entity_container.h"
 #include "game_system_logic/component/component_registry.h"
+#include "game_system_logic/system/process_physics_object_lifetime.h"
 #include "game_system_logic/system/process_render_object_lifetime.h"
 #include "game_system_logic/system/propagate_changed_transforms.h"
 #include "game_system_logic/system/write_render_transforms.h"
@@ -394,7 +395,7 @@ int32_t main()
         #endif  // !BTZC_REFACTOR_TO_ENTT
 
         main_physics_engine.accumulate_delta_time(delta_time);
-        while (main_physics_engine.calc_wants_to_tick())
+        while (main_physics_engine.calc_wants_to_tick())  // @TODO: Change the `wants_to_tick()` to something that's not the physics engine. Perhaps a simulation manager or something???  -Thea 2025/10/31
         {   // Run all pre-physics systems.
             #if !BTZC_REFACTOR_TO_ENTT
             for (auto game_obj : all_game_objs)
@@ -403,9 +404,14 @@ int32_t main()
             }
             #endif  // !BTZC_REFACTOR_TO_ENTT
 
+            BT::system::process_physics_object_lifetime();
+
             INVOKE_SYSTEM(System_player_character_movement);
             INVOKE_SYSTEM(System_animator_driven_hitcapsule_set);
             BT::system::propagate_changed_transforms();  // Does there need to be 2 of these system invocations???  -Thea 2025/10/22
+            // @REPLY: @TODO: @FIXME: I kinda don't think that there needs to be 2
+            // `propagate_changed_transforms()`, since ideally there would be just a conversion of
+            // the entity transform to the render object transform. Maybe?  -Thea 2025/10/31
 
             // Update physics.
             main_physics_engine.update_physics();
