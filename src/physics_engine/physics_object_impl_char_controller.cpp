@@ -80,11 +80,11 @@ BT::Phys_obj_impl_char_controller::Phys_obj_impl_char_controller(
 
     // Create debug render job.
     static auto s_debug_model{ Model_bank::get_model("unit_box") };
-    m_debug_mesh_id =
-        get_main_debug_mesh_pool().emplace_debug_mesh({
-            *s_debug_model,
-            Material_bank::get_material("debug_physics_wireframe_fore_material"),
-            Material_bank::get_material("debug_physics_wireframe_back_material") });
+    m_debug_mesh_id = get_main_debug_mesh_pool().emplace_debug_mesh(
+        { s_debug_model,
+          Debug_mesh_pool::k_mask_phys_obj,
+          Material_bank::get_material("debug_physics_wireframe_fore_material"),
+          Material_bank::get_material("debug_physics_wireframe_back_material") });
 }
 
 BT::Phys_obj_impl_char_controller::~Phys_obj_impl_char_controller()

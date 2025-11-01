@@ -24,7 +24,6 @@ public:
     void set_renderer_ref(Renderer* renderer) { m_renderer = renderer; }
     void set_input_handler_ref(Input_handler* input_handler) { m_input_handler = input_handler; }
 
-    void set_selected_game_obj(Game_object* game_obj);
     void render_imgui(float_t delta_time);
 
 private:

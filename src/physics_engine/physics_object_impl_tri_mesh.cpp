@@ -94,11 +94,11 @@ BT::Phys_obj_impl_tri_mesh::Phys_obj_impl_tri_mesh(
     m_body_id = m_phys_body_ifc.CreateAndAddBody(mesh_body_settings, JPH::EActivation::DontActivate);
 
     // Create debug render job.
-    m_debug_mesh_id =
-        get_main_debug_mesh_pool().emplace_debug_mesh({
-            *m_model,
-            Material_bank::get_material("debug_physics_wireframe_fore_material"),
-            Material_bank::get_material("debug_physics_wireframe_back_material") });
+    m_debug_mesh_id = get_main_debug_mesh_pool().emplace_debug_mesh(
+        { m_model,
+          Debug_mesh_pool::k_mask_phys_obj,
+          Material_bank::get_material("debug_physics_wireframe_fore_material"),
+          Material_bank::get_material("debug_physics_wireframe_back_material") });
 }
 
 BT::Phys_obj_impl_tri_mesh::~Phys_obj_impl_tri_mesh()

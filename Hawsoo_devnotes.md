@@ -364,8 +364,10 @@ while (running_game_loop)
             - [x] Initial.
             - [x] Get a couple physics objects into the btscene file.
             - [x] Draw the debug meshes again!
-            - [ ] (If doable) get the selected object to be rendered as well!
-                - [ ] Fix picking! (Bc picking just crashes for some reason... it might just be simple as an assert on an undef func?)
+            - [x] (If doable) get the selected object to be rendered as well!
+                - [x] Fix picking! (Bc picking just crashes for some reason... it might just be simple as an assert on an undef func?)
+                - [x] Re-add the render job to render the selected object.
+                - [x] Since I added it to the debug render job, add masks for the meshes and edit it in the imgui menu bar.
             - [ ] Connect the physics objects to the entity transforms!
                 - This should probably just be its own system that runs after physics calculations finish. I think that would be good eh!
 

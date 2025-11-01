@@ -4,6 +4,7 @@
 #include "entt/entity/fwd.hpp"
 #include "game_system_logic/component/component_registry.h"
 #include "game_system_logic/component/entity_metadata.h"
+#include "game_system_logic/component/render_object_settings.h"
 #include "game_system_logic/component/transform.h"
 #include "game_system_logic/entity_container.h"
 #include "imgui.h"
@@ -11,6 +12,7 @@
 #include "misc/cpp/imgui_stdlib.h"
 #include "ImGuizmo.h"
 #include "renderer/camera.h"
+#include "renderer/debug_render_job.h"
 #include "renderer/renderer.h"
 #include "service_finder/service_finder.h"
 #include "uuid/uuid.h"
@@ -27,6 +29,7 @@ using namespace BT;
 struct State
 {
     entt::entity selected_entity{ entt::null };
+    UUID debug_mesh_key;
 };
 static State s_state;
 
@@ -353,9 +356,76 @@ void BT::system::imgui_render_transform_hierarchy_window(bool clear_state)
 {
     if (clear_state)
     {
+        if (!s_state.debug_mesh_key.is_nil())
+        {   // Remove debug mesh from set of render jobs!
+            get_main_debug_mesh_pool().remove_debug_mesh(s_state.debug_mesh_key);
+            s_state.debug_mesh_key = UUID();
+        }
+
         s_state = {};
     }
 
     internal_imgui_render_entities();
     internal_imgui_render_item_properties_inspector();
 }
+
+void BT::system::set_selected_entity(entt::entity entity)
+{
+    if (!s_state.debug_mesh_key.is_nil())  // @COPYPASTA
+    {   // Remove debug mesh from set of render jobs!
+        get_main_debug_mesh_pool().remove_debug_mesh(s_state.debug_mesh_key);
+        s_state.debug_mesh_key = UUID();
+    }
+
+    // Set selected entity.
+    s_state.selected_entity = entity;
+}
+
+void BT::system::update_selected_entity_debug_render_transform()
+{   // Make sure that there is an entity selected.
+    if (s_state.selected_entity == entt::null)
+        return;
+
+    // Look for selected entity's render object.
+    auto poss_rend_obj_ref{ service_finder::find_service<Entity_container>()
+                                .get_ecs_registry()
+                                .try_get<component::Created_render_object_reference const>(
+                                    s_state.selected_entity) };
+    if (!poss_rend_obj_ref)
+        return;
+
+    // Create new debug mesh if doesn't exist yet.
+    if (s_state.debug_mesh_key.is_nil())
+    {
+        auto& rend_obj_pool{ service_finder::find_service<Renderer>().get_render_object_pool() };
+        auto checked_out_rend_objs{ rend_obj_pool.checkout_render_obj_by_key(
+            { poss_rend_obj_ref->render_obj_uuid_ref }) };
+
+        // Create debug mesh.
+        s_state.debug_mesh_key = get_main_debug_mesh_pool().emplace_debug_mesh(
+            { checked_out_rend_objs.front()->get_renderable(),
+              Debug_mesh_pool::k_mask_selected_obj,
+              Material_bank::get_material("debug_selected_wireframe_fore_material"),
+              Material_bank::get_material("debug_selected_wireframe_back_material") });
+
+        rend_obj_pool.return_render_objs(std::move(checked_out_rend_objs));
+    }
+
+    // Get render transform of render object.
+    mat4 rend_trans;
+
+    auto& rend_obj_pool{ service_finder::find_service<Renderer>().get_render_object_pool() };
+    auto checked_out_rend_objs{ rend_obj_pool.checkout_render_obj_by_key(
+        { poss_rend_obj_ref->render_obj_uuid_ref }) };
+
+    glm_mat4_copy(checked_out_rend_objs.front()->render_transform(), rend_trans);
+
+    rend_obj_pool.return_render_objs(std::move(checked_out_rend_objs));
+
+    // Set render transform of debug mesh.
+    glm_mat4_copy(rend_trans,
+                  get_main_debug_mesh_pool()
+                      .get_debug_mesh_volatile_handle(s_state.debug_mesh_key)
+                      .transform);
+}
+

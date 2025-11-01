@@ -2,7 +2,6 @@
 
 #include "refactor_to_entt.h"
 
-#include "btglm.h"
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
@@ -16,13 +15,19 @@
 #include "../btzc_game_engine.h"
 #include "../input_handler/input_handler.h"
 #include "../game_object/game_object.h"
-#include "debug_render_job.h"
+#include "btglm.h"
 #include "btlogger.h"
+#include "debug_render_job.h"
+#include "entt/entity/entity.hpp"
+#include "game_system_logic/entity_container.h"
+#include "game_system_logic/component/render_object_settings.h"
+#include "game_system_logic/system/imgui_render_transform_hierarchy_window.h"
 #include "material.h"
 #include "material_impl_debug_picking.h"
 #include "material_impl_debug_lines.h"
 #include "render_object.h"
 #include "renderer.h"
+#include "service_finder/service_finder.h"
 #include "stb_image.h"
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
 #include "stb_image_resize2.h"
@@ -748,7 +753,7 @@ void BT::Renderer::Impl::render_scene_to_picking_framebuffer()
     {
         picked_rend_obj = rend_objs[picked_idx];
     }
-    find_owning_game_obj_and_set_as_selected(picked_rend_obj);
+    find_owning_entity_and_set_as_selected(picked_rend_obj);
 
     m_rend_obj_pool.return_render_objs(std::move(rend_objs));
 
@@ -757,20 +762,41 @@ void BT::Renderer::Impl::render_scene_to_picking_framebuffer()
     glDisable(GL_DEPTH_TEST);
 }
 
-void BT::Renderer::Impl::find_owning_game_obj_and_set_as_selected(Render_object* render_object)
+void BT::Renderer::Impl::find_owning_entity_and_set_as_selected(Render_object* render_object)
 {
+#if BTZC_REFACTOR_TO_ENTT
+    entt::entity ecs_entity{ entt::null };
+
+    if (render_object != nullptr)
+    {   // Use UUID of render obj to search.
+        auto rend_obj_uuid{ render_object->get_uuid() };
+
+        auto view{ service_finder::find_service<Entity_container>()
+                       .get_ecs_registry()
+                       .view<component::Created_render_object_reference const>() };
+
+        for (auto view_entity : view)
+        {
+            if (view.get<component::Created_render_object_reference const>(view_entity)
+                    .render_obj_uuid_ref == rend_obj_uuid)
+            {   // Found correct entity!
+                ecs_entity = view_entity;
+                break;
+            }
+        }
+    }
+
+    system::set_selected_entity(ecs_entity);
+#else
     Game_object* selected_game_obj{ nullptr };
 
     if (render_object)
     {
-#if BTZC_REFACTOR_TO_ENTT
-        assert(false);  // @TODO: FIGURE OUT WHAT YOU WANNA DOOOOO
-#else
         selected_game_obj = &render_object->get_owning_game_obj();
-#endif  // !BTZC_REFACTOR_TO_ENTT
     }
 
     m_imgui_renderer.set_selected_game_obj(selected_game_obj);
+#endif  // !BTZC_REFACTOR_TO_ENTT
 }
 
 void BT::Renderer::Impl::render_hdr_color_to_ldr_framebuffer()

@@ -48,6 +48,8 @@ public:
     Game_object& get_owning_game_obj() { return m_game_obj; }
 #endif  // !BTZC_REFACTOR_TO_ENTT
 
+    Renderable_ifc const* get_renderable() { return m_renderable; }
+
     void set_model(Model const* model)
     {
         assert(model != nullptr);

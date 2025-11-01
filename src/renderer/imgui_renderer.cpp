@@ -37,15 +37,6 @@ BT::ImGui_renderer::ImGui_renderer()
     BT_SERVICE_FINDER_ADD_SERVICE(ImGui_renderer, this);
 }
 
-void BT::ImGui_renderer::set_selected_game_obj(Game_object* game_obj)
-{
-#if BTZC_REFACTOR_TO_ENTT
-    assert(false);  // Implement!!
-#else
-    m_game_obj_pool->set_selected_game_obj(game_obj);
-#endif  // BTZC_REFACTOR_TO_ENTT
-}
-
 void BT::ImGui_renderer::render_imgui(float_t delta_time)
 {
     // @NOCHECKIN: @TEMP
@@ -125,15 +116,34 @@ void BT::ImGui_renderer::render_imgui(float_t delta_time)
 
             ImGui::MenuItem("Show ImGui demo window", nullptr, &s_show_demo_window);
 
-            if (ImGui::MenuItem("Show debug meshes", nullptr, get_main_debug_mesh_pool().get_visible()))
+            if (ImGui::BeginMenu("Show debug renderables"))
             {
-                get_main_debug_mesh_pool().set_visible(!get_main_debug_mesh_pool().get_visible());
+                if (ImGui::MenuItem("Lines", nullptr, get_main_debug_line_pool().get_visible()))
+                {
+                    get_main_debug_line_pool().set_visible(
+                        !get_main_debug_line_pool().get_visible());
+                }
+
+                // All the debug mesh masks.
+                static std::vector<std::pair<std::string, uint8_t>> const k_masks{
+                    { "Selected obj", Debug_mesh_pool::k_mask_selected_obj },
+                    { "Physics obj", Debug_mesh_pool::k_mask_phys_obj },
+                };
+                for (auto& [mask_str, mask_bit] : k_masks)
+                {
+                    if (ImGui::MenuItem(("Meshes: " + mask_str).c_str(),
+                                        nullptr,
+                                        get_main_debug_mesh_pool().get_visible(mask_bit)))
+                    {
+                        get_main_debug_mesh_pool().set_visible(
+                            mask_bit,
+                            !get_main_debug_mesh_pool().get_visible(mask_bit));
+                    }
+                }
+
+                ImGui::EndMenu();
             }
 
-            if (ImGui::MenuItem("Show debug lines", nullptr, get_main_debug_line_pool().get_visible()))
-            {
-                get_main_debug_line_pool().set_visible(!get_main_debug_line_pool().get_visible());
-            }
 
             ImGui::EndMenu();
         }

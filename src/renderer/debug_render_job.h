@@ -14,13 +14,14 @@
 namespace BT
 {
 
-class Model;
+class Renderable_ifc;
 class Material_ifc;
 
-// Debug mesh.
+/// Debug mesh.
 struct Debug_mesh
 {
-    Model const& model;
+    Renderable_ifc const* renderable;
+    uint8_t render_mask{ 0 };  // Default is render nothing.
     Material_ifc* foreground_material{ nullptr };
     Material_ifc* background_material{ nullptr };
     mat4 transform = GLM_MAT4_IDENTITY_INIT;
@@ -35,14 +36,35 @@ public:
 
     void render_all_meshes();
 
-    bool get_visible() { return m_visible.load(); }
-    void set_visible(bool flag) { m_visible.store(flag); }
+    /// Debug mesh rendering masks.
+    static constexpr uint8_t k_mask_all          = 0b11111111;
+    static constexpr uint8_t k_mask_none         = 0b00000000;
+    static constexpr uint8_t k_mask_selected_obj = 0b00000001;
+    static constexpr uint8_t k_mask_phys_obj     = 0b00000010;
+
+    uint8_t get_visible_mask() { return m_visible.load(); }
+
+    bool get_visible(uint8_t mask)
+    {
+        return get_visible_mask() & mask;
+    }
+
+    void set_visible(uint8_t mask, bool flag)
+    {
+        auto vis_mask{ get_visible_mask() };
+        if (flag)
+            vis_mask |= mask;
+        else
+            vis_mask &= ~mask;
+
+        m_visible.store(vis_mask);
+    }
 
 private:
     std::mutex m_meshes_mutex;
     std::unordered_map<UUID, Debug_mesh> m_meshes;
 
-    std::atomic_bool m_visible{ false };
+    std::atomic_uint8_t m_visible{ k_mask_selected_obj };
 };
 
 Debug_mesh_pool& set_main_debug_mesh_pool(std::unique_ptr<Debug_mesh_pool>&& dbg_mesh_pool);

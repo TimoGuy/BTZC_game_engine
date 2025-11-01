@@ -1,6 +1,7 @@
 #include "animation_frame_action_tool/runtime_data.h"
 #include "btzc_game_engine.h"
 #include "btglm.h"
+#include "game_system_logic/system/imgui_render_transform_hierarchy_window.h"
 #include "renderer/camera.h"
 #include "game_object/component_registry.h"
 #include "game_object/system/concrete_systems.h"
@@ -431,6 +432,7 @@ int32_t main()
 
             BT::system::process_render_object_lifetime();
             BT::system::write_render_transforms();
+            BT::system::update_selected_entity_debug_render_transform();
 
             INVOKE_SYSTEM(System__dev__anim_editor_tool_state_agent);
             INVOKE_SYSTEM(System_apply_phys_xform_to_rend_obj);
