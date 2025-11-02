@@ -109,6 +109,9 @@ public:
     vector<Render_object*> checkout_render_obj_by_key(vector<UUID>&& keys);
     void return_render_objs(vector<Render_object*>&& render_objs);
 
+    /// Gets number of render objects in this pool.
+    size_t get_num_render_objects() const;
+
 private:
     unordered_map<UUID, Render_object> m_render_objects;
 

@@ -215,6 +215,11 @@ void BT::Render_object_pool::return_render_objs(vector<Render_object*>&& render_
     unblock();
 }
 
+size_t BT::Render_object_pool::get_num_render_objects() const
+{
+    return m_render_objects.size();
+}
+
 // Synchronization. (@COPYPASTA: See `game_object.cpp`)
 void BT::Render_object_pool::wait_until_free_then_block()
 {

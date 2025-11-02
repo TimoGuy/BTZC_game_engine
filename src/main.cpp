@@ -378,8 +378,15 @@ int32_t main()
     main_timer.start_timer();
 
     // Main loop.
-    bool first_iter{ true };
-    while (!main_renderer.get_requesting_close())
+    enum class Iteration_type
+    {
+        FIRST_RUNNING_ITERATION,
+        RUNNING_ITERATION,
+        TEARDOWN_ITERATION,
+        EXIT_LOOP,
+    } iter_type{ Iteration_type::FIRST_RUNNING_ITERATION };
+
+    while (iter_type != Iteration_type::EXIT_LOOP)
     {
         BT::logger::notify_start_new_mainloop_iteration();
         main_watchdog.pet();
@@ -395,7 +402,8 @@ int32_t main()
 
         // Simulation loop.
         main_physics_engine.accumulate_delta_time(delta_time);
-        while (main_physics_engine.calc_wants_to_tick())  // @TODO: Change the `wants_to_tick()` to something that's not the physics engine. Perhaps a simulation manager or something???  -Thea 2025/10/31
+        while (main_physics_engine.calc_wants_to_tick() ||  // @TODO: Change the `wants_to_tick()` to something that's not the physics engine. Perhaps a simulation manager or something???  -Thea 2025/10/31
+               iter_type == Iteration_type::TEARDOWN_ITERATION)  // Force one iteration if teardown.
         {   // Run all pre-physics systems.
             #if !BTZC_REFACTOR_TO_ENTT
             for (auto game_obj : all_game_objs)
@@ -418,6 +426,10 @@ int32_t main()
             // Post-physics.
             BT::system::write_entity_transforms_from_physics();
             BT::system::propagate_changed_transforms();
+
+            // Only run once if teardown iteration.
+            if (iter_type == Iteration_type::TEARDOWN_ITERATION)
+                break;
         }
 
         // Render loop.
@@ -476,6 +488,40 @@ int32_t main()
         game_object_pool.return_list(std::move(all_game_objs));
         #endif  // !BTZC_REFACTOR_TO_ENTT
 
+        // Switch iteration type.
+        switch (iter_type)
+        {
+        case Iteration_type::FIRST_RUNNING_ITERATION:
+            // Turn off logging to the console.
+            BT::logger::printe(BT::logger::TRACE, "Set logger to not print to console.");
+            BT::logger::set_logging_print_mask(BT::logger::NONE);
+
+            iter_type = Iteration_type::RUNNING_ITERATION;
+            break;
+
+        case Iteration_type::RUNNING_ITERATION:
+            if (main_renderer.get_requesting_close())
+            {   // Enter teardown.
+                main_scene_loader.unload_all_scenes();
+
+                BT::logger::set_logging_print_mask(BT::logger::ALL);
+                BT::logger::printe(BT::logger::TRACE,
+                                   "==== ENTERING TEARDOWN =====================================");
+
+                iter_type = Iteration_type::TEARDOWN_ITERATION;
+            }
+            break;
+
+        case Iteration_type::TEARDOWN_ITERATION:
+            iter_type = Iteration_type::EXIT_LOOP;
+            break;
+
+        case Iteration_type::EXIT_LOOP:
+            // How did you get here? The loop should've exited.
+            assert(false);
+            break;
+        }
+
 #if BTZC_REFACTOR_TO_ENTT
         // Tick scene loader.
         main_scene_loader.process_scene_loading_requests();
@@ -483,19 +529,20 @@ int32_t main()
         // Tick level loading.
         main_scene_switcher.process_scene_load_request();
 #endif  // !BTZC_REFACTOR_TO_ENTT
-
-        if (first_iter)
-        {   // Turn off logging to the console.
-            BT::logger::printe(BT::logger::TRACE, "Set logger to not print to console.");
-            BT::logger::set_logging_print_mask(BT::logger::NONE);
-
-            first_iter = false;
-        }
     }
 
-    // Start showing console logs again for cleanup now that window is gonna disappear.
-    BT::logger::set_logging_print_mask(BT::logger::ALL);
-    BT::logger::printe(BT::logger::TRACE, "Set logger to print to console.");
+    // Show stats prior to cleanup.
+    BT_TRACEF("Post-teardown statistics:\n"
+              "  Num scenes          : %i\n"
+              "  Num entities        : %i\n"
+              "  Num ECS entities    : %i\n"
+              "  Num physics objects : %i\n"
+              "  Num render objects  : %i\n",
+              main_scene_loader.get_num_loaded_scenes(),
+              entity_container.get_num_entities(),
+              entity_container.get_ecs_registry().view<entt::entity>().size(),
+              main_physics_engine.get_num_physics_objects(),
+              main_renderer.get_render_object_pool().get_num_render_objects());
 
     return 0;
 }

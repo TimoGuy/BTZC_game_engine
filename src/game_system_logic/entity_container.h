@@ -23,6 +23,9 @@ public:
     /// Gets the ECS inner version of the entity.
     entt::entity find_entity(UUID uuid) const;
 
+    /// Gets the number of entities registered in this container.
+    size_t get_num_entities() const;
+
     /// Gets a handle to the ECS registry.
     /// @warning DO NOT USE `.create()` AND/OR `.destroy()` FUNCTIONS DIRECTLY.
     entt::registry& get_ecs_registry();

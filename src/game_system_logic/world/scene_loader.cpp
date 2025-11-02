@@ -26,6 +26,11 @@ void BT::world::Scene_loader::unload_all_scenes()
     m_load_scene_requests.clear();
 }
 
+size_t BT::world::Scene_loader::get_num_loaded_scenes() const
+{
+    return m_loaded_scenes.size();
+}
+
 
 namespace
 {
@@ -52,6 +57,7 @@ Scene_entity_list_t internal_load_scene(Entity_container& entity_container,
 
     // Create entities with components.
     Scene_entity_list_t created_entities;
+
     for (auto& entity : scene_data.entities)
     {   // Assert that the provided UUID is valid.
         assert(!entity.entity_uuid.is_nil());
@@ -62,6 +68,9 @@ Scene_entity_list_t internal_load_scene(Entity_container& entity_container,
         {   // Construct component inside entity.
             component::construct_component(ecs_entity, component.type_name, component.members_j);
         }
+
+        // Add entity to creation list.
+        created_entities.emplace_back(entity.entity_uuid);
     }
 
     BT_TRACEF("Loaded scene \"%s\"", scene_name.c_str());
@@ -92,6 +101,7 @@ void BT::world::Scene_loader::process_scene_loading_requests()
     for (auto& scene_name : m_load_scene_requests)
     {
         auto created_entity_list{ internal_load_scene(entity_container, scene_name) };
+        m_loaded_scenes.emplace(scene_name, std::move(created_entity_list));
     }
     m_load_scene_requests.clear();
 }

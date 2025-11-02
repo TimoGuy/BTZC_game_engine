@@ -176,6 +176,11 @@ void BT::Physics_engine::return_physics_objects(vector<Physics_object*>&& phys_o
     phys_obj_pool_unblock();
 }
 
+size_t BT::Physics_engine::get_num_physics_objects() const
+{
+    return m_physics_objects.size();
+}
+
 // Physics object pool.
 // @COPYPASTA: see "game_object.cpp"
 void BT::Physics_engine::phys_obj_pool_wait_until_free_then_block()

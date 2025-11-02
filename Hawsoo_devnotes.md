@@ -388,6 +388,8 @@ while (running_game_loop)
     - [x] Send a move func if trying to move w the gizmo.
     - [x] For static objects, just send an error message "trying to move a static physics object".
 
+- [x] Fix the physics engine crashing on cleanup bug.
+    - Turns out there were llingering physics objects that never got fully deleted before exiting.
 
 - [ ] "Play" button.
     - There could be an `if` statement for what systems would run with "play" on?

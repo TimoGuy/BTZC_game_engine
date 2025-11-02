@@ -17,7 +17,7 @@ BT::Entity_container::Entity_container()
 namespace
 {
 
-size_t get_num_entities(entt::registry& reg)
+size_t internal_get_num_ecs_entities(entt::registry& reg)
 {
     return reg.view<entt::entity>().size();
 }
@@ -27,7 +27,7 @@ size_t get_num_entities(entt::registry& reg)
 
 entt::entity BT::Entity_container::create_entity(UUID uuid)
 {   // Assert that there were no illegal direct entity additions/deletions within registry.
-    assert(m_uuid_to_inner_entity_map.size() == get_num_entities(m_ecs_registry));
+    assert(m_uuid_to_inner_entity_map.size() == internal_get_num_ecs_entities(m_ecs_registry));
 
     auto entity{ m_ecs_registry.create() };
 
@@ -45,7 +45,7 @@ entt::entity BT::Entity_container::create_entity(UUID uuid)
 
 void BT::Entity_container::destroy_entity(UUID uuid)
 {   // Assert that there were no illegal direct entity additions/deletions within registry.
-    assert(m_uuid_to_inner_entity_map.size() == get_num_entities(m_ecs_registry));
+    assert(m_uuid_to_inner_entity_map.size() == internal_get_num_ecs_entities(m_ecs_registry));
 
     m_ecs_registry.destroy(m_uuid_to_inner_entity_map.at(uuid));
     m_uuid_to_inner_entity_map.erase(uuid);
@@ -68,6 +68,11 @@ entt::entity BT::Entity_container::find_entity(UUID uuid) const
     }
 
     return found_entity;
+}
+
+size_t BT::Entity_container::get_num_entities() const
+{
+    return m_uuid_to_inner_entity_map.size();
 }
 
 entt::registry& BT::Entity_container::get_ecs_registry()

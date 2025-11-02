@@ -23,6 +23,9 @@ public:
     /// Unloads all scenes that are loaded using this scene loader.
     void unload_all_scenes();
 
+    /// Gets number of loaded scenes.
+    size_t get_num_loaded_scenes() const;
+
     /// Process all requests for scene loading.
     void process_scene_loading_requests();
 
