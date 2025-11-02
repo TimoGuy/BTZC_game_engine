@@ -1,6 +1,7 @@
 #pragma once
 
 #include "btjson.h"
+#include "entt/entity/fwd.hpp"
 #include "physics_engine/physics_object.h"
 #include "uuid/uuid.h"
 
@@ -73,6 +74,14 @@ struct Created_physics_object_reference
 {
     UUID physics_obj_uuid_ref;
 };
+
+/// Helper for setting the transform of a physics object.
+/// @NOTE: Does nothing if there is no created physics object.
+/// @NOTE: Emits an error if the physics object is static.
+void try_set_physics_object_transform_helper(entt::registry& reg,
+                                             entt::entity entity,
+                                             rvec3s pos,
+                                             versors rot);
 
 }  // namespace component
 }  // namespace BT

@@ -112,7 +112,14 @@ void BT::Phys_obj_impl_tri_mesh::move_kinematic(Physics_transform&& new_transfor
     if (!m_can_move)
     {
         logger::printe(logger::ERROR, "Object marked as unmovable.");
-        assert(false);
+
+        constexpr bool k_error_on_try_move{ false };
+        if constexpr (k_error_on_try_move)
+        {
+            assert(false);
+        }
+
+        return;
     }
     m_phys_body_ifc.MoveKinematic(m_body_id,
                                   new_transform.position,

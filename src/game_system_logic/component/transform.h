@@ -54,5 +54,11 @@ void submit_transform_change_helper(entt::registry& reg,
                                     versors rot,
                                     vec3s sca);
 
+/// Helper function for submitting new transform change (does not change scale).
+void submit_transform_change_no_scale_helper(entt::registry& reg,
+                                             entt::entity entity,
+                                             rvec3s pos,
+                                             versors rot);
+
 }  // namespace component
 }  // namespace BT

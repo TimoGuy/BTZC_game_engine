@@ -382,10 +382,10 @@ while (running_game_loop)
     - [ ] Created_render_object_reference
     - [ ] Created_physics_object_reference
 
-- [ ] Unstick physics objects.
+- [x] Unstick physics objects.
     - If the object is kinematic or dynamic, use the move-kinematic func.
-    - [ ] Send a move func if trying to move w the gizmo.
-    - [ ] For static objects, just send an error message "trying to move a static physics object".
+    - [x] Send a move func if trying to move w the gizmo.
+    - [x] For static objects, just send an error message "trying to move a static physics object".
 
 - [ ] "Play" button.
     - There could be an `if` statement for what systems would run with "play" on?

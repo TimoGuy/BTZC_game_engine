@@ -7,6 +7,7 @@
 #include "imgui.h"
 #include "imgui_internal.h"
 #include "misc/cpp/imgui_stdlib.h"
+#include "physics_object_settings.h"
 #include "service_finder/service_finder.h"
 #include "transform.h"
 #include "uuid/uuid.h"
@@ -154,6 +155,12 @@ void BT::component::edit::imgui_edit__transform(entt::registry& reg, entt::entit
                                                   transform_copy.position,
                                                   transform_copy.rotation,
                                                   transform_copy.scale);
+
+        // Try to assign the transform to physics object in case there is a physics object.
+        component::try_set_physics_object_transform_helper(reg,
+                                                           ecs_entity,
+                                                           transform_copy.position,
+                                                           transform_copy.rotation);
     }
 
     ImGui::PopID();

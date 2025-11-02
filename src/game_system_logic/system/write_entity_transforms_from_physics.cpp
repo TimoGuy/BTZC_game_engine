@@ -30,15 +30,11 @@ void BT::system::write_entity_transforms_from_physics()
 
         rvec3s new_pos;
         versors new_rot;
-        vec3s new_sca;
         phys_obj.get_transform_for_entity(new_pos.raw, new_rot.raw);
 
         phys_engine.return_physics_object(&phys_obj);
 
-        // Scale is not written by physics obj.
-        new_sca = transform.scale;
-
         // Submit new transform.
-        component::submit_transform_change_helper(reg, entity, new_pos, new_rot, new_sca);
+        component::submit_transform_change_no_scale_helper(reg, entity, new_pos, new_rot);
     }
 }

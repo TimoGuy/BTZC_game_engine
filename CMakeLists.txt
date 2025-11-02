@@ -87,6 +87,7 @@ set(MAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/component_registry.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/component_registry.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/entity_metadata.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/physics_object_settings.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/physics_object_settings.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/render_object_settings.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/transform.cpp

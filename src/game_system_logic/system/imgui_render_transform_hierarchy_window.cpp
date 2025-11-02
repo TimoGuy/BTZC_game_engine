@@ -4,6 +4,7 @@
 #include "entt/entity/fwd.hpp"
 #include "game_system_logic/component/component_registry.h"
 #include "game_system_logic/component/entity_metadata.h"
+#include "game_system_logic/component/physics_object_settings.h"
 #include "game_system_logic/component/render_object_settings.h"
 #include "game_system_logic/component/transform.h"
 #include "game_system_logic/entity_container.h"
@@ -330,6 +331,7 @@ void internal_imguizmo_transform_gizmo()
     if (internal_imguizmo_manipulate(reg, camera, pos, rot, sca))
     {
         component::submit_transform_change_helper(reg, s_state.selected_entity, pos, rot, sca);
+        component::try_set_physics_object_transform_helper(reg, s_state.selected_entity, pos, rot);
     }
 }
 
