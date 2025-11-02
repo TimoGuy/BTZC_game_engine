@@ -372,15 +372,16 @@ while (running_game_loop)
                 - This should probably just be its own system that runs after physics calculations finish. I think that would be good eh!
 
 
-- [ ] Inspector window.
+- [x] Inspector window.
     - [x] Create component-grabbing tech.
     - [x] Get a few components rendered in.
-    - [ ] Render object settings
+    - [x] Render object settings
         - DISABLE THIS WHEN `Created_render_object_reference` exists.
-    - [ ] Physics object settings
+    - [x] Physics object settings
         - DISABLE THIS WHEN `Created_physics_object_reference` exists.
-    - [ ] Created_render_object_reference
-    - [ ] Created_physics_object_reference
+    - [x] Created_render_object_reference
+    - [x] Created_physics_object_reference
+
 
 - [x] Unstick physics objects.
     - If the object is kinematic or dynamic, use the move-kinematic func.
