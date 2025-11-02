@@ -131,7 +131,7 @@ public:
     Physics_object_type_impl_ifc* get_impl() { return m_type_pimpl.get(); }
     void read_and_store_new_transform();
 
-    void get_transform_for_game_obj(rvec3& out_position, versor& out_rotation);
+    void get_transform_for_entity(rvec3& out_position, versor& out_rotation);
 
 #if !BTZC_REFACTOR_TO_ENTT
     // Scene_serialization_ifc.

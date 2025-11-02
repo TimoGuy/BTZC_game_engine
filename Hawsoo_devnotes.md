@@ -351,8 +351,8 @@ while (running_game_loop)
         - [x] Have a deselect region at the bottom.
 
 
-- [ ] Next goal: Get stuff rendered onto the screen again~!
-    - [ ] OVERHAUL: Change these things into components
+- [x] Next goal: Get stuff rendered onto the screen again~!
+    - [x] OVERHAUL: Change these things into components
         - [x] Transform (serializable)
         - [x] Render object (partial serializable)
             - Needs to be built in case deformed model.
@@ -368,13 +368,24 @@ while (running_game_loop)
                 - [x] Fix picking! (Bc picking just crashes for some reason... it might just be simple as an assert on an undef func?)
                 - [x] Re-add the render job to render the selected object.
                 - [x] Since I added it to the debug render job, add masks for the meshes and edit it in the imgui menu bar.
-            - [ ] Connect the physics objects to the entity transforms!
+            - [x] Connect the physics objects to the entity transforms!
                 - This should probably just be its own system that runs after physics calculations finish. I think that would be good eh!
 
 
 - [ ] Inspector window.
     - [x] Create component-grabbing tech.
     - [x] Get a few components rendered in.
+    - [ ] Render object settings
+        - DISABLE THIS WHEN `Created_render_object_reference` exists.
+    - [ ] Physics object settings
+        - DISABLE THIS WHEN `Created_physics_object_reference` exists.
+    - [ ] Created_render_object_reference
+    - [ ] Created_physics_object_reference
+
+- [ ] Unstick physics objects.
+    - If the object is kinematic or dynamic, use the move-kinematic func.
+    - [ ] Send a move func if trying to move w the gizmo.
+    - [ ] For static objects, just send an error message "trying to move a static physics object".
 
 - [ ] "Play" button.
     - There could be an `if` statement for what systems would run with "play" on?

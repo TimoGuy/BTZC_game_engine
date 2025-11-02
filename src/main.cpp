@@ -1,16 +1,17 @@
 #include "animation_frame_action_tool/runtime_data.h"
 #include "btzc_game_engine.h"
 #include "btglm.h"
-#include "game_system_logic/system/imgui_render_transform_hierarchy_window.h"
 #include "renderer/camera.h"
 #include "game_object/component_registry.h"
 #include "game_object/system/concrete_systems.h"
 #include "game_object/game_object.h"
 #include "game_system_logic/entity_container.h"
 #include "game_system_logic/component/component_registry.h"
+#include "game_system_logic/system/imgui_render_transform_hierarchy_window.h"
 #include "game_system_logic/system/process_physics_object_lifetime.h"
 #include "game_system_logic/system/process_render_object_lifetime.h"
 #include "game_system_logic/system/propagate_changed_transforms.h"
+#include "game_system_logic/system/write_entity_transforms_from_physics.h"
 #include "game_system_logic/system/write_render_transforms.h"
 #include "game_system_logic/world/scene_loader.h"
 #include "hitbox_interactor/hitcapsule.h"
@@ -53,10 +54,7 @@ int32_t main()
 {
     BT::Watchdog_timer main_watchdog;
 
-#if BTZC_REFACTOR_TO_ENTT
-    /// Super duper dummy erasure thing @INCOMPLETE
-    #define INVOKE_SYSTEM(_)
-#else
+#if !BTZC_REFACTOR_TO_ENTT
     // ---- Initialization of entity component system --------------------------------------------------------------
     BT::component_system::Registry main_component_registry;
     main_component_registry.register_all_components();
@@ -395,6 +393,7 @@ int32_t main()
         auto const all_game_objs{ game_object_pool.checkout_all_as_list() };
         #endif  // !BTZC_REFACTOR_TO_ENTT
 
+        // Simulation loop.
         main_physics_engine.accumulate_delta_time(delta_time);
         while (main_physics_engine.calc_wants_to_tick())  // @TODO: Change the `wants_to_tick()` to something that's not the physics engine. Perhaps a simulation manager or something???  -Thea 2025/10/31
         {   // Run all pre-physics systems.
@@ -405,22 +404,23 @@ int32_t main()
             }
             #endif  // !BTZC_REFACTOR_TO_ENTT
 
+            // Pre-physics.
             BT::system::process_physics_object_lifetime();
-
+            #if !BTZC_REFACTOR_TO_ENTT
             INVOKE_SYSTEM(System_player_character_movement);
             INVOKE_SYSTEM(System_animator_driven_hitcapsule_set);
-            BT::system::propagate_changed_transforms();  // Does there need to be 2 of these system invocations???  -Thea 2025/10/22
-            // @REPLY: @TODO: @FIXME: I kinda don't think that there needs to be 2
-            // `propagate_changed_transforms()`, since ideally there would be just a conversion of
-            // the entity transform to the render object transform. Maybe?  -Thea 2025/10/31
+            #endif  // !BTZC_REFACTOR_TO_ENTT
 
-            // Update physics.
+            // Physics calculations.
             main_physics_engine.update_physics();
-
-            // Update overlap solver.
             hitcapsule_solver.update_overlaps();
+
+            // Post-physics.
+            BT::system::write_entity_transforms_from_physics();
+            BT::system::propagate_changed_transforms();
         }
 
+        // Render loop.
         main_physics_engine.calc_interpolation_alpha();
         {   // Run all pre-render systems.
             #if !BTZC_REFACTOR_TO_ENTT
@@ -434,13 +434,14 @@ int32_t main()
             BT::system::write_render_transforms();
             BT::system::update_selected_entity_debug_render_transform();
 
+            #if !BTZC_REFACTOR_TO_ENTT
             INVOKE_SYSTEM(System__dev__anim_editor_tool_state_agent);
             INVOKE_SYSTEM(System_apply_phys_xform_to_rend_obj);
-            BT::system::propagate_changed_transforms();  // Does there need to be 2 of these system invocations???  -Thea 2025/10/22
+            #endif  // !BTZC_REFACTOR_TO_ENTT
 
             main_renderer.render(delta_time, [&]() {
-                // Render selected game obj.
                 #if !BTZC_REFACTOR_TO_ENTT
+                // Render selected game obj.
                 auto selected_game_obj{ game_object_pool.get_selected_game_obj() };
                 if (!selected_game_obj.is_nil())
                 {

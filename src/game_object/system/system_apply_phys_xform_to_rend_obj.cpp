@@ -45,7 +45,7 @@ void BT::component_system::system::System_apply_phys_xform_to_rend_obj::invoke_s
     //     rvec3 position;
     //     versor rotation;
     //     // auto phys_obj{ m_phys_engine.checkout_physics_object(game_obj->get_phys_obj_key()) };
-    //     comp_phys_obj.phys_obj->get_transform_for_game_obj(position, rotation);
+    //     comp_phys_obj.phys_obj->get_transform_for_entity(position, rotation);
     //     // m_phys_engine.return_physics_object(phys_obj);
 
     //     // Apply to game object.
@@ -132,7 +132,7 @@ void BT::Scripts::Script_apply_phys_xform_to_rend_obj::on_pre_render(float_t del
     rvec3 position;
     versor rotation;
     auto phys_obj{ m_phys_engine.checkout_physics_object(game_obj->get_phys_obj_key()) };
-    phys_obj->get_transform_for_game_obj(position, rotation);
+    phys_obj->get_transform_for_entity(position, rotation);
     m_phys_engine.return_physics_object(phys_obj);
 
     // Apply to game object.

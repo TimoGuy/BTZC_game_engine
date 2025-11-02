@@ -196,7 +196,7 @@ void BT::Physics_object::read_and_store_new_transform()
     m_trip_buf_offset.store(trip_buf_offset + 1);
 }
 
-void BT::Physics_object::get_transform_for_game_obj(rvec3& out_position, versor& out_rotation)
+void BT::Physics_object::get_transform_for_entity(rvec3& out_position, versor& out_rotation)
 {
     size_t trip_buf_offset{ m_trip_buf_offset.load() };
 
