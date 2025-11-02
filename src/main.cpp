@@ -493,7 +493,7 @@ int32_t main()
         {
         case Iteration_type::FIRST_RUNNING_ITERATION:
             // Turn off logging to the console.
-            BT::logger::printe(BT::logger::TRACE, "Set logger to not print to console.");
+            BT_TRACE("Set logger to not print to console.");
             BT::logger::set_logging_print_mask(BT::logger::NONE);
 
             iter_type = Iteration_type::RUNNING_ITERATION;
@@ -505,8 +505,7 @@ int32_t main()
                 main_scene_loader.unload_all_scenes();
 
                 BT::logger::set_logging_print_mask(BT::logger::ALL);
-                BT::logger::printe(BT::logger::TRACE,
-                                   "==== ENTERING TEARDOWN =====================================");
+                BT_TRACE("==== ENTERING TEARDOWN =====================================");
 
                 iter_type = Iteration_type::TEARDOWN_ITERATION;
             }

@@ -183,8 +183,18 @@ void BT::logger::printe(Log_type type, string entry)
         // Insert as much as possible.
         uint32_t insert_amount{ min(static_cast<uint32_t>(entry.size() - i),
                                     remaining_columns) };
+
+        // Check for newline chars.
+        bool has_newline_char{ false };
+        if (size_t newline_pos = entry.find('\n', i); newline_pos != std::string::npos)
+        {   // End early at the newline char.
+            insert_amount = min(insert_amount, static_cast<uint32_t>(newline_pos - i));
+            has_newline_char = true;
+        }
+
+        // Add requested substring amount.
         row << entry.substr(i, insert_amount);
-        i += insert_amount;
+        i += insert_amount + (has_newline_char ? 1 : 0);
 
         // Assert that somehow we didn't accidentally make too long of a string.
         // @NOTE: Use the length w/ encoding since we're comparing the string length w/ encoding.

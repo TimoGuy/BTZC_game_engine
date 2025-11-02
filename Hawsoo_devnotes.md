@@ -390,6 +390,7 @@ while (running_game_loop)
 
 - [x] Fix the physics engine crashing on cleanup bug.
     - Turns out there were llingering physics objects that never got fully deleted before exiting.
+- [x] Fix logger not detecting \n chars properly.
 
 - [ ] "Play" button.
     - There could be an `if` statement for what systems would run with "play" on?
