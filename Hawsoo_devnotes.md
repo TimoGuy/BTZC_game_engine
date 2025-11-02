@@ -388,6 +388,7 @@ while (running_game_loop)
     - [x] Send a move func if trying to move w the gizmo.
     - [x] For static objects, just send an error message "trying to move a static physics object".
 
+
 - [ ] "Play" button.
     - There could be an `if` statement for what systems would run with "play" on?
         > I worry that this would cause bad branching, but hey, branch prediction should figure out the pattern that something's always gonna be a certain way after a few cpu cycles right?
@@ -405,8 +406,8 @@ while (running_game_loop)
         - [ ] Set `s_play_mode = true;`
         - [ ] Run!
             - When running, everything that needs to get created (e.g. render_objs, phys_objs), will still get created in the systems that create them, but this time, since `s_play_mode == true`, then everything will get created correctly!
-    
-    
+
+
 > Some thoughts on how there could be parallelization.
 >   Simulation running on one core, and then rendering running on another core, with that bit of sync when adding/removing render objects and passing transforms sim->rend could be good.
 >   And then the remaining cores are worker cores. They're asleep unless there are barriers submitted. They all work to tackle all the jobs in each barrier to finish whole barriers as fast as possible (first come first serve as far as priority).
