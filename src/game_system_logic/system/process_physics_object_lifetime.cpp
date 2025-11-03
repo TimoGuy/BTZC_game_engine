@@ -37,32 +37,39 @@ void destroy_physics_objects(entt::registry& reg,
 {   // Get all UUIDs inside physics object pool.
     auto all_phys_objs{ phys_engine.checkout_all_physics_objects() };
 
-    std::unordered_map<UUID, bool> phys_obj_uuid_to_found_tag_map;
-    phys_obj_uuid_to_found_tag_map.reserve(all_phys_objs.size());
+    struct Found_metadata
+    {
+        bool found_tag{ false };
+        entt::entity ecs_entity{ entt::null };
+    };
+    std::unordered_map<UUID, Found_metadata> phys_obj_uuid_to_found_metadata_map;
+    phys_obj_uuid_to_found_metadata_map.reserve(all_phys_objs.size());
 
+    // Populate data from physics engine.
     for (auto phys_obj : all_phys_objs)
     {
-        phys_obj_uuid_to_found_tag_map.emplace(phys_obj->get_uuid(), false);
+        phys_obj_uuid_to_found_metadata_map.emplace(phys_obj->get_uuid(), Found_metadata{});
     }
 
     phys_engine.return_physics_objects(std::move(all_phys_objs));
 
-    // Mark UUIDs as non-dangling from pool collection, if only targeting dangling.
-    if (destroy_behavior == DESTROY_ONLY_DANGLING)
-    {
-        auto view{ reg.view<component::Created_physics_object_reference>() };
-        for (auto entity : view)
-        {   // Mark UUID as non-dangling.
-            auto& created_phys_obj_ref{ view.get<component::Created_physics_object_reference>(
-                entity) };
-            phys_obj_uuid_to_found_tag_map.at(created_phys_obj_ref.physics_obj_uuid_ref) = true;
-        }
+    // Populate data from ECS.
+    auto view{ reg.view<component::Created_physics_object_reference>() };
+    for (auto entity : view)
+    {   // Mark UUID as non-dangling.
+        auto& created_phys_obj_ref{ view.get<component::Created_physics_object_reference>(
+            entity) };
+
+        auto& found_metadata{ phys_obj_uuid_to_found_metadata_map.at(
+            created_phys_obj_ref.physics_obj_uuid_ref) };
+        found_metadata.found_tag = true;
+        found_metadata.ecs_entity = entity;
     }
 
     // Remove certain UUIDs.
-    for (auto& it : phys_obj_uuid_to_found_tag_map)
+    for (auto& it : phys_obj_uuid_to_found_metadata_map)
     {
-        bool destroy_this{ false };
+        bool destroy_this;
         switch (destroy_behavior)
         {
         case DESTROY_ALL:
@@ -71,13 +78,17 @@ void destroy_physics_objects(entt::registry& reg,
 
         case DESTROY_ONLY_DANGLING:
             // `!it.second == true` means this UUID is dangling.
-            destroy_this = !it.second;
+            destroy_this = !it.second.found_tag;
             break;
         }
 
         if (destroy_this)
         {   // Remove this UUID.
             phys_engine.remove_physics_object(it.first);
+
+            if (it.second.ecs_entity != entt::null)
+                reg.remove<component::Created_physics_object_reference>(it.second.ecs_entity);
+
             BT_TRACEF("Destroyed and removed \"%s\" from physics object pool.",
                       UUID_helper::to_pretty_repr(it.first).c_str());
         }

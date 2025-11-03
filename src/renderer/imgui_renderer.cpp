@@ -1,5 +1,6 @@
 #include "imgui_renderer.h"
 
+#include "game_system_logic/world/world_properties.h"
 #include "refactor_to_entt.h"
 
 #include "../animation_frame_action_tool/editor_state.h"
@@ -228,12 +229,11 @@ void BT::ImGui_renderer::render_imgui(float_t delta_time)
         ImGui::SameLine();
 
         // Game controls.
-        ImGui::BeginDisabled();
-            ImGui::Button("Play");
-
-            ImGui::SameLine();
-            ImGui::Button("Stop");
-        ImGui::EndDisabled();
+        auto& world_props{
+            service_finder::find_service<world::World_properties_container>().get_data_handle()
+        };
+        if (ImGui::Button(world_props.is_simulation_running ? "Stop" : "Play"))
+            world_props.is_simulation_running = !world_props.is_simulation_running;
 
         // Game play status.
         ImGui::SameLine(0, k_wide_spacing);

@@ -25,8 +25,8 @@ using namespace BT;
 /// How to destroy render objects.
 enum Destroy_behavior
 {
-    DESTROY_ALL,
-    DESTROY_ONLY_DANGLING,
+    DESTROY_DANGLING_OR_DEFORMABLE,
+    DESTROY_DANGLING_OR_SUPPOSED_TO_BE_DEFORMABLE,
 };
 
 /// Searches thru render objects and finds and deletes certain ones.
@@ -36,47 +36,67 @@ void destroy_render_objects(entt::registry& reg,
 {   // Get all UUIDs inside render object pool.
     auto all_rend_objs{ rend_obj_pool.checkout_all_render_objs() };
 
-    std::unordered_map<UUID, bool> rend_obj_uuid_to_found_tag_map;
-    rend_obj_uuid_to_found_tag_map.reserve(all_rend_objs.size());
+    struct Found_metadata
+    {
+        bool found_tag{ false };
+        entt::entity ecs_entity{ entt::null };
+        bool is_deformable_in_settings{ false };
+        bool is_deformed_in_created{ false };
+    };
+    std::unordered_map<UUID, Found_metadata> rend_obj_uuid_to_metadata_map;
+    rend_obj_uuid_to_metadata_map.reserve(all_rend_objs.size());
 
+    // Populate data from renderer.
     for (auto rend_obj : all_rend_objs)
     {
-        rend_obj_uuid_to_found_tag_map.emplace(rend_obj->get_uuid(), false);
+        Found_metadata metadata{
+            .is_deformed_in_created = (rend_obj->get_deformed_model() != nullptr)
+        };
+        rend_obj_uuid_to_metadata_map.emplace(rend_obj->get_uuid(), std::move(metadata));
     }
 
     rend_obj_pool.return_render_objs(std::move(all_rend_objs));
 
-    // Mark UUIDs as non-dangling from render object pool collection.
-    if (destroy_behavior == DESTROY_ONLY_DANGLING)
-    {
-        auto view{ reg.view<component::Created_render_object_reference>() };
-        for (auto entity : view)
-        {   // Mark UUID as non-dangling.
-            auto& created_rend_obj_ref{ view.get<component::Created_render_object_reference>(
-                entity) };
-            rend_obj_uuid_to_found_tag_map.at(created_rend_obj_ref.render_obj_uuid_ref) = true;
-        }
+    // Populate data from ECS.
+    auto view{ reg.view<component::Render_object_settings const,
+                        component::Created_render_object_reference const>() };
+    for (auto entity : view)
+    {   // Mark UUID as non-dangling.
+        auto const& rend_obj_settings{ view.get<component::Render_object_settings const>(entity) };
+        auto const& created_rend_obj_ref{
+            view.get<component::Created_render_object_reference const>(entity)
+        };
+
+        auto& found_metadata{ rend_obj_uuid_to_metadata_map.at(
+            created_rend_obj_ref.render_obj_uuid_ref) };
+        found_metadata.found_tag                 = true;
+        found_metadata.ecs_entity                = entity;
+        found_metadata.is_deformable_in_settings = rend_obj_settings.is_deformed;
     }
 
     // Remove certain UUIDs.
-    for (auto& it : rend_obj_uuid_to_found_tag_map)
-    {
-        bool destroy_this{ false };
+    for (auto& it : rend_obj_uuid_to_metadata_map)
+    {   // `!it.second == true` means this UUID is dangling.
+        bool destroy_this{ !it.second.found_tag };
         switch (destroy_behavior)
         {
-        case DESTROY_ALL:
-            destroy_this = true;
+        case DESTROY_DANGLING_OR_DEFORMABLE:
+            destroy_this |= it.second.is_deformed_in_created;
             break;
 
-        case DESTROY_ONLY_DANGLING:
-            // `!it.second == true` means this UUID is dangling.
-            destroy_this = !it.second;
+        case DESTROY_DANGLING_OR_SUPPOSED_TO_BE_DEFORMABLE:
+            destroy_this |=
+                (!it.second.is_deformed_in_created && it.second.is_deformable_in_settings);
             break;
         }
 
         if (destroy_this)
         {   // Remove this UUID.
             rend_obj_pool.remove(it.first);
+
+            if (it.second.ecs_entity != entt::null)
+                reg.remove<component::Created_render_object_reference>(it.second.ecs_entity);
+
             BT_TRACEF("Destroyed and removed \"%s\" from render object pool.",
                       UUID_helper::to_pretty_repr(it.first).c_str());
         }
@@ -84,7 +104,9 @@ void destroy_render_objects(entt::registry& reg,
 }
 
 /// Goes thru all non-created render objects and creates render objects.
-void create_staged_render_objects(entt::registry& reg, Render_object_pool& rend_obj_pool)
+void create_staged_render_objects(entt::registry& reg,
+                                  Render_object_pool& rend_obj_pool,
+                                  bool allow_deformed_creation)
 {
     auto view{ reg.view<component::Render_object_settings>(
         entt::exclude<component::Created_render_object_reference>) };
@@ -98,7 +120,7 @@ void create_staged_render_objects(entt::registry& reg, Render_object_pool& rend_
         Render_object new_rend_obj{ rend_obj_settings.render_layer };
 
         auto const& model{ *Model_bank::get_model(rend_obj_settings.model_name) };
-        if (rend_obj_settings.is_deformed)
+        if (allow_deformed_creation && rend_obj_settings.is_deformed)
         {   // Create deformed model w/ animator.
             auto deformed_model{ std::make_unique<Deformed_model>(model) };
             auto model_animator{ std::make_unique<Model_animator>(model) };
@@ -135,16 +157,17 @@ void BT::system::process_render_object_lifetime()
     // @TODO: Perhaps right @HERE there needs to be a lock on the renderer, since it's basically an
     //        update to the renderer of "hey here's everything that updated".
 
-    if (service_finder::find_service<world::World_properties_container>()
-            .get_data_handle()
-            .is_simulation_running)
+    bool is_sim_running{ service_finder::find_service<world::World_properties_container>()
+                             .get_data_handle()
+                             .is_simulation_running };
+    if (is_sim_running)
     {
-        destroy_render_objects(reg, rend_obj_pool, DESTROY_ONLY_DANGLING);
-        create_staged_render_objects(reg, rend_obj_pool);
+        destroy_render_objects(reg, rend_obj_pool, DESTROY_DANGLING_OR_SUPPOSED_TO_BE_DEFORMABLE);
+        create_staged_render_objects(reg, rend_obj_pool, true);
     }
     else
     {
-        destroy_render_objects(reg, rend_obj_pool, DESTROY_ALL);
-
+        destroy_render_objects(reg, rend_obj_pool, DESTROY_DANGLING_OR_DEFORMABLE);
+        create_staged_render_objects(reg, rend_obj_pool, false);
     }
 }
