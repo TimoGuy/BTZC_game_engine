@@ -5,6 +5,7 @@
 #include "entt/entity/registry.hpp"
 #include "game_system_logic/component/render_object_settings.h"
 #include "game_system_logic/entity_container.h"
+#include "game_system_logic/world/world_properties.h"
 #include "renderer/animator_template.h"
 #include "renderer/mesh.h"
 #include "renderer/model_animator.h"
@@ -21,8 +22,17 @@ namespace
 
 using namespace BT;
 
-/// Searches thru render objects and finds and deletes dangling ones.
-void destroy_dangling_render_objects(entt::registry& reg, Render_object_pool& rend_obj_pool)
+/// How to destroy render objects.
+enum Destroy_behavior
+{
+    DESTROY_ALL,
+    DESTROY_ONLY_DANGLING,
+};
+
+/// Searches thru render objects and finds and deletes certain ones.
+void destroy_render_objects(entt::registry& reg,
+                            Render_object_pool& rend_obj_pool,
+                            Destroy_behavior destroy_behavior)
 {   // Get all UUIDs inside render object pool.
     auto all_rend_objs{ rend_obj_pool.checkout_all_render_objs() };
 
@@ -37,21 +47,40 @@ void destroy_dangling_render_objects(entt::registry& reg, Render_object_pool& re
     rend_obj_pool.return_render_objs(std::move(all_rend_objs));
 
     // Mark UUIDs as non-dangling from render object pool collection.
-    auto view{ reg.view<component::Created_render_object_reference>() };
-    for (auto entity : view)
-    {   // Mark UUID as non-dangling.
-        auto& created_rend_obj_ref{ view.get<component::Created_render_object_reference>(entity) };
-        rend_obj_uuid_to_found_tag_map.at(created_rend_obj_ref.render_obj_uuid_ref) = true;
+    if (destroy_behavior == DESTROY_ONLY_DANGLING)
+    {
+        auto view{ reg.view<component::Created_render_object_reference>() };
+        for (auto entity : view)
+        {   // Mark UUID as non-dangling.
+            auto& created_rend_obj_ref{ view.get<component::Created_render_object_reference>(
+                entity) };
+            rend_obj_uuid_to_found_tag_map.at(created_rend_obj_ref.render_obj_uuid_ref) = true;
+        }
     }
 
-    // Remove dangling UUIDs.
+    // Remove certain UUIDs.
     for (auto& it : rend_obj_uuid_to_found_tag_map)
-        if (!it.second)
-        {   // Remove this UUID since it's dangling.
+    {
+        bool destroy_this{ false };
+        switch (destroy_behavior)
+        {
+        case DESTROY_ALL:
+            destroy_this = true;
+            break;
+
+        case DESTROY_ONLY_DANGLING:
+            // `!it.second == true` means this UUID is dangling.
+            destroy_this = !it.second;
+            break;
+        }
+
+        if (destroy_this)
+        {   // Remove this UUID.
             rend_obj_pool.remove(it.first);
             BT_TRACEF("Destroyed and removed \"%s\" from render object pool.",
                       UUID_helper::to_pretty_repr(it.first).c_str());
         }
+    }
 }
 
 /// Goes thru all non-created render objects and creates render objects.
@@ -106,6 +135,16 @@ void BT::system::process_render_object_lifetime()
     // @TODO: Perhaps right @HERE there needs to be a lock on the renderer, since it's basically an
     //        update to the renderer of "hey here's everything that updated".
 
-    destroy_dangling_render_objects(reg, rend_obj_pool);
-    create_staged_render_objects(reg, rend_obj_pool);
+    if (service_finder::find_service<world::World_properties_container>()
+            .get_data_handle()
+            .is_simulation_running)
+    {
+        destroy_render_objects(reg, rend_obj_pool, DESTROY_ONLY_DANGLING);
+        create_staged_render_objects(reg, rend_obj_pool);
+    }
+    else
+    {
+        destroy_render_objects(reg, rend_obj_pool, DESTROY_ALL);
+
+    }
 }

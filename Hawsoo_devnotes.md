@@ -401,7 +401,7 @@ while (running_game_loop)
         - [ ] Clear all registrations (mainly `Created_render_object_reference`)
             - [ ] Change it so that `Deformed_model`s are only allowed when `s_play_mode == true`.
                 - I.e. during the level creation mode/screen, only T-pose models and stuff!!! (static models)
-            - [ ] Change it so that `Physics_object`s in the physics engine only get created when `s_play_mode == true`.
+            - [x] Change it so that `Physics_object`s in the physics engine only get created when `s_play_mode == true`.
                 - This is suuuuper important bc creation of physics objects use the `Transform` as its starting point, and then it takes over the `Transform` while it's active in the entity.
                 - Since you can't really click and drag to move stuff very effectively in the level editor, this is necessary.
                 - Tho, once you're playing, and you wanna just drag stuff around... does that mean you just can't anymore?

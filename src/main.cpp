@@ -14,6 +14,7 @@
 #include "game_system_logic/system/write_entity_transforms_from_physics.h"
 #include "game_system_logic/system/write_render_transforms.h"
 #include "game_system_logic/world/scene_loader.h"
+#include "game_system_logic/world/world_properties.h"
 #include "hitbox_interactor/hitcapsule.h"
 #include "input_handler/input_handler.h"
 #include "Jolt/Jolt.h"  // @DEBUG
@@ -373,19 +374,29 @@ int32_t main()
         });
 #endif  // !BTZC_REFACTOR_TO_ENTT
 
+    // Setup world properties.
+    BT::world::World_properties_container world_properties;
+    {
+        auto& wprops{ world_properties.get_data_handle() };
+        wprops.is_simulation_running = false;
+    }
+
     // Timer.
     BT::Timer main_timer;
     main_timer.start_timer();
 
-    // Main loop.
+    // Iteration types for main loop.
     enum class Iteration_type
     {
         FIRST_RUNNING_ITERATION,
         RUNNING_ITERATION,
         TEARDOWN_ITERATION,
         EXIT_LOOP,
-    } iter_type{ Iteration_type::FIRST_RUNNING_ITERATION };
+    };
+    BT_TRACE("==== ENTERING MAIN LOOP (FIRST RUNNING ITERATION) ==============");
+    Iteration_type iter_type{ Iteration_type::FIRST_RUNNING_ITERATION };
 
+    // Main loop.
     while (iter_type != Iteration_type::EXIT_LOOP)
     {
         BT::logger::notify_start_new_mainloop_iteration();
@@ -496,6 +507,7 @@ int32_t main()
             BT_TRACE("Set logger to not print to console.");
             BT::logger::set_logging_print_mask(BT::logger::NONE);
 
+            BT_TRACE("==== ENTERING RUNNING ==========================================");
             iter_type = Iteration_type::RUNNING_ITERATION;
             break;
 
@@ -505,13 +517,14 @@ int32_t main()
                 main_scene_loader.unload_all_scenes();
 
                 BT::logger::set_logging_print_mask(BT::logger::ALL);
-                BT_TRACE("==== ENTERING TEARDOWN =====================================");
 
+                BT_TRACE("==== ENTERING TEARDOWN =========================================");
                 iter_type = Iteration_type::TEARDOWN_ITERATION;
             }
             break;
 
         case Iteration_type::TEARDOWN_ITERATION:
+            BT_TRACE("==== EXITING MAIN LOOP =========================================");
             iter_type = Iteration_type::EXIT_LOOP;
             break;
 

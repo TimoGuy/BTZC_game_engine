@@ -6,6 +6,7 @@
 #include "game_system_logic/component/physics_object_settings.h"
 #include "game_system_logic/component/transform.h"
 #include "game_system_logic/entity_container.h"
+#include "game_system_logic/world/world_properties.h"
 #include "physics_engine/physics_engine.h"
 #include "physics_engine/physics_object.h"
 #include "renderer/mesh.h"
@@ -22,8 +23,17 @@ namespace
 
 using namespace BT;
 
-/// Searches thru physics objects and finds and deletes dangling ones.
-void destroy_dangling_physics_objects(entt::registry& reg, Physics_engine& phys_engine)
+/// How to destroy physics objects.
+enum Destroy_behavior
+{
+    DESTROY_ALL,
+    DESTROY_ONLY_DANGLING,
+};
+
+/// Searches thru physics objects and finds and deletes certain ones.
+void destroy_physics_objects(entt::registry& reg,
+                             Physics_engine& phys_engine,
+                             Destroy_behavior destroy_behavior)
 {   // Get all UUIDs inside physics object pool.
     auto all_phys_objs{ phys_engine.checkout_all_physics_objects() };
 
@@ -37,22 +47,41 @@ void destroy_dangling_physics_objects(entt::registry& reg, Physics_engine& phys_
 
     phys_engine.return_physics_objects(std::move(all_phys_objs));
 
-    // Mark UUIDs as non-dangling from pool collection.
-    auto view{ reg.view<component::Created_physics_object_reference>() };
-    for (auto entity : view)
-    {   // Mark UUID as non-dangling.
-        auto& created_phys_obj_ref{ view.get<component::Created_physics_object_reference>(entity) };
-        phys_obj_uuid_to_found_tag_map.at(created_phys_obj_ref.physics_obj_uuid_ref) = true;
+    // Mark UUIDs as non-dangling from pool collection, if only targeting dangling.
+    if (destroy_behavior == DESTROY_ONLY_DANGLING)
+    {
+        auto view{ reg.view<component::Created_physics_object_reference>() };
+        for (auto entity : view)
+        {   // Mark UUID as non-dangling.
+            auto& created_phys_obj_ref{ view.get<component::Created_physics_object_reference>(
+                entity) };
+            phys_obj_uuid_to_found_tag_map.at(created_phys_obj_ref.physics_obj_uuid_ref) = true;
+        }
     }
 
-    // Remove dangling UUIDs.
+    // Remove certain UUIDs.
     for (auto& it : phys_obj_uuid_to_found_tag_map)
-        if (!it.second)
-        {   // Remove this UUID since it's dangling.
+    {
+        bool destroy_this{ false };
+        switch (destroy_behavior)
+        {
+        case DESTROY_ALL:
+            destroy_this = true;
+            break;
+
+        case DESTROY_ONLY_DANGLING:
+            // `!it.second == true` means this UUID is dangling.
+            destroy_this = !it.second;
+            break;
+        }
+
+        if (destroy_this)
+        {   // Remove this UUID.
             phys_engine.remove_physics_object(it.first);
             BT_TRACEF("Destroyed and removed \"%s\" from physics object pool.",
                       UUID_helper::to_pretty_repr(it.first).c_str());
         }
+    }
 }
 
 /// Goes thru all non-created physics objects and creates physics objects.
@@ -121,6 +150,15 @@ void BT::system::process_physics_object_lifetime()
     auto& reg{ service_finder::find_service<Entity_container>().get_ecs_registry() };
     auto& phys_engine{ service_finder::find_service<Physics_engine>() };
 
-    destroy_dangling_physics_objects(reg, phys_engine);
-    create_staged_physics_objects(reg, phys_engine);
+    if (service_finder::find_service<world::World_properties_container>()
+            .get_data_handle()
+            .is_simulation_running)
+    {
+        destroy_physics_objects(reg, phys_engine, DESTROY_ONLY_DANGLING);
+        create_staged_physics_objects(reg, phys_engine);
+    }
+    else
+    {
+        destroy_physics_objects(reg, phys_engine, DESTROY_ALL);
+    }
 }
