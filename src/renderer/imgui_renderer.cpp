@@ -233,11 +233,18 @@ void BT::ImGui_renderer::render_imgui(float_t delta_time)
             service_finder::find_service<world::World_properties_container>().get_data_handle()
         };
         if (ImGui::Button(world_props.is_simulation_running ? "Stop" : "Play"))
+        {
             world_props.is_simulation_running = !world_props.is_simulation_running;
+            BT_TRACEF("Simulation running state set to: %s",
+                      world_props.is_simulation_running ? "ON" : "OFF");
+        }
 
         // Game play status.
         ImGui::SameLine(0, k_wide_spacing);
-        ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 0.5f), "Playing");
+        if (world_props.is_simulation_running)
+            ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 0.5f), "Simulation Playing");
+        else
+            ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "Simulation Stopped");
 
         ImGui::SameLine();
         ImGui::Text("%.1f FPS (%.3f ms)", io.Framerate, (1000.0f / io.Framerate));
