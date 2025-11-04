@@ -398,6 +398,9 @@ while (running_game_loop)
     - Reference: https://marzer.github.io/tomlplusplus/
 
 
+- [x] Ummm, ig I made the `Load Scene..` menu item completely functional.
+
+
 - [ ] "Play" button.
     - There could be an `if` statement for what systems would run with "play" on?
         > I worry that this would cause bad branching, but hey, branch prediction should figure out the pattern that something's always gonna be a certain way after a few cpu cycles right?
