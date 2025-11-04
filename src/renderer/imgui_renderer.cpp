@@ -93,7 +93,39 @@ void BT::ImGui_renderer::render_imgui(float_t delta_time)
     {
         if (ImGui::BeginMenu("Menu##main_menu_bar_option"))
         {
-            if (ImGui::MenuItem("New")) {}
+            if (ImGui::MenuItem("New"))
+            {   // Clear loaded scene(s).
+                service_finder::find_service<world::Scene_loader>().unload_all_scenes();
+            }
+
+            bool open_load_scene_modal_popup{ false };
+            if (ImGui::MenuItem("Load Scene.."))
+                open_load_scene_modal_popup = true;
+            if (open_load_scene_modal_popup)
+                ImGui::OpenPopup("load_scene_modal_popup");
+            if (ImGui::BeginPopupModal("load_scene_modal_popup", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+            {
+                ImGui::RadioButton("Some file 1", false);
+                ImGui::RadioButton("Some file 2", true);
+                ImGui::RadioButton("Some file 3", false);
+                ImGui::RadioButton("Some file 4", false);
+
+                ImGui::Separator();
+
+                if (ImGui::Button("Load Scene"))
+                {
+                    assert(false);  // @TODO: Implement.
+                }
+
+                ImGui::SameLine();
+                if (ImGui::Button("Cancel"))
+                {
+                    ImGui::CloseCurrentPopup();
+                }
+
+                ImGui::EndPopup();
+            }
+
             if (ImGui::MenuItem("Save"))
             {   // @TODO: @NOCHECKIN: @DEBUG
                 // Serialize scene.

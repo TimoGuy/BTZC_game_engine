@@ -398,6 +398,8 @@ while (running_game_loop)
 
     - [ ] Upon clicking "Play" button
         - [ ] Save a copy of the current scene being edited prior to setting `s_play_mode = true;`.
+            - [ ] Create the implementation of `world/scene_saver.h` so that this all can get serialized and saved.
+                - This may not even need to be saved out to a file. Up to you how you wanna do it tho.
         - [x] Clear all registrations (mainly `Created_render_object_reference`)
             - [x] Change it so that `Deformed_model`s are only allowed when `s_play_mode == true`.
                 - I.e. during the level creation mode/screen, only T-pose models and stuff!!! (static models)
@@ -425,9 +427,17 @@ while (running_game_loop)
 
 
 
-- [ ]
-- [ ] Create script for character controller movement but without the input from player.
-    - [ ] Perhaps this could just be a script that sends its data to another script? Maybe there could be a connections type thing? Mmmmm maybe provide a `on_start()` func for scripts where they could get the script that they need to send to and stuff?
+- [ ] Achieve feature parity as before.
+    - [ ] Player character
+        - [ ] Input getting system.
+        - [ ] Char-con collide-n-slide algorithm system.
+    - [ ] Animator editor.
+        - [ ] Umm, whatever is needed here.
+
+- [ ] Now do the thing I initially wanted to do but couldn't
+    - [ ] Create script for character controller movement but without the input from player.
+        - [ ] ~~Perhaps this could just be a script that sends its data to another script? Maybe there could be a connections type thing? Mmmmm maybe provide a `on_start()` func for scripts where they could get the script that they need to send to and stuff?~~
+            - This all got solved with the script to ECS overhaul.
 >-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 
