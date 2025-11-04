@@ -469,6 +469,9 @@ void BT::Renderer::Impl::calc_window_dim_pos_and_apply_window_hints()
         //        For now, I will just make this crash if set to fullscreen. I'll get it implemented
         //        at some point right?
         //          -Thea 2025/11/04
+        //
+        // @AMEND: Also, this is good ref:
+        // https://stackoverflow.com/questions/47402766/switching-between-windowed-and-full-screen-in-opengl-glfw-3-2
         assert(false);
     }
     else
