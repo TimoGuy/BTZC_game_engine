@@ -10,6 +10,7 @@
 #include "../input_handler/input_codes.h"
 #include "../input_handler/input_handler.h"
 #include "../service_finder/service_finder.h"
+#include "btzc_game_engine.h"
 #include "btglm.h"
 #include "btjson.h"
 #include "game_system_logic/system/imgui_render_transform_hierarchy_window.h"
@@ -29,6 +30,7 @@
 #include <cmath>
 #include <cstdint>
 #include <cstring>
+#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -91,6 +93,7 @@ void BT::ImGui_renderer::render_imgui(float_t delta_time)
     // Main menu bar.
     if (ImGui::BeginMainMenuBar())
     {
+        bool open_load_scene_modal_popup{ false };
         if (ImGui::BeginMenu("Menu##main_menu_bar_option"))
         {
             if (ImGui::MenuItem("New"))
@@ -98,33 +101,8 @@ void BT::ImGui_renderer::render_imgui(float_t delta_time)
                 service_finder::find_service<world::Scene_loader>().unload_all_scenes();
             }
 
-            bool open_load_scene_modal_popup{ false };
             if (ImGui::MenuItem("Load Scene.."))
                 open_load_scene_modal_popup = true;
-            if (open_load_scene_modal_popup)
-                ImGui::OpenPopup("load_scene_modal_popup");
-            if (ImGui::BeginPopupModal("load_scene_modal_popup", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
-            {
-                ImGui::RadioButton("Some file 1", false);
-                ImGui::RadioButton("Some file 2", true);
-                ImGui::RadioButton("Some file 3", false);
-                ImGui::RadioButton("Some file 4", false);
-
-                ImGui::Separator();
-
-                if (ImGui::Button("Load Scene"))
-                {
-                    assert(false);  // @TODO: Implement.
-                }
-
-                ImGui::SameLine();
-                if (ImGui::Button("Cancel"))
-                {
-                    ImGui::CloseCurrentPopup();
-                }
-
-                ImGui::EndPopup();
-            }
 
             if (ImGui::MenuItem("Save"))
             {   // @TODO: @NOCHECKIN: @DEBUG
@@ -179,6 +157,81 @@ void BT::ImGui_renderer::render_imgui(float_t delta_time)
 
 
             ImGui::EndMenu();
+        }
+
+        {   // "Load scene" modal.
+            static std::string s_selected_scene_fname;
+            static std::vector<std::string> s_loadable_scene_fnames;
+
+            if (open_load_scene_modal_popup)
+            {   // Clear state.
+                s_selected_scene_fname = "";
+                s_loadable_scene_fnames.clear();
+
+                // Fetch all .btscene files.
+                for (auto const& entry : std::filesystem::recursive_directory_iterator(
+                         BTZC_GAME_ENGINE_ASSET_SCENE_PATH))
+                {   // Make sure is a regular file.
+                    if (!entry.is_regular_file())
+                        continue;
+
+                    // Make sure has the right extension.
+                    if (!entry.path().has_filename() || !entry.path().has_extension() ||
+                        entry.path().extension() != ".btscene")
+                        continue;
+
+                    s_loadable_scene_fnames.emplace_back(entry.path().filename().string());
+                }
+
+                // Open the popup.
+                ImGui::OpenPopup("Load Scene..##load_scene_modal_popup");
+            }
+
+            // @NOTE: Always center this window when appearing.
+            ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+            ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
+            if (ImGui::BeginPopupModal("Load Scene..##load_scene_modal_popup",
+                                       nullptr,
+                                       ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove |
+                                           ImGuiWindowFlags_NoSavedSettings))
+            {
+                ImGui::Text(
+                    "Below are the list of found \".btscene\" files in the scene asset folder "
+                    "(" BTZC_GAME_ENGINE_ASSET_SCENE_PATH ").\n\n"
+                    "If there are missing files, try closing and then reopening this modal.\n\n"
+                    "NOTE: Due to current limitations, only one scene will be loaded at a time.\n"
+                    "(Once multiple scenes can be separated out in the transform hierarchy then\n"
+                    " I think this isn't an issue anymore.  -Thea 2025/11/04)");
+
+                ImGui::Separator();
+
+                for (auto const& fname : s_loadable_scene_fnames)
+                {
+                    if (ImGui::RadioButton(fname.c_str(), s_selected_scene_fname == fname))
+                        s_selected_scene_fname = fname;
+                }
+
+                ImGui::Separator();
+
+                if (ImGui::Button("Load Scene", ImVec2(120, 0)))
+                {   // Unload everything and load the selected scene.
+                    auto& scene_loader{ service_finder::find_service<world::Scene_loader>() };
+                    scene_loader.unload_all_scenes();
+                    scene_loader.load_scene(s_selected_scene_fname);
+
+                    ImGui::CloseCurrentPopup();
+                }
+                ImGui::SetItemDefaultFocus();
+
+                ImGui::SameLine();
+                if (ImGui::Button("Cancel", ImVec2(120, 0)))
+                {
+                    ImGui::CloseCurrentPopup();
+                }
+
+                ImGui::EndPopup();
+            }
         }
 
         // Context switching menu.
