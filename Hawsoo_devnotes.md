@@ -393,7 +393,7 @@ while (running_game_loop)
 - [x] Fix logger not detecting \n chars properly.
 
 
-- [ ] Create simple startup .toml file.
+- [x] Create simple startup .toml file.
     - It'll just be 
     - Reference: https://marzer.github.io/tomlplusplus/
 
