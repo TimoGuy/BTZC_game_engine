@@ -46,7 +46,9 @@ set(DEPENDENCY_INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/json/include
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/stb  # Header only (essentially).
     # ${CMAKE_CURRENT_SOURCE_DIR}/third_party/stduuid/include  # @NOTE: Removing this so that it's not easy to mix up the uuid.h header files.
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/tinyobjloader)
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/tinyobjloader
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/tomlplusplus/include  # Header only.
+)
 
 add_subdirectory(third_party/fastgltf)
 add_subdirectory(third_party/fmt)
@@ -178,6 +180,8 @@ set(MAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/scene/scene_serialization.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/service_finder/service_finder.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/service_finder/service_finder.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/settings/settings.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/settings/settings.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/timer/timer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/timer/timer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/timer/watchdog_timer.cpp

@@ -49,6 +49,9 @@ public:
 
     // Create image texture.
 
+    // App settings.
+    void save_state_to_app_settings() const;
+
     // Imgui.
     void render_imgui_game_view();
 

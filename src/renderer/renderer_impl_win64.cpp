@@ -28,6 +28,7 @@
 #include "render_object.h"
 #include "renderer.h"
 #include "service_finder/service_finder.h"
+#include "settings/settings.h"
 #include "stb_image.h"
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
 #include "stb_image_resize2.h"
@@ -166,7 +167,7 @@ BT::Renderer::Impl::Impl(Renderer& renderer, ImGui_renderer& imgui_renderer, Inp
 
     setup_glfw_and_opengl46_hints();
 
-    calc_ideal_standard_window_dim_and_apply_center_hints();
+    calc_window_dim_pos_and_apply_window_hints();
     create_window_with_gfx_context(title);
 
     setup_imgui();
@@ -303,6 +304,73 @@ BT::Render_object_pool& BT::Renderer::Impl::get_render_object_pool()
     return m_rend_obj_pool;
 }
 
+void BT::Renderer::Impl::save_state_to_app_settings() const
+{   // Get settings writing handle.
+    auto& app_window_settings{ get_app_settings_write_handle().window_settings };
+
+    auto win_handle{ reinterpret_cast<GLFWwindow*>(m_window_handle) };
+
+    // Check if fullscreen.
+    bool is_fullscreen{ glfwGetWindowMonitor(win_handle) != nullptr };
+    app_window_settings.is_fullscreen = is_fullscreen;
+
+    if (is_fullscreen)
+    {   // Get monitor idx.
+        auto monitor_ptr{ glfwGetWindowMonitor(win_handle) };
+
+        int32_t count;
+        GLFWmonitor** all_monitors{ glfwGetMonitors(&count) };
+        for (int32_t i = 0; i < count; i++)
+            if (all_monitors[i] == monitor_ptr)
+            {   // Found matching monitor idx!
+                app_window_settings.monitor_idx = i;
+                break;
+            }
+    }
+    else
+    {   // Use placement postion to get monitor idx.
+        int32_t xpos_center, ypos_center;
+        {
+            glfwGetWindowPos(win_handle, &xpos_center, &ypos_center);
+
+            int32_t w, h;
+            glfwGetWindowSize(win_handle, &w, &h);
+
+            xpos_center += w * 0.5;
+            ypos_center += h * 0.5;
+        }
+
+        // Find where positions line up in monitor workareas.
+        int32_t monitor_cnt;
+        GLFWmonitor** all_monitors{ glfwGetMonitors(&monitor_cnt) };
+        for (int32_t i = 0; i < monitor_cnt; i++)
+        {
+            int32_t wa_x, wa_y, wa_w, wa_h;
+            glfwGetMonitorWorkarea(all_monitors[i], &wa_x, &wa_y, &wa_w, &wa_h);
+
+            if (xpos_center >= wa_x && xpos_center <= wa_x + wa_w &&
+                ypos_center >= wa_y && ypos_center <= wa_y + wa_h)
+            {   // Found a monitor!
+                app_window_settings.monitor_idx = i;
+                break;
+            }
+        }
+
+        // Save window attributes.
+        app_window_settings.is_resizable = (glfwGetWindowAttrib(win_handle, GLFW_RESIZABLE) == GLFW_TRUE);
+        app_window_settings.has_border   = (glfwGetWindowAttrib(win_handle, GLFW_DECORATED) == GLFW_TRUE);
+        app_window_settings.is_maximized = (glfwGetWindowAttrib(win_handle, GLFW_MAXIMIZED) == GLFW_TRUE);
+
+        if (!app_window_settings.is_maximized)
+        {   // Save window dimensions.
+            int32_t win_w, win_h;
+            glfwGetWindowSize(win_handle, &win_w, &win_h);
+            app_window_settings.windowed_width = win_w;
+            app_window_settings.windowed_height = win_h;
+        }
+    }
+}
+
 void BT::Renderer::Impl::render_imgui_game_view()
 {
     ImVec2 content_size{ ImGui::GetContentRegionAvail() };
@@ -350,68 +418,97 @@ void BT::Renderer::Impl::setup_glfw_and_opengl46_hints()
 #endif
 }
 
-void BT::Renderer::Impl::calc_ideal_standard_window_dim_and_apply_center_hints()
-{
-    static vector<Window_dimensions> const k_standard_window_dims{
-        { 3840, 2160 },
-        { 2560, 1440 },
-        { 1920, 1080 },
-        { 1280, 720 },
-        { 1024, 576 },
-        { 800, 450 },
-        { 640, 360 },
-    };
+void BT::Renderer::Impl::calc_window_dim_pos_and_apply_window_hints()
+{   // Get settings handle.
+    auto const& app_window_settings{ get_app_settings_read_handle().window_settings };
 
-    // calc_ideal_std_window_dim()
-    struct Monitor_workarea
-    {
-        int32_t xpos;
-        int32_t ypos;
-        int32_t width;
-        int32_t height;
-    } monitor_workarea;
-    glfwGetMonitorWorkarea(glfwGetPrimaryMonitor(),
-                           &monitor_workarea.xpos,
-                           &monitor_workarea.ypos,
-                           &monitor_workarea.width,
-                           &monitor_workarea.height);
+    // Pick display monitor.
+    GLFWmonitor* monitor_ptr;
 
-    // Find largest dimension within monitor workarea.
-    Window_dimensions ideal_std_win_dim{ 0, 0 };
-    for (auto& window_dim : k_standard_window_dims)
-    {
-        if (window_dim.width < monitor_workarea.width &&
-            window_dim.height < monitor_workarea.height)
-        {
-            ideal_std_win_dim = window_dim;
-            break;
+    bool found_monitor_idx{ false };
+    {   // Try to look for matching monitor index.
+        int32_t count;
+        GLFWmonitor** all_monitors{ glfwGetMonitors(&count) };
+        assert(count > 0);
+
+        if (app_window_settings.monitor_idx >= 0 && app_window_settings.monitor_idx < count)
+        {   // Found the monitor index!
+            monitor_ptr = all_monitors[app_window_settings.monitor_idx];
+            found_monitor_idx = true;
         }
     }
 
-    assert(ideal_std_win_dim.width > 0 &&
-           ideal_std_win_dim.height > 0);
-    submit_window_dims(ideal_std_win_dim.width, ideal_std_win_dim.height);
+    if (!found_monitor_idx)
+    {   // Save idx of primary monitor as the monitor idx.
+        monitor_ptr = glfwGetPrimaryMonitor();
+        assert(monitor_ptr != nullptr);
 
-    // Apply centering hints.
-    int32_t centered_window_pos[2]{
-        monitor_workarea.xpos
-            + static_cast<int32_t>(monitor_workarea.width * 0.5
-                - m_window_dims.width * 0.5),
-        monitor_workarea.ypos
-            + static_cast<int32_t>(monitor_workarea.height * 0.5
-                - m_window_dims.height * 0.5),
-    };
-
-    glfwWindowHint(GLFW_POSITION_X, centered_window_pos[0]);
-    glfwWindowHint(GLFW_POSITION_Y, centered_window_pos[1]);
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-    glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-
-    // Apply wanted viewport dimensions.
-    if (!m_render_to_ldr)
-    {
-        m_main_viewport_wanted_dims = m_window_dims;
+        get_app_settings_write_handle().window_settings.monitor_idx = 0;  // 0 is always the primary.
     }
+
+    assert(monitor_ptr != nullptr);  // One final check.
+
+    // Set monitor workarea size.
+    Window_dimensions win_dims{ 0, 0 };
+
+    if (app_window_settings.is_fullscreen)
+    {   // Set width and height to monitor size.
+        // @TODO: @CHECK: This may have to change with scaled desktops?
+        GLFWvidmode const* mode{ glfwGetVideoMode(monitor_ptr) };
+        glfwWindowHint(GLFW_RED_BITS, mode->redBits);
+        glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
+        glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
+        glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+
+        win_dims.width = mode->width;
+        win_dims.height = mode->height;
+
+        // @TODO: Implement getting `monitor` param set in `glfwCreateWindow()` and then toggling
+        //        which monitor to fullscreen into depending on the monitor context.
+        //
+        //        For now, I will just make this crash if set to fullscreen. I'll get it implemented
+        //        at some point right?
+        //          -Thea 2025/11/04
+        assert(false);
+    }
+    else
+    {   // Set width and height to settings.
+        win_dims.width = app_window_settings.windowed_width;
+        win_dims.height = app_window_settings.windowed_height;
+
+        // Apply centering hints.
+        struct Monitor_workarea
+        {
+            int32_t xpos;
+            int32_t ypos;
+            int32_t width;
+            int32_t height;
+        } monitor_workarea;
+        glfwGetMonitorWorkarea(monitor_ptr,
+                               &monitor_workarea.xpos,
+                               &monitor_workarea.ypos,
+                               &monitor_workarea.width,
+                               &monitor_workarea.height);
+
+        int32_t centered_window_pos[2]{
+            monitor_workarea.xpos +
+                static_cast<int32_t>(monitor_workarea.width * 0.5 - win_dims.width * 0.5),
+            monitor_workarea.ypos +
+                static_cast<int32_t>(monitor_workarea.height * 0.5 - win_dims.height * 0.5),
+        };
+
+        glfwWindowHint(GLFW_POSITION_X, centered_window_pos[0]);
+        glfwWindowHint(GLFW_POSITION_Y, centered_window_pos[1]);
+
+        glfwWindowHint(GLFW_RESIZABLE, app_window_settings.is_resizable ? GLFW_TRUE : GLFW_FALSE);
+        glfwWindowHint(GLFW_DECORATED, app_window_settings.has_border ? GLFW_TRUE : GLFW_FALSE);
+        glfwWindowHint(GLFW_MAXIMIZED, app_window_settings.is_maximized ? GLFW_TRUE : GLFW_FALSE);
+    }
+
+    assert(win_dims.width > 0 && win_dims.height > 0);
+    submit_window_dims(win_dims.width, win_dims.height);
+
+    glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 }
 
 void BT::Renderer::Impl::create_window_with_gfx_context(string const& title)

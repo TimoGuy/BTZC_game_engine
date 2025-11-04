@@ -547,6 +547,10 @@ int32_t main()
 #endif  // !BTZC_REFACTOR_TO_ENTT
     }
 
+    // Write final state of settings file.
+    main_renderer.save_state_to_app_settings();
+    BT::save_app_settings_to_disk();
+
     // Show stats prior to cleanup.
     BT_TRACEF("Post-teardown statistics:\n"
               "  Num scenes          : %i\n"

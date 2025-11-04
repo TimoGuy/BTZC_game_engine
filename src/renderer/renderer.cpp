@@ -52,6 +52,12 @@ BT::Render_object_pool& BT::Renderer::get_render_object_pool()
     return m_pimpl->get_render_object_pool();
 }
 
+// App settings.
+void BT::Renderer::save_state_to_app_settings() const
+{
+    m_pimpl->save_state_to_app_settings();
+}
+
 // Imgui.
 void BT::Renderer::render_imgui_game_view()
 {

@@ -38,6 +38,8 @@ public:
 
     Render_object_pool& get_render_object_pool();
 
+    void save_state_to_app_settings() const;
+
     void render_imgui_game_view();
 
 private:
@@ -54,7 +56,7 @@ private:
     bool m_window_focused{ true };
     bool m_window_iconified{ false };
 
-    void calc_ideal_standard_window_dim_and_apply_center_hints();
+    void calc_window_dim_pos_and_apply_window_hints();
 
     inline static void* m_window_handle{ nullptr };
     Input_handler& m_input_handler;
