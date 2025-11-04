@@ -392,6 +392,12 @@ while (running_game_loop)
     - Turns out there were llingering physics objects that never got fully deleted before exiting.
 - [x] Fix logger not detecting \n chars properly.
 
+
+- [ ] Create simple startup .toml file.
+    - It'll just be 
+    - Reference: https://marzer.github.io/tomlplusplus/
+
+
 - [ ] "Play" button.
     - There could be an `if` statement for what systems would run with "play" on?
         > I worry that this would cause bad branching, but hey, branch prediction should figure out the pattern that something's always gonna be a certain way after a few cpu cycles right?

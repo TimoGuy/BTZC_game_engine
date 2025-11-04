@@ -41,6 +41,7 @@
 #include "renderer/texture.h"  // @DEBUG
 #include "scene/scene_serialization_ifc.h"
 #include "service_finder/service_finder.h"
+#include "settings/settings.h"
 #include "timer/timer.h"
 #include "timer/watchdog_timer.h"
 #include "uuid/uuid.h"
@@ -53,6 +54,9 @@ using std::unique_ptr;
 
 int32_t main()
 {
+    BT::initialize_app_settings_from_file_or_fallback_to_defaults();
+    auto const& app_settings{ BT::get_app_settings_read_handle() };
+
     BT::Watchdog_timer main_watchdog;
 
 #if !BTZC_REFACTOR_TO_ENTT
