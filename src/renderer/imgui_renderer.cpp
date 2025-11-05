@@ -107,6 +107,8 @@ void BT::ImGui_renderer::render_imgui(float_t delta_time)
             if (ImGui::MenuItem("Save"))
             {   // @TODO: @NOCHECKIN: @DEBUG
                 // Serialize scene.
+                service_finder::find_service<world::Scene_loader>().save_all_entities_into_scene("Current_or_last_filename to laod_")j
+
                 json root = {};
                 size_t game_obj_idx{ 0 };
 #if !BTZC_REFACTOR_TO_ENTT
@@ -322,6 +324,9 @@ void BT::ImGui_renderer::render_imgui(float_t delta_time)
             world_props.is_simulation_running = !world_props.is_simulation_running;
             BT_TRACEF("Simulation running state set to: %s",
                       world_props.is_simulation_running ? "ON" : "OFF");
+
+            // Save entities to temp disk image if entering play mode.
+            service_finder::find_service<world::Scene_loader>().save_all_entities_into_scene("._temp_btscene_save_for_playmoe.btsceneFISs");
         }
 
         // Game play status.

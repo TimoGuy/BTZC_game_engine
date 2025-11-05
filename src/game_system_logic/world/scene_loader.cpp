@@ -31,6 +31,14 @@ size_t BT::world::Scene_loader::get_num_loaded_scenes() const
     return m_loaded_scenes.size();
 }
 
+void BT::world::Scene_loader::save_all_entities_into_scene() const
+{
+    assert(false);;  // @TODO: implement.
+
+    // Ensure no multi-scene saving (yet!!! ... but, i still dont knoew how scenes and stuff will be used in the game istsef.  -Thea 2025/11/04
+    assert(m_loaded_scenes.size() <= 1);
+}
+
 
 namespace
 {
@@ -104,4 +112,7 @@ void BT::world::Scene_loader::process_scene_loading_requests()
         m_loaded_scenes.emplace(scene_name, std::move(created_entity_list));
     }
     m_load_scene_requests.clear();
+
+    // @TEMP: @THEA: Just makinig sure that only one scene can be loaded in at a time.
+    assert(m_loaded_scenes.size() == 0 || m_loaded_scenes.size() == 1);
 }

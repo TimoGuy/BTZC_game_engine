@@ -26,6 +26,9 @@ public:
     /// Gets number of loaded scenes.
     size_t get_num_loaded_scenes() const;
 
+    /// Takes contents of loaded scene and writes them to a file.
+    void save_all_entities_into_scene() const;
+
     /// Process all requests for scene loading.
     void process_scene_loading_requests();
 
