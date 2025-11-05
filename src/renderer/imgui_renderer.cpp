@@ -107,7 +107,8 @@ void BT::ImGui_renderer::render_imgui(float_t delta_time)
             if (ImGui::MenuItem("Save"))
             {   // @TODO: @NOCHECKIN: @DEBUG
                 // Serialize scene.
-                service_finder::find_service<world::Scene_loader>().save_all_entities_into_scene("Current_or_last_filename to laod_");
+                service_finder::find_service<world::Scene_loader>().save_all_entities_into_scene(
+                    "Current_or_last_filename to laod_");
 
                 // @TODO: @NOCHECKIN: @THEA: vv CLEAN UP THIS DEAD CODE!!!! vv
 //                 json root = {};

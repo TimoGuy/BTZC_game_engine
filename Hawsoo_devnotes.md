@@ -407,8 +407,9 @@ while (running_game_loop)
 
     - [ ] Upon clicking "Play" button
         - [ ] Save a copy of the current scene being edited prior to setting `s_play_mode = true;`.
-            - [ ] Create the implementation of `world/scene_saver.h` so that this all can get serialized and saved.
+            - [x] Create the implementation of `world/scene_saver.h` so that this all can get serialized and saved.
                 - This may not even need to be saved out to a file. Up to you how you wanna do it tho.
+                - @NOTE: Did not need to use/create `scene_saver.h`
         - [x] Clear all registrations (mainly `Created_render_object_reference`)
             - [x] Change it so that `Deformed_model`s are only allowed when `s_play_mode == true`.
                 - I.e. during the level creation mode/screen, only T-pose models and stuff!!! (static models)

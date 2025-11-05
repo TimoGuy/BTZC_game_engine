@@ -26,6 +26,9 @@ public:
     /// Gets the number of entities registered in this container.
     size_t get_num_entities() const;
 
+    /// Gets all of the registered UUIDs inside this container.
+    std::vector<UUID> get_all_entity_uuids() const;
+
     /// Gets a handle to the ECS registry.
     /// @warning DO NOT USE `.create()` AND/OR `.destroy()` FUNCTIONS DIRECTLY.
     entt::registry& get_ecs_registry();

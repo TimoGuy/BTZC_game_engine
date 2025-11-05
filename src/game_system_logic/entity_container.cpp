@@ -75,6 +75,17 @@ size_t BT::Entity_container::get_num_entities() const
     return m_uuid_to_inner_entity_map.size();
 }
 
+std::vector<BT::UUID> BT::Entity_container::get_all_entity_uuids() const
+{
+    std::vector<UUID> all_uuids;
+    all_uuids.reserve(m_uuid_to_inner_entity_map.size());
+
+    for (auto [ent_uuid, ent_ecs_id] : m_uuid_to_inner_entity_map)
+        all_uuids.emplace_back(ent_uuid);
+
+    return all_uuids;
+}
+
 entt::registry& BT::Entity_container::get_ecs_registry()
 {
     return m_ecs_registry;

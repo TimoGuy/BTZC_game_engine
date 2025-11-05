@@ -1,5 +1,6 @@
 #include "component_registry.h"
 
+#include "btjson.h"
 #include "component_imgui_edit_functions.h"
 #include "entity_metadata.h"
 #include "entt/core/fwd.hpp"
@@ -15,6 +16,7 @@
 #include <cassert>
 #include <functional>
 #include <map>
+#include <optional>
 #include <string>
 #include <typeindex>
 #include <unordered_map>
@@ -33,6 +35,7 @@ struct Component_metadata
     size_t display_order;
     std::string comp_name;
     std::function<void(entt::registry&, entt::entity)> imgui_edit_fn;
+    std::function<json(entt::registry&, entt::entity)> serialize_component_fn;
 };
 static std::unordered_map<entt::id_type, Component_metadata> s_entt_type_id_to_comp_meta_map;
 
@@ -46,46 +49,59 @@ void BT::component::register_all_components()
     assert(s_entt_type_id_to_comp_meta_map.empty());
 
     /// Helpful macro for registering a component.
-    #define REGISTER_COMPONENT(_type, _allow_serialize, _imgui_edit_fn)                             \
+    #define REGISTER_COMPONENT__YES_SERIALIZE(_type, _imgui_edit_fn)                                \
         do                                                                                          \
         {                                                                                           \
-            if constexpr (_allow_serialize)                                                         \
-            {   /* Register in serialization func map. */                                           \
-                auto type_idx{ std::type_index(typeid(_type)) };                                    \
-                s_type_str_to_type_idx_map.emplace(#_type, type_idx);                               \
-                s_type_idx_to_construct_comp_fn_map.emplace(type_idx,                               \
-                                                            [](entt::entity ecs_entity,             \
-                                                               json const& members_j) {             \
-                    /* Add component to entity. */                                                  \
-                    auto& entity_container{ service_finder::find_service<Entity_container>() };     \
+            /* Register in serialization func map. */                                               \
+            auto type_idx{ std::type_index(typeid(_type)) };                                        \
+            s_type_str_to_type_idx_map.emplace(#_type, type_idx);                                   \
+            s_type_idx_to_construct_comp_fn_map.emplace(type_idx,                                   \
+                                                        [](entt::entity ecs_entity,                 \
+                                                           json const& members_j) {                 \
+                /* Add component to entity. */                                                      \
+                auto& entity_container{ service_finder::find_service<Entity_container>() };         \
                                                                                                     \
-                    auto& new_comp{                                                                 \
-                        entity_container.get_ecs_registry().emplace<_type>(ecs_entity) };           \
-                    new_comp = _type(members_j);                                                    \
-                });                                                                                 \
-            }                                                                                       \
+                auto& new_comp{                                                                     \
+                    entity_container.get_ecs_registry().emplace<_type>(ecs_entity) };               \
+                new_comp = _type(members_j);                                                        \
+            });                                                                                     \
                                                                                                     \
             /* Add component to hash-to-component-name map. */                                      \
             s_entt_type_id_to_comp_meta_map.emplace(                                                \
                 entt::type_id<_type>().hash(),                                                      \
                 Component_metadata{ s_entt_type_id_to_comp_meta_map.size(),                         \
                                     #_type,                                                         \
-                                    _imgui_edit_fn });                                              \
+                                    _imgui_edit_fn,                                                 \
+                                    [](entt::registry& reg, entt::entity ecs_entity) {              \
+                                        return reg.get<_type>(ecs_entity);                          \
+                                    } });                                                           \
+        } while(0);
+
+    #define REGISTER_COMPONENT___NO_SERIALIZE(_type, _imgui_edit_fn)                                \
+        do                                                                                          \
+        {                                                                                           \
+            /* Add component to hash-to-component-name map. */                                      \
+            s_entt_type_id_to_comp_meta_map.emplace(                                                \
+                entt::type_id<_type>().hash(),                                                      \
+                Component_metadata{ s_entt_type_id_to_comp_meta_map.size(),                         \
+                                    #_type,                                                         \
+                                    _imgui_edit_fn,                                                 \
+                                    nullptr });                                                     \
         } while(0);
 
     //---- All Components -- @NOTE: Order matters here! --------------------------------------------
-    //----------------       Component typename                        Serializable?    ImGui edit func
-    REGISTER_COMPONENT(component::Entity_metadata,                         true,    edit::imgui_edit__entity_metadata);
-    REGISTER_COMPONENT(component::Transform,                               true,    edit::imgui_edit__transform);
-    REGISTER_COMPONENT(component::Transform_hierarchy,                     true,    edit::imgui_edit__transform_hierarchy);
-    REGISTER_COMPONENT(component::Transform_changed,                       false,   edit::imgui_edit__transform_changed);
-    REGISTER_COMPONENT(component::Render_object_settings,                  true,    edit::imgui_edit__render_object_settings);
-    REGISTER_COMPONENT(component::Created_render_object_reference,         false,   edit::imgui_edit__created_render_object_reference);
-    REGISTER_COMPONENT(component::Physics_object_settings,                 true,    edit::imgui_edit__physics_object_settings);
-    REGISTER_COMPONENT(component::Physics_obj_type_triangle_mesh_settings, true,    edit::imgui_edit__physics_obj_type_triangle_mesh_settings);
-    REGISTER_COMPONENT(component::Physics_obj_type_char_con_settings,      true,    edit::imgui_edit__physics_obj_type_char_con_settings);
-    REGISTER_COMPONENT(component::Created_physics_object_reference,        false,   edit::imgui_edit__created_physics_object_reference);
- // REGISTER_COMPONENT(component::Some_sample_component,                   true,    edit::imgui_edit__sample);
+    //----------------                Component typename                                    ImGui edit func
+ // REGISTER_COMPONENT__YES_SERIALIZE(component::Some_sample_component,                     edit::imgui_edit__sample);
+    REGISTER_COMPONENT__YES_SERIALIZE(component::Entity_metadata,                           edit::imgui_edit__entity_metadata);
+    REGISTER_COMPONENT__YES_SERIALIZE(component::Transform,                                 edit::imgui_edit__transform);
+    REGISTER_COMPONENT__YES_SERIALIZE(component::Transform_hierarchy,                       edit::imgui_edit__transform_hierarchy);
+    REGISTER_COMPONENT___NO_SERIALIZE(component::Transform_changed,                         edit::imgui_edit__transform_changed);
+    REGISTER_COMPONENT__YES_SERIALIZE(component::Render_object_settings,                    edit::imgui_edit__render_object_settings);
+    REGISTER_COMPONENT___NO_SERIALIZE(component::Created_render_object_reference,           edit::imgui_edit__created_render_object_reference);
+    REGISTER_COMPONENT__YES_SERIALIZE(component::Physics_object_settings,                   edit::imgui_edit__physics_object_settings);
+    REGISTER_COMPONENT__YES_SERIALIZE(component::Physics_obj_type_triangle_mesh_settings,   edit::imgui_edit__physics_obj_type_triangle_mesh_settings);
+    REGISTER_COMPONENT__YES_SERIALIZE(component::Physics_obj_type_char_con_settings,        edit::imgui_edit__physics_obj_type_char_con_settings);
+    REGISTER_COMPONENT___NO_SERIALIZE(component::Created_physics_object_reference,          edit::imgui_edit__created_physics_object_reference);
     //----------------------------------------------------------------------------------------------
 
     #undef REGISTER_COMPONENT
@@ -105,6 +121,22 @@ std::string BT::component::find_component_name(entt::id_type comp_id)
     return s_entt_type_id_to_comp_meta_map.at(comp_id).comp_name;
 }
 
+std::optional<json> BT::component::serialize_component_of_entity(entt::entity ecs_entity,
+                                                                 entt::id_type comp_id)
+{
+    auto& reg{ service_finder::find_service<Entity_container>().get_ecs_registry() };
+    auto& serialize_component_fn{
+        s_entt_type_id_to_comp_meta_map.at(comp_id).serialize_component_fn
+    };
+
+    if (serialize_component_fn == nullptr)
+    {   // No serialization function found.
+        return std::nullopt;
+    }
+
+    return serialize_component_fn(reg, ecs_entity);
+}
+
 void BT::component::imgui_render_components_edit_panes(entt::entity ecs_entity)
 {   // Figure out what components appear.
     std::map<size_t, Component_metadata> found_comps_ordered;
@@ -122,7 +154,7 @@ void BT::component::imgui_render_components_edit_panes(entt::entity ecs_entity)
             found_comps_ordered.emplace(comp_meta_copy.display_order, std::move(comp_meta_copy));
         }
 
-    // Run ImGui edit funcs in order.
+    // Run ImGui edit funcs in desired order (i.e. the order listed in the .h file).
     for (auto&& it : found_comps_ordered)
     {
         auto& comp_meta{ it.second };

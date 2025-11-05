@@ -1,6 +1,7 @@
 #include "scene_loader.h"
 
 #include "btlogger.h"
+#include "entt/entity/fwd.hpp"
 #include "game_system_logic/component/component_registry.h"
 #include "game_system_logic/entity_container.h"
 #include "scene_serialization.h"
@@ -34,11 +35,20 @@ size_t BT::world::Scene_loader::get_num_loaded_scenes() const
 }
 
 void BT::world::Scene_loader::save_all_entities_into_scene(std::string const& scene_name) const
-{
-    assert(false);;  // @TODO: implement.
-
-    // Ensure no multi-scene saving (yet!!! ... but, i still dont knoew how scenes and stuff will be used in the game istsef.  -Thea 2025/11/04
+{   // Ensure no multi-scene saving (yet!!! ... but, i still dont knoew how scenes and stuff will be used in the game istsef.  -Thea 2025/11/04
     assert(m_loaded_scenes.size() <= 1);
+
+    // Build scene serialization. 
+    Scene_serialization scene_serialized;
+
+    auto all_ent_uuids{ service_finder::find_service<Entity_container>().get_all_entity_uuids() };
+    scene_serialized.entities.reserve(all_ent_uuids.size());
+
+    for (auto ent_uuid : all_ent_uuids)
+        scene_serialized.entities.emplace_back(serialize_entity(ent_uuid));
+
+    // Write to disk.
+    serialize_scene_data_to_disk(scene_serialized, scene_name);
 }
 
 

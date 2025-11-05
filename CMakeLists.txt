@@ -110,7 +110,6 @@ set(MAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/write_render_transforms.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/world/scene_loader.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/world/scene_loader.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/world/scene_saver.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/world/scene_serialization.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/world/scene_serialization.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/world/world_properties.cpp
