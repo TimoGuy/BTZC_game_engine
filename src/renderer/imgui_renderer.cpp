@@ -107,22 +107,23 @@ void BT::ImGui_renderer::render_imgui(float_t delta_time)
             if (ImGui::MenuItem("Save"))
             {   // @TODO: @NOCHECKIN: @DEBUG
                 // Serialize scene.
-                service_finder::find_service<world::Scene_loader>().save_all_entities_into_scene("Current_or_last_filename to laod_")j
+                service_finder::find_service<world::Scene_loader>().save_all_entities_into_scene("Current_or_last_filename to laod_");
 
-                json root = {};
-                size_t game_obj_idx{ 0 };
-#if !BTZC_REFACTOR_TO_ENTT
-                auto const game_objs{ m_game_obj_pool->get_all_as_list_no_lock() };
-                for (auto game_obj : game_objs)
-                {
-                    game_obj->scene_serialize(BT::SCENE_SERIAL_MODE_SERIALIZE, root[game_obj_idx++]);
-                }
-#endif  // !BTZC_REFACTOR_TO_ENTT
+                // @TODO: @NOCHECKIN: @THEA: vv CLEAN UP THIS DEAD CODE!!!! vv
+//                 json root = {};
+//                 size_t game_obj_idx{ 0 };
+// #if !BTZC_REFACTOR_TO_ENTT
+//                 auto const game_objs{ m_game_obj_pool->get_all_as_list_no_lock() };
+//                 for (auto game_obj : game_objs)
+//                 {
+//                     game_obj->scene_serialize(BT::SCENE_SERIAL_MODE_SERIALIZE, root[game_obj_idx++]);
+//                 }
+// #endif  // !BTZC_REFACTOR_TO_ENTT
 
-                // Save to disk.
-                json_save_to_disk(root,
-                                  BTZC_GAME_ENGINE_ASSET_SCENE_PATH
-                                  "sumthin_cumming_outta_me.btscene");
+//                 // Save to disk.
+//                 json_save_to_disk(root,
+//                                   BTZC_GAME_ENGINE_ASSET_SCENE_PATH
+//                                   "sumthin_cumming_outta_me.btscene");
             }
 
             ImGui::Separator();

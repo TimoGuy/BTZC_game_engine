@@ -6,6 +6,8 @@
 #include "scene_serialization.h"
 #include "service_finder/service_finder.h"
 
+#include <string>
+
 
 BT::world::Scene_loader::Scene_loader()
 {
@@ -31,7 +33,7 @@ size_t BT::world::Scene_loader::get_num_loaded_scenes() const
     return m_loaded_scenes.size();
 }
 
-void BT::world::Scene_loader::save_all_entities_into_scene() const
+void BT::world::Scene_loader::save_all_entities_into_scene(std::string const& scene_name) const
 {
     assert(false);;  // @TODO: implement.
 
