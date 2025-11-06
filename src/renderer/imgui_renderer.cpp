@@ -25,6 +25,7 @@
 #include "misc/cpp/imgui_stdlib.h"
 #include "model_animator.h"  // @CHECK: @NOCHECKIN: Is this needed?
 #include "renderer.h"
+#include "timer/timer.h"
 
 #include <array>
 #include <cmath>
@@ -108,7 +109,7 @@ void BT::ImGui_renderer::render_imgui(float_t delta_time)
             {   // @TODO: @NOCHECKIN: @DEBUG
                 // Serialize scene.
                 service_finder::find_service<world::Scene_loader>().save_all_entities_into_scene(
-                    "Current_or_last_filename to laod_");
+                    "TODO_FILL_IN_NAME_FOR_SAVING_SYSTEM_HEREEEE.btscene");
 
                 // @TODO: @NOCHECKIN: @THEA: vv CLEAN UP THIS DEAD CODE!!!! vv
 //                 json root = {};
@@ -323,12 +324,28 @@ void BT::ImGui_renderer::render_imgui(float_t delta_time)
         };
         if (ImGui::Button(world_props.is_simulation_running ? "Stop" : "Play"))
         {
-            world_props.is_simulation_running = !world_props.is_simulation_running;
-            BT_TRACEF("Simulation running state set to: %s",
-                      world_props.is_simulation_running ? "ON" : "OFF");
+            Timer toggle_simulation_timer;  // For tracking how long the switch takes.
+            toggle_simulation_timer.start_timer();
 
-            // Save entities to temp disk image if entering play mode.
-            service_finder::find_service<world::Scene_loader>().save_all_entities_into_scene("._temp_btscene_save_for_playmoe.btsceneFISs");
+            world_props.is_simulation_running = !world_props.is_simulation_running;
+
+            constexpr char const* const k_temp_save_fname{
+                "._temp_btscene_save_for_playmode.btscene"
+            };
+            if (world_props.is_simulation_running)
+                // Save entities to temp disk file if entering play mode.
+                service_finder::find_service<world::Scene_loader>().save_all_entities_into_scene(
+                    k_temp_save_fname);
+            else
+            {   // Load previously saved temp disk into the world, restoring the pre-play state.
+                auto& scene_loader{ service_finder::find_service<world::Scene_loader>() };
+                scene_loader.unload_all_scenes();
+                scene_loader.load_scene(k_temp_save_fname);
+            }
+
+            BT_TRACEF("Simulation running state set to %s in %0.6f seconds.",
+                      world_props.is_simulation_running ? "ON" : "OFF",
+                      toggle_simulation_timer.calc_delta_time());
         }
 
         // Game play status.

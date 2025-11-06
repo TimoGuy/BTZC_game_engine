@@ -401,12 +401,12 @@ while (running_game_loop)
 - [x] Ummm, ig I made the `Load Scene..` menu item completely functional.
 
 
-- [ ] "Play" button.
+- [x] "Play" and "Stop" button.
     - There could be an `if` statement for what systems would run with "play" on?
         > I worry that this would cause bad branching, but hey, branch prediction should figure out the pattern that something's always gonna be a certain way after a few cpu cycles right?
 
-    - [ ] Upon clicking "Play" button
-        - [ ] Save a copy of the current scene being edited prior to setting `s_play_mode = true;`.
+    - [x] Upon clicking "Play" button
+        - [x] Save a copy of the current scene being edited prior to setting `s_play_mode = true;`.
             - [x] Create the implementation of `world/scene_saver.h` so that this all can get serialized and saved.
                 - This may not even need to be saved out to a file. Up to you how you wanna do it tho.
                 - @NOTE: Did not need to use/create `scene_saver.h`
@@ -418,9 +418,11 @@ while (running_game_loop)
                 - Since you can't really click and drag to move stuff very effectively in the level editor, this is necessary.
                 - Tho, once you're playing, and you wanna just drag stuff around... does that mean you just can't anymore?
                 > I think the above ^^ needs some more thought about if I'll support dragging around physics objs and how?
-        - [ ] Set `s_play_mode = true;`
-        - [ ] Run!
-            - When running, everything that needs to get created (e.g. render_objs, phys_objs), will still get created in the systems that create them, but this time, since `s_play_mode == true`, then everything will get created correctly!
+                    - @UPDATE: So it turns out that physics objects will get moved durng play mode as well as during editing mode, however, for static objects, since they're unable to be moved during play mode, they will be static.
+        - [x] Set `s_play_mode = true;`
+        - [x] Run!
+            - When running, everything that needs to get created (e.g. render_objs, phys_objs), will still get created in the systems that create them, but this time, since `s_play_mode == true`, then everything will get created completely!
+    - [x] Upon clicking the `Stop` button, the previously saved file is loaded again from disk, after unloading all scenes.
 
 
 > Some thoughts on how there could be parallelization.
