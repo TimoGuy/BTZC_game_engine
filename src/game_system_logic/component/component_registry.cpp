@@ -6,9 +6,9 @@
 #include "entt/core/fwd.hpp"
 #include "entt/core/type_info.hpp"
 #include "entt/entity/registry.hpp"
-#include "game_system_logic/component/entity_metadata.h"
-#include "game_system_logic/component/physics_object_settings.h"
 #include "game_system_logic/entity_container.h"
+#include "physics_object_settings.h"
+#include "player_character.h"
 #include "render_object_settings.h"
 #include "service_finder/service_finder.h"
 #include "transform.h"
@@ -96,6 +96,7 @@ void BT::component::register_all_components()
     REGISTER_COMPONENT__YES_SERIALIZE(component::Transform,                                 edit::imgui_edit__transform);
     REGISTER_COMPONENT__YES_SERIALIZE(component::Transform_hierarchy,                       edit::imgui_edit__transform_hierarchy);
     REGISTER_COMPONENT___NO_SERIALIZE(component::Transform_changed,                         edit::imgui_edit__transform_changed);
+    REGISTER_COMPONENT__YES_SERIALIZE(component::Player_character,                          edit::imgui_edit__sample);
     REGISTER_COMPONENT__YES_SERIALIZE(component::Render_object_settings,                    edit::imgui_edit__render_object_settings);
     REGISTER_COMPONENT___NO_SERIALIZE(component::Created_render_object_reference,           edit::imgui_edit__created_render_object_reference);
     REGISTER_COMPONENT__YES_SERIALIZE(component::Physics_object_settings,                   edit::imgui_edit__physics_object_settings);

@@ -435,6 +435,7 @@ while (running_game_loop)
 >  There could be more parallelization happening (e.g. having another thread dedicated to some other type of work) (e.g. figuring out what systems depend on each other and running only the ones that depend on each other in order)
 >
 >  Thankfully, I should just implement this single-threaded now first and then profile and think about multithreaded workflows later.
+>    Even tho I know it's a very special interest of mine.
 
 
 

@@ -8,6 +8,7 @@
 #include "game_system_logic/entity_container.h"
 #include "game_system_logic/component/component_registry.h"
 #include "game_system_logic/system/imgui_render_transform_hierarchy_window.h"
+#include "game_system_logic/system/player_character_movement.h"
 #include "game_system_logic/system/process_physics_object_lifetime.h"
 #include "game_system_logic/system/process_render_object_lifetime.h"
 #include "game_system_logic/system/propagate_changed_transforms.h"
@@ -429,6 +430,7 @@ int32_t main()
 
             // Pre-physics.
             BT::system::process_physics_object_lifetime();
+            BT::system::player_character_movement();
             #if !BTZC_REFACTOR_TO_ENTT
             INVOKE_SYSTEM(System_player_character_movement);
             INVOKE_SYSTEM(System_animator_driven_hitcapsule_set);

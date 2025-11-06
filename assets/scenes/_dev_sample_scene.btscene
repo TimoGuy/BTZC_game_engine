@@ -53,6 +53,12 @@
                     }
                 },
                 {
+                    "type_name": "component::Player_character",
+                    "members_j": {
+                        "player_idx": 0
+                    }
+                },
+                {
                     "type_name": "component::Physics_object_settings",
                     "members_j": {
                         "phys_obj_type": 1

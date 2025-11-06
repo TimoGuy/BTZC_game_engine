@@ -91,6 +91,7 @@ set(MAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/entity_metadata.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/physics_object_settings.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/physics_object_settings.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/player_character.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/render_object_settings.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/transform.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/transform.h
@@ -98,6 +99,8 @@ set(MAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/entity_container.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/imgui_render_transform_hierarchy_window.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/imgui_render_transform_hierarchy_window.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/player_character_movement.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/player_character_movement.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/process_physics_object_lifetime.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/process_physics_object_lifetime.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/process_render_object_lifetime.cpp
