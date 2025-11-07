@@ -63,6 +63,12 @@
                     "members_j": {}
                 },
                 {
+                    "type_name": "component::Display_repr_transform_ref",
+                    "members_j": {
+                        "display_repr_uuid": "d33f01dc-b0b5-4954-9771-71a1c42e5209"
+                    }
+                },
+                {
                     "type_name": "component::Physics_object_settings",
                     "members_j": {
                         "phys_obj_type": 1
@@ -176,6 +182,12 @@
                     "members_j": {
                         "parent_entity": "aae5ebfb-7c2b-49a8-bcb9-658fdea987af",
                         "children_entities": ["019a3906-7e7d-7d56-b661-f6622ac60651"]
+                    }
+                },
+                {
+                    "type_name": "component::Follow_camera_follow_ref",
+                    "members_j": {
+                        "follow_offset_y": 2.0
                     }
                 },
                 {

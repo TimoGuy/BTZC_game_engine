@@ -297,6 +297,7 @@ struct Char_mvt_logic_results
     bool is_grounded;
     JPH::Quat up_rotation;
     JPH::Vec3 new_velocity;
+    float_t display_facing_angle;
 };
 
 Char_mvt_logic_results character_controller_movement_logic(Input_handler::State const& input_state,
@@ -454,7 +455,7 @@ Char_mvt_logic_results character_controller_movement_logic(Input_handler::State 
 
     ////////////////////////  ^^ @TODO ^^ //
 
-    return { is_grounded, up_rotation, new_velocity };
+    return { is_grounded, up_rotation, new_velocity, display_facing_angle };
 }
 
 void apply_velocity_to_char_con(
@@ -530,8 +531,8 @@ void BT::system::player_character_movement()
             poss_display_repr_ref != nullptr)
         {   // Calculate rotation.
             versors rot;
-            assert(false);  // @TODO Implement!!
-            
+            glm_quat(rot.raw, mvt_logic_result.display_facing_angle, 0.0f, 1.0f, 0.0f);
+
             // Write to display repr entity transform.
             auto display_repr_ecs_ent{ entity_container.find_entity(
                 poss_display_repr_ref->display_repr_uuid) };

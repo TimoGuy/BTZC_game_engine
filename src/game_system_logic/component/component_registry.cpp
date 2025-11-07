@@ -6,6 +6,7 @@
 #include "entt/core/fwd.hpp"
 #include "entt/core/type_info.hpp"
 #include "entt/entity/registry.hpp"
+#include "follow_camera.h"
 #include "game_system_logic/entity_container.h"
 #include "physics_object_settings.h"
 #include "player_character.h"
@@ -99,6 +100,7 @@ void BT::component::register_all_components()
     REGISTER_COMPONENT__YES_SERIALIZE(component::Player_character,                          edit::imgui_edit__sample);
     REGISTER_COMPONENT__YES_SERIALIZE(component::Character_mvt_state,                       edit::imgui_edit__sample);
     REGISTER_COMPONENT__YES_SERIALIZE(component::Display_repr_transform_ref,                edit::imgui_edit__sample);
+    REGISTER_COMPONENT__YES_SERIALIZE(component::Follow_camera_follow_ref,                  edit::imgui_edit__sample);
     REGISTER_COMPONENT__YES_SERIALIZE(component::Render_object_settings,                    edit::imgui_edit__render_object_settings);
     REGISTER_COMPONENT___NO_SERIALIZE(component::Created_render_object_reference,           edit::imgui_edit__created_render_object_reference);
     REGISTER_COMPONENT__YES_SERIALIZE(component::Physics_object_settings,                   edit::imgui_edit__physics_object_settings);

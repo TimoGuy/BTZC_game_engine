@@ -6,8 +6,12 @@
 #include "../input_handler/input_handler.h"
 #include "../renderer/imgui_renderer.h"
 #include "btglm.h"
-#include "imgui.h"
 #include "btlogger.h"
+#include "game_system_logic/entity_container.h"
+#include "game_system_logic/component/follow_camera.h"
+#include "game_system_logic/component/transform.h"
+#include "imgui.h"
+#include "service_finder/service_finder.h"
 
 #include <array>
 #include <cmath>
@@ -93,11 +97,8 @@ struct Camera::Data
             float_t orbit_x_auto_turn_max_influence_magnitude{ 5.0f };  // @THOUGHT: Should this be based off the input instead of the effective velocity?
             float_t cam_distance{ 10.0f };
             float_t cam_return_to_distance_speed{ 10.0f };
-            float_t follow_offset_y{ 1.0f };
 
             // Internal state.
-            Game_object_pool* game_object_pool{ nullptr };
-            UUID game_object_ref{ UUID() };
             vec3 current_follow_pos{ 0.0f, 3.0f, 0.0f };
             vec2 orbits{ glm_rad(0.0f), glm_rad(30.0f) };
             float_t max_orbit_y{ glm_rad(89.0f) };
@@ -144,11 +145,6 @@ BT::Camera::~Camera() = default;  // For smart pimpl.
 void BT::Camera::set_callbacks(function<void(bool)>&& cursor_lock_fn)
 {
     m_data->cursor_lock_fn = std::move(cursor_lock_fn);
-}
-
-void BT::Camera::set_game_object_pool(Game_object_pool& pool)
-{
-    m_data->frontend.follow_orbit.game_object_pool = &pool;
 }
 
 // GPU camera.
@@ -232,16 +228,6 @@ void BT::Camera::get_view_direction(vec3& out_view_direction)
 }
 
 // Camera frontend.
-void BT::Camera::set_follow_object(UUID game_object_ref)
-{
-    m_data->frontend.follow_orbit.game_object_ref = game_object_ref;
-}
-
-BT::UUID BT::Camera::get_follow_object()
-{
-    return m_data->frontend.follow_orbit.game_object_ref;
-}
-
 bool BT::Camera::is_capture_fly()
 {
     return (m_data->frontend.state == Data::Frontend::FRONTEND_CAMERA_STATE_CAPTURE_FLY);
@@ -538,7 +524,42 @@ void BT::Camera::update_frontend_follow_orbit(Input_handler::State const& input_
 
     vec3 mvt_velocity{ 0.0f, 0.0f, 0.0f };
 
-#if !BTZC_REFACTOR_TO_ENTT
+#if BTZC_REFACTOR_TO_ENTT
+    float_t follow_offset_y{ 0 };
+    {   // Follow a camera follow ref's transform, if one exists.
+        auto follow_cam_view{
+            service_finder::find_service<Entity_container>()
+                .get_ecs_registry()
+                .view<component::Follow_camera_follow_ref const, component::Transform const>()
+        };
+        bool first{ true };
+        for (auto&& [entity, cam_follow_ref, follow_trans] : follow_cam_view.each())
+        {   // There should only be one follow object
+            // (or one per camera, but there's only one camera rn)
+            assert(first);
+
+            follow_offset_y = cam_follow_ref.follow_offset_y;
+
+            // Copy prev follow position.
+            vec3 from_follow_pos;
+            glm_vec3_copy(fo.current_follow_pos, from_follow_pos);
+
+            // Update follow position.
+            // @NOTE: This should follow the format of `write_render_transforms.cpp`, since we're
+            //        doing a conversion from double to float right now.  -Thea 2025/11/07
+            fo.current_follow_pos[0] = follow_trans.position.x;
+            fo.current_follow_pos[1] = follow_trans.position.y;
+            fo.current_follow_pos[2] = follow_trans.position.z;
+
+            // Calc mvt velocity (@NOTE: deltatime independant).
+            glm_vec3_sub(fo.current_follow_pos, from_follow_pos, mvt_velocity);
+            glm_vec3_scale(mvt_velocity, 1.0f / delta_time, mvt_velocity);
+
+            // End first follow obj.
+            first = false;
+        }
+    }
+#else
     if (!fo.game_object_ref.is_nil())
     {   // Follow game object with camera.
         auto game_obj{ fo.game_object_pool->get_one_no_lock(fo.game_object_ref) };
@@ -631,7 +652,7 @@ void BT::Camera::update_frontend_follow_orbit(Input_handler::State const& input_
     glm_mat4_mulv3(look_rotation, offset_from_follow_obj, 0.0f, offset_from_follow_obj);
 
     // Position camera transform.
-    glm_vec3_add(fo.current_follow_pos, vec3{ 0.0f, fo.follow_offset_y, 0.0f}, camera.position);
+    glm_vec3_add(fo.current_follow_pos, vec3{ 0.0f, follow_offset_y, 0.0f}, camera.position);
     glm_vec3_add(camera.position, offset_from_follow_obj, camera.position);
 
     glm_vec3_negate_to(offset_from_follow_obj, camera.view_direction);
