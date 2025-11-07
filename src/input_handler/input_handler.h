@@ -10,6 +10,8 @@ namespace BT
 class Input_handler
 {
 public:
+    Input_handler();
+
     void report_keyboard_input_change(int32_t key_code, bool pressed);
     void report_mouse_button_input_change(int32_t button_code, bool pressed);
     void report_mouse_position_offset(float_t x_offset, float_t y_offset);

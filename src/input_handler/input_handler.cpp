@@ -1,7 +1,13 @@
 #include "input_handler.h"
 
 #include "input_codes.h"
+#include "service_finder/service_finder.h"
 
+
+BT::Input_handler::Input_handler()
+{
+    BT_SERVICE_FINDER_ADD_SERVICE(Input_handler, this);
+}
 
 void BT::Input_handler::report_keyboard_input_change(int32_t key_code, bool pressed)
 {   // Update direct lookup table.
