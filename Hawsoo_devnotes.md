@@ -446,6 +446,8 @@ while (running_game_loop)
         - [x] Char-con collide-n-slide algorithm system.
         > @NOTE: The above ^^ is still in the coupled mode as before, but there are clear sections and is a bit more laid out better. Hopefully this makes decoupling this in the future a bit easier.
         - [ ] Writing the animation to entity transform rotation.
+            - [ ] Add required componenet to player obj
+            - [ ] Fix the asserts put up and implement.
         - [ ] Documentation.
             - [ ] Remove `struct Character_mvt_state`'s `m_` variables.
             - [ ] Add docstrings for anonymous namespace funcs in `player_character_movement.cpp`
