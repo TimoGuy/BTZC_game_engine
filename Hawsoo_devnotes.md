@@ -450,7 +450,7 @@ while (running_game_loop)
             - [x] Fix the asserts put up and implement.
         - [x] Fix camera not following an object.
         - [ ] Documentation.
-            - [ ] Remove `struct Character_mvt_state`'s `m_` variables.
+            - [x] Remove `struct Character_mvt_state`'s `m_` variables.
             - [ ] Add docstrings for anonymous namespace funcs in `player_character_movement.cpp`
                 - [ ] Remove @TODO banners too
     - [ ] Animator editor.
