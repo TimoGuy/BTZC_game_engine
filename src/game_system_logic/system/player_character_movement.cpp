@@ -24,6 +24,8 @@ namespace
 
 using namespace BT;
 
+/// Takes `input_vec` user input and transforms it into a world space input vector where forward is
+/// the direction the camera is facing.
 void transform_input_to_camera_pov_input(vec2 const input_vec, vec3& out_ws_input_vec)
 {
     auto camera{ service_finder::find_service<Renderer>().get_camera_obj() };
@@ -56,16 +58,14 @@ void transform_input_to_camera_pov_input(vec2 const input_vec, vec3& out_ws_inpu
         glm_vec3_normalize(out_ws_input_vec);
 }
 
-//////////////////  vv @TODO vv ////////////////////////////////////////////////////////////////////
-
-/// @TODO: FILL IN
+/// Struct holding origin offset and input direction.
 struct Origin_offset_and_input_dir
 {
     JPH::Vec3 origin_offset;
     JPH::Vec3 input_dir;
 };
 
-/// @TODO: FILL IN
+/// Calculates an origin offset and input direction from the parameters of the character controller.
 Origin_offset_and_input_dir calc_check_origin_point_and_input_dir(float_t facing_angle,
                                                                   float_t char_con_radius)
 {
@@ -206,6 +206,7 @@ void process_midair_jump_interactions(
     #endif  // REFACTOR_WALL_INTERACTIONS
 }
 
+/// Swithes ground turn speed depending on the running speed/linear speed.
 float_t find_grounded_turn_speed(component::Character_mvt_state::Settings const& mvt_settings,
                                  float_t linear_speed)
 {
@@ -220,6 +221,7 @@ float_t find_grounded_turn_speed(component::Character_mvt_state::Settings const&
     return turn_speed;
 }
 
+/// Processes input to turn the character when in the grounded state.
 void apply_grounded_facing_angle(component::Character_mvt_state::Grounded_state& grounded_state,
                                  component::Character_mvt_state::Settings const& mvt_settings,
                                  JPH::Vec3Arg input_velocity)
@@ -264,6 +266,7 @@ void apply_grounded_facing_angle(component::Character_mvt_state::Grounded_state&
     }
 }
 
+/// Processes the linear speed after acceleration/deceleration accounted for.
 void apply_grounded_linear_speed(component::Character_mvt_state::Grounded_state& grounded_state,
                                  component::Character_mvt_state::Settings const& mvt_settings,
                                  JPH::Vec3Arg input_velocity)
@@ -290,8 +293,7 @@ void apply_grounded_linear_speed(component::Character_mvt_state::Grounded_state&
     grounded_state.speed += delta_speed;
 }
 
-//////////////////  ^^ @TODO ^^ ////////////////////////////////////////////////////////////////////
-
+/// Result from movement logic.
 struct Char_mvt_logic_results
 {
     bool is_grounded;
@@ -300,6 +302,7 @@ struct Char_mvt_logic_results
     float_t display_facing_angle;
 };
 
+/// Character controller movement logic.
 Char_mvt_logic_results character_controller_movement_logic(Input_handler::State const& input_state,
                                    component::Character_mvt_state& char_mvt_state,
                                    Physics_object& phys_obj,
@@ -340,8 +343,6 @@ Char_mvt_logic_results character_controller_movement_logic(Input_handler::State 
 
     bool on_crouch_press{ input_state.crouch.val && !char_mvt_state.prev_crouch_pressed };
     char_mvt_state.prev_crouch_pressed = input_state.crouch.val;
-
-    //////////// vv @TODO vv
 
     // Find movement state.
     JPH::Vec3 current_vertical_velocity = linear_velocity.Dot(up_direction) * up_direction;
@@ -453,11 +454,10 @@ Char_mvt_logic_results character_controller_movement_logic(Input_handler::State 
         display_facing_angle = airborne_state.input_facing_angle;
     }
 
-    ////////////////////////  ^^ @TODO ^^ //
-
     return { is_grounded, up_rotation, new_velocity, display_facing_angle };
 }
 
+/// Applies desired velocity to character controller.
 void apply_velocity_to_char_con(
     component::Character_mvt_state::Grounded_state const& grounded_state,
     Physics_object& phys_obj,
