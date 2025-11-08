@@ -26,20 +26,20 @@ struct Player_character
 /// @NOTE: Only settings are serialized.
 struct Character_mvt_state
 {
-    bool m_prev_jump_pressed{ false };
-    bool m_prev_crouch_pressed{ false };
+    bool prev_jump_pressed{ false };
+    bool prev_crouch_pressed{ false };
 
     struct Grounded_state
     {
         float_t speed{ 0.0f };
         float_t facing_angle{ 0.0f };
         bool turnaround_enabled{ false };
-    } m_grounded_state;
+    } grounded_state;
 
     struct Airborne_state
     {
         float_t input_facing_angle{ 0.0f };
-    } m_airborne_state;
+    } airborne_state;
 
     struct Settings
     {
@@ -74,9 +74,9 @@ struct Character_mvt_state
                                                     airborne_acceleration,
                                                     airborne_turn_speed,
                                                     jump_speed);
-    } m_settings;
+    } settings;
 
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(Character_mvt_state, m_settings);
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(Character_mvt_state, settings);
 };
 
 /// Stores the reference to the entity with the transform of the display representation. This is

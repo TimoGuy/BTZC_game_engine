@@ -328,18 +328,18 @@ Char_mvt_logic_results character_controller_movement_logic(Input_handler::State 
         JPH::Quat::sEulerAngles(JPH::Vec3(0, 0, 0));  // @NOCHECKIN: Overriding the up rot.
 
     // Change input into desired velocity.
-    auto const& mvt_settings{ char_mvt_state.m_settings };
+    auto const& mvt_settings{ char_mvt_state.settings };
 
     JPH::Vec3 desired_velocity{ ws_mvt_input[0], 0.0f, ws_mvt_input[2] };
     desired_velocity *= (char_con_impl->get_cc_stance() ? mvt_settings.crouched_speed
                                                         : mvt_settings.standing_speed);
 
     // Extra input checks.
-    bool on_jump_press{ input_state.jump.val && !char_mvt_state.m_prev_jump_pressed };
-    char_mvt_state.m_prev_jump_pressed = input_state.jump.val;
+    bool on_jump_press{ input_state.jump.val && !char_mvt_state.prev_jump_pressed };
+    char_mvt_state.prev_jump_pressed = input_state.jump.val;
 
-    bool on_crouch_press{ input_state.crouch.val && !char_mvt_state.m_prev_crouch_pressed };
-    char_mvt_state.m_prev_crouch_pressed = input_state.crouch.val;
+    bool on_crouch_press{ input_state.crouch.val && !char_mvt_state.prev_crouch_pressed };
+    char_mvt_state.prev_crouch_pressed = input_state.crouch.val;
 
     //////////// vv @TODO vv
 
@@ -375,7 +375,7 @@ Char_mvt_logic_results character_controller_movement_logic(Input_handler::State 
 
         if (on_jump_press)
         {
-            process_midair_jump_interactions(char_mvt_state.m_airborne_state,
+            process_midair_jump_interactions(char_mvt_state.airborne_state,
                                              mvt_settings,
                                              char_con_impl,
                                              up_direction,
@@ -387,7 +387,7 @@ Char_mvt_logic_results character_controller_movement_logic(Input_handler::State 
     float_t display_facing_angle;
     if (is_grounded)
     {   // Grounded turn & speed movement.
-        auto& grounded_state{ char_mvt_state.m_grounded_state };
+        auto& grounded_state{ char_mvt_state.grounded_state };
 
         if (glm_vec3_norm2(ws_mvt_input) > 1e-6f * 1e-6f)
             apply_grounded_facing_angle(grounded_state, mvt_settings, desired_velocity);
@@ -399,13 +399,13 @@ Char_mvt_logic_results character_controller_movement_logic(Input_handler::State 
                                    cosf(grounded_state.facing_angle) * grounded_state.speed };
 
         // Keep airborne state up to date.
-        char_mvt_state.m_airborne_state.input_facing_angle = grounded_state.facing_angle;
+        char_mvt_state.airborne_state.input_facing_angle = grounded_state.facing_angle;
 
         display_facing_angle = grounded_state.facing_angle;
     }
     else
     {   // Move towards desired velocity.
-        auto& airborne_state{ char_mvt_state.m_airborne_state };
+        auto& airborne_state{ char_mvt_state.airborne_state };
 
         JPH::Vec3 flat_linear_velo{ linear_velocity.GetX(), 0.0f, linear_velocity.GetZ() };
         JPH::Vec3 delta_velocity{ desired_velocity - flat_linear_velo };
@@ -441,14 +441,14 @@ Char_mvt_logic_results character_controller_movement_logic(Input_handler::State 
         }
 
         // Keep grounded state up to date.
-        char_mvt_state.m_grounded_state.speed = effective_velocity.Length();
+        char_mvt_state.grounded_state.speed = effective_velocity.Length();
         if (effective_velocity.IsNearZero())
-            char_mvt_state.m_grounded_state.facing_angle = airborne_state.input_facing_angle;
+            char_mvt_state.grounded_state.facing_angle = airborne_state.input_facing_angle;
         else
-            char_mvt_state.m_grounded_state.facing_angle =
+            char_mvt_state.grounded_state.facing_angle =
                 atan2f(effective_velocity.GetX(), effective_velocity.GetZ());
 
-        char_mvt_state.m_grounded_state.turnaround_enabled = false;
+        char_mvt_state.grounded_state.turnaround_enabled = false;
 
         display_facing_angle = airborne_state.input_facing_angle;
     }
@@ -516,7 +516,7 @@ void BT::system::player_character_movement()
                 service_finder::find_service<Physics_engine>().get_physics_system_ptr())
                 ->GetGravity()
         };
-        apply_velocity_to_char_con(char_mvt_state.m_grounded_state,
+        apply_velocity_to_char_con(char_mvt_state.grounded_state,
                                    phys_obj,
                                    mvt_logic_result.is_grounded,
                                    mvt_logic_result.up_rotation,
