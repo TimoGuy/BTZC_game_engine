@@ -1,9 +1,113 @@
 #include "_dev_animation_frame_action_editor.h"
 
+#include "animation_frame_action_tool/editor_state.h"
+#include "game_system_logic/component/render_object_settings.h"
+#include "game_system_logic/entity_container.h"
+#include "game_system_logic/component/_dev_animation_frame_action_editor_agent.h"
+#include "renderer/mesh.h"
+#include "renderer/render_layer.h"
+#include "renderer/renderer.h"
+#include "service_finder/service_finder.h"
+
 #include <cassert>
 
 
 void BT::system::_dev_animation_frame_action_editor()
 {
-    assert(false);  // @TODO: implement!
+    auto& reg{ service_finder::find_service<Entity_container>().get_ecs_registry() };
+    auto view{ reg.view<component::_Dev_animation_frame_action_editor_agent>() };
+
+    // This check is to ensure that editing the editor state will be used/practical.
+    assert(view->size() == 1);
+
+    for (auto&& [entity, afa_agent] : view->each())
+    {   // Completely reset editor data.
+        // @NOTE: This is the case where the editor is loaded in, which default behavior is to load in
+        //        with flag to reset the editor state.
+        if (afa_agent.request_reset_editor_state)
+            anim_frame_action::reset_editor_state();
+
+        auto& eds{ anim_frame_action::s_editor_state };
+
+        // Reset editor data when working model is changed.
+        if (afa_agent.prev_working_model != eds.working_model)
+        {
+            eds.working_model_animator = nullptr;
+            afa_agent.prev_working_timeline_copy = nullptr;  // Forces animator reconfiguration.
+
+            // Create render object settings component (to trigger creating a render object).
+            reg.emplace_or_replace<component::Render_object_settings>(
+                entity,
+                Render_layer::RENDER_LAYER_DEFAULT,
+                eds.working_model->get_model_name(),
+                !eds.working_model->get_joint_animations().empty(),
+                eds.working_model->get_model_name() + ".btanitor");
+            
+            reg.remove<component::Created_render_object_reference>(entity);  // Removes if exists.
+
+            afa_agent.prev_working_model = eds.working_model;
+        }
+
+        // Configuration once render object is created.
+        if (reg.any_of<component::Created_render_object_reference>(entity))
+        {   // Sanity checks.
+            assert(eds.working_model != nullptr);
+            assert(eds.working_timeline_copy != nullptr);
+
+            if (eds.working_model_animator == nullptr)
+            {   // Get animator.
+                auto rend_obj_uuid{
+                    reg.get<component::Created_render_object_reference>(entity).render_obj_uuid_ref
+                };
+                auto& rend_obj_pool{
+                    service_finder::find_service<Renderer>().get_render_object_pool()
+                };
+                auto render_obj{
+                    rend_obj_pool.checkout_render_obj_by_key({ rend_obj_uuid }).front()
+                };
+
+                eds.working_model_animator = render_obj->get_model_animator();
+                assert(eds.working_model_animator != nullptr);
+
+                rend_obj_pool.return_render_objs({ render_obj });
+
+                // Set initial animator state.
+                eds.working_model_animator->change_state_idx(afa_agent.working_anim_state_idx);
+
+                // Fill in animator state name to idx map.
+                auto const& anim_states{ eds.working_model_animator->get_animator_states() };
+
+                eds.anim_state_name_to_idx_map.clear();
+                for (size_t i = 0; i < anim_states.size(); i++)
+                {   // Fill in anim state map.
+                    eds.anim_state_name_to_idx_map.emplace(anim_states[i].state_name, i);
+                }
+
+                // Configure anim frame action data.
+                eds.working_model_animator->configure_anim_frame_action_controls(
+                    eds.working_timeline_copy);  // @TODO: @THINK: @THEA: How do we get these into the render object settings components or smth so that these automatically load up without this process here??
+
+                // Set editor state from animator.
+                auto anim_state_anim_idx{ eds.working_model_animator
+                                              ->get_animator_state(afa_agent.working_anim_state_idx)
+                                              .animation_idx };
+                eds.selected_anim_num_frames =
+                    eds.working_model_animator->get_model_animation(anim_state_anim_idx)
+                        .get_num_frames();
+
+                // @TODO: @THEA: vv Needed? vv
+                // afa_agent.prev_working_timeline_copy = eds.working_timeline_copy;
+            }
+
+            // Update animator frame.
+            assert(eds.working_model_animator != nullptr);
+
+            auto current_frame_clamped{ eds.anim_current_frame };  // @NOTE: Assumed clamped.
+            eds.working_model_animator->set_time(current_frame_clamped /
+                                                 Model_joint_animation::k_frames_per_second);
+
+            // Process all controllable data.
+            // @TODO: @NOCHECKIN: Do this porting from the old system!
+        }
+    }
 }

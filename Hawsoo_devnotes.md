@@ -467,6 +467,14 @@ while (running_game_loop)
         - [ ] Create system that uses component to reset editor state but other than that just uses the editor state same as before (also adds and changes components and stuff).
             - [x] Make switch for forcing allowing the deformed rend objs (needed for editing animations obviiii)
             - [x] Stub out the system
+            - [x] Initial try to get a scrubbable animated character in there.
+
+            - It's not working so more work needed???
+            - [ ] Figure out why there's no rendered render obj.
+
+            - Once that is done...
+            - [ ] Implement processing controllable data.
+            - [ ] Think about how to load and process controllable data inside of the regular animator too.
             - [ ] @TODO: Fill out the next steps @HERE .....
 
 - [ ] Now do the thing I initially wanted to do but couldn't
