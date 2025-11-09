@@ -35,8 +35,12 @@
                     "type_name": "component::Transform_hierarchy",
                     "members_j": {
                         "parent_entity": null,
-                        "children_entities": null
+                        "children_entities": []
                     }
+                },
+                {
+                    "type_name": "component::_Dev_animation_editor_agent",
+                    "members_j": {}
                 }
             ]
         },
@@ -75,7 +79,15 @@
                     "type_name": "component::Transform_hierarchy",
                     "members_j": {
                         "parent_entity": null,
-                        "children_entities": null
+                        "children_entities": []
+                    }
+                },
+                {
+                    "type_name": "component::Render_object_settings",
+                    "members_j": {
+                        "render_layer": 1,
+                        "model_name": "xz_grid",
+                        "is_deformed": false
                     }
                 }
             ]

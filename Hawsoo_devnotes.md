@@ -441,7 +441,7 @@ while (running_game_loop)
 
 
 - [ ] Achieve feature parity as before.
-    - [ ] Player character
+    - [x] Player character
         - [x] Input getting system.
         - [x] Char-con collide-n-slide algorithm system.
         > @NOTE: The above ^^ is still in the coupled mode as before, but there are clear sections and is a bit more laid out better. Hopefully this makes decoupling this in the future a bit easier.
@@ -454,7 +454,15 @@ while (running_game_loop)
             - [x] Add docstrings for anonymous namespace funcs in `player_character_movement.cpp`
                 - [x] Remove @TODO banners too
     - [ ] Animator editor.
-        - [ ] Umm, whatever is needed here.
+        - [ ] ~~Umm, whatever is needed here.~~
+        - [x] ~~Change `animation_frame_action_tool/editor_state.h` into a component.~~
+        - [ ] ~~Create system that uses the new component.~~
+        - [ ] ~~Plug component results into imgui system.~~
+            - ~~@NOTE: This does ~~
+        - [ ] ~~Delete `animation_frame_action_tool/editor_state.h`~~
+        - [ ] Remove the stuff from `editor_state.h` from the newly created component for the anim frame action editor.
+        - [ ] (free space) Have the imgui stuff still connected to the original `editor_state.h` (i.e. do nothing)
+        - [ ] Use the system to 
 
 - [ ] Now do the thing I initially wanted to do but couldn't
     - [ ] Create script for character controller movement but without the input from player.

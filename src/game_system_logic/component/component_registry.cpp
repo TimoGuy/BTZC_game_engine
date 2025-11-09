@@ -1,5 +1,6 @@
 #include "component_registry.h"
 
+#include "_dev_animation_editor_agent.h"
 #include "btjson.h"
 #include "component_imgui_edit_functions.h"
 #include "entity_metadata.h"
@@ -107,6 +108,7 @@ void BT::component::register_all_components()
     REGISTER_COMPONENT__YES_SERIALIZE(component::Physics_obj_type_triangle_mesh_settings,   edit::imgui_edit__physics_obj_type_triangle_mesh_settings);
     REGISTER_COMPONENT__YES_SERIALIZE(component::Physics_obj_type_char_con_settings,        edit::imgui_edit__physics_obj_type_char_con_settings);
     REGISTER_COMPONENT___NO_SERIALIZE(component::Created_physics_object_reference,          edit::imgui_edit__created_physics_object_reference);
+    REGISTER_COMPONENT__YES_SERIALIZE(component::_Dev_animation_editor_agent,               edit::imgui_edit__sample);
     //----------------------------------------------------------------------------------------------
 
     #undef REGISTER_COMPONENT
