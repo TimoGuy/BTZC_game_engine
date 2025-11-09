@@ -41,6 +41,32 @@ BT::ImGui_renderer::ImGui_renderer()
     BT_SERVICE_FINDER_ADD_SERVICE(ImGui_renderer, this);
 }
 
+
+namespace
+{
+
+using namespace BT;
+
+enum Editor_context
+{
+    LEVEL_EDITOR,
+    ANIMATION_FRAME_DATA_EDITOR,
+    NUM_EDITOR_CONTEXTS
+};
+static std::array<std::string, NUM_EDITOR_CONTEXTS> const k_editor_context_strs{
+    "Level Editor",
+    "Animation Frame Data Editor",
+};
+static Editor_context s_current_editor_context{ Editor_context(0) };
+
+}  // namespace
+
+
+bool BT::ImGui_renderer::is_anim_frame_data_editor_context() const
+{
+    return (s_current_editor_context == Editor_context::ANIMATION_FRAME_DATA_EDITOR);
+}
+
 void BT::ImGui_renderer::render_imgui(float_t delta_time)
 {
     // @NOCHECKIN: @TEMP
@@ -69,21 +95,11 @@ void BT::ImGui_renderer::render_imgui(float_t delta_time)
 
     // Context switching.
     static bool s_entering_new_context{ true };
-    enum Editor_context
-    {
-        LEVEL_EDITOR,
-        ANIMATION_FRAME_DATA_EDITOR,
-        NUM_EDITOR_CONTEXTS
-    };
-    static std::array<std::string, NUM_EDITOR_CONTEXTS> const k_editor_context_strs{
-        "Level Editor",
-        "Animation Frame Data Editor",
-    };
+
     static std::array<void(ImGui_renderer::*)(bool, float_t), NUM_EDITOR_CONTEXTS> const k_editor_context_fns{
         &ImGui_renderer::render_imgui__level_editor_context,
         &ImGui_renderer::render_imgui__animation_frame_data_editor_context,
     };
-    static Editor_context s_current_editor_context{ Editor_context(0) };
 
     static auto const s_window_name_w_context_fn = [](char const* const name) {
         return (std::string(name)

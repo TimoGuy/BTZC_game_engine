@@ -1,6 +1,7 @@
 #include "animation_frame_action_tool/runtime_data.h"
 #include "btzc_game_engine.h"
 #include "btglm.h"
+#include "game_system_logic/system/_dev_animation_frame_action_editor.h"
 #include "renderer/camera.h"
 #include "game_object/component_registry.h"
 #include "game_object/system/concrete_systems.h"
@@ -459,7 +460,12 @@ int32_t main()
             }
             #endif  // !BTZC_REFACTOR_TO_ENTT
 
-            BT::system::process_render_object_lifetime();
+            bool is_afa_editor_context{
+                main_renderer_imgui_renderer.is_anim_frame_data_editor_context() };
+            if (is_afa_editor_context)
+                BT::system::_dev_animation_frame_action_editor();
+
+            BT::system::process_render_object_lifetime(is_afa_editor_context);
             BT::system::write_render_transforms();
             BT::system::update_selected_entity_debug_render_transform();
 

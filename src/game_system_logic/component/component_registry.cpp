@@ -1,6 +1,6 @@
 #include "component_registry.h"
 
-#include "_dev_animation_editor_agent.h"
+#include "_dev_animation_frame_action_editor_agent.h"
 #include "btjson.h"
 #include "component_imgui_edit_functions.h"
 #include "entity_metadata.h"
@@ -92,23 +92,23 @@ void BT::component::register_all_components()
         } while(0);
 
     //---- All Components -- @NOTE: Order matters here! --------------------------------------------
-    //----------------                Component typename                                    ImGui edit func
- // REGISTER_COMPONENT__YES_SERIALIZE(component::Some_sample_component,                     edit::imgui_edit__sample);
-    REGISTER_COMPONENT__YES_SERIALIZE(component::Entity_metadata,                           edit::imgui_edit__entity_metadata);
-    REGISTER_COMPONENT__YES_SERIALIZE(component::Transform,                                 edit::imgui_edit__transform);
-    REGISTER_COMPONENT__YES_SERIALIZE(component::Transform_hierarchy,                       edit::imgui_edit__transform_hierarchy);
-    REGISTER_COMPONENT___NO_SERIALIZE(component::Transform_changed,                         edit::imgui_edit__transform_changed);
-    REGISTER_COMPONENT__YES_SERIALIZE(component::Player_character,                          edit::imgui_edit__sample);
-    REGISTER_COMPONENT__YES_SERIALIZE(component::Character_mvt_state,                       edit::imgui_edit__sample);
-    REGISTER_COMPONENT__YES_SERIALIZE(component::Display_repr_transform_ref,                edit::imgui_edit__sample);
-    REGISTER_COMPONENT__YES_SERIALIZE(component::Follow_camera_follow_ref,                  edit::imgui_edit__sample);
-    REGISTER_COMPONENT__YES_SERIALIZE(component::Render_object_settings,                    edit::imgui_edit__render_object_settings);
-    REGISTER_COMPONENT___NO_SERIALIZE(component::Created_render_object_reference,           edit::imgui_edit__created_render_object_reference);
-    REGISTER_COMPONENT__YES_SERIALIZE(component::Physics_object_settings,                   edit::imgui_edit__physics_object_settings);
-    REGISTER_COMPONENT__YES_SERIALIZE(component::Physics_obj_type_triangle_mesh_settings,   edit::imgui_edit__physics_obj_type_triangle_mesh_settings);
-    REGISTER_COMPONENT__YES_SERIALIZE(component::Physics_obj_type_char_con_settings,        edit::imgui_edit__physics_obj_type_char_con_settings);
-    REGISTER_COMPONENT___NO_SERIALIZE(component::Created_physics_object_reference,          edit::imgui_edit__created_physics_object_reference);
-    REGISTER_COMPONENT__YES_SERIALIZE(component::_Dev_animation_editor_agent,               edit::imgui_edit__sample);
+    //----------------                Component typename                                      ImGui edit func
+ // REGISTER_COMPONENT__YES_SERIALIZE(component::Some_sample_component,                       edit::imgui_edit__sample);
+    REGISTER_COMPONENT__YES_SERIALIZE(component::Entity_metadata,                             edit::imgui_edit__entity_metadata);
+    REGISTER_COMPONENT__YES_SERIALIZE(component::Transform,                                   edit::imgui_edit__transform);
+    REGISTER_COMPONENT__YES_SERIALIZE(component::Transform_hierarchy,                         edit::imgui_edit__transform_hierarchy);
+    REGISTER_COMPONENT___NO_SERIALIZE(component::Transform_changed,                           edit::imgui_edit__transform_changed);
+    REGISTER_COMPONENT__YES_SERIALIZE(component::Player_character,                            edit::imgui_edit__sample);
+    REGISTER_COMPONENT__YES_SERIALIZE(component::Character_mvt_state,                         edit::imgui_edit__sample);
+    REGISTER_COMPONENT__YES_SERIALIZE(component::Display_repr_transform_ref,                  edit::imgui_edit__sample);
+    REGISTER_COMPONENT__YES_SERIALIZE(component::Follow_camera_follow_ref,                    edit::imgui_edit__sample);
+    REGISTER_COMPONENT__YES_SERIALIZE(component::Render_object_settings,                      edit::imgui_edit__render_object_settings);
+    REGISTER_COMPONENT___NO_SERIALIZE(component::Created_render_object_reference,             edit::imgui_edit__created_render_object_reference);
+    REGISTER_COMPONENT__YES_SERIALIZE(component::Physics_object_settings,                     edit::imgui_edit__physics_object_settings);
+    REGISTER_COMPONENT__YES_SERIALIZE(component::Physics_obj_type_triangle_mesh_settings,     edit::imgui_edit__physics_obj_type_triangle_mesh_settings);
+    REGISTER_COMPONENT__YES_SERIALIZE(component::Physics_obj_type_char_con_settings,          edit::imgui_edit__physics_obj_type_char_con_settings);
+    REGISTER_COMPONENT___NO_SERIALIZE(component::Created_physics_object_reference,            edit::imgui_edit__created_physics_object_reference);
+    REGISTER_COMPONENT__YES_SERIALIZE(component::_Dev_animation_frame_action_editor_agent,    edit::imgui_edit__sample);
     //----------------------------------------------------------------------------------------------
 
     #undef REGISTER_COMPONENT

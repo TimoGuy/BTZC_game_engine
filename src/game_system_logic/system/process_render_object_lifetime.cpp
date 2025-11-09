@@ -149,7 +149,7 @@ void create_staged_render_objects(entt::registry& reg,
 }  // namespace
 
 
-void BT::system::process_render_object_lifetime()
+void BT::system::process_render_object_lifetime(bool force_allow_deformed_render_objs)
 {
     auto& reg{ service_finder::find_service<Entity_container>().get_ecs_registry() };
     auto& rend_obj_pool{ service_finder::find_service<Renderer>().get_render_object_pool() };
@@ -157,10 +157,10 @@ void BT::system::process_render_object_lifetime()
     // @TODO: Perhaps right @HERE there needs to be a lock on the renderer, since it's basically an
     //        update to the renderer of "hey here's everything that updated".
 
-    bool is_sim_running{ service_finder::find_service<world::World_properties_container>()
-                             .get_data_handle()
-                             .is_simulation_running };
-    if (is_sim_running)
+    if (force_allow_deformed_render_objs ||
+        service_finder::find_service<world::World_properties_container>()
+            .get_data_handle()
+            .is_simulation_running)
     {
         destroy_render_objects(reg, rend_obj_pool, DESTROY_DANGLING_OR_SUPPOSED_TO_BE_DEFORMABLE);
         create_staged_render_objects(reg, rend_obj_pool, true);

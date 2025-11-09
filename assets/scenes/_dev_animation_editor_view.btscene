@@ -39,7 +39,7 @@
                     }
                 },
                 {
-                    "type_name": "component::_Dev_animation_editor_agent",
+                    "type_name": "component::_Dev_animation_frame_action_editor_agent",
                     "members_j": {}
                 }
             ]

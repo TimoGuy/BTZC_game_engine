@@ -460,9 +460,14 @@ while (running_game_loop)
         - [ ] ~~Plug component results into imgui system.~~
             - ~~@NOTE: This does ~~
         - [ ] ~~Delete `animation_frame_action_tool/editor_state.h`~~
-        - [ ] Remove the stuff from `editor_state.h` from the newly created component for the anim frame action editor.
-        - [ ] (free space) Have the imgui stuff still connected to the original `editor_state.h` (i.e. do nothing)
-        - [ ] Use the system to 
+        - [x] Remove the stuff from `editor_state.h` from the newly created component for the anim frame action editor.
+            - [x] Just have the component have a flag for whether to reset the editor state. (True as default).
+                > So then every time we reload the editor tab, it will reset the editor state.
+        - [x] (free space) Have the imgui stuff still connected to the original `editor_state.h` (i.e. do nothing)
+        - [ ] Create system that uses component to reset editor state but other than that just uses the editor state same as before (also adds and changes components and stuff).
+            - [x] Make switch for forcing allowing the deformed rend objs (needed for editing animations obviiii)
+            - [x] Stub out the system
+            - [ ] @TODO: Fill out the next steps @HERE .....
 
 - [ ] Now do the thing I initially wanted to do but couldn't
     - [ ] Create script for character controller movement but without the input from player.

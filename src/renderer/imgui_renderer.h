@@ -24,6 +24,11 @@ public:
     void set_renderer_ref(Renderer* renderer) { m_renderer = renderer; }
     void set_input_handler_ref(Input_handler* input_handler) { m_input_handler = input_handler; }
 
+    /// This flag is retrieved for getting different behavior amongst systems when the AFA editor is
+    /// being used.
+    /// As in, this is @HACK ... very verrry hacky!!!  -Thea 2025/11/09
+    bool is_anim_frame_data_editor_context() const;
+
     void render_imgui(float_t delta_time);
 
 private:
