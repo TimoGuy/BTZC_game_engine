@@ -471,6 +471,11 @@ while (running_game_loop)
 
             - It's not working so more work needed???
             - [ ] Figure out why there's no rendered render obj.
+                - [x] Fixed for if you select a different model to edit.
+                - [ ] Fix render obj not getting properly creating from the get go.
+            - [x] Fix ctrl data points not getting loaded w the data types.
+            - [ ] Fix vars of AFA data viewers. It appears the bools are flickering between false and true when over the override region???
+            - [ ] Fix 
 
             - Once that is done...
             - [ ] Implement processing controllable data.

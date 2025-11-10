@@ -217,6 +217,9 @@ BT::anim_frame_action::Runtime_data_controls::Runtime_data_controls(std::string 
     // Load model from bank.
     animated_model = Model_bank::get_model(data.animated_model_name);
     assert(animated_model != nullptr);
+
+    // Ctrl items type calculation.
+    calculate_all_ctrl_item_types();
 }
 
 // void BT::anim_frame_action::Runtime_data_controls::serialize(

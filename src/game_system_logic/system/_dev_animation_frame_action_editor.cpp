@@ -18,14 +18,17 @@ void BT::system::_dev_animation_frame_action_editor()
     auto view{ reg.view<component::_Dev_animation_frame_action_editor_agent>() };
 
     // This check is to ensure that editing the editor state will be used/practical.
-    assert(view->size() == 1);
+    assert(view->size() <= 1);
 
     for (auto&& [entity, afa_agent] : view->each())
     {   // Completely reset editor data.
         // @NOTE: This is the case where the editor is loaded in, which default behavior is to load in
         //        with flag to reset the editor state.
         if (afa_agent.request_reset_editor_state)
+        {
             anim_frame_action::reset_editor_state();
+            afa_agent.request_reset_editor_state = false;
+        }
 
         auto& eds{ anim_frame_action::s_editor_state };
 
@@ -36,6 +39,7 @@ void BT::system::_dev_animation_frame_action_editor()
             afa_agent.prev_working_timeline_copy = nullptr;  // Forces animator reconfiguration.
 
             // Create render object settings component (to trigger creating a render object).
+            // @TODO: START HERE!!!! WHY IS THIS BREAKPOINT NOT WORKING??!?!?!?!?!
             reg.emplace_or_replace<component::Render_object_settings>(
                 entity,
                 Render_layer::RENDER_LAYER_DEFAULT,
@@ -55,7 +59,10 @@ void BT::system::_dev_animation_frame_action_editor()
             assert(eds.working_timeline_copy != nullptr);
 
             if (eds.working_model_animator == nullptr)
-            {   // Get animator.
+            {   // Reset vars.
+                afa_agent.working_anim_state_idx = 0;
+
+                // Get animator.
                 auto rend_obj_uuid{
                     reg.get<component::Created_render_object_reference>(entity).render_obj_uuid_ref
                 };
