@@ -2,6 +2,7 @@
 #include "btzc_game_engine.h"
 #include "btglm.h"
 #include "game_system_logic/system/_dev_animation_frame_action_editor.h"
+#include "game_system_logic/system/animator_driven_hitcapsule_sets_update.h"
 #include "renderer/camera.h"
 #include "game_object/component_registry.h"
 #include "game_object/system/concrete_systems.h"
@@ -444,6 +445,8 @@ int32_t main()
             // Post-physics.
             BT::system::write_entity_transforms_from_physics();
             BT::system::propagate_changed_transforms();
+
+            BT::system::animator_driven_hitcapsule_sets_update();
 
             // Only run once if teardown iteration.
             if (iter_type == Iteration_type::TEARDOWN_ITERATION)

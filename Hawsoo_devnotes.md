@@ -474,8 +474,10 @@ while (running_game_loop)
                 - [x] Fixed for if you select a different model to edit.
                 - [ ] Fix render obj not getting properly creating from the get go.
             - [x] Fix ctrl data points not getting loaded w the data types.
+            - [x] Fix hitcapsules not being attached to bones of animator.
+                - [x] Also enable/disable hitcapsules from here too.
+            - [ ] Fix imgui timelines not getting changed out.
             - [ ] Fix vars of AFA data viewers. It appears the bools are flickering between false and true when over the override region???
-            - [ ] Fix 
 
             - Once that is done...
             - [ ] Implement processing controllable data.

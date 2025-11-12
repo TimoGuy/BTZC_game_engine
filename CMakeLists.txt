@@ -85,6 +85,7 @@ set(MAIN_SOURCES
     # ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/system/system_player_character_movement.cpp  @TEMP: To reduce errors for refactor.
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/UNUSED_serialization.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/_dev_animation_frame_action_editor_agent.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/animator_driven_hitcapsule_set.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/component_imgui_edit_functions.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/component_imgui_edit_functions.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/component_registry.cpp
@@ -101,6 +102,8 @@ set(MAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/entity_container.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/_dev_animation_frame_action_editor.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/_dev_animation_frame_action_editor.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/animator_driven_hitcapsule_sets_update.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/animator_driven_hitcapsule_sets_update.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/imgui_render_transform_hierarchy_window.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/imgui_render_transform_hierarchy_window.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/player_character_movement.cpp

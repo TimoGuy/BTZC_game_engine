@@ -1,6 +1,7 @@
 #include "_dev_animation_frame_action_editor.h"
 
 #include "animation_frame_action_tool/editor_state.h"
+#include "game_system_logic/component/animator_driven_hitcapsule_set.h"
 #include "game_system_logic/component/render_object_settings.h"
 #include "game_system_logic/entity_container.h"
 #include "game_system_logic/component/_dev_animation_frame_action_editor_agent.h"
@@ -102,8 +103,8 @@ void BT::system::_dev_animation_frame_action_editor()
                     eds.working_model_animator->get_model_animation(anim_state_anim_idx)
                         .get_num_frames();
 
-                // @TODO: @INCOMPLETE: Create and attach hitcapsule set driver.
-                // @HERE
+                // Create and attach hitcapsule set driver.
+                reg.emplace_or_replace<component::Animator_driven_hitcapsule_set>(entity);
 
                 // @TODO: @THEA: vv Needed? vv
                 // afa_agent.prev_working_timeline_copy = eds.working_timeline_copy;
