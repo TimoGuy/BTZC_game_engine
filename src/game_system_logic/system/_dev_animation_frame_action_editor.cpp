@@ -102,6 +102,9 @@ void BT::system::_dev_animation_frame_action_editor()
                     eds.working_model_animator->get_model_animation(anim_state_anim_idx)
                         .get_num_frames();
 
+                // @TODO: @INCOMPLETE: Create and attach hitcapsule set driver.
+                // @HERE
+
                 // @TODO: @THEA: vv Needed? vv
                 // afa_agent.prev_working_timeline_copy = eds.working_timeline_copy;
             }
