@@ -8,6 +8,15 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
 *Simple OBJ loader with hacky lighting and a flying camera. (2025/05/22)*
 
 
+## Build gotchas.
+
+### Windows ARM64
+
+> In order to build for this platform, do the following below.
+
+Uncomment `third_party/cglm/include/cglm/simd/intrin.h:98` (where it includes "arm64_neon.h"). ARM64 on clang-cl on windows already defines the neon typenames.
+
+
 ## 0.1.0-develop.2 (NEXT VERSION, WIP)
 
 ### Adds
