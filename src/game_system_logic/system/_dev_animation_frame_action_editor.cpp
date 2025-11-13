@@ -79,9 +79,6 @@ void BT::system::_dev_animation_frame_action_editor()
 
                 rend_obj_pool.return_render_objs({ render_obj });
 
-                // Set initial animator state.
-                eds.working_model_animator->change_state_idx(afa_agent.working_anim_state_idx);
-
                 // Fill in animator state name to idx map.
                 auto const& anim_states{ eds.working_model_animator->get_animator_states() };
 
@@ -95,6 +92,21 @@ void BT::system::_dev_animation_frame_action_editor()
                 eds.working_model_animator->configure_anim_frame_action_controls(
                     eds.working_timeline_copy);  // @TODO: @THINK: @THEA: How do we get these into the render object settings components or smth so that these automatically load up without this process here??
 
+                // Create and attach hitcapsule set driver.
+                reg.emplace_or_replace<component::Animator_driven_hitcapsule_set>(entity);
+
+                // @TODO: @THEA: vv Needed? vv
+                // afa_agent.prev_working_timeline_copy = eds.working_timeline_copy;
+            }
+
+            // Update animator state.
+            if (afa_agent.working_anim_state_idx != eds.selected_anim_state_idx)
+            {
+                afa_agent.working_anim_state_idx = eds.selected_anim_state_idx;
+
+                // Set initial animator state.
+                eds.working_model_animator->change_state_idx(afa_agent.working_anim_state_idx);
+
                 // Set editor state from animator.
                 auto anim_state_anim_idx{ eds.working_model_animator
                                               ->get_animator_state(afa_agent.working_anim_state_idx)
@@ -102,12 +114,6 @@ void BT::system::_dev_animation_frame_action_editor()
                 eds.selected_anim_num_frames =
                     eds.working_model_animator->get_model_animation(anim_state_anim_idx)
                         .get_num_frames();
-
-                // Create and attach hitcapsule set driver.
-                reg.emplace_or_replace<component::Animator_driven_hitcapsule_set>(entity);
-
-                // @TODO: @THEA: vv Needed? vv
-                // afa_agent.prev_working_timeline_copy = eds.working_timeline_copy;
             }
 
             // Update animator frame.

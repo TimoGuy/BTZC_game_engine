@@ -477,6 +477,9 @@ while (running_game_loop)
             - [x] Fix hitcapsules not being attached to bones of animator.
                 - [x] Also enable/disable hitcapsules from here too.
             - [ ] Fix imgui timelines not getting changed out.
+                - [x] Half done.
+                - [ ] Fix the actual timeline regions not showing.
+                    - Do you think it's just not configured correctly in the .btafa?
             - [ ] Fix vars of AFA data viewers. It appears the bools are flickering between false and true when over the override region???
 
             - Once that is done...

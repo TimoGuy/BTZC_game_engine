@@ -5,6 +5,14 @@
             "state_name": "_DEBUG_STATE"
         },
         {
+            "regions": [],
+            "state_name": "st_idle"
+        },
+        {
+            "regions": [],
+            "state_name": "st_running"
+        },
+        {
             "regions": [
                 {
                     "ctrl_item_idx": 5,
