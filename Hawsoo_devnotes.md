@@ -483,8 +483,9 @@ while (running_game_loop)
                     - Do you think it's just not configured correctly in the .btafa?
                     > THE ISSUE: The order of the .btafa and the .btanitor needed to be the same. So there needs to be a map from the state idx of the .btanitor to the .btafa region idx.
                 - [x] Fix default/first timeline that gets loaded being empty/0 and also not plain working.
-                - [ ] Fix the random crashing when closing the program.
-                - [ ] Fix the random crashing when switching AFAs.
+                - [x] Fix the random crashing when closing the program.
+                - [ ] Fix the random crashing when switching AFAs. Or discarding AFA changes.
+                    - It just seems like there's no more animator and that's an issue type thing? It might have to be manually done in.
                 - [ ] Rename `s_selected_timeline_idx` to `s_selected_afa_idx` along with other "timeline" names/labels that shouldnt be this way (imgui_renderer.cpp:661)
             - [ ] Fix vars of AFA data viewers. It appears the bools are flickering between false and true when over the override region???
                 > It appears to be working correctly now that there's the right stuff loading in from the system???? Idk double check pls.

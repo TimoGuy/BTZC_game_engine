@@ -477,32 +477,35 @@ int32_t main()
             INVOKE_SYSTEM(System_apply_phys_xform_to_rend_obj);
             #endif  // !BTZC_REFACTOR_TO_ENTT
 
-            main_renderer.render(delta_time, [&]() {
-                #if !BTZC_REFACTOR_TO_ENTT
-                // Render selected game obj.
-                auto selected_game_obj{ game_object_pool.get_selected_game_obj() };
-                if (!selected_game_obj.is_nil())
-                {
-                    auto game_obj = game_object_pool.get_one_no_lock(selected_game_obj);
-                    auto rend_obj_key{ game_obj->get_rend_obj_key() };
-                    if (!rend_obj_key.is_nil())
+            if (iter_type < Iteration_type::TEARDOWN_ITERATION)
+            {
+                main_renderer.render(delta_time, [&]() {
+                    #if !BTZC_REFACTOR_TO_ENTT
+                    // Render selected game obj.
+                    auto selected_game_obj{ game_object_pool.get_selected_game_obj() };
+                    if (!selected_game_obj.is_nil())
                     {
-                        auto rend_obj =
-                            main_renderer.get_render_object_pool()
-                                .checkout_render_obj_by_key({ rend_obj_key })[0];
+                        auto game_obj = game_object_pool.get_one_no_lock(selected_game_obj);
+                        auto rend_obj_key{ game_obj->get_rend_obj_key() };
+                        if (!rend_obj_key.is_nil())
+                        {
+                            auto rend_obj =
+                                main_renderer.get_render_object_pool()
+                                    .checkout_render_obj_by_key({ rend_obj_key })[0];
 
-                        static auto s_material_fore{
-                            BT::Material_bank::get_material("debug_selected_wireframe_fore_material") };
-                        static auto s_material_back{
-                            BT::Material_bank::get_material("debug_selected_wireframe_back_material") };
-                        rend_obj->render(BT::Render_layer::RENDER_LAYER_ALL, s_material_fore);
-                        rend_obj->render(BT::Render_layer::RENDER_LAYER_ALL, s_material_back);
+                            static auto s_material_fore{
+                                BT::Material_bank::get_material("debug_selected_wireframe_fore_material") };
+                            static auto s_material_back{
+                                BT::Material_bank::get_material("debug_selected_wireframe_back_material") };
+                            rend_obj->render(BT::Render_layer::RENDER_LAYER_ALL, s_material_fore);
+                            rend_obj->render(BT::Render_layer::RENDER_LAYER_ALL, s_material_back);
 
-                        main_renderer.get_render_object_pool().return_render_objs({ rend_obj });
+                            main_renderer.get_render_object_pool().return_render_objs({ rend_obj });
+                        }
                     }
-                }
-                #endif  // !BTZC_REFACTOR_TO_ENTT
-            });
+                    #endif  // !BTZC_REFACTOR_TO_ENTT
+                });
+            }
         }
 
         #if !BTZC_REFACTOR_TO_ENTT
