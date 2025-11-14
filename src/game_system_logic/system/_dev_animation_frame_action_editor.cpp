@@ -47,8 +47,9 @@ void BT::system::_dev_animation_frame_action_editor()
                 eds.working_model->get_model_name(),
                 !eds.working_model->get_joint_animations().empty(),
                 eds.working_model->get_model_name() + ".btanitor");
-            
-            reg.remove<component::Created_render_object_reference>(entity);  // Removes if exists.
+
+            // Removes prev created rend obj if exists, so that changed settings get regenerated.
+            reg.remove<component::Created_render_object_reference>(entity);
 
             afa_agent.prev_working_model = eds.working_model;
         }
@@ -103,6 +104,11 @@ void BT::system::_dev_animation_frame_action_editor()
             if (afa_agent.working_anim_state_idx != eds.selected_anim_state_idx)
             {
                 afa_agent.working_anim_state_idx = eds.selected_anim_state_idx;
+
+                // Set control region idx.
+                eds.selected_action_timeline_idx =
+                    eds.working_model_animator->get_anim_frame_action_data_handle()
+                        .anim_state_idx_to_timeline_idx_map.at(afa_agent.working_anim_state_idx);
 
                 // Set initial animator state.
                 eds.working_model_animator->change_state_idx(afa_agent.working_anim_state_idx);

@@ -285,6 +285,8 @@ void BT::Model_animator::configure_anim_frame_action_controls(
     // Idk why I put this into a separate method instead of in the constructor but hey, here we are.
     m_anim_frame_action_controls = anim_frame_action_controls;
 
+    m_anim_frame_action_data.map_animator_to_control_regions(*this, *m_anim_frame_action_controls);
+
     m_anim_frame_action_data.hitcapsule_group_set.replace_and_reregister(
         m_anim_frame_action_controls->data.hitcapsule_group_set_template);
     m_anim_frame_action_data.hitcapsule_group_set.connect_animator(*this);
@@ -348,8 +350,11 @@ void BT::Model_animator::update(float_t delta_time)
         float_t curr_time{ m_time };
 
         // Process anim frame action runtime.
-        auto& afa_timeline{ m_anim_frame_action_controls
-                            ->data.anim_frame_action_timelines[m_current_state_idx] };
+        auto current_action_timeline_idx{
+            m_anim_frame_action_data.anim_state_idx_to_timeline_idx_map.at(m_current_state_idx)
+        };
+        auto& afa_timeline{ m_anim_frame_action_controls->data
+                                .anim_frame_action_timelines[current_action_timeline_idx] };
 
         m_anim_frame_action_data.clear_all_data_overrides();
 

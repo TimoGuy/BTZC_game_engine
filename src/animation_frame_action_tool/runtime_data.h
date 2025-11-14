@@ -97,6 +97,9 @@ enum Controllable_data_label : std::uint32_t
     INTERNAL__CTRL_DATA_LABEL_MARKER_END_REEVE
 };
 
+/// Forward decl.
+struct Runtime_data_controls;
+
 // Controllable data.
 struct Runtime_controllable_data
 {   // Get list of str labels.
@@ -227,6 +230,13 @@ public:
 
     void clear_all_data_overrides();
 
+    /// Map to get timeline idx for runtime controls.
+    std::unordered_map<size_t, size_t> anim_state_idx_to_timeline_idx_map;
+
+    /// Calculates the mapping of animator state indices to timeline indices.
+    void map_animator_to_control_regions(Model_animator const& animator,
+                                         Runtime_data_controls const& data_controls);
+
     // Controlled hitcapsule group set.
     Hitcapsule_group_set hitcapsule_group_set;
 
@@ -287,8 +297,9 @@ struct Runtime_data_controls
                 NLOHMANN_DEFINE_TYPE_INTRUSIVE(Region, ctrl_item_idx, start_frame, end_frame);
             };
             std::vector<Region> regions;
+            std::string state_name;  // The corresponding animator state name this timeline belongs to.
 
-            NLOHMANN_DEFINE_TYPE_INTRUSIVE(Animation_frame_action_timeline, regions);
+            NLOHMANN_DEFINE_TYPE_INTRUSIVE(Animation_frame_action_timeline, regions, state_name);
         };
         std::vector<Animation_frame_action_timeline> anim_frame_action_timelines;  // Same order as `model_animations`.
 

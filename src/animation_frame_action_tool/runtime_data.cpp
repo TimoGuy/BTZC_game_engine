@@ -143,6 +143,29 @@ void BT::anim_frame_action::Runtime_controllable_data
     }
 }
 
+void BT::anim_frame_action::Runtime_controllable_data::map_animator_to_control_regions(
+    Model_animator const& animator,
+    Runtime_data_controls const& data_controls)
+{
+    anim_state_idx_to_timeline_idx_map.clear();
+
+    auto const& animator_states{ animator.get_animator_states() };
+    auto const& data_control_timelines{ data_controls.data.anim_frame_action_timelines };
+    assert(animator_states.size() == data_control_timelines.size());
+
+    anim_state_idx_to_timeline_idx_map.reserve(animator_states.size());
+    for (size_t anim_state_idx = 0; anim_state_idx < animator_states.size(); anim_state_idx++)
+        for (size_t timeline_idx = 0; timeline_idx < data_control_timelines.size(); timeline_idx++)
+            if (animator_states[anim_state_idx].state_name ==
+                data_control_timelines[timeline_idx].state_name)
+            {   // Found a mapping!
+                anim_state_idx_to_timeline_idx_map.emplace(anim_state_idx, timeline_idx);
+                break;
+            }
+
+    assert(anim_state_idx_to_timeline_idx_map.size() == animator_states.size());
+}
+
 void BT::anim_frame_action::Runtime_controllable_data
     ::assign_hitcapsule_enabled_flags()
 {

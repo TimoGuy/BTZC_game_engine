@@ -658,7 +658,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
         anim_frame_action::s_editor_state = {};  // Reset editor state.
     }
 
-    static size_t s_selected_timeline_idx{ 0 };
+    static size_t s_selected_timeline_idx{ 0 };  // @TODO: @FIXME: Rename to `s_selected_afa_idx` or something. AND ALSO THE OTHER "TIMELINE" NAMES THAT SHOULD BE AFAS.  -Thea 2025/11/13
     static int32_t s_current_animation_clip{ 0 };
     static auto s_all_timeline_names{ anim_frame_action::Bank::get_all_names() };
 
@@ -970,7 +970,9 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
 
         ImGui::BeginDisabled(anim_frame_action::s_editor_state.is_working_timeline_dirty);
 
-        if (ImGui::Combo("Animation clip", &s_current_animation_clip, anim_names_0_delim.c_str()))
+        if (ImGui::Combo("Animation clip action timelines",
+                         &s_current_animation_clip,
+                         anim_names_0_delim.c_str()))
         {   // Change selected anim idx.
             anim_frame_action::s_editor_state.selected_anim_state_idx =
                 anim_frame_action::s_editor_state.anim_state_name_to_idx_map.at(
@@ -1070,7 +1072,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
             auto& afa_regions{ anim_frame_action::s_editor_state
                                    .working_timeline_copy
                                    ->data.anim_frame_action_timelines[
-                                       anim_frame_action::s_editor_state.selected_anim_state_idx]
+                                       anim_frame_action::s_editor_state.selected_action_timeline_idx]
                                    .regions };
 
             static vec2s s_timeline_cell_size{ 16.0f, 24.0f };
@@ -1515,10 +1517,8 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                         int32_t start_frame{
                             static_cast<int32_t>(std::floorf(zoom_relative_mouse_x)) };
 
-                        afa_regions.emplace_back(ctrl_item_idx,
-                                               start_frame,
-                                               start_frame + 4);
-                        
+                        afa_regions.emplace_back(ctrl_item_idx, start_frame, start_frame + 4);
+
                         // Immediately assign created region as selected.
                         // (Just in case there may be some kind of vector resizing
                         //  which makes the pointers stale. I hate this issue too)
