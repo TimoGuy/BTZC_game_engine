@@ -214,23 +214,26 @@ void BT::anim_frame_action::Runtime_controllable_data::update_hitcapsule_transfo
 
 
 // Data controls.
-namespace
-{
 
-std::unordered_map<std::string, size_t> compile_anim_state_name_to_idx_map(
-    std::vector<BT::Animator_template::Animator_state> const& animator_states)
-{
-    std::unordered_map<std::string, size_t> rei_no_map;
-    size_t idx{ 0 };
-    for (auto& anim_state : animator_states)
-    {
-        rei_no_map.emplace(anim_state.state_name, idx);
-        idx++;
-    }
-    return rei_no_map;
-}
+#if 0
+// namespace
+// {
 
-}  // namespace
+// std::unordered_map<std::string, size_t> compile_anim_state_name_to_idx_map(
+//     std::vector<BT::Animator_template::Animator_state> const& animator_states)
+// {
+//     std::unordered_map<std::string, size_t> rei_no_map;
+//     size_t idx{ 0 };
+//     for (auto& anim_state : animator_states)
+//     {
+//         rei_no_map.emplace(anim_state.state_name, idx);
+//         idx++;
+//     }
+//     return rei_no_map;
+// }
+
+// }  // namespace
+#endif  // 0
 
 BT::anim_frame_action::Runtime_data_controls::Runtime_data_controls(std::string const& fname)
 {

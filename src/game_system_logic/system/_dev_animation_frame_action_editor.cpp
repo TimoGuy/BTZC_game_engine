@@ -23,8 +23,8 @@ void BT::system::_dev_animation_frame_action_editor()
 
     for (auto&& [entity, afa_agent] : view->each())
     {   // Completely reset editor data.
-        // @NOTE: This is the case where the editor is loaded in, which default behavior is to load in
-        //        with flag to reset the editor state.
+        // @NOTE: This is the case where the scene for the editor is loaded in, which default
+        //        behavior is to load in with flag to reset the editor state.
         if (afa_agent.request_reset_editor_state)
         {
             anim_frame_action::reset_editor_state();
@@ -62,7 +62,7 @@ void BT::system::_dev_animation_frame_action_editor()
 
             if (eds.working_model_animator == nullptr)
             {   // Reset vars.
-                afa_agent.working_anim_state_idx = 0;
+                afa_agent.working_anim_state_idx = -1;
 
                 // Get animator.
                 auto rend_obj_uuid{

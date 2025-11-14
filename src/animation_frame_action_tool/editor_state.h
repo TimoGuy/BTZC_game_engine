@@ -17,6 +17,8 @@ struct Runtime_data_controls;
 
 struct Editor_state
 {
+    bool is_editor_state_untouched{ true };  // Set to true when editor state is reset.
+
     Runtime_data_controls* working_timeline_copy{ nullptr };  // Idc if this is a memory leak (raw pointer).  -Thea 2025/08/30
     Model const* working_model{ nullptr };
     Model_animator* working_model_animator{ nullptr };

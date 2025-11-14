@@ -659,7 +659,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
     }
 
     static size_t s_selected_timeline_idx{ 0 };  // @TODO: @FIXME: Rename to `s_selected_afa_idx` or something. AND ALSO THE OTHER "TIMELINE" NAMES THAT SHOULD BE AFAS.  -Thea 2025/11/13
-    static int32_t s_current_animation_clip{ 0 };
+    static int32_t s_current_animation_clip{ -1 };  // -1 means unset.
     static auto s_all_timeline_names{ anim_frame_action::Bank::get_all_names() };
 
     // @NOCHECKIN
@@ -669,11 +669,19 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
     ImGui::Begin("Timeline select");
     {
         static bool s_load_selected_timeline{ true };
-        if (ImGui::Button("Refresh list") ||
-            enter)
+
+        bool trigger_list_refresh{ ImGui::Button("Refresh list") };
+
+        if (anim_frame_action::s_editor_state.is_editor_state_untouched)
+        {   // List refresh will load a timeline, initializing the editor state.
+            trigger_list_refresh = true;
+            anim_frame_action::s_editor_state.is_editor_state_untouched = false;
+        }
+
+        if (trigger_list_refresh)
         {   // Reset timeline selection and load first one from refreshed list.
-            s_selected_timeline_idx = 0;
             s_all_timeline_names = anim_frame_action::Bank::get_all_names();
+            s_selected_timeline_idx = 0;
             s_load_selected_timeline = true;
         }
 
@@ -765,6 +773,12 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
             assert(anim_frame_action::s_editor_state.working_model != nullptr);
 
             anim_frame_action::s_editor_state.is_working_timeline_dirty = false;  // Load from disk so not dirty.
+
+            // Reset selected indices.
+            anim_frame_action::s_editor_state.selected_anim_state_idx = 0;
+            anim_frame_action::s_editor_state.selected_action_timeline_idx = 0;
+            anim_frame_action::s_editor_state.anim_state_name_to_idx_map.clear();  // Cleared to prevent `s_current_animation_clip` from getting set to the wrong anim state idx immediately.
+            s_current_animation_clip = -1;
 
             s_load_selected_timeline = false;
         }
@@ -966,6 +980,24 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                 anim_names_as_list.emplace_back(anim_name);
                 current_str_pos += (anim_name.size() + 1);
             }
+        }
+
+        if (s_current_animation_clip == -1 &&
+            !anim_frame_action::s_editor_state.anim_state_name_to_idx_map.empty())
+        {   // Set animation clip idx to currently set selected anim state idx.
+            size_t new_clip_idx{ 0 };
+            for (auto&& [anim_name, idx] : anim_frame_action::s_editor_state.anim_state_name_to_idx_map)
+                if (idx == anim_frame_action::s_editor_state.selected_anim_state_idx)
+                {   // Found.
+                    break;
+                }
+                else
+                {
+                    new_clip_idx++;
+                }
+
+            // Set found idx.
+            s_current_animation_clip = new_clip_idx;
         }
 
         ImGui::BeginDisabled(anim_frame_action::s_editor_state.is_working_timeline_dirty);
