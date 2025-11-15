@@ -488,8 +488,9 @@ while (running_game_loop)
                     - It just seems like there's no more animator and that's an issue type thing? It might have to be manually done in.
                     - When the AFA gets saved, it replaces the AFA in the AFA bank, so it unfortunately messes up the pointer that's in the model animator.
                         - The bank doesn't get edited normally, but I had to check whether the pointer to the AFA changed and then reload the AFA into the model animator in `_dev_animation_frame_action_editor.cpp`
-                - [ ] Fix crashing when closing the program after saving an AFA and then closing the program
+                - [x] Fix crashing when closing the program after saving an AFA and then closing the program
                     - My guess is that registered hitcapsule sets in the overlap solver are getting held up in there.
+                    - @SOLUTION: Needed to remove the old AFA's hitcapsule group set from the overlap solver.
                 - [ ] Rename `s_selected_timeline_idx` to `s_selected_afa_idx` along with other "timeline" names/labels that shouldnt be this way (imgui_renderer.cpp:661)
             - [ ] Fix vars of AFA data viewers. It appears the bools are flickering between false and true when over the override region???
                 > It appears to be working correctly now that there's the right stuff loading in from the system???? Idk double check pls.

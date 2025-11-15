@@ -88,6 +88,8 @@ public:
     // void scene_serialize(Scene_serialization_mode mode, json& node_ref) override;
 
     void replace_and_reregister(Hitcapsule_group_set const& other);
+    void unregister_from_overlap_solver();
+
     void connect_animator(Model_animator const& animator);
 
     std::vector<Hitcapsule_group>& get_hitcapsule_groups();

@@ -716,12 +716,20 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                 if (ImGui::Button("Save changes"))
                 {
                     auto const& timeline_name{ s_all_timeline_names[s_selected_timeline_idx] };
-                    {   // Apply hitcapsule group set to template copy for saving.
-                        anim_frame_action::s_editor_state.working_timeline_copy
-                            ->data.hitcapsule_group_set_template =
+                    {   // Remove hitcapsule group set from overlap solver.
+                        // @NOTE: This gets unregistered right before serialization since a new
+                        //        working timeline copy is made and that hitcapsule group set gets
+                        //        added to the next created animator.
+                        auto& hitcapsule_grp_set{
                             anim_frame_action::s_editor_state.working_model_animator
                                 ->get_anim_frame_action_data_handle()
-                                .hitcapsule_group_set;
+                                .hitcapsule_group_set
+                        };
+                        hitcapsule_grp_set.unregister_from_overlap_solver();
+
+                        // Apply hitcapsule group set to template copy for saving.
+                        anim_frame_action::s_editor_state.working_timeline_copy->data
+                            .hitcapsule_group_set_template = hitcapsule_grp_set;
 
                         // Serialize the working timeline copy.
                         json working_timeline_copy_as_json =

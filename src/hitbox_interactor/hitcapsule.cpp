@@ -155,12 +155,7 @@ void BT::Hitcapsule_group::emplace_debug_render_repr() const
 // Hitcapsule_group_set.
 BT::Hitcapsule_group_set::~Hitcapsule_group_set()
 {
-    if (m_is_registered_in_overlap_solver)
-    {
-        // Unregister to cleanup.
-        m_is_registered_in_overlap_solver =
-            !service_finder::find_service<Hitcapsule_group_overlap_solver>().remove_group_set(*this);
-    }
+    unregister_from_overlap_solver();
 }
 
 // void BT::Hitcapsule_group_set::scene_serialize(Scene_serialization_mode mode, json& node_ref)
@@ -234,6 +229,16 @@ void BT::Hitcapsule_group_set::replace_and_reregister(Hitcapsule_group_set const
 
     m_is_registered_in_overlap_solver = overlap_solver.add_group_set(*this);
     assert(m_is_registered_in_overlap_solver);
+}
+
+void BT::Hitcapsule_group_set::unregister_from_overlap_solver()
+{
+    if (m_is_registered_in_overlap_solver)
+    {
+        // Unregister to cleanup.
+        m_is_registered_in_overlap_solver =
+            !service_finder::find_service<Hitcapsule_group_overlap_solver>().remove_group_set(*this);
+    }
 }
 
 void BT::Hitcapsule_group_set::connect_animator(Model_animator const& animator)

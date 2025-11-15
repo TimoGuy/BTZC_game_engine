@@ -17,9 +17,9 @@
                     "start_frame": 3
                 },
                 {
-                    "ctrl_item_idx": 1,
-                    "end_frame": 11,
-                    "start_frame": 7
+                    "ctrl_item_idx": 2,
+                    "end_frame": 12,
+                    "start_frame": 8
                 }
             ],
             "state_name": "st_idle"
