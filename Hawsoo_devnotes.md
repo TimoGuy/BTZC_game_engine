@@ -484,8 +484,12 @@ while (running_game_loop)
                     > THE ISSUE: The order of the .btafa and the .btanitor needed to be the same. So there needs to be a map from the state idx of the .btanitor to the .btafa region idx.
                 - [x] Fix default/first timeline that gets loaded being empty/0 and also not plain working.
                 - [x] Fix the random crashing when closing the program.
-                - [ ] Fix the random crashing when switching AFAs. Or discarding AFA changes.
+                - [x] Fix the random crashing when switching AFAs. Or discarding AFA changes.
                     - It just seems like there's no more animator and that's an issue type thing? It might have to be manually done in.
+                    - When the AFA gets saved, it replaces the AFA in the AFA bank, so it unfortunately messes up the pointer that's in the model animator.
+                        - The bank doesn't get edited normally, but I had to check whether the pointer to the AFA changed and then reload the AFA into the model animator in `_dev_animation_frame_action_editor.cpp`
+                - [ ] Fix crashing when closing the program after saving an AFA and then closing the program
+                    - My guess is that registered hitcapsule sets in the overlap solver are getting held up in there.
                 - [ ] Rename `s_selected_timeline_idx` to `s_selected_afa_idx` along with other "timeline" names/labels that shouldnt be this way (imgui_renderer.cpp:661)
             - [ ] Fix vars of AFA data viewers. It appears the bools are flickering between false and true when over the override region???
                 > It appears to be working correctly now that there's the right stuff loading in from the system???? Idk double check pls.

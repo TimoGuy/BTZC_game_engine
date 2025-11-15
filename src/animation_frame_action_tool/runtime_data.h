@@ -270,7 +270,8 @@ struct Runtime_data_controls
 
         struct Control_item
         {
-            std::string name;
+            std::string name;  // Only this needs to get saved. Other members are calculated.
+
             Control_item_type type{ CTRL_ITEM_TYPE_UNDEFINED };
             Controllable_data_label affecting_data_label{ 0 };
 
@@ -278,11 +279,7 @@ struct Runtime_data_controls
             uint32_t data_point1;
 
             NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(Control_item,
-                                                        name,
-                                                        type,
-                                                        affecting_data_label,
-                                                        data_point0,
-                                                        data_point1);
+                                                        name);
         };
         std::vector<Control_item> control_items;
 

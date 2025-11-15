@@ -5,7 +5,23 @@
             "state_name": "_DEBUG_STATE"
         },
         {
-            "regions": [],
+            "regions": [
+                {
+                    "ctrl_item_idx": 2,
+                    "end_frame": 5,
+                    "start_frame": 1
+                },
+                {
+                    "ctrl_item_idx": 4,
+                    "end_frame": 7,
+                    "start_frame": 3
+                },
+                {
+                    "ctrl_item_idx": 1,
+                    "end_frame": 11,
+                    "start_frame": 7
+                }
+            ],
             "state_name": "st_idle"
         },
         {

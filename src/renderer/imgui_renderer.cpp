@@ -723,12 +723,9 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                                 ->get_anim_frame_action_data_handle()
                                 .hitcapsule_group_set;
 
-                        // Save changes.
-                        json working_timeline_copy_as_json;
-                        assert(false);  // @TODO: FIX THIS
-                        // anim_frame_action::s_editor_state.working_timeline_copy
-                        //     ->serialize(anim_frame_action::SERIAL_MODE_SERIALIZE,
-                        //                 working_timeline_copy_as_json);
+                        // Serialize the working timeline copy.
+                        json working_timeline_copy_as_json =
+                            anim_frame_action::s_editor_state.working_timeline_copy->data;
 
                         // Save to disk.
                         json_save_to_disk(working_timeline_copy_as_json,

@@ -60,7 +60,8 @@ void BT::system::_dev_animation_frame_action_editor()
             assert(eds.working_model != nullptr);
             assert(eds.working_timeline_copy != nullptr);
 
-            if (eds.working_model_animator == nullptr)
+            if (eds.working_model_animator == nullptr ||
+                afa_agent.prev_working_timeline_copy != eds.working_timeline_copy)
             {   // Reset vars.
                 afa_agent.working_anim_state_idx = -1;
 
@@ -96,8 +97,9 @@ void BT::system::_dev_animation_frame_action_editor()
                 // Create and attach hitcapsule set driver.
                 reg.emplace_or_replace<component::Animator_driven_hitcapsule_set>(entity);
 
-                // @TODO: @THEA: vv Needed? vv
-                // afa_agent.prev_working_timeline_copy = eds.working_timeline_copy;
+                // Keep track so that if the working timeline gets saved/discarded, a new one is
+                // immediately fetched.
+                afa_agent.prev_working_timeline_copy = eds.working_timeline_copy;
             }
 
             // Update animator state.
