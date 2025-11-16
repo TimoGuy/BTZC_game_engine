@@ -39,6 +39,11 @@
                     "ctrl_item_idx": 5,
                     "end_frame": 100,
                     "start_frame": 60
+                },
+                {
+                    "ctrl_item_idx": 2,
+                    "end_frame": 19,
+                    "start_frame": 15
                 }
             ],
             "state_name": "st_attack_0"

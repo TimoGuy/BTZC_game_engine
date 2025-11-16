@@ -219,7 +219,7 @@ void BT::Hitcapsule_group_set::replace_and_reregister(Hitcapsule_group_set const
     auto& overlap_solver{ service_finder::find_service<Hitcapsule_group_overlap_solver>() };
 
     if (m_is_registered_in_overlap_solver)
-    {   // Unregister self if currently registered.
+    {   // Unregister self if currently registered.  @COPYPASTA with `unregister_from_overlap_solver()`
         m_is_registered_in_overlap_solver =
             !overlap_solver.remove_group_set(*this);
         assert(!m_is_registered_in_overlap_solver);
@@ -314,6 +314,11 @@ bool BT::Hitcapsule_group_overlap_solver::remove_group_set(Hitcapsule_group_set&
     }
 
     return success;
+}
+
+size_t BT::Hitcapsule_group_overlap_solver::get_num_group_sets() const
+{
+    return m_group_sets.size();
 }
 
 void BT::Hitcapsule_group_overlap_solver::update_overlaps()

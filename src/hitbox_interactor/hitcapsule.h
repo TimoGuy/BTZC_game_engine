@@ -114,6 +114,7 @@ public:
 
     bool add_group_set(Hitcapsule_group_set& group_set);
     bool remove_group_set(Hitcapsule_group_set& group_set);
+    size_t get_num_group_sets() const;
 
     void update_overlaps();
 

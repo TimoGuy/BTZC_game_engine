@@ -567,16 +567,18 @@ int32_t main()
 
     // Show stats prior to cleanup.
     BT_TRACEF("Post-teardown statistics:\n"
-              "  Num scenes          : %i\n"
-              "  Num entities        : %i\n"
-              "  Num ECS entities    : %i\n"
-              "  Num physics objects : %i\n"
-              "  Num render objects  : %i\n",
+              "  Num scenes                        : %i\n"
+              "  Num entities                      : %i\n"
+              "  Num ECS entities                  : %i\n"
+              "  Num physics objects               : %i\n"
+              "  Num render objects                : %i\n"
+              "  Num hitcapsule grp sets in solver : %i\n",
               main_scene_loader.get_num_loaded_scenes(),
               entity_container.get_num_entities(),
               entity_container.get_ecs_registry().view<entt::entity>().size(),
               main_physics_engine.get_num_physics_objects(),
-              main_renderer.get_render_object_pool().get_num_render_objects());
+              main_renderer.get_render_object_pool().get_num_render_objects(),
+              hitcapsule_solver.get_num_group_sets());
 
     return 0;
 }
