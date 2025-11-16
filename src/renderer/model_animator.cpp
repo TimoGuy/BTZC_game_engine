@@ -304,6 +304,12 @@ BT::Model_animator::get_animator_state(size_t idx) const
     return m_animator_states[idx];
 }
 
+BT::Model_animator::Animator_state&
+BT::Model_animator::get_animator_state_write_handle(size_t idx)
+{
+    return m_animator_states[idx];
+}
+
 void BT::Model_animator::change_state_idx(uint32_t to_state)
 {
     uint32_t from_state_copy{ m_current_state_idx.load() };

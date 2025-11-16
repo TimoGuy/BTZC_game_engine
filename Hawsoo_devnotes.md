@@ -493,11 +493,12 @@ while (running_game_loop)
                     - @SOLUTION: Needed to remove the old AFA's hitcapsule group set from the overlap solver.
                 - [x] Rename `s_selected_timeline_idx` to `s_selected_afa_idx` along with other "timeline" names/labels that shouldnt be this way (imgui_renderer.cpp:661)
             - [x] SMOL: Just add a cleanup statistic for number of group sets in the solver leftover.
-            - [ ] Fix vars of AFA data viewers. It appears the bools are flickering between false and true when over the override region???
+            - [x] Fix vars of AFA data viewers. It appears the bools are flickering between false and true when over the override region???
                 > It appears to be working correctly now that there's the right stuff loading in from the system???? Idk double check pls.
                 > Huh... it really doesn't appear to be flickering anymore...
                 - After doing some fiddling, it just seems to be the animator updating since even tho `_dev_animation_Frame_action_editor.cpp` sets the time every tick for the simulation, if the renderer is slower or something, it will update the animator forward and then the next frame is shown.
                     - So the solution: stop the animator from ticking forward in time (if there's a speed indicator or something????)
+                        - [x] Fixed this problem. (Redo if the weaker hardware is still having issues)
 
             - Once that is done...
             - [ ] Implement processing controllable data.

@@ -102,6 +102,9 @@ public:
 
     std::vector<Animator_state> const& get_animator_states() const;
     Animator_state const& get_animator_state(size_t idx) const;
+
+    Animator_state& get_animator_state_write_handle(size_t idx);
+
     void change_state_idx(uint32_t to_state);
 
     size_t get_model_animation_idx(std::string anim_name) const;
