@@ -523,6 +523,9 @@ while (running_game_loop)
                     - [ ] Do this. For now, have animator get updated _only_ in the simulation loop.
                         - [ ] Update the hitcapsules and AFA data.
                     - [ ] Make a later task to have the renderer interpolate the animations. (defer this task but make sure you're not forgetting about it!!!!)
+            - [ ] Have a component that configures the model animator with an AFA controller.
+            - [ ] Run a system _right after_ the system that created model animators to configure the model animator to add the AFA controller.
+                - [ ] Add an assert that if the model animator isn't created yet then that's a SERIOUS issue, bc it should've JUST been created just prior. (also leave a message for future me pls!!)
 
 
 
