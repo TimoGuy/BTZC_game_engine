@@ -477,7 +477,7 @@ while (running_game_loop)
             - [x] Fix ctrl data points not getting loaded w the data types.
             - [x] Fix hitcapsules not being attached to bones of animator.
                 - [x] Also enable/disable hitcapsules from here too.
-            - [ ] Fix imgui timelines not getting changed out.
+            - [x] Fix imgui timelines not getting changed out.
                 - [x] Half done.
                 - [x] Fix the actual timeline regions not showing.
                     - Do you think it's just not configured correctly in the .btafa?
@@ -491,7 +491,7 @@ while (running_game_loop)
                 - [x] Fix crashing when closing the program after saving an AFA and then closing the program
                     - My guess is that registered hitcapsule sets in the overlap solver are getting held up in there.
                     - @SOLUTION: Needed to remove the old AFA's hitcapsule group set from the overlap solver.
-                - [ ] Rename `s_selected_timeline_idx` to `s_selected_afa_idx` along with other "timeline" names/labels that shouldnt be this way (imgui_renderer.cpp:661)
+                - [x] Rename `s_selected_timeline_idx` to `s_selected_afa_idx` along with other "timeline" names/labels that shouldnt be this way (imgui_renderer.cpp:661)
             - [ ] Fix vars of AFA data viewers. It appears the bools are flickering between false and true when over the override region???
                 > It appears to be working correctly now that there's the right stuff loading in from the system???? Idk double check pls.
                 > Huh... it really doesn't appear to be flickering anymore...

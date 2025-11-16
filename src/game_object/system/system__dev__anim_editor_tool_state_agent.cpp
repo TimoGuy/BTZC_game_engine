@@ -56,7 +56,7 @@ void BT::component_system::system::System__dev__anim_editor_tool_state_agent::in
         if (comp_afa_comm_state.prev_working_model != anim_frame_action::s_editor_state.working_model)
         {
             anim_frame_action::s_editor_state.working_model_animator = nullptr;
-            comp_afa_comm_state.prev_working_timeline_copy = nullptr;  // To ensure working timeline and animators get realigned.
+            comp_afa_comm_state.prev_working_afa_ctrls_copy = nullptr;  // To ensure working AFA controls and animators get realigned.
 
             // Check if new model is deformable by whether it has animations.
             auto const& new_model{ *anim_frame_action::s_editor_state.working_model };
@@ -90,7 +90,8 @@ void BT::component_system::system::System__dev__anim_editor_tool_state_agent::in
         }
 
         if (anim_frame_action::s_editor_state.working_model_animator &&
-            comp_afa_comm_state.prev_working_timeline_copy != anim_frame_action::s_editor_state.working_timeline_copy)
+            comp_afa_comm_state.prev_working_afa_ctrls_copy !=
+                anim_frame_action::s_editor_state.working_afa_ctrls_copy)
         {   // Configure animator to use new timeline.
             reconfigure_animator_needed = true;
         }
@@ -98,7 +99,7 @@ void BT::component_system::system::System__dev__anim_editor_tool_state_agent::in
         if (reconfigure_animator_needed)
         {
             assert(anim_frame_action::s_editor_state.working_model != nullptr);
-            assert(anim_frame_action::s_editor_state.working_timeline_copy != nullptr);
+            assert(anim_frame_action::s_editor_state.working_afa_ctrls_copy != nullptr);
 
             {   // Create new animator.
                 auto animator{ std::make_unique<Model_animator>(*anim_frame_action::s_editor_state.working_model) };
@@ -156,7 +157,7 @@ void BT::component_system::system::System__dev__anim_editor_tool_state_agent::in
             // Reconfigure animator.
             anim_frame_action::s_editor_state.working_model_animator
                 ->configure_anim_frame_action_controls(
-                    anim_frame_action::s_editor_state.working_timeline_copy);
+                    anim_frame_action::s_editor_state.working_afa_ctrls_copy);
 
             auto anim_state_anim_idx{
                 anim_frame_action::s_editor_state.working_model_animator
@@ -168,8 +169,8 @@ void BT::component_system::system::System__dev__anim_editor_tool_state_agent::in
                 ->get_model_animation(anim_state_anim_idx)
                 .get_num_frames();
 
-            comp_afa_comm_state.prev_working_timeline_copy =
-                anim_frame_action::s_editor_state.working_timeline_copy;
+            comp_afa_comm_state.prev_working_afa_ctrls_copy =
+                anim_frame_action::s_editor_state.working_afa_ctrls_copy;
         }
 
         if (anim_frame_action::s_editor_state.working_model_animator)
@@ -288,7 +289,7 @@ public:
     uint32_t m_working_anim_state_idx{ (uint32_t)-1 };
     size_t m_prev_anim_frame{ (size_t)-1 };
 
-    anim_frame_action::Runtime_data_controls const* m_prev_working_timeline_copy{ nullptr };
+    anim_frame_action::Runtime_data_controls const* m_prev_working_afa_ctrls_copy{ nullptr };
 };
 
 }  // namespace BT
@@ -321,7 +322,7 @@ void BT::Scripts::Script__dev__anim_editor_tool_state_agent::on_pre_render(float
     if (m_prev_working_model != anim_frame_action::s_editor_state.working_model)
     {
         anim_frame_action::s_editor_state.working_model_animator = nullptr;
-        m_prev_working_timeline_copy = nullptr;  // To ensure working timeline and animators get realigned.
+        m_prev_working_afa_ctrls_copy = nullptr;  // To ensure working timeline and animators get realigned.
 
         // Check if new model is deformable by whether it has animations.
         auto const& new_model{ *anim_frame_action::s_editor_state.working_model };
@@ -355,7 +356,7 @@ void BT::Scripts::Script__dev__anim_editor_tool_state_agent::on_pre_render(float
     }
 
     if (anim_frame_action::s_editor_state.working_model_animator &&
-        m_prev_working_timeline_copy != anim_frame_action::s_editor_state.working_timeline_copy)
+        m_prev_working_afa_ctrls_copy != anim_frame_action::s_editor_state.working_afa_ctrls_copy)
     {   // Configure animator to use new timeline.
         reconfigure_animator_needed = true;
     }
@@ -363,7 +364,7 @@ void BT::Scripts::Script__dev__anim_editor_tool_state_agent::on_pre_render(float
     if (reconfigure_animator_needed)
     {
         assert(anim_frame_action::s_editor_state.working_model != nullptr);
-        assert(anim_frame_action::s_editor_state.working_timeline_copy != nullptr);
+        assert(anim_frame_action::s_editor_state.working_afa_ctrls_copy != nullptr);
 
         {   // Create new animator.
             auto animator{ std::make_unique<Model_animator>(*anim_frame_action::s_editor_state.working_model) };
@@ -417,7 +418,7 @@ void BT::Scripts::Script__dev__anim_editor_tool_state_agent::on_pre_render(float
         // Reconfigure animator.
         anim_frame_action::s_editor_state.working_model_animator
             ->configure_anim_frame_action_controls(
-                anim_frame_action::s_editor_state.working_timeline_copy);
+                anim_frame_action::s_editor_state.working_afa_ctrls_copy);
 
         auto anim_state_anim_idx{
             anim_frame_action::s_editor_state.working_model_animator
@@ -429,7 +430,7 @@ void BT::Scripts::Script__dev__anim_editor_tool_state_agent::on_pre_render(float
             ->get_model_animation(anim_state_anim_idx)
             .get_num_frames();
 
-        m_prev_working_timeline_copy = anim_frame_action::s_editor_state.working_timeline_copy;
+        m_prev_working_afa_ctrls_copy = anim_frame_action::s_editor_state.working_afa_ctrls_copy;
     }
 
     if (anim_frame_action::s_editor_state.working_model_animator)

@@ -186,7 +186,7 @@ struct Component_anim_editor_tool_communicator_state
     uint32_t working_anim_state_idx{ (uint32_t)-1 };
     size_t prev_anim_frame{ (size_t)-1 };
 
-    anim_frame_action::Runtime_data_controls const* prev_working_timeline_copy{ nullptr };
+    anim_frame_action::Runtime_data_controls const* prev_working_afa_ctrls_copy{ nullptr };
 
     /// Serialization/deserialization.
     NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(

@@ -37,7 +37,7 @@ void BT::system::_dev_animation_frame_action_editor()
         if (afa_agent.prev_working_model != eds.working_model)
         {
             eds.working_model_animator = nullptr;
-            afa_agent.prev_working_timeline_copy = nullptr;  // Forces animator reconfiguration.
+            afa_agent.prev_working_afa_ctrls_copy = nullptr;  // Forces animator reconfiguration.
 
             // Create render object settings component (to trigger creating a render object).
             // @TODO: START HERE!!!! WHY IS THIS BREAKPOINT NOT WORKING??!?!?!?!?!
@@ -58,10 +58,10 @@ void BT::system::_dev_animation_frame_action_editor()
         if (reg.any_of<component::Created_render_object_reference>(entity))
         {   // Sanity checks.
             assert(eds.working_model != nullptr);
-            assert(eds.working_timeline_copy != nullptr);
+            assert(eds.working_afa_ctrls_copy != nullptr);
 
             if (eds.working_model_animator == nullptr ||
-                afa_agent.prev_working_timeline_copy != eds.working_timeline_copy)
+                afa_agent.prev_working_afa_ctrls_copy != eds.working_afa_ctrls_copy)
             {   // Reset vars.
                 afa_agent.working_anim_state_idx = -1;
 
@@ -92,14 +92,14 @@ void BT::system::_dev_animation_frame_action_editor()
 
                 // Configure anim frame action data.
                 eds.working_model_animator->configure_anim_frame_action_controls(
-                    eds.working_timeline_copy);  // @TODO: @THINK: @THEA: How do we get these into the render object settings components or smth so that these automatically load up without this process here??
+                    eds.working_afa_ctrls_copy);  // @TODO: @THINK: @THEA: How do we get these into the render object settings components or smth so that these automatically load up without this process here??
 
                 // Create and attach hitcapsule set driver.
                 reg.emplace_or_replace<component::Animator_driven_hitcapsule_set>(entity);
 
                 // Keep track so that if the working timeline gets saved/discarded, a new one is
                 // immediately fetched.
-                afa_agent.prev_working_timeline_copy = eds.working_timeline_copy;
+                afa_agent.prev_working_afa_ctrls_copy = eds.working_afa_ctrls_copy;
             }
 
             // Update animator state.
