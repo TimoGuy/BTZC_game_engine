@@ -502,7 +502,7 @@ while (running_game_loop)
 
             - Once that is done...
             - [x] Implement processing controllable data.
-            - [ ] Think about how to load and process controllable data inside of the regular animator too.
+            - [x] Think about how to load and process controllable data inside of the regular animator too.
                 - Honestly, the same way that's going on w the other handles I think that will just work haha.
                 - Basically, get the data handle references you need, then query them
                 ```cpp
@@ -520,9 +520,13 @@ while (running_game_loop)
                 ```
 
                 - WARNING: The animator should run in the simulation loop for handling the events, so that there's no need to rely on the renderer for updating the animators.
-                    - [ ] Do this. For now, have animator get updated _only_ in the simulation loop.
-                        - [ ] Update the hitcapsules and AFA data.
-                    - [ ] Make a later task to have the renderer interpolate the animations. (defer this task but make sure you're not forgetting about it!!!!)
+                    - [x] Do this. For now, have animator get updated ~~_only_~~also in the simulation loop.
+                        - [x] Update the hitcapsules and AFA data.
+                        - I basically just added a new timer for the renderer, and made a profile switcher that updates the correct timer for the animator.
+                    - [ ] ~~Make a later task to have the renderer interpolate the animations. (defer this task but make sure you're not forgetting about it!!!!)~~
+                        - It was actually easier to just make it now! So I did.
+                    > @NOTE: I believe that there should be testing that these values don't get off, but theoretically they never will!!
+                        > Mmmm, this is probably gonna bite me in the butt in the ftuure??
             - [ ] Have a component that configures the model animator with an AFA controller.
             - [ ] Run a system _right after_ the system that created model animators to configure the model animator to add the AFA controller.
                 - [ ] Add an assert that if the model animator isn't created yet then that's a SERIOUS issue, bc it should've JUST been created just prior. (also leave a message for future me pls!!)

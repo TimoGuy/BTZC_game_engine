@@ -7,6 +7,7 @@
 #include "game_system_logic/component/render_object_settings.h"
 #include "game_system_logic/component/transform.h"
 #include "game_system_logic/entity_container.h"
+#include "physics_engine/physics_engine.h"  // For `k_simulation_delta_time`.
 #include "renderer/renderer.h"
 #include "service_finder/service_finder.h"
 
@@ -32,13 +33,13 @@ void BT::system::animator_driven_hitcapsule_sets_update()
         // Update whether capsules are enabled and keep capsules attached to connecting bone in
         // animator.
         auto& animator{ *rend_obj.get_model_animator() };
+        animator.update(Model_animator::SIMULATION_PROFILE,
+                        Physics_engine::k_simulation_delta_time);
+
         animator.get_anim_frame_action_data_handle().assign_hitcapsule_enabled_flags();
 
-        // @TODO: @FIXME: If this could be physics thread dependent instead of having to depend on
-        // the timing of the render thread, then that would be wonderful. It would be sooo much more
-        // consistent  -Thea 2025/10/07
         std::vector<mat4s> joint_matrices;
-        animator.get_anim_floored_frame_pose(joint_matrices);
+        animator.get_anim_floored_frame_pose(Model_animator::SIMULATION_PROFILE, joint_matrices);
 
         animator.get_anim_frame_action_data_handle().update_hitcapsule_transforms(
             rend_obj.render_transform(),

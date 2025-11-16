@@ -44,6 +44,21 @@
                     "ctrl_item_idx": 2,
                     "end_frame": 19,
                     "start_frame": 15
+                },
+                {
+                    "ctrl_item_idx": 3,
+                    "end_frame": 40,
+                    "start_frame": 39
+                },
+                {
+                    "ctrl_item_idx": 3,
+                    "end_frame": 62,
+                    "start_frame": 61
+                },
+                {
+                    "ctrl_item_idx": 3,
+                    "end_frame": 101,
+                    "start_frame": 100
                 }
             ],
             "state_name": "st_attack_0"
@@ -231,7 +246,7 @@
                         "radius": 0.25
                     }
                 ],
-                "m_enabled": false,
+                "m_enabled": true,
                 "m_type": 1
             }
         ]

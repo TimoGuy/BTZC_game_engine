@@ -27,6 +27,7 @@
 #include "material_impl_debug_lines.h"
 #include "render_object.h"
 #include "renderer.h"
+#include "renderer/model_animator.h"
 #include "service_finder/service_finder.h"
 #include "settings/settings.h"
 #include "stb_image.h"
@@ -676,10 +677,10 @@ bool BT::Renderer::Impl::update_animators_and_compute_mesh_skinning(float_t delt
         if (rend_obj->get_deformed_model() != nullptr)
         {
             auto& animator{ *rend_obj->get_model_animator() };
-            animator.update(delta_time);
+            animator.update(Model_animator::RENDERER_PROFILE, delta_time);
 
             std::vector<mat4s> joint_matrices;
-            animator.calc_anim_pose(joint_matrices);
+            animator.calc_anim_pose(Model_animator::RENDERER_PROFILE, joint_matrices);
             rend_obj->get_deformed_model()->dispatch_compute_deform(std::move(joint_matrices));
 
             mutated = true;
