@@ -539,6 +539,15 @@ Uncomment `third_party/cglm/include/cglm/simd/intrin.h:98` (where it includes "a
     - [ ] Get mesh importing figured out.
     - @TODO.
 
+1. Move from GLSL to SLANG shaders.
+    > This should make the switch from OpenGL to Vulkan (and to Metal in the further future) a lot easier!!
+    > I think that reflection should be easier for this as well. Using the spirv reflection API was fine, but I worry that for something like Metal it wouldn't work quite the way it should.
+    > Reflection ref: https://youtu.be/OxOZ81N3NKw?si=44uyuV-CDp4hzBDx
+
+    - [ ] @TODO define tasks.
+    - [ ] Convert all glsl shaders to slang.
+
+
 1. Swordplay combat.
     - [x] @PREREQUISITE: Skeletal animations.
     - Cutting.
