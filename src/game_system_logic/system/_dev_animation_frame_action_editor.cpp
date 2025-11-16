@@ -1,6 +1,7 @@
 #include "_dev_animation_frame_action_editor.h"
 
 #include "animation_frame_action_tool/editor_state.h"
+#include "animation_frame_action_tool/runtime_data.h"
 #include "game_system_logic/component/animator_driven_hitcapsule_set.h"
 #include "game_system_logic/component/render_object_settings.h"
 #include "game_system_logic/entity_container.h"
@@ -137,7 +138,31 @@ void BT::system::_dev_animation_frame_action_editor()
                                                  Model_joint_animation::k_frames_per_second);
 
             // Process all controllable data.
-            // @TODO: @NOCHECKIN: Do this porting from the old system!
+            // @NOTE: Just for the editor, it's only necessary to flush all the events.
+            static std::vector<anim_frame_action::Controllable_data_label> s_all_data_labels;
+            if (s_all_data_labels.empty())
+            {   // Add in data labels.
+                auto const& all_controllable_data_strs{
+                    anim_frame_action::Runtime_controllable_data::get_all_str_labels()
+                };
+                for (auto& data_str : all_controllable_data_strs)
+                {
+                    auto data_label{
+                        anim_frame_action::Runtime_controllable_data::str_label_to_enum(data_str)
+                    };
+                    s_all_data_labels.emplace_back(data_label);
+                }
+            }
+
+            for (auto label : s_all_data_labels)
+                if (anim_frame_action::Runtime_controllable_data::get_data_type(label) ==
+                    anim_frame_action::Runtime_controllable_data::CTRL_DATA_TYPE_RISING_EDGE_EVENT)
+                {
+                    (void)anim_frame_action::s_editor_state.working_model_animator
+                        ->get_anim_frame_action_data_handle()
+                        .get_reeve_data_handle(label)
+                        .check_if_rising_edge_occurred();
+                }
         }
     }
 }

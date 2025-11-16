@@ -501,9 +501,28 @@ while (running_game_loop)
                         - [x] Fixed this problem. (Redo if the weaker hardware is still having issues)
 
             - Once that is done...
-            - [ ] Implement processing controllable data.
+            - [x] Implement processing controllable data.
             - [ ] Think about how to load and process controllable data inside of the regular animator too.
-            - [ ] @TODO: Fill out the next steps @HERE .....
+                - Honestly, the same way that's going on w the other handles I think that will just work haha.
+                - Basically, get the data handle references you need, then query them
+                ```cpp
+                if (my_comp.some_event == nullptr)
+                {   // Get information.
+                    my_comp.some_event =
+                        &my_animator.get_anim_frame_action_data_handle().get_reeve_data_handle(
+                            some_event_label);
+                }
+
+                if (my_comp.some_event->check_if_rising_edge_occurred())
+                {
+                    // PROCESS EVENT HERE.
+                }
+                ```
+
+                - WARNING: The animator should run in the simulation loop for handling the events, so that there's no need to rely on the renderer for updating the animators.
+                    - [ ] Do this. For now, have animator get updated _only_ in the simulation loop.
+                        - [ ] Update the hitcapsules and AFA data.
+                    - [ ] Make a later task to have the renderer interpolate the animations. (defer this task but make sure you're not forgetting about it!!!!)
 
 
 
