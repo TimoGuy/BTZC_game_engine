@@ -85,6 +85,7 @@ set(MAIN_SOURCES
     # ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/system/system_player_character_movement.cpp  @TEMP: To reduce errors for refactor.
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/UNUSED_serialization.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/_dev_animation_frame_action_editor_agent.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/anim_frame_action_controller.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/animator_driven_hitcapsule_set.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/component_imgui_edit_functions.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/component_imgui_edit_functions.h

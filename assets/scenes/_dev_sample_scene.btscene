@@ -198,6 +198,12 @@
                         "is_deformed": true,
                         "animator_template_name": "simple_combat_char.btanitor"
                     }
+                },
+                {
+                    "type_name": "component::Anim_frame_action_controller",
+                    "members_j": {
+                        "anim_frame_action_controller_name": "simple_combat_char.btafa"
+                    }
                 }
             ]
         },

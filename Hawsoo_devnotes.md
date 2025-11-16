@@ -527,16 +527,17 @@ while (running_game_loop)
                         - It was actually easier to just make it now! So I did.
                     > @NOTE: I believe that there should be testing that these values don't get off, but theoretically they never will!!
                         > Mmmm, this is probably gonna bite me in the butt in the ftuure??
-            - [ ] Have a component that configures the model animator with an AFA controller.
+            - [x] Have a component that configures the model animator with an AFA controller.
             - [ ] Run a system _right after_ the system that created model animators to configure the model animator to add the AFA controller.
+                - Also make sure that this is before the animator gets updated in the `animator_driven_hitcapsules_stuff_stuff()` system.
                 - [ ] Add an assert that if the model animator isn't created yet then that's a SERIOUS issue, bc it should've JUST been created just prior. (also leave a message for future me pls!!)
-
-
 
 - [ ] Now do the thing I initially wanted to do but couldn't
     - [ ] Create script for character controller movement but without the input from player.
         - [ ] ~~Perhaps this could just be a script that sends its data to another script? Maybe there could be a connections type thing? Mmmmm maybe provide a `on_start()` func for scripts where they could get the script that they need to send to and stuff?~~
             - This all got solved with the script to ECS overhaul.
+
+- [ ] Delete the old system. Gut it out.
 >-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 
