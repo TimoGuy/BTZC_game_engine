@@ -440,7 +440,7 @@ while (running_game_loop)
 
 
 
-- [ ] Achieve feature parity as before.
+- [x] Achieve feature parity as before.
     - [x] Player character
         - [x] Input getting system.
         - [x] Char-con collide-n-slide algorithm system.
@@ -543,6 +543,8 @@ while (running_game_loop)
             - This all got solved with the script to ECS overhaul.
 
 - [ ] Delete the old system. Gut it out.
+
+- [ ] Make merge request.
 >-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 
