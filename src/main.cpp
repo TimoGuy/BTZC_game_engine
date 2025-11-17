@@ -509,6 +509,9 @@ int32_t main()
                 if (is_afa_editor_context)
                     // @HACK: @IMPROVE: Run AFA editor again in case if animator reconfiguration is
                     //   needed from ImGui actions of the render that just happened.
+                    // @TODO: Make the func call below a stripped down version that only deals with
+                    //        animator reconfiguration, and no processing of the animator, no
+                    //        processing of AFA controller/data points.
                     BT::system::_dev_animation_frame_action_editor();
             }
         }
