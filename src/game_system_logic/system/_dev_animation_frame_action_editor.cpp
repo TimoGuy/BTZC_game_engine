@@ -41,7 +41,6 @@ void BT::system::_dev_animation_frame_action_editor()
             afa_agent.prev_working_afa_ctrls_copy = nullptr;  // Forces animator reconfiguration.
 
             // Create render object settings component (to trigger creating a render object).
-            // @TODO: START HERE!!!! WHY IS THIS BREAKPOINT NOT WORKING??!?!?!?!?!
             reg.emplace_or_replace<component::Render_object_settings>(
                 entity,
                 Render_layer::RENDER_LAYER_DEFAULT,

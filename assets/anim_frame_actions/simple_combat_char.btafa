@@ -18,8 +18,8 @@
                 },
                 {
                     "ctrl_item_idx": 2,
-                    "end_frame": 12,
-                    "start_frame": 8
+                    "end_frame": 14,
+                    "start_frame": 7
                 }
             ],
             "state_name": "st_idle"
@@ -246,7 +246,7 @@
                         "radius": 0.25
                     }
                 ],
-                "m_enabled": true,
+                "m_enabled": false,
                 "m_type": 1
             }
         ]

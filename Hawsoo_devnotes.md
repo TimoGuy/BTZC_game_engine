@@ -527,6 +527,10 @@ while (running_game_loop)
                         - It was actually easier to just make it now! So I did.
                     > @NOTE: I believe that there should be testing that these values don't get off, but theoretically they never will!!
                         > Mmmm, this is probably gonna bite me in the butt in the ftuure??
+            - [x] Fix crashing when discarding/saving an AFA controller (since the split animator now caused this issue to arise again)
+                - Basically the animator needs to be reconfigured _after_ the renderer does its render step. Add another system check to check if the working AFA changed.
+                - My fix is basically just calling the AFA editor system _again_ after doing the renderer's render pass.
+                    - Hacky but oh well, problem solved I think.
             - [x] Have a component that configures the model animator with an AFA controller.
             - [ ] Run a system _right after_ the system that created model animators to configure the model animator to add the AFA controller.
                 - Also make sure that this is before the animator gets updated in the `animator_driven_hitcapsules_stuff_stuff()` system.

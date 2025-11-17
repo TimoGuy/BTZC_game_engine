@@ -505,6 +505,11 @@ int32_t main()
                     }
                     #endif  // !BTZC_REFACTOR_TO_ENTT
                 });
+
+                if (is_afa_editor_context)
+                    // @HACK: @IMPROVE: Run AFA editor again in case if animator reconfiguration is
+                    //   needed from ImGui actions of the render that just happened.
+                    BT::system::_dev_animation_frame_action_editor();
             }
         }
 
