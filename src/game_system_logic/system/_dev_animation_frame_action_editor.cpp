@@ -2,6 +2,7 @@
 
 #include "animation_frame_action_tool/editor_state.h"
 #include "animation_frame_action_tool/runtime_data.h"
+#include "game_system_logic/component/anim_frame_action_controller.h"
 #include "game_system_logic/component/animator_driven_hitcapsule_set.h"
 #include "game_system_logic/component/render_object_settings.h"
 #include "game_system_logic/entity_container.h"
@@ -90,11 +91,21 @@ void BT::system::_dev_animation_frame_action_editor()
                     eds.anim_state_name_to_idx_map.emplace(anim_states[i].state_name, i);
                 }
 
+                // Due to manual control in configuring the model animator, ensure that there is no
+                // auto configuration component attached (this exclusion is just a special case for
+                // this editor agent entity).  -Thea 2025/11/16
+                assert(!reg.any_of<component::Anim_frame_action_controller>(entity));
+
                 // Configure anim frame action data.
+                // @NOTE: Using the `anim_frame_action_controller` component will configure the
+                //        model animator, however, since we want to manually control which AFA
+                //        controller is assigned on this dynamic entity, this component is not
+                //        attached.
                 eds.working_model_animator->configure_anim_frame_action_controls(
                     eds.working_afa_ctrls_copy);  // @TODO: @THINK: @THEA: How do we get these into the render object settings components or smth so that these automatically load up without this process here??
 
                 // Create and attach hitcapsule set driver.
+                // @NOTE: This is also manually added.
                 reg.emplace_or_replace<component::Animator_driven_hitcapsule_set>(entity);
 
                 // Keep track so that if the working timeline gets saved/discarded, a new one is

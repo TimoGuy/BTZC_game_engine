@@ -3,6 +3,8 @@
 #include "btlogger.h"
 #include "entt/entity/fwd.hpp"
 #include "entt/entity/registry.hpp"
+#include "game_system_logic/component/anim_frame_action_controller.h"
+#include "game_system_logic/component/animator_driven_hitcapsule_set.h"
 #include "game_system_logic/component/render_object_settings.h"
 #include "game_system_logic/entity_container.h"
 #include "game_system_logic/world/world_properties.h"
@@ -130,6 +132,17 @@ void create_staged_render_objects(entt::registry& reg,
 
             new_rend_obj.set_deformed_model(std::move(deformed_model));
             new_rend_obj.set_model_animator(std::move(model_animator));
+
+            // Check for anim frame action controller configuration.
+            auto afa_ctrller{ reg.try_get<component::Anim_frame_action_controller>(entity) };
+            if (afa_ctrller != nullptr)
+            {   // Configure anim frame action data.
+                new_rend_obj.get_model_animator()->configure_anim_frame_action_controls(
+                    &anim_frame_action::Bank::get(afa_ctrller->anim_frame_action_controller_name));
+
+                // Add hitcapsule set driver.
+                reg.emplace_or_replace<component::Animator_driven_hitcapsule_set>(entity);
+            }
         }
         else
         {   // Use static model from bank.

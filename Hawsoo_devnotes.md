@@ -453,7 +453,7 @@ while (running_game_loop)
             - [x] Remove `struct Character_mvt_state`'s `m_` variables.
             - [x] Add docstrings for anonymous namespace funcs in `player_character_movement.cpp`
                 - [x] Remove @TODO banners too
-    - [ ] Animator editor.
+    - [x] Animator editor.
         - [ ] ~~Umm, whatever is needed here.~~
         - [x] ~~Change `animation_frame_action_tool/editor_state.h` into a component.~~
         - [ ] ~~Create system that uses the new component.~~
@@ -464,7 +464,7 @@ while (running_game_loop)
             - [x] Just have the component have a flag for whether to reset the editor state. (True as default).
                 > So then every time we reload the editor tab, it will reset the editor state.
         - [x] (free space) Have the imgui stuff still connected to the original `editor_state.h` (i.e. do nothing)
-        - [ ] Create system that uses component to reset editor state but other than that just uses the editor state same as before (also adds and changes components and stuff).
+        - [x] Create system that uses component to reset editor state but other than that just uses the editor state same as before (also adds and changes components and stuff).
             - [x] Make switch for forcing allowing the deformed rend objs (needed for editing animations obviiii)
             - [x] Stub out the system
             - [x] Initial try to get a scrubbable animated character in there.
@@ -532,9 +532,10 @@ while (running_game_loop)
                 - My fix is basically just calling the AFA editor system _again_ after doing the renderer's render pass.
                     - Hacky but oh well, problem solved I think.
             - [x] Have a component that configures the model animator with an AFA controller.
-            - [ ] Run a system _right after_ the system that created model animators to configure the model animator to add the AFA controller.
+            - [x] Run a system _right after_ the system that created model animators to configure the model animator to add the AFA controller.
                 - Also make sure that this is before the animator gets updated in the `animator_driven_hitcapsules_stuff_stuff()` system.
-                - [ ] Add an assert that if the model animator isn't created yet then that's a SERIOUS issue, bc it should've JUST been created just prior. (also leave a message for future me pls!!)
+                - [ ] ~~Add an assert that if the model animator isn't created yet then that's a SERIOUS issue, bc it should've JUST been created just prior. (also leave a message for future me pls!!)~~
+                    - I don't think this is necessary bc I just added a branch into the render object lifetime system instead of creating a new system.
 
 - [ ] Now do the thing I initially wanted to do but couldn't
     - [ ] Create script for character controller movement but without the input from player.
