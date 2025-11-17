@@ -612,6 +612,7 @@ Uncomment `third_party/cglm/include/cglm/simd/intrin.h:98` (where it includes "a
 
 1. Add cascaded shadow maps to renderer.
     - @TODO.
+    - Nice shadow biasing post: https://www.reddit.com/r/GraphicsProgramming/s/p2HXNVNAXl
     - [ ] Add player shadow as well, but using a different camera setup.
         - Drop shadow.
 
