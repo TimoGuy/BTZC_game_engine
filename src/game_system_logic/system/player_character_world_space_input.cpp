@@ -1,11 +1,11 @@
-#include "player_character_movement.h"
+#include "player_character_world_space_input.h"
 
 #include "Jolt/Jolt.h"
 #include "Jolt/Physics/PhysicsSystem.h"
 #include "Jolt/Math/Vec3.h"
 #include "btglm.h"
+#include "game_system_logic/component/character_movement.h"
 #include "game_system_logic/component/physics_object_settings.h"
-#include "game_system_logic/component/player_character.h"
 #include "game_system_logic/component/transform.h"
 #include "game_system_logic/entity_container.h"
 #include "input_handler/input_handler.h"
@@ -476,7 +476,7 @@ void apply_velocity_to_char_con(
 }  // namespace
 
 
-void BT::system::player_character_movement()
+void BT::system::player_character_world_space_input()
 {
     auto& entity_container{ service_finder::find_service<Entity_container>() };
     auto& reg{ entity_container.get_ecs_registry() };

@@ -538,9 +538,14 @@ while (running_game_loop)
                     - I don't think this is necessary bc I just added a branch into the render object lifetime system instead of creating a new system.
 
 - [ ] Now do the thing I initially wanted to do but couldn't
-    - [ ] Create script for character controller movement but without the input from player.
-        - [ ] ~~Perhaps this could just be a script that sends its data to another script? Maybe there could be a connections type thing? Mmmmm maybe provide a `on_start()` func for scripts where they could get the script that they need to send to and stuff?~~
-            - This all got solved with the script to ECS overhaul.
+    > [ ] Create ~~script~~system for character controller movement but without the input from player.
+        > [ ] ~~Perhaps this could just be a script that sends its data to another script? Maybe there could be a connections type thing? Mmmmm maybe provide a `on_start()` func for scripts where they could get the script that they need to send to and stuff?~~
+            > This all got solved with the script to ECS overhaul.
+    - [ ] Split player movement into two systems.
+        - [x] Stub out system split.
+        - [ ] Get player input.
+            - [ ] Make between component, `Character_controller_input`.
+        - [ ] Do movement.
 
 - [ ] Delete the old system. Gut it out.
 

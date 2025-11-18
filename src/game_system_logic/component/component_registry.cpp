@@ -3,6 +3,7 @@
 #include "_dev_animation_frame_action_editor_agent.h"
 #include "anim_frame_action_controller.h"
 #include "btjson.h"
+#include "character_movement.h"
 #include "component_imgui_edit_functions.h"
 #include "entity_metadata.h"
 #include "entt/core/fwd.hpp"
@@ -12,7 +13,6 @@
 #include "game_system_logic/component/animator_driven_hitcapsule_set.h"
 #include "game_system_logic/entity_container.h"
 #include "physics_object_settings.h"
-#include "player_character.h"
 #include "render_object_settings.h"
 #include "service_finder/service_finder.h"
 #include "transform.h"
@@ -101,6 +101,7 @@ void BT::component::register_all_components()
     REGISTER_COMPONENT__YES_SERIALIZE(component::Transform_hierarchy,                         edit::imgui_edit__transform_hierarchy);
     REGISTER_COMPONENT___NO_SERIALIZE(component::Transform_changed,                           edit::imgui_edit__transform_changed);
     REGISTER_COMPONENT__YES_SERIALIZE(component::Player_character,                            edit::imgui_edit__sample);
+    REGISTER_COMPONENT__YES_SERIALIZE(component::Character_world_space_input,                 edit::imgui_edit__sample);
     REGISTER_COMPONENT__YES_SERIALIZE(component::Character_mvt_state,                         edit::imgui_edit__sample);
     REGISTER_COMPONENT__YES_SERIALIZE(component::Display_repr_transform_ref,                  edit::imgui_edit__sample);
     REGISTER_COMPONENT__YES_SERIALIZE(component::Follow_camera_follow_ref,                    edit::imgui_edit__sample);

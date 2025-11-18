@@ -1,5 +1,6 @@
 #pragma once
 
+#include "btglm.h"
 #include "btjson.h"
 #include "uuid/uuid.h"
 
@@ -22,13 +23,25 @@ struct Player_character
     );
 };
 
+/// World space input for character controller movement.
+/// NPC AI would output to this struct. Player input would output to this struct.
+struct Character_world_space_input
+{
+    vec3 ws_flat_normalized_input{ 0, 0, 0 };
+
+    bool jump_pressed{ false };
+    bool prev_jump_pressed{ false };
+    bool crouch_pressed{ false };
+    bool prev_crouch_pressed{ false };
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(Character_world_space_input,
+                                                ws_flat_normalized_input);
+};
+
 /// Holds movement state for characters. Also contains settings for movement parameters.
 /// @NOTE: Only settings are serialized.
 struct Character_mvt_state
 {
-    bool prev_jump_pressed{ false };
-    bool prev_crouch_pressed{ false };
-
     struct Grounded_state
     {
         float_t speed{ 0.0f };

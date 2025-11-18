@@ -87,6 +87,7 @@ set(MAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/_dev_animation_frame_action_editor_agent.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/anim_frame_action_controller.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/animator_driven_hitcapsule_set.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/character_movement.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/component_imgui_edit_functions.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/component_imgui_edit_functions.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/component_registry.cpp
@@ -95,7 +96,6 @@ set(MAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/follow_camera.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/physics_object_settings.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/physics_object_settings.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/player_character.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/render_object_settings.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/transform.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/transform.h
@@ -107,8 +107,10 @@ set(MAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/animator_driven_hitcapsule_sets_update.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/imgui_render_transform_hierarchy_window.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/imgui_render_transform_hierarchy_window.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/player_character_movement.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/player_character_movement.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/input_controlled_character_movement.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/input_controlled_character_movement.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/player_character_world_space_input.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/player_character_world_space_input.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/process_physics_object_lifetime.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/process_physics_object_lifetime.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/process_render_object_lifetime.cpp
