@@ -24,40 +24,6 @@ namespace
 
 using namespace BT;
 
-/// Takes `input_vec` user input and transforms it into a world space input vector where forward is
-/// the direction the camera is facing.
-void transform_input_to_camera_pov_input(vec2 const input_vec, vec3& out_ws_input_vec)
-{
-    auto camera{ service_finder::find_service<Renderer>().get_camera_obj() };
-
-    if (!camera->is_follow_orbit())
-    {   // Exit early since camera isn't accepting input.
-        glm_vec3_zero(out_ws_input_vec);
-        return;
-    }
-
-    // Calc forward and right axis vectors.
-    vec3 cam_forward;
-    camera->get_view_direction(cam_forward);
-    cam_forward[1] = 0;
-    glm_vec3_normalize(cam_forward);
-
-    vec3 cam_right;
-    glm_vec3_cross(cam_forward, vec3{ 0, 1, 0 }, cam_right);
-    cam_right[1] = 0;
-    glm_vec3_normalize(cam_right);
-
-    // Transform `input_vec` into axis vectors.
-    glm_vec3_zero(out_ws_input_vec);
-    glm_vec3_muladds(cam_right, input_vec[0], out_ws_input_vec);
-    glm_vec3_muladds(cam_forward, input_vec[1], out_ws_input_vec);
-    out_ws_input_vec[1] = 0;
-
-    // Clamp magnitude to <=1.0
-    if (glm_vec3_norm2(out_ws_input_vec) > 1.0f * 1.0f)
-        glm_vec3_normalize(out_ws_input_vec);
-}
-
 /// Struct holding origin offset and input direction.
 struct Origin_offset_and_input_dir
 {
@@ -78,7 +44,7 @@ Origin_offset_and_input_dir calc_check_origin_point_and_input_dir(float_t facing
 }
 
 void process_midair_jump_interactions(
-    component::Character_mvt_state::Airborne_state& airborne_state,
+    component::Character_mvt_state::Airborne_state const& airborne_state,
     component::Character_mvt_state::Settings const& mvt_settings,
     Physics_object_type_impl_ifc* char_con_impl,
     JPH::Vec3 up_direction,
@@ -303,10 +269,10 @@ struct Char_mvt_logic_results
 };
 
 /// Character controller movement logic.
-Char_mvt_logic_results character_controller_movement_logic(Input_handler::State const& input_state,
-                                   component::Character_mvt_state& char_mvt_state,
-                                   Physics_object& phys_obj,
-                                   vec3 ws_mvt_input)
+Char_mvt_logic_results character_controller_movement_logic(
+    component::Character_world_space_input const& char_ws_input,
+    component::Character_mvt_state& char_mvt_state,
+    Physics_object& phys_obj)
 {   // Get current character controller state.
     auto char_con_impl{ phys_obj.get_impl() };
 
@@ -333,16 +299,15 @@ Char_mvt_logic_results character_controller_movement_logic(Input_handler::State 
     // Change input into desired velocity.
     auto const& mvt_settings{ char_mvt_state.settings };
 
-    JPH::Vec3 desired_velocity{ ws_mvt_input[0], 0.0f, ws_mvt_input[2] };
+    JPH::Vec3 desired_velocity{ char_ws_input.ws_flat_normalized_input.x,
+                                0.0f,
+                                char_ws_input.ws_flat_normalized_input.z };
     desired_velocity *= (char_con_impl->get_cc_stance() ? mvt_settings.crouched_speed
                                                         : mvt_settings.standing_speed);
 
     // Extra input checks.
-    bool on_jump_press{ input_state.jump.val && !char_mvt_state.prev_jump_pressed };
-    char_mvt_state.prev_jump_pressed = input_state.jump.val;
-
-    bool on_crouch_press{ input_state.crouch.val && !char_mvt_state.prev_crouch_pressed };
-    char_mvt_state.prev_crouch_pressed = input_state.crouch.val;
+    bool on_jump_press{ char_ws_input.jump_pressed && !char_ws_input.prev_jump_pressed };
+    bool on_crouch_press{ char_ws_input.crouch_pressed && !char_ws_input.prev_crouch_pressed };
 
     // Find movement state.
     JPH::Vec3 current_vertical_velocity = linear_velocity.Dot(up_direction) * up_direction;
@@ -390,7 +355,8 @@ Char_mvt_logic_results character_controller_movement_logic(Input_handler::State 
     {   // Grounded turn & speed movement.
         auto& grounded_state{ char_mvt_state.grounded_state };
 
-        if (glm_vec3_norm2(ws_mvt_input) > 1e-6f * 1e-6f)
+        if (glm_vec3_norm2(const_cast<float_t*>(char_ws_input.ws_flat_normalized_input.raw)) >
+            1e-6f * 1e-6f)
             apply_grounded_facing_angle(grounded_state, mvt_settings, desired_velocity);
 
         apply_grounded_linear_speed(grounded_state, mvt_settings, desired_velocity);
@@ -421,9 +387,11 @@ Char_mvt_logic_results character_controller_movement_logic(Input_handler::State 
         JPH::Vec3 effective_velocity{ flat_linear_velo + delta_velocity };
         new_velocity += effective_velocity;
 
-        if (glm_vec3_norm2(ws_mvt_input) > 1e-6f * 1e-6f)
+        if (glm_vec3_norm2(const_cast<float_t*>(char_ws_input.ws_flat_normalized_input.raw)) >
+            1e-6f * 1e-6f)
         {  // Move towards input angle.
-            float_t desired_facing_angle{ atan2f(ws_mvt_input[0], ws_mvt_input[2]) };
+            float_t desired_facing_angle{ atan2f(char_ws_input.ws_flat_normalized_input.x,
+                                                 char_ws_input.ws_flat_normalized_input.z) };
             float_t delta_direction{ desired_facing_angle - airborne_state.input_facing_angle };
 
             while (delta_direction > glm_rad(180.0f))
@@ -482,21 +450,13 @@ void BT::system::input_controlled_character_movement()
     auto& reg{ entity_container.get_ecs_registry() };
     auto view{ reg.view<component::Character_world_space_input const,
                         component::Character_mvt_state,
-                        component::Created_physics_object_reference const>() };  // @TODO: START HERE NEXT!!!!!
+                        component::Created_physics_object_reference const>() };
 
     // Process all character movements.
     for (auto entity : view)
-    {
-        // Gets character movement state.
+    {   // Get input and character movement state.
+        auto const& char_ws_input{ view.get<component::Character_world_space_input const>(entity) };
         auto& char_mvt_state{ view.get<component::Character_mvt_state>(entity) };
-
-        #if 0
-        // Get input for player character, transformed into camera view direction.
-        auto const& input_state{ service_finder::find_service<Input_handler>().get_input_state() };
-        vec3 ws_input;
-        transform_input_to_camera_pov_input(vec2{ input_state.move.x.val, input_state.move.y.val },
-                                            ws_input);
-        #endif  // 0
 
         // Process input into character movement logic.
         auto& phys_engine{ service_finder::find_service<Physics_engine>() };
@@ -506,7 +466,7 @@ void BT::system::input_controlled_character_movement()
         auto& phys_obj{ *phys_engine.checkout_physics_object(phys_obj_uuid) };
 
         auto mvt_logic_result =
-            character_controller_movement_logic(input_state, char_mvt_state, phys_obj, ws_input);
+            character_controller_movement_logic(char_ws_input, char_mvt_state, phys_obj);
 
         // Apply movement logic outputs to physics object character controller inputs.
         auto const& physics_gravity{

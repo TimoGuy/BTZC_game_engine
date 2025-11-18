@@ -543,9 +543,12 @@ while (running_game_loop)
             > This all got solved with the script to ECS overhaul.
     - [ ] Split player movement into two systems.
         - [x] Stub out system split.
-        - [ ] Get player input.
-            - [ ] Make between component, `Character_controller_input`.
-        - [ ] Do movement.
+        - [x] Get player input.
+            - [x] Make between component, `Character_controller_input`.
+        - [x] Do movement.
+        - [x] Make this work for the player!
+        - [x] Make another non-player character that has simple movement.
+        - [ ] Test it with an imgui edit.
 
 - [ ] Delete the old system. Gut it out.
 
