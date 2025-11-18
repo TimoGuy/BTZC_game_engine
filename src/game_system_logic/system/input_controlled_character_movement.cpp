@@ -480,25 +480,23 @@ void BT::system::input_controlled_character_movement()
 {
     auto& entity_container{ service_finder::find_service<Entity_container>() };
     auto& reg{ entity_container.get_ecs_registry() };
-    auto view{ reg.view<component::Player_character const,
+    auto view{ reg.view<component::Character_world_space_input const,
                         component::Character_mvt_state,
-                        component::Created_physics_object_reference const>() };
+                        component::Created_physics_object_reference const>() };  // @TODO: START HERE NEXT!!!!!
 
-    // @TEMP: @UNSURE: Only support one player character and fail if not the first.
-    bool is_first{ true };
-
+    // Process all character movements.
     for (auto entity : view)
     {
-        assert(is_first);
-
         // Gets character movement state.
         auto& char_mvt_state{ view.get<component::Character_mvt_state>(entity) };
 
+        #if 0
         // Get input for player character, transformed into camera view direction.
         auto const& input_state{ service_finder::find_service<Input_handler>().get_input_state() };
         vec3 ws_input;
         transform_input_to_camera_pov_input(vec2{ input_state.move.x.val, input_state.move.y.val },
                                             ws_input);
+        #endif  // 0
 
         // Process input into character movement logic.
         auto& phys_engine{ service_finder::find_service<Physics_engine>() };
@@ -538,8 +536,5 @@ void BT::system::input_controlled_character_movement()
                 poss_display_repr_ref->display_repr_uuid) };
             component::submit_transform_change_only_rotation_helper(reg, display_repr_ecs_ent, rot);
         }
-
-        // End of first iteration.
-        is_first = false;
     }
 }

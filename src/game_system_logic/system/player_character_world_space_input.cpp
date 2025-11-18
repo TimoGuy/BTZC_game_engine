@@ -481,8 +481,7 @@ void BT::system::player_character_world_space_input()
     auto& entity_container{ service_finder::find_service<Entity_container>() };
     auto& reg{ entity_container.get_ecs_registry() };
     auto view{ reg.view<component::Player_character const,
-                        component::Character_mvt_state,
-                        component::Created_physics_object_reference const>() };
+                        component::Character_world_space_input>() };  // @TODO: START HERE NEXT!!!!!
 
     // @TEMP: @UNSURE: Only support one player character and fail if not the first.
     bool is_first{ true };
@@ -500,6 +499,7 @@ void BT::system::player_character_world_space_input()
         transform_input_to_camera_pov_input(vec2{ input_state.move.x.val, input_state.move.y.val },
                                             ws_input);
 
+        #if 0
         // Process input into character movement logic.
         auto& phys_engine{ service_finder::find_service<Physics_engine>() };
         auto phys_obj_uuid{
@@ -538,6 +538,7 @@ void BT::system::player_character_world_space_input()
                 poss_display_repr_ref->display_repr_uuid) };
             component::submit_transform_change_only_rotation_helper(reg, display_repr_ecs_ent, rot);
         }
+        #endif  // 0
 
         // End of first iteration.
         is_first = false;
