@@ -81,7 +81,7 @@ void BT::system::player_character_world_space_input()
         // Get input for player character, transformed into camera view direction.
         auto const& input_state{ service_finder::find_service<Input_handler>().get_input_state() };
         transform_input_to_camera_pov_input(vec2{ input_state.move.x.val, input_state.move.y.val },
-                                            char_ws_input.ws_flat_normalized_input);
+                                            char_ws_input.ws_flat_clamped_input);
 
         // Update input state.
         char_ws_input.prev_jump_pressed   = char_ws_input.jump_pressed;

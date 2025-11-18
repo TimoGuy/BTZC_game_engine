@@ -27,7 +27,7 @@ struct Player_character
 /// NPC AI would output to this struct. Player input would output to this struct.
 struct Character_world_space_input
 {
-    vec3s ws_flat_normalized_input{ 0, 0, 0 };
+    vec3s ws_flat_clamped_input{ 0, 0, 0 };
 
     bool jump_pressed{ false };
     bool prev_jump_pressed{ false };
@@ -35,7 +35,7 @@ struct Character_world_space_input
     bool prev_crouch_pressed{ false };
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(Character_world_space_input,
-                                                ws_flat_normalized_input);
+                                                ws_flat_clamped_input);
 };
 
 /// Holds movement state for characters. Also contains settings for movement parameters.

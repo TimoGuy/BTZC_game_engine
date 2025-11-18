@@ -1,5 +1,6 @@
 #include "component_imgui_edit_functions.h"
 
+#include "btglm.h"
 #include "entity_metadata.h"
 #include "game_system_logic/component/entity_metadata.h"
 #include "game_system_logic/component/render_object_settings.h"
@@ -10,6 +11,7 @@
 #include "misc/cpp/imgui_stdlib.h"
 #include "physics_engine/physics_object.h"
 #include "physics_object_settings.h"
+#include "character_movement.h"
 #include "renderer/render_layer.h"
 #include "service_finder/service_finder.h"
 #include "transform.h"
@@ -249,6 +251,30 @@ void BT::component::edit::imgui_edit__transform_changed(entt::registry& reg,
     ImGui::Text("  Pos : (%0.6f, %0.6f, %0.6f)",        next_pos.x, next_pos.y, next_pos.z);
     ImGui::Text("  Rot : (%0.3f, %0.3f, %0.3f, %0.3f)", next_rot.x, next_rot.y, next_rot.z, next_rot.w);
     ImGui::Text("  Pos : (%0.3f, %0.3f, %0.3f)",        next_sca.x, next_sca.y, next_sca.z);
+
+    ImGui::PopID();
+}
+
+void BT::component::edit::imgui_edit__character_world_space_input(entt::registry& reg,
+                                                                  entt::entity ecs_entity)
+{
+    auto& char_ws_input{ reg.get<component::Character_world_space_input>(ecs_entity) };
+
+    ImGui::PushID(&char_ws_input);
+
+    if (ImGui::DragFloat3("Flat normalized input", char_ws_input.ws_flat_clamped_input.raw, 0.05f))
+    {   // Flatten.
+        char_ws_input.ws_flat_clamped_input.y = 0;
+
+        // Clamp magnitude to <=1.0
+        if (glm_vec3_norm2(char_ws_input.ws_flat_clamped_input.raw) > 1.0f * 1.0f)
+            glm_vec3_normalize(char_ws_input.ws_flat_clamped_input.raw);
+    }
+
+    ImGui::Checkbox("jump_pressed",        &char_ws_input.jump_pressed);
+    ImGui::Checkbox("prev_jump_pressed",   &char_ws_input.prev_jump_pressed);
+    ImGui::Checkbox("crouch_pressed",      &char_ws_input.crouch_pressed);
+    ImGui::Checkbox("prev_crouch_pressed", &char_ws_input.prev_crouch_pressed);
 
     ImGui::PopID();
 }

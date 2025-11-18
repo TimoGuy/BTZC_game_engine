@@ -101,7 +101,7 @@ void BT::component::register_all_components()
     REGISTER_COMPONENT__YES_SERIALIZE(component::Transform_hierarchy,                         edit::imgui_edit__transform_hierarchy);
     REGISTER_COMPONENT___NO_SERIALIZE(component::Transform_changed,                           edit::imgui_edit__transform_changed);
     REGISTER_COMPONENT__YES_SERIALIZE(component::Player_character,                            edit::imgui_edit__sample);
-    REGISTER_COMPONENT__YES_SERIALIZE(component::Character_world_space_input,                 edit::imgui_edit__sample);
+    REGISTER_COMPONENT__YES_SERIALIZE(component::Character_world_space_input,                 edit::imgui_edit__character_world_space_input);
     REGISTER_COMPONENT__YES_SERIALIZE(component::Character_mvt_state,                         edit::imgui_edit__sample);
     REGISTER_COMPONENT__YES_SERIALIZE(component::Display_repr_transform_ref,                  edit::imgui_edit__sample);
     REGISTER_COMPONENT__YES_SERIALIZE(component::Follow_camera_follow_ref,                    edit::imgui_edit__sample);

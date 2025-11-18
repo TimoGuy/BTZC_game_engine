@@ -537,18 +537,18 @@ while (running_game_loop)
                 - [ ] ~~Add an assert that if the model animator isn't created yet then that's a SERIOUS issue, bc it should've JUST been created just prior. (also leave a message for future me pls!!)~~
                     - I don't think this is necessary bc I just added a branch into the render object lifetime system instead of creating a new system.
 
-- [ ] Now do the thing I initially wanted to do but couldn't
+- [x] Now do the thing I initially wanted to do but couldn't
     > [ ] Create ~~script~~system for character controller movement but without the input from player.
         > [ ] ~~Perhaps this could just be a script that sends its data to another script? Maybe there could be a connections type thing? Mmmmm maybe provide a `on_start()` func for scripts where they could get the script that they need to send to and stuff?~~
             > This all got solved with the script to ECS overhaul.
-    - [ ] Split player movement into two systems.
+    - [x] Split player movement into two systems.
         - [x] Stub out system split.
         - [x] Get player input.
             - [x] Make between component, `Character_controller_input`.
         - [x] Do movement.
         - [x] Make this work for the player!
         - [x] Make another non-player character that has simple movement.
-        - [ ] Test it with an imgui edit.
+        - [x] Test it with an imgui edit.
 
 - [ ] Delete the old system. Gut it out.
 

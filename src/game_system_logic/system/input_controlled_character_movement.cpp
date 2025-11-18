@@ -299,9 +299,9 @@ Char_mvt_logic_results character_controller_movement_logic(
     // Change input into desired velocity.
     auto const& mvt_settings{ char_mvt_state.settings };
 
-    JPH::Vec3 desired_velocity{ char_ws_input.ws_flat_normalized_input.x,
+    JPH::Vec3 desired_velocity{ char_ws_input.ws_flat_clamped_input.x,
                                 0.0f,
-                                char_ws_input.ws_flat_normalized_input.z };
+                                char_ws_input.ws_flat_clamped_input.z };
     desired_velocity *= (char_con_impl->get_cc_stance() ? mvt_settings.crouched_speed
                                                         : mvt_settings.standing_speed);
 
@@ -355,7 +355,7 @@ Char_mvt_logic_results character_controller_movement_logic(
     {   // Grounded turn & speed movement.
         auto& grounded_state{ char_mvt_state.grounded_state };
 
-        if (glm_vec3_norm2(const_cast<float_t*>(char_ws_input.ws_flat_normalized_input.raw)) >
+        if (glm_vec3_norm2(const_cast<float_t*>(char_ws_input.ws_flat_clamped_input.raw)) >
             1e-6f * 1e-6f)
             apply_grounded_facing_angle(grounded_state, mvt_settings, desired_velocity);
 
@@ -387,11 +387,11 @@ Char_mvt_logic_results character_controller_movement_logic(
         JPH::Vec3 effective_velocity{ flat_linear_velo + delta_velocity };
         new_velocity += effective_velocity;
 
-        if (glm_vec3_norm2(const_cast<float_t*>(char_ws_input.ws_flat_normalized_input.raw)) >
+        if (glm_vec3_norm2(const_cast<float_t*>(char_ws_input.ws_flat_clamped_input.raw)) >
             1e-6f * 1e-6f)
         {  // Move towards input angle.
-            float_t desired_facing_angle{ atan2f(char_ws_input.ws_flat_normalized_input.x,
-                                                 char_ws_input.ws_flat_normalized_input.z) };
+            float_t desired_facing_angle{ atan2f(char_ws_input.ws_flat_clamped_input.x,
+                                                 char_ws_input.ws_flat_clamped_input.z) };
             float_t delta_direction{ desired_facing_angle - airborne_state.input_facing_angle };
 
             while (delta_direction > glm_rad(180.0f))
