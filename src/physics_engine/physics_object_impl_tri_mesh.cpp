@@ -131,6 +131,8 @@ void BT::Phys_obj_impl_tri_mesh::update_debug_mesh()
 {
     auto current_trans{ read_transform() };
 
+    // @TODO: When camera or renderer changes, this needs to change.
+    //        Ensure matching with `write_render_transforms.cpp`.
     mat4 graphic_trans;
     glm_translate_make(graphic_trans, vec3{ static_cast<float_t>(current_trans.position.GetX()),
                                             static_cast<float_t>(current_trans.position.GetY()),

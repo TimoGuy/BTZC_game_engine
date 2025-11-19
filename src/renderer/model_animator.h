@@ -114,7 +114,6 @@ public:
     void set_time(float_t time);
 
     /// Profile enum for which timing of the animator to base calculations off of.
-    /// 
     enum Animator_timer_profile
     {
         SIMULATION_PROFILE,

@@ -318,24 +318,24 @@ Char_mvt_logic_results character_controller_movement_logic(
     // Calc and apply desired velocity.
     JPH::Vec3 new_velocity;
     if (is_grounded)
-    {  // Grounded.
+    {   // Grounded.
         new_velocity = ground_velocity;
 
         if (on_crouch_press || (char_con_impl->get_cc_stance() && on_jump_press))
-        {  // Toggle crouching.
+        {   // Toggle crouching.
             char_con_impl->set_cc_stance(!char_con_impl->get_cc_stance());
         }
         else if (!char_con_impl->get_cc_stance() && on_jump_press)
-        {  // Jump.
+        {   // Jump.
             new_velocity += mvt_settings.jump_speed * up_direction;
         }
     }
     else
-    {  // Start with previous tick velocity.
+    {   // Start with previous tick velocity.
         new_velocity = current_vertical_velocity;
 
         if (char_con_impl->get_cc_stance())
-        {  // Leave crouching stance automatically.
+        {   // Leave crouching stance automatically.
             char_con_impl->set_cc_stance(false);
         }
 
@@ -389,7 +389,7 @@ Char_mvt_logic_results character_controller_movement_logic(
 
         if (glm_vec3_norm2(const_cast<float_t*>(char_ws_input.ws_flat_clamped_input.raw)) >
             1e-6f * 1e-6f)
-        {  // Move towards input angle.
+        {   // Move towards input angle.
             float_t desired_facing_angle{ atan2f(char_ws_input.ws_flat_clamped_input.x,
                                                  char_ws_input.ws_flat_clamped_input.z) };
             float_t delta_direction{ desired_facing_angle - airborne_state.input_facing_angle };

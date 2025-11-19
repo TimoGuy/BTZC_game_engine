@@ -1,6 +1,5 @@
 #pragma once
 
-// #include "../scene/scene_serialization_ifc.h"
 #include "btglm.h"
 #include "btjson.h"
 
@@ -57,10 +56,6 @@ public:
         HITBOX_TYPE_GIVE_HURT,
     };
 
-    // Hitcapsule_group(bool enabled,
-    //                  Type type,
-    //                  std::vector<Hitcapsule>&& capsules);
-
     void set_enabled(bool enabled);
     bool is_enabled();
     Type get_type();
@@ -80,12 +75,10 @@ public:
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(Hitcapsule_group, m_enabled, m_type, m_capsules);
 };
 
-class Hitcapsule_group_set // : public Scene_serialization_ifc
+class Hitcapsule_group_set
 {
 public:
     ~Hitcapsule_group_set();
-
-    // void scene_serialize(Scene_serialization_mode mode, json& node_ref) override;
 
     void replace_and_reregister(Hitcapsule_group_set const& other);
     void unregister_from_overlap_solver();

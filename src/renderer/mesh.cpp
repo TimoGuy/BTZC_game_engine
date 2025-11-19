@@ -1,12 +1,12 @@
 #include "mesh.h"
 
 #include "btglm.h"
+#include "btlogger.h"
 #include "fastgltf/core.hpp"
 #include "fastgltf/math.hpp"
 #include "fastgltf/types.hpp"
 #include "fastgltf/tools.hpp"
 #include "glad/glad.h"
-#include "btlogger.h"
 #include "material.h"
 #include "model_animator.h"
 #include "shader.h"

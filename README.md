@@ -525,7 +525,7 @@ Uncomment `third_party/cglm/include/cglm/simd/intrin.h:98` (where it includes "a
     - [ ] Use simple anim dude and make dummy character and create fighting animation movesets.
         - Deferred to fix script system issues (see "Script reform" below).
             - The reason for this was due to no support to share data between scripts. Big oof.
-    - [ ] Script reform.
+    - [x] Script reform.
         - Blocks the deferred task above.
         - @NOTE: ended up deciding to replace with EnTT ecs.
 

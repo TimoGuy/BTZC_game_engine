@@ -554,7 +554,7 @@ while (running_game_loop)
     - [x] Ensure that saving the scene actually saves the scene.
     - [x] Remove the debug draw lambda from the renderer.
 
-- [ ] Make merge request.
+- [x] Make merge request.
 >-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 
