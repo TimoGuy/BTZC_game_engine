@@ -20,6 +20,11 @@
                     "ctrl_item_idx": 2,
                     "end_frame": 14,
                     "start_frame": 7
+                },
+                {
+                    "ctrl_item_idx": 5,
+                    "end_frame": 7,
+                    "start_frame": 3
                 }
             ],
             "state_name": "st_idle"

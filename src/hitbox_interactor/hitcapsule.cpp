@@ -97,26 +97,17 @@ void BT::Hitcapsule::emplace_debug_render_repr(vec4 color) const
 
 
 // Hitcapsule_group.
-// BT::Hitcapsule_group::Hitcapsule_group(bool enabled,
-//                     Type type,
-//                     std::vector<Hitcapsule>&& capsules)
-//     : m_enabled{ enabled }
-//     , m_type{ type }
-//     , m_capsules{ std::move(capsules) }
-// {
-// }
-
 void BT::Hitcapsule_group::set_enabled(bool enabled)
 {
     m_enabled = enabled;
 }
 
-bool BT::Hitcapsule_group::is_enabled()
+bool BT::Hitcapsule_group::is_enabled() const
 {
     return m_enabled;
 }
 
-BT::Hitcapsule_group::Type BT::Hitcapsule_group::get_type()
+BT::Hitcapsule_group::Type BT::Hitcapsule_group::get_type() const
 {
     return m_type;
 }
@@ -157,62 +148,6 @@ BT::Hitcapsule_group_set::~Hitcapsule_group_set()
 {
     unregister_from_overlap_solver();
 }
-
-// void BT::Hitcapsule_group_set::scene_serialize(Scene_serialization_mode mode, json& node_ref)
-// {
-//     if (mode == SCENE_SERIAL_MODE_DESERIALIZE)
-//     {   // Access list of hitcapsule groups.
-//         m_hitcapsule_grps.reserve(node_ref["hitcapsule_groups"].size());
-//         for (auto& capsule_group_json : node_ref["hitcapsule_groups"])
-//         {   // Deserialize capsules.
-//             std::vector<Hitcapsule> capsules;
-//             capsules.reserve(capsule_group_json["capsules"].size());
-//             for (auto& capsule_json : capsule_group_json["capsules"])
-//             {
-//                 capsules.emplace_back(vec3s{ capsule_json["origin_a"][0].get<float_t>(),
-//                                              capsule_json["origin_a"][1].get<float_t>(),
-//                                              capsule_json["origin_a"][2].get<float_t>() },
-//                                       vec3s{ capsule_json["origin_b"][0].get<float_t>(),
-//                                              capsule_json["origin_b"][1].get<float_t>(),
-//                                              capsule_json["origin_b"][2].get<float_t>() },
-//                                       capsule_json["radius"].get<float_t>(),
-//                                       capsule_json["connecting_bone_name"].get<std::string>(),
-//                                       capsule_json["connecting_bone_name_2"].get<std::string>());
-//             }
-
-//             m_hitcapsule_grps.emplace_back(capsule_group_json["enabled"].get<bool>(),
-//                                            capsule_group_json["type"].get<Hitcapsule_group::Type>(),
-//                                            std::move(capsules));
-//         }
-//     }
-//     else if (mode == SCENE_SERIAL_MODE_SERIALIZE)
-//     {   // Access list of hitcapsule groups.
-//         for (auto& capsule_group : m_hitcapsule_grps)
-//         {   // Serialize capsules.
-//             json capsule_group_json = {};
-//             for (auto& capsule : capsule_group.get_capsules())
-//             {
-//                 json capsule_json = {};
-//                 capsule_json["origin_a"][0]            = capsule.origin_a.x;
-//                 capsule_json["origin_a"][1]            = capsule.origin_a.y;
-//                 capsule_json["origin_a"][2]            = capsule.origin_a.z;
-//                 capsule_json["origin_b"][0]            = capsule.origin_b.x;
-//                 capsule_json["origin_b"][1]            = capsule.origin_b.y;
-//                 capsule_json["origin_b"][2]            = capsule.origin_b.z;
-//                 capsule_json["radius"]                 = capsule.radius;
-//                 capsule_json["connecting_bone_name"]   = capsule.connecting_bone_name;
-//                 capsule_json["connecting_bone_name_2"] = capsule.connecting_bone_name_2;
-
-//                 capsule_group_json["capsules"].push_back(capsule_json);
-//             }
-
-//             capsule_group_json["enabled"] = capsule_group.is_enabled();
-//             capsule_group_json["type"] = capsule_group.get_type();
-
-//             node_ref["hitcapsule_groups"].push_back(capsule_group_json);
-//         }
-//     }
-// }
 
 void BT::Hitcapsule_group_set::replace_and_reregister(Hitcapsule_group_set const& other)
 {
@@ -263,6 +198,24 @@ void BT::Hitcapsule_group_set::emplace_debug_render_repr() const
     {
         group.emplace_debug_render_repr();
     }
+}
+
+std::vector<BT::Hitcapsule const*> BT::Hitcapsule_group_set::fetch_all_enabled_hitcapsules(
+    Hitcapsule_group::Type hitcapsule_type) const
+{
+    std::vector<Hitcapsule const*> result_hitcapsules;
+
+    for (auto& group : m_hitcapsule_grps)
+        if (group.is_enabled() && group.get_type() == hitcapsule_type)
+        {
+            auto const& hitcapsules{ const_cast<Hitcapsule_group&>(group).get_capsules() };  // @HACK.
+
+            for (auto& hitcapsule : hitcapsules)
+                result_hitcapsules.emplace_back(&hitcapsule);
+        }
+
+    result_hitcapsules.shrink_to_fit();
+    return result_hitcapsules;    
 }
 
 
@@ -326,9 +279,55 @@ void BT::Hitcapsule_group_overlap_solver::update_overlaps()
     for (auto grp_set_ptr_a : m_group_sets)
     for (auto grp_set_ptr_b : m_group_sets)
     if (grp_set_ptr_a != grp_set_ptr_b)
-    {
-        // @TODO: Check for overlaps.
-        assert(false);
+    {   // Collect capsules for check.
+        auto give_hurt_caps_a{ grp_set_ptr_a->fetch_all_enabled_hitcapsules(
+            Hitcapsule_group::HITBOX_TYPE_GIVE_HURT) };
+        auto rece_hurt_caps_b{ grp_set_ptr_b->fetch_all_enabled_hitcapsules(
+            Hitcapsule_group::HITBOX_TYPE_RECEIVE_HURT) };
+
+        // Broad phase check for overlaps (A hurts B).
+        // @NOTE: Only A hurts B is necessary, since the n^2 loops. The reverse case will eventually
+        //        be covered with the loops.
+        bool found_overlap{ false };
+        {
+            for (size_t a_i = 0; a_i < give_hurt_caps_a.size() && !found_overlap; a_i++)
+            for (size_t b_i = 0; b_i < rece_hurt_caps_b.size() && !found_overlap; b_i++)
+            {
+                auto& ghc{ *give_hurt_caps_a[a_i] };
+                auto& rhc{ *rece_hurt_caps_b[b_i] };
+
+                // @NOTE: `ghc` is "give hurt capsule", and `rhc` is "receive hurt capsule".
+                vec3 ghc_mdpt_origin = GLM_VEC3_ZERO_INIT;
+                glm_vec3_muladds(const_cast<float_t*>(ghc.calcd_origin_a), 0.5f, ghc_mdpt_origin);
+                glm_vec3_muladds(const_cast<float_t*>(ghc.calcd_origin_b), 0.5f, ghc_mdpt_origin);
+                float_t ghc_bp_sphere_rad{ ghc.calcd_orig_pts_dist * 0.5f + ghc.radius };
+
+                vec3 rhc_mdpt_origin = GLM_VEC3_ZERO_INIT;
+                glm_vec3_muladds(const_cast<float_t*>(rhc.calcd_origin_a), 0.5f, rhc_mdpt_origin);
+                glm_vec3_muladds(const_cast<float_t*>(rhc.calcd_origin_b), 0.5f, rhc_mdpt_origin);
+                float_t rhc_bp_sphere_rad{ rhc.calcd_orig_pts_dist * 0.5f + rhc.radius };
+
+                // Check for overlap.
+                float_t combined_rads{ ghc_bp_sphere_rad + rhc_bp_sphere_rad };
+                if (glm_vec3_distance2(ghc_mdpt_origin, rhc_mdpt_origin) <
+                    combined_rads * combined_rads)
+                {   // Found overlap! No more need to look.
+                    found_overlap = true;
+                    break;
+                }
+            }
+        }
+
+        if (found_overlap)
+        {   // Continue to narrow phase check!
+            found_overlap = false;
+            assert(false);  // @TODO: Implement!
+        }
+
+        if (found_overlap)
+        {   // Report that A hurt B!
+            assert(false);  // @TODO: Implement!
+        }
     }
 
     // Submit debug drawing for all hitcapsules.

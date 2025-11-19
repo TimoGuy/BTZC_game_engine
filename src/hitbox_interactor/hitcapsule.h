@@ -57,8 +57,8 @@ public:
     };
 
     void set_enabled(bool enabled);
-    bool is_enabled();
-    Type get_type();
+    bool is_enabled() const;
+    Type get_type() const;
     std::vector<Hitcapsule>& get_capsules();
 
     // Submits debug render representation of hitcapsules, with different colors depending on type
@@ -87,8 +87,12 @@ public:
 
     std::vector<Hitcapsule_group>& get_hitcapsule_groups();
 
-    // Submits debug render representation of hitcapsule groups.
+    /// Submits debug render representation of hitcapsule groups.
     void emplace_debug_render_repr() const;
+
+    /// Retrieves all enabled hitcapsules for overlap checking.
+    std::vector<Hitcapsule const*> fetch_all_enabled_hitcapsules(
+        Hitcapsule_group::Type hitcapsule_type) const;
 
 private:
     std::vector<Hitcapsule_group> m_hitcapsule_grps;

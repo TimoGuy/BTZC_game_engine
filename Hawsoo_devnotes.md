@@ -565,19 +565,19 @@ while (running_game_loop)
 - [ ] Write the hitcapsule group sets interact w each other.
     > @NOTE: This is kind of the order of checking I think would be good for the interaction.
     - [x] Cancel check if same hitcapsule group set.
-    - [ ] Cancel check if hitcapsule group set A does not have any enabled hitcapsule (give hurt).
-    - [ ] Cancel check if hitcapsule group set B does not have any enabled hitcapsule (receive hurt).
+    - [x] Cancel check if hitcapsule group set A does not have any enabled hitcapsule (give hurt).
+    - [x] Cancel check if hitcapsule group set B does not have any enabled hitcapsule (receive hurt).
         - @NOTE: For iframes, the animation should disable the receive-hurt hitcapsule.
         - @REPLY: Or wait, would a different method be better? For debouncing hits, bc that's needed too tho.
 
-    - [ ] Create bounding sphere for both interacting sets (set A's enabled hitcapsule (give hurt), and set B's enabled hitcapsule (receive hurt))
+    - [x] Create bounding sphere for both interacting sets (set A's enabled hitcapsule (give hurt), and set B's enabled hitcapsule (receive hurt))
         - For each set of hitcapsules:
             - Gather all `calcd_origin_a` and `calcd_origin_b` and find the midpoint.
             - Find the radius of the bounding sphere by taking each capsule, taking the distance of each origin, adding `radius` to the distance, and then finding the max of the radius-included distances.
 
-    - [ ] Compare the bounding spheres to see if they collide. Cancel if they don't. Continue if they do.
+    - [x] Compare the bounding spheres to see if they collide. Cancel if they don't. Continue if they do.
 
-    - [ ] Check each individual hitcapsule in set A with all of the others in set B. `O(N^2)` unfortu (^_^;)
+    - [x] Check each individual hitcapsule in set A with all of the others in set B. `O(N^2)` unfortu (^_^;)
         - For each hitcapsule pair, create their respective bounding sphere, so for each one:
             - Find the midpoint between `calcd_origin_a` and `calcd_origin_b` for the bounding sphere.
             - Find the radius of the bounding sphere with:
@@ -597,4 +597,5 @@ while (running_game_loop)
             >
             > Maybe then "interface groups" would be a useful thing to attach to scripts? Or like a script tag system? And `find_script_by_tag()` or something.
 
-- [ ] REFACTOR: Delete the `calc_orig_pt_distance()` method in hitcapsule bc this info is really only needed when doing the actual collision and isn't needed most of the time.
+- [ ] ~~REFACTOR: Delete the `calc_orig_pt_distance()` method in hitcapsule bc this info is really only needed when doing the actual collision and isn't needed most of the time.~~
+    - No. This is used in the spherization of the capsules in the broad phase of the overlap check.
