@@ -1,6 +1,6 @@
 #include "watchdog_timer.h"
 
-#include "logger.h"
+#include "btlogger.h"
 #include <chrono>
 #include <cstdlib>
 #include <thread>
@@ -33,7 +33,7 @@ void watchdog_thread_fn(BT::Watchdog_timer& watchdog)
 
 BT::Watchdog_timer::Watchdog_timer()
     : m_pet_time{ std::chrono::high_resolution_clock::now() }
-    , m_timeout_time{ 10000ms }
+    , m_timeout_time{ 60000ms }
     , m_watchdog_thread(watchdog_thread_fn, std::ref(*this))
 {
 }

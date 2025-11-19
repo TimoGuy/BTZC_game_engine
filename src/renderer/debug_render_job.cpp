@@ -2,10 +2,9 @@
 
 #include "../uuid/uuid.h"
 #include "../renderer/mesh.h"
-#include "cglm/vec3.h"
-#include "cglm/vec4.h"
+#include "btglm.h"
 #include "glad/glad.h"
-#include "logger.h"
+#include "btlogger.h"
 #include <array>
 #include <cassert>
 #include <memory>
@@ -38,10 +37,6 @@ BT::Debug_mesh& BT::Debug_mesh_pool::get_debug_mesh_volatile_handle(UUID key)
         // Fail bc key was invalid.
         logger::printef(logger::ERROR, "Mesh key %s does not exist", UUID_helper::to_pretty_repr(key).c_str());
         assert(false);
-        abort();
-
-        // In case abort and assert don't crash program. Just force program to spin forever.
-        while (false) {}
     }
 
     return m_meshes.at(key);
@@ -63,22 +58,24 @@ void BT::Debug_mesh_pool::remove_debug_mesh(UUID key)
 }
 
 void BT::Debug_mesh_pool::render_all_meshes()
-{
-    if (!get_visible())
+{   // Skip rendering if there's nothing in the mask.
+    auto vis_mask{ get_visible_mask() };
+    if (vis_mask == k_mask_none)
         return;
 
     std::lock_guard<std::mutex> lock{ m_meshes_mutex };
 
     for (auto& mesh_job : m_meshes)
-    {
-        // Render foreground first so that foreground doesn't overwrite background material.
-        if (mesh_job.second.foreground_material != nullptr)
-            mesh_job.second.model.render(mesh_job.second.transform,
-                                         mesh_job.second.foreground_material);
-        if (mesh_job.second.background_material != nullptr)
-            mesh_job.second.model.render(mesh_job.second.transform,
-                                         mesh_job.second.background_material);
-    }
+        if (vis_mask & mesh_job.second.render_mask)
+        {
+            // Render foreground first so that foreground doesn't overwrite background material.
+            if (mesh_job.second.foreground_material != nullptr)
+                mesh_job.second.renderable->render(mesh_job.second.transform,
+                                                   mesh_job.second.foreground_material);
+            if (mesh_job.second.background_material != nullptr)
+                mesh_job.second.renderable->render(mesh_job.second.transform,
+                                                   mesh_job.second.background_material);
+        }
 }
 
 namespace
@@ -88,6 +85,7 @@ std::unique_ptr<BT::Debug_mesh_pool> s_debug_mesh_pool{ nullptr };
 
 }  // namespace
 
+// @TODO: Set below to use `service_finder` instead!!!  -Thea 2025/10/31
 BT::Debug_mesh_pool& BT::set_main_debug_mesh_pool(std::unique_ptr<Debug_mesh_pool>&& dbg_mesh_pool)
 {
     s_debug_mesh_pool = std::move(dbg_mesh_pool);

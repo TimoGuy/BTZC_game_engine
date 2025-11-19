@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Jolt/Jolt.h"  // @NOTE: Must appear first.
-#include "logger.h"
+#include "btlogger.h"
 #include <cassert>
 #include <cstdarg>
 #include <string>

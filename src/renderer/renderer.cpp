@@ -28,9 +28,9 @@ void BT::Renderer::poll_events()
     m_pimpl->poll_events();
 }
 
-void BT::Renderer::render(float_t delta_time, function<void()>&& debug_views_render_fn)
+void BT::Renderer::render(float_t delta_time)
 {
-    m_pimpl->render(delta_time, std::move(debug_views_render_fn));
+    m_pimpl->render(delta_time);
 }
 
 // Camera read.
@@ -50,6 +50,12 @@ BT::Camera* BT::Renderer::get_camera_obj()
 BT::Render_object_pool& BT::Renderer::get_render_object_pool()
 {
     return m_pimpl->get_render_object_pool();
+}
+
+// App settings.
+void BT::Renderer::save_state_to_app_settings() const
+{
+    m_pimpl->save_state_to_app_settings();
 }
 
 // Imgui.

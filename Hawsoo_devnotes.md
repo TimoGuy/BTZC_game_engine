@@ -90,14 +90,14 @@
     - Bools
         - Override like this: `bool_name:o:true` (For the duration of the region, the bool `bool_name` is set to true, but only overwritten, not persistent (`o`).)
     - Rising-edge events
-        - Show 
+        - Show
 
     - Float names
         - model_opacity: range(0-1), default(1.0)
         - turn_speed: range(>=0), default(0.0)
         - move_speed: range(∞), default(0.0)  <<@NOTE: `move_speed` will cause character to start moving along the facing direction. Knockback is a negative number since this is moving back.
         - gravity_magnitude: range(∞), default(1.0)  <<@NOTE: Gravity is (0.0, -98.0, 0.0), but this value gets multiplied by gravity to get actual gravity applied to this character.
-        - 
+        -
 
     - Bool names
         - is_parry_active: default(false)
@@ -118,7 +118,7 @@
         - play_sfx_hurt_vocalize_human_male_mc
         - play_sfx_guard_receive_hit
         - play_sfx_deflect_receive_hit
-        - 
+        -
 
 - Okay, so it seems like there's a pretty good basis for how the timeline should work.
 
@@ -242,7 +242,7 @@ while (running_game_loop)
     - This is for making editing the hitcylinders easier.
     - [x] Initial
     - [x] Zoom and move.
-        - Right click to click 
+        - Right click to click
         - [x] Basic works.
         - [x] Calc basis vectors correctly.
 
@@ -269,8 +269,297 @@ while (running_game_loop)
     - I think the main point I was trying to make above is that having the hitcapsules be updated inconsistently is sucky. It should be super consistent, and not depend on the render timing of the animator (since it grabs the animator's `m_time` and gets the floored frame and uses that, but it still has to depend on `m_time` which is a render-thread updated variable.).
     - If i were to redo this engine, I would definitely just make everything a fixed timestep and have rendering run right after simulation. Then when I want to separate out the rendering into its own thread, then I would choose how stuff gets divvied up, but for the most part everything is simulator-thread driven and then the render thread lerps the provided values.
 
-- [ ] Create script for character controller movement but without the input from player.
-    - [ ] Perhaps this could just be a script that sends its data to another script? Maybe there could be a connections type thing? Mmmmm maybe provide a `on_start()` func for scripts where they could get the script that they need to send to and stuff?
+
+### Script reform
+
+>-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+>                SCRIPT REFORM
+>-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+- Basic plan for the script reform:
+    ```cpp
+    auto& hecs_system{ find_service<HECS_system>() };
+
+    // Adding a struct.
+    hecs_system.emplace_struct("Struct_type",   // Struct typename as str.
+                               Struct_type{});  // Struct default data.
+
+    // Add a system (kind of like the script but doesn't belong to gameobjects/entities).
+    hecs_system.emplace_system("Concrete_system_type",       // System typename as str.
+                               std::unique_ptr<System_ifc>(  // Unique instance of system as ifc ptr.
+                                   new Concrete_system_type())
+                               { "Struct_type",              // List of required structs (checked when entity is added to system).
+                                 "Struct_type_2" });
+
+    // Add system ordering (@NOTE: if this is omitted for a struct, then it's a free for all for
+    // every system using the struct; that would be the ideal for structs that aren't
+    // accessed/written multiple times in an entity).
+    hecs_system.add_struct_system_order("Struct_type_69",                  // Struct typename.
+                                        { { "Concrete_system_type_222" },  // All system typenames that use `Struct_type_69`, placed in an order.
+                                          { "Concrete_system_type_555",
+                                            "Concrete_system_type_666" } });  // @NOTE: both `555` and `666` can be run at the same time, but if an entity is added to both `555` and `666` then an error occurs.
+
+    // Creating an entity.
+    hecs_system.create_entity("Entity_name",             // Entity name.
+                              { "Struct_type",           // Structs allocated for new entity.
+                                "Struct_type_2",
+                                "Struct_type_3" },
+    //                          { "Concrete_system_type",  // Systems to add entity to.
+    //                            "Concrete_system_type_2" }
+                              );  // ^^No more adding systems. I'm gonna try to go thru with ECS.
+
+    // Querying for an entity.
+    Concrete_system::invoke_system() override
+    {
+        static auto const k_query{
+            component::System_helpers::compile_query_string(
+                "(Struct_type_2 && Struct_type_3 && Struct_player && !Struct_deku_scrub)") };
+        auto comp_lists{ service_finder::find_service<component::Registry>()
+                             .query_component_lists(k_query) };
+    }
+    ```
+
+- [x] Emplace everything into a `string->size_t` for the struct name for deserialization.
+- [x] Attach structs ~~and scripts~~ to gameobject
+    - [ ] ~~When gameobjects are added to the script execution pool,~~
+
+- [x] OVERHAUL: Change a lot of things to use `NLOHMANN_DEFINE_TYPE_INTRUSIVE()` instead of `Scene_serialization_ifc`
+
+- [x] @THINK: How should components like `Component_model_animator` work, where it just has a pointer to an animator?
+    - It definitely feels like that's probably not the best way of doing it. Bc then it's really just something that can't be serialized.
+    - [x] @FOR_NOW: Just load it up as nullptr values.
+    - [x] Edit the `.btscene` files to change scripts to components (refer to new systems to see what components to include).
+
+- [x] OVERHAUL: Create new entity pool that doesn't reallocate its size.
+    - Add-removes are immediate since we're doing systems now.
+
+- [x] OVERHAUL: Just switch to using EnTT.
+
+- [x] OVERHAUL: Remake game_object/entity type.
+    - Don't require a bunch of services upfront. Use service finder.
+
+- [x] Write scene loader to load entities and components from disk.
+
+- [x] Have transform graph show up in imgui game object select.
+    - [x] Rename to entities window.
+    - [x] Stubbed out
+    - [x] Render floating entities in its own list.
+    - [x] Render hierarchy entities in its own list (just flat for now).
+    - [x] Hierarchize the entities in the transform hierarchy.
+    - [x] Include one floating entity.
+    - [x] Make nodes clickable and have them show up in the inspector
+        - [x] Initial
+        - [x] Have a deselect region at the bottom.
+
+
+- [x] Next goal: Get stuff rendered onto the screen again~!
+    - [x] OVERHAUL: Change these things into components
+        - [x] Transform (serializable)
+        - [x] Render object (partial serializable)
+            - Needs to be built in case deformed model.
+            - [x] Fix Transform gizmos!
+                - [x] Position, rotation
+                - [x] Scaling. <---- THIS WAS HARD!!!!!
+        - Physics object (partial serializable)
+            > Needs to be built depending on the physics obj type.
+            - [x] Initial.
+            - [x] Get a couple physics objects into the btscene file.
+            - [x] Draw the debug meshes again!
+            - [x] (If doable) get the selected object to be rendered as well!
+                - [x] Fix picking! (Bc picking just crashes for some reason... it might just be simple as an assert on an undef func?)
+                - [x] Re-add the render job to render the selected object.
+                - [x] Since I added it to the debug render job, add masks for the meshes and edit it in the imgui menu bar.
+            - [x] Connect the physics objects to the entity transforms!
+                - This should probably just be its own system that runs after physics calculations finish. I think that would be good eh!
+
+
+- [x] Inspector window.
+    - [x] Create component-grabbing tech.
+    - [x] Get a few components rendered in.
+    - [x] Render object settings
+        - DISABLE THIS WHEN `Created_render_object_reference` exists.
+    - [x] Physics object settings
+        - DISABLE THIS WHEN `Created_physics_object_reference` exists.
+    - [x] Created_render_object_reference
+    - [x] Created_physics_object_reference
+
+
+- [x] Unstick physics objects.
+    - If the object is kinematic or dynamic, use the move-kinematic func.
+    - [x] Send a move func if trying to move w the gizmo.
+    - [x] For static objects, just send an error message "trying to move a static physics object".
+
+- [x] Fix the physics engine crashing on cleanup bug.
+    - Turns out there were llingering physics objects that never got fully deleted before exiting.
+- [x] Fix logger not detecting \n chars properly.
+
+
+- [x] Create simple startup .toml file.
+    - It'll just be 
+    - Reference: https://marzer.github.io/tomlplusplus/
+
+
+- [x] Ummm, ig I made the `Load Scene..` menu item completely functional.
+
+
+- [x] "Play" and "Stop" button.
+    - There could be an `if` statement for what systems would run with "play" on?
+        > I worry that this would cause bad branching, but hey, branch prediction should figure out the pattern that something's always gonna be a certain way after a few cpu cycles right?
+
+    - [x] Upon clicking "Play" button
+        - [x] Save a copy of the current scene being edited prior to setting `s_play_mode = true;`.
+            - [x] Create the implementation of `world/scene_saver.h` so that this all can get serialized and saved.
+                - This may not even need to be saved out to a file. Up to you how you wanna do it tho.
+                - @NOTE: Did not need to use/create `scene_saver.h`
+        - [x] Clear all registrations (mainly `Created_render_object_reference`)
+            - [x] Change it so that `Deformed_model`s are only allowed when `s_play_mode == true`.
+                - I.e. during the level creation mode/screen, only T-pose models and stuff!!! (static models)
+            - [x] Change it so that `Physics_object`s in the physics engine only get created when `s_play_mode == true`.
+                - This is suuuuper important bc creation of physics objects use the `Transform` as its starting point, and then it takes over the `Transform` while it's active in the entity.
+                - Since you can't really click and drag to move stuff very effectively in the level editor, this is necessary.
+                - Tho, once you're playing, and you wanna just drag stuff around... does that mean you just can't anymore?
+                > I think the above ^^ needs some more thought about if I'll support dragging around physics objs and how?
+                    - @UPDATE: So it turns out that physics objects will get moved durng play mode as well as during editing mode, however, for static objects, since they're unable to be moved during play mode, they will be static.
+        - [x] Set `s_play_mode = true;`
+        - [x] Run!
+            - When running, everything that needs to get created (e.g. render_objs, phys_objs), will still get created in the systems that create them, but this time, since `s_play_mode == true`, then everything will get created completely!
+    - [x] Upon clicking the `Stop` button, the previously saved file is loaded again from disk, after unloading all scenes.
+
+
+> Some thoughts on how there could be parallelization.
+>   Simulation running on one core, and then rendering running on another core, with that bit of sync when adding/removing render objects and passing transforms sim->rend could be good.
+>   And then the remaining cores are worker cores. They're asleep unless there are barriers submitted. They all work to tackle all the jobs in each barrier to finish whole barriers as fast as possible (first come first serve as far as priority).
+>
+>   A system can submit a barrier of jobs (i.e. barriers must be done in order, but the `n` number of jobs in the barrier can be in any order).
+>     After submitting the barrier of jobs, the system will work on the submitted barrier too (when calling on the `barrier.wait()` func), so that there's progress being done on everything at the very least.
+>
+>  There could be more parallelization happening (e.g. having another thread dedicated to some other type of work) (e.g. figuring out what systems depend on each other and running only the ones that depend on each other in order)
+>
+>  Thankfully, I should just implement this single-threaded now first and then profile and think about multithreaded workflows later.
+>    Even tho I know it's a very special interest of mine.
+
+
+
+
+- [x] Achieve feature parity as before.
+    - [x] Player character
+        - [x] Input getting system.
+        - [x] Char-con collide-n-slide algorithm system.
+        > @NOTE: The above ^^ is still in the coupled mode as before, but there are clear sections and is a bit more laid out better. Hopefully this makes decoupling this in the future a bit easier.
+        - [x] Writing the animation to entity transform rotation.
+            - [x] Add required componenet to player obj
+            - [x] Fix the asserts put up and implement.
+        - [x] Fix camera not following an object.
+        - [x] Documentation.
+            - [x] Remove `struct Character_mvt_state`'s `m_` variables.
+            - [x] Add docstrings for anonymous namespace funcs in `player_character_movement.cpp`
+                - [x] Remove @TODO banners too
+    - [x] Animator editor.
+        - [ ] ~~Umm, whatever is needed here.~~
+        - [x] ~~Change `animation_frame_action_tool/editor_state.h` into a component.~~
+        - [ ] ~~Create system that uses the new component.~~
+        - [ ] ~~Plug component results into imgui system.~~
+            - ~~@NOTE: This does ~~
+        - [ ] ~~Delete `animation_frame_action_tool/editor_state.h`~~
+        - [x] Remove the stuff from `editor_state.h` from the newly created component for the anim frame action editor.
+            - [x] Just have the component have a flag for whether to reset the editor state. (True as default).
+                > So then every time we reload the editor tab, it will reset the editor state.
+        - [x] (free space) Have the imgui stuff still connected to the original `editor_state.h` (i.e. do nothing)
+        - [x] Create system that uses component to reset editor state but other than that just uses the editor state same as before (also adds and changes components and stuff).
+            - [x] Make switch for forcing allowing the deformed rend objs (needed for editing animations obviiii)
+            - [x] Stub out the system
+            - [x] Initial try to get a scrubbable animated character in there.
+
+            - It's not working so more work needed???
+            - [x] Figure out why there's no rendered render obj.
+                - [x] Fixed for if you select a different model to edit.
+                - [x] Fix render obj not getting properly creating from the get go.
+                    > Turns out when the level for the editor got loaded in the editor agent immediately just deleted everything (_dev_animation_frame_action_Editor.cpp).
+            - [x] Fix ctrl data points not getting loaded w the data types.
+            - [x] Fix hitcapsules not being attached to bones of animator.
+                - [x] Also enable/disable hitcapsules from here too.
+            - [x] Fix imgui timelines not getting changed out.
+                - [x] Half done.
+                - [x] Fix the actual timeline regions not showing.
+                    - Do you think it's just not configured correctly in the .btafa?
+                    > THE ISSUE: The order of the .btafa and the .btanitor needed to be the same. So there needs to be a map from the state idx of the .btanitor to the .btafa region idx.
+                - [x] Fix default/first timeline that gets loaded being empty/0 and also not plain working.
+                - [x] Fix the random crashing when closing the program.
+                - [x] Fix the random crashing when switching AFAs. Or discarding AFA changes.
+                    - It just seems like there's no more animator and that's an issue type thing? It might have to be manually done in.
+                    - When the AFA gets saved, it replaces the AFA in the AFA bank, so it unfortunately messes up the pointer that's in the model animator.
+                        - The bank doesn't get edited normally, but I had to check whether the pointer to the AFA changed and then reload the AFA into the model animator in `_dev_animation_frame_action_editor.cpp`
+                - [x] Fix crashing when closing the program after saving an AFA and then closing the program
+                    - My guess is that registered hitcapsule sets in the overlap solver are getting held up in there.
+                    - @SOLUTION: Needed to remove the old AFA's hitcapsule group set from the overlap solver.
+                - [x] Rename `s_selected_timeline_idx` to `s_selected_afa_idx` along with other "timeline" names/labels that shouldnt be this way (imgui_renderer.cpp:661)
+            - [x] SMOL: Just add a cleanup statistic for number of group sets in the solver leftover.
+            - [x] Fix vars of AFA data viewers. It appears the bools are flickering between false and true when over the override region???
+                > It appears to be working correctly now that there's the right stuff loading in from the system???? Idk double check pls.
+                > Huh... it really doesn't appear to be flickering anymore...
+                - After doing some fiddling, it just seems to be the animator updating since even tho `_dev_animation_Frame_action_editor.cpp` sets the time every tick for the simulation, if the renderer is slower or something, it will update the animator forward and then the next frame is shown.
+                    - So the solution: stop the animator from ticking forward in time (if there's a speed indicator or something????)
+                        - [x] Fixed this problem. (Redo if the weaker hardware is still having issues)
+
+            - Once that is done...
+            - [x] Implement processing controllable data.
+            - [x] Think about how to load and process controllable data inside of the regular animator too.
+                - Honestly, the same way that's going on w the other handles I think that will just work haha.
+                - Basically, get the data handle references you need, then query them
+                ```cpp
+                if (my_comp.some_event == nullptr)
+                {   // Get information.
+                    my_comp.some_event =
+                        &my_animator.get_anim_frame_action_data_handle().get_reeve_data_handle(
+                            some_event_label);
+                }
+
+                if (my_comp.some_event->check_if_rising_edge_occurred())
+                {
+                    // PROCESS EVENT HERE.
+                }
+                ```
+
+                - WARNING: The animator should run in the simulation loop for handling the events, so that there's no need to rely on the renderer for updating the animators.
+                    - [x] Do this. For now, have animator get updated ~~_only_~~also in the simulation loop.
+                        - [x] Update the hitcapsules and AFA data.
+                        - I basically just added a new timer for the renderer, and made a profile switcher that updates the correct timer for the animator.
+                    - [ ] ~~Make a later task to have the renderer interpolate the animations. (defer this task but make sure you're not forgetting about it!!!!)~~
+                        - It was actually easier to just make it now! So I did.
+                    > @NOTE: I believe that there should be testing that these values don't get off, but theoretically they never will!!
+                        > Mmmm, this is probably gonna bite me in the butt in the ftuure??
+            - [x] Fix crashing when discarding/saving an AFA controller (since the split animator now caused this issue to arise again)
+                - Basically the animator needs to be reconfigured _after_ the renderer does its render step. Add another system check to check if the working AFA changed.
+                - My fix is basically just calling the AFA editor system _again_ after doing the renderer's render pass.
+                    - Hacky but oh well, problem solved I think.
+            - [x] Have a component that configures the model animator with an AFA controller.
+            - [x] Run a system _right after_ the system that created model animators to configure the model animator to add the AFA controller.
+                - Also make sure that this is before the animator gets updated in the `animator_driven_hitcapsules_stuff_stuff()` system.
+                - [ ] ~~Add an assert that if the model animator isn't created yet then that's a SERIOUS issue, bc it should've JUST been created just prior. (also leave a message for future me pls!!)~~
+                    - I don't think this is necessary bc I just added a branch into the render object lifetime system instead of creating a new system.
+
+- [x] Now do the thing I initially wanted to do but couldn't
+    > [ ] Create ~~script~~system for character controller movement but without the input from player.
+        > [ ] ~~Perhaps this could just be a script that sends its data to another script? Maybe there could be a connections type thing? Mmmmm maybe provide a `on_start()` func for scripts where they could get the script that they need to send to and stuff?~~
+            > This all got solved with the script to ECS overhaul.
+    - [x] Split player movement into two systems.
+        - [x] Stub out system split.
+        - [x] Get player input.
+            - [x] Make between component, `Character_controller_input`.
+        - [x] Do movement.
+        - [x] Make this work for the player!
+        - [x] Make another non-player character that has simple movement.
+        - [x] Test it with an imgui edit.
+
+- [x] Delete the old system. Gut it out.
+    - [x] Ensure that saving the scene actually saves the scene.
+    - [x] Remove the debug draw lambda from the renderer.
+
+- [x] Make merge request.
+>-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+
+## (cont./unblocked) Use simple anim dude and make dummy character and create fighting animation movesets.
+
 - [ ] Add another dummy character that plays the same anim as player.
 
 - [ ] Write the hitcapsule group sets interact w each other.

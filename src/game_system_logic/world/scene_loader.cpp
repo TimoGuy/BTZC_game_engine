@@ -1,0 +1,130 @@
+#include "scene_loader.h"
+
+#include "btlogger.h"
+#include "entt/entity/fwd.hpp"
+#include "game_system_logic/component/component_registry.h"
+#include "game_system_logic/entity_container.h"
+#include "scene_serialization.h"
+#include "service_finder/service_finder.h"
+
+#include <string>
+
+
+BT::world::Scene_loader::Scene_loader()
+{
+    BT_SERVICE_FINDER_ADD_SERVICE(Scene_loader, this);
+}
+
+void BT::world::Scene_loader::load_scene(std::string const& scene_name)
+{
+    m_load_scene_requests.emplace_back(scene_name);
+}
+
+void BT::world::Scene_loader::unload_all_scenes()
+{
+    m_unload_all_scenes_request = true;
+
+    // Clear load requests since these haven't been processed yet.
+    // (and would have been unloaded immediately if they did get processed)
+    m_load_scene_requests.clear();
+}
+
+size_t BT::world::Scene_loader::get_num_loaded_scenes() const
+{
+    return m_loaded_scenes.size();
+}
+
+void BT::world::Scene_loader::save_all_entities_into_scene(std::string const& scene_name) const
+{   // Ensure no multi-scene saving (yet!!! ... but, i still dont knoew how scenes and stuff will be used in the game istsef.  -Thea 2025/11/04
+    assert(m_loaded_scenes.size() <= 1);
+
+    // Build scene serialization. 
+    Scene_serialization scene_serialized;
+
+    auto all_ent_uuids{ service_finder::find_service<Entity_container>().get_all_entity_uuids() };
+    scene_serialized.entities.reserve(all_ent_uuids.size());
+
+    for (auto ent_uuid : all_ent_uuids)
+        scene_serialized.entities.emplace_back(serialize_entity(ent_uuid));
+
+    // Write to disk.
+    serialize_scene_data_to_disk(scene_serialized, scene_name);
+}
+
+
+namespace
+{
+
+using namespace BT;
+using Scene_entity_list_t = world::Scene_loader::Scene_entity_list_t;
+
+void internal_unload_scene(Entity_container& entity_container,
+                           std::string const& scene_name,
+                           Scene_entity_list_t const& scene_entity_list)
+{   // Destroy all entities associated with scene.
+    for (auto entity : scene_entity_list)
+    {
+        entity_container.destroy_entity(entity);
+    }
+
+    BT_TRACEF("Unloaded scene \"%s\"", scene_name.c_str());
+}
+
+Scene_entity_list_t internal_load_scene(Entity_container& entity_container,
+                                        std::string const& scene_name)
+{   // Deserialize scene into creation list.
+    auto scene_data{ world::deserialize_scene_data_from_disk(scene_name) };
+
+    // Create entities with components.
+    Scene_entity_list_t created_entities;
+
+    for (auto& entity : scene_data.entities)
+    {   // Assert that the provided UUID is valid.
+        assert(!entity.entity_uuid.is_nil());
+
+        auto ecs_entity = entity_container.create_entity(entity.entity_uuid);
+
+        for (auto& component : entity.components)
+        {   // Construct component inside entity.
+            component::construct_component(ecs_entity, component.type_name, component.members_j);
+        }
+
+        // Add entity to creation list.
+        created_entities.emplace_back(entity.entity_uuid);
+    }
+
+    BT_TRACEF("Loaded scene \"%s\"", scene_name.c_str());
+
+    return created_entities;
+}
+
+}  // namespace
+
+
+void BT::world::Scene_loader::process_scene_loading_requests()
+{
+    auto& entity_container{ service_finder::find_service<Entity_container>() };
+
+    // Process unload request first.
+    if (m_unload_all_scenes_request)
+    {
+        for (auto& loaded_scene : m_loaded_scenes)
+        {
+            internal_unload_scene(entity_container, loaded_scene.first, loaded_scene.second);
+        }
+        m_loaded_scenes.clear();
+
+        m_unload_all_scenes_request = false;
+    }
+
+    // Process load requests.
+    for (auto& scene_name : m_load_scene_requests)
+    {
+        auto created_entity_list{ internal_load_scene(entity_container, scene_name) };
+        m_loaded_scenes.emplace(scene_name, std::move(created_entity_list));
+    }
+    m_load_scene_requests.clear();
+
+    // @TEMP: @THEA: Just makinig sure that only one scene can be loaded in at a time.
+    assert(m_loaded_scenes.size() == 0 || m_loaded_scenes.size() == 1);
+}

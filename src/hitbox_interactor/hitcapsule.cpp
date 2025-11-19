@@ -3,8 +3,8 @@
 #include "../renderer/debug_render_job.h"
 #include "../renderer/model_animator.h"
 #include "../service_finder/service_finder.h"
-#include "cglm/vec3.h"
-#include "logger.h"
+#include "btglm.h"
+#include "btlogger.h"
 
 #include <cassert>
 
@@ -97,14 +97,14 @@ void BT::Hitcapsule::emplace_debug_render_repr(vec4 color) const
 
 
 // Hitcapsule_group.
-BT::Hitcapsule_group::Hitcapsule_group(bool enabled,
-                    Type type,
-                    std::vector<Hitcapsule>&& capsules)
-    : m_enabled{ enabled }
-    , m_type{ type }
-    , m_capsules{ std::move(capsules) }
-{
-}
+// BT::Hitcapsule_group::Hitcapsule_group(bool enabled,
+//                     Type type,
+//                     std::vector<Hitcapsule>&& capsules)
+//     : m_enabled{ enabled }
+//     , m_type{ type }
+//     , m_capsules{ std::move(capsules) }
+// {
+// }
 
 void BT::Hitcapsule_group::set_enabled(bool enabled)
 {
@@ -155,76 +155,71 @@ void BT::Hitcapsule_group::emplace_debug_render_repr() const
 // Hitcapsule_group_set.
 BT::Hitcapsule_group_set::~Hitcapsule_group_set()
 {
-    if (m_is_registered_in_overlap_solver)
-    {
-        // Unregister to cleanup.
-        m_is_registered_in_overlap_solver =
-            !service_finder::find_service<Hitcapsule_group_overlap_solver>().remove_group_set(*this);
-    }
+    unregister_from_overlap_solver();
 }
 
-void BT::Hitcapsule_group_set::scene_serialize(Scene_serialization_mode mode, json& node_ref)
-{
-    if (mode == SCENE_SERIAL_MODE_DESERIALIZE)
-    {   // Access list of hitcapsule groups.
-        m_hitcapsule_grps.reserve(node_ref["hitcapsule_groups"].size());
-        for (auto& capsule_group_json : node_ref["hitcapsule_groups"])
-        {   // Deserialize capsules.
-            std::vector<Hitcapsule> capsules;
-            capsules.reserve(capsule_group_json["capsules"].size());
-            for (auto& capsule_json : capsule_group_json["capsules"])
-            {
-                capsules.emplace_back(vec3s{ capsule_json["origin_a"][0].get<float_t>(),
-                                             capsule_json["origin_a"][1].get<float_t>(),
-                                             capsule_json["origin_a"][2].get<float_t>() },
-                                      vec3s{ capsule_json["origin_b"][0].get<float_t>(),
-                                             capsule_json["origin_b"][1].get<float_t>(),
-                                             capsule_json["origin_b"][2].get<float_t>() },
-                                      capsule_json["radius"].get<float_t>(),
-                                      capsule_json["connecting_bone_name"].get<std::string>(),
-                                      capsule_json["connecting_bone_name_2"].get<std::string>());
-            }
+// void BT::Hitcapsule_group_set::scene_serialize(Scene_serialization_mode mode, json& node_ref)
+// {
+//     if (mode == SCENE_SERIAL_MODE_DESERIALIZE)
+//     {   // Access list of hitcapsule groups.
+//         m_hitcapsule_grps.reserve(node_ref["hitcapsule_groups"].size());
+//         for (auto& capsule_group_json : node_ref["hitcapsule_groups"])
+//         {   // Deserialize capsules.
+//             std::vector<Hitcapsule> capsules;
+//             capsules.reserve(capsule_group_json["capsules"].size());
+//             for (auto& capsule_json : capsule_group_json["capsules"])
+//             {
+//                 capsules.emplace_back(vec3s{ capsule_json["origin_a"][0].get<float_t>(),
+//                                              capsule_json["origin_a"][1].get<float_t>(),
+//                                              capsule_json["origin_a"][2].get<float_t>() },
+//                                       vec3s{ capsule_json["origin_b"][0].get<float_t>(),
+//                                              capsule_json["origin_b"][1].get<float_t>(),
+//                                              capsule_json["origin_b"][2].get<float_t>() },
+//                                       capsule_json["radius"].get<float_t>(),
+//                                       capsule_json["connecting_bone_name"].get<std::string>(),
+//                                       capsule_json["connecting_bone_name_2"].get<std::string>());
+//             }
 
-            m_hitcapsule_grps.emplace_back(capsule_group_json["enabled"].get<bool>(),
-                                           capsule_group_json["type"].get<Hitcapsule_group::Type>(),
-                                           std::move(capsules));
-        }
-    }
-    else if (mode == SCENE_SERIAL_MODE_SERIALIZE)
-    {   // Access list of hitcapsule groups.
-        for (auto& capsule_group : m_hitcapsule_grps)
-        {   // Serialize capsules.
-            json capsule_group_json = {};
-            for (auto& capsule : capsule_group.get_capsules())
-            {
-                json capsule_json = {};
-                capsule_json["origin_a"][0]            = capsule.origin_a.x;
-                capsule_json["origin_a"][1]            = capsule.origin_a.y;
-                capsule_json["origin_a"][2]            = capsule.origin_a.z;
-                capsule_json["origin_b"][0]            = capsule.origin_b.x;
-                capsule_json["origin_b"][1]            = capsule.origin_b.y;
-                capsule_json["origin_b"][2]            = capsule.origin_b.z;
-                capsule_json["radius"]                 = capsule.radius;
-                capsule_json["connecting_bone_name"]   = capsule.connecting_bone_name;
-                capsule_json["connecting_bone_name_2"] = capsule.connecting_bone_name_2;
+//             m_hitcapsule_grps.emplace_back(capsule_group_json["enabled"].get<bool>(),
+//                                            capsule_group_json["type"].get<Hitcapsule_group::Type>(),
+//                                            std::move(capsules));
+//         }
+//     }
+//     else if (mode == SCENE_SERIAL_MODE_SERIALIZE)
+//     {   // Access list of hitcapsule groups.
+//         for (auto& capsule_group : m_hitcapsule_grps)
+//         {   // Serialize capsules.
+//             json capsule_group_json = {};
+//             for (auto& capsule : capsule_group.get_capsules())
+//             {
+//                 json capsule_json = {};
+//                 capsule_json["origin_a"][0]            = capsule.origin_a.x;
+//                 capsule_json["origin_a"][1]            = capsule.origin_a.y;
+//                 capsule_json["origin_a"][2]            = capsule.origin_a.z;
+//                 capsule_json["origin_b"][0]            = capsule.origin_b.x;
+//                 capsule_json["origin_b"][1]            = capsule.origin_b.y;
+//                 capsule_json["origin_b"][2]            = capsule.origin_b.z;
+//                 capsule_json["radius"]                 = capsule.radius;
+//                 capsule_json["connecting_bone_name"]   = capsule.connecting_bone_name;
+//                 capsule_json["connecting_bone_name_2"] = capsule.connecting_bone_name_2;
 
-                capsule_group_json["capsules"].push_back(capsule_json);
-            }
+//                 capsule_group_json["capsules"].push_back(capsule_json);
+//             }
 
-            capsule_group_json["enabled"] = capsule_group.is_enabled();
-            capsule_group_json["type"] = capsule_group.get_type();
+//             capsule_group_json["enabled"] = capsule_group.is_enabled();
+//             capsule_group_json["type"] = capsule_group.get_type();
 
-            node_ref["hitcapsule_groups"].push_back(capsule_group_json);
-        }
-    }
-}
+//             node_ref["hitcapsule_groups"].push_back(capsule_group_json);
+//         }
+//     }
+// }
 
 void BT::Hitcapsule_group_set::replace_and_reregister(Hitcapsule_group_set const& other)
 {
     auto& overlap_solver{ service_finder::find_service<Hitcapsule_group_overlap_solver>() };
 
     if (m_is_registered_in_overlap_solver)
-    {   // Unregister self if currently registered.
+    {   // Unregister self if currently registered.  @COPYPASTA with `unregister_from_overlap_solver()`
         m_is_registered_in_overlap_solver =
             !overlap_solver.remove_group_set(*this);
         assert(!m_is_registered_in_overlap_solver);
@@ -236,6 +231,16 @@ void BT::Hitcapsule_group_set::replace_and_reregister(Hitcapsule_group_set const
     assert(m_is_registered_in_overlap_solver);
 }
 
+void BT::Hitcapsule_group_set::unregister_from_overlap_solver()
+{
+    if (m_is_registered_in_overlap_solver)
+    {
+        // Unregister to cleanup.
+        m_is_registered_in_overlap_solver =
+            !service_finder::find_service<Hitcapsule_group_overlap_solver>().remove_group_set(*this);
+    }
+}
+
 void BT::Hitcapsule_group_set::connect_animator(Model_animator const& animator)
 {
     for (auto& group : m_hitcapsule_grps)
@@ -243,6 +248,8 @@ void BT::Hitcapsule_group_set::connect_animator(Model_animator const& animator)
     {
         capsule.init_calc_info(animator);
     }
+
+    m_is_connected_to_animator = true;
 }
 
 std::vector<BT::Hitcapsule_group>& BT::Hitcapsule_group_set::get_hitcapsule_groups()
@@ -307,6 +314,11 @@ bool BT::Hitcapsule_group_overlap_solver::remove_group_set(Hitcapsule_group_set&
     }
 
     return success;
+}
+
+size_t BT::Hitcapsule_group_overlap_solver::get_num_group_sets() const
+{
+    return m_group_sets.size();
 }
 
 void BT::Hitcapsule_group_overlap_solver::update_overlaps()

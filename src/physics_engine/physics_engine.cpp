@@ -1,8 +1,10 @@
 #include "physics_engine.h"
 
-#include "logger.h"
+#include "btlogger.h"
 #include "physics_engine_impl.h"
 #include "physics_object.h"
+#include "service_finder/service_finder.h"
+
 #include <algorithm>
 #include <cassert>
 #include <memory>
@@ -14,6 +16,7 @@ using std::min;
 BT::Physics_engine::Physics_engine()
     : m_pimpl(make_unique<Phys_impl>())
 {
+    BT_SERVICE_FINDER_ADD_SERVICE(Physics_engine, this);
 }
 
 BT::Physics_engine::~Physics_engine() = default;
@@ -102,8 +105,15 @@ BT::UUID BT::Physics_engine::emplace_physics_object(
 {
     UUID uuid{ phys_obj->get_uuid() };
     if (uuid.is_nil())
+    {   // Create UUID during emplacement.
+        phys_obj->assign_generated_uuid();
+        uuid = phys_obj->get_uuid();
+    }
+    else
     {
-        logger::printe(logger::ERROR, "Invalid UUID passed in.");
+        logger::printe(
+            logger::ERROR,
+            "Pre-generated UUID passed in. Nil UUID expected so it can be created in this step.");
         assert(false);
     }
 
@@ -164,6 +174,11 @@ void BT::Physics_engine::return_physics_objects(vector<Physics_object*>&& phys_o
 {
     (void)phys_objs;
     phys_obj_pool_unblock();
+}
+
+size_t BT::Physics_engine::get_num_physics_objects() const
+{
+    return m_physics_objects.size();
 }
 
 // Physics object pool.

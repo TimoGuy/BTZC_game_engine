@@ -2,7 +2,7 @@
 
 #include "../uuid/uuid.h"
 #include "../input_handler/input_handler.h"
-#include "cglm/cglm.h"
+#include "btglm.h"
 #include <cmath>
 #include <functional>
 #include <memory>
@@ -14,8 +14,6 @@ using std::unique_ptr;
 namespace BT
 {
 
-class Game_object_pool;
-
 class Camera
 {
 public:
@@ -24,7 +22,6 @@ public:
 
     // Callbacks.
     void set_callbacks(function<void(bool)>&& cursor_lock_fn);
-    void set_game_object_pool(Game_object_pool& pool);
 
     // GPU camera.
     void set_fov(float_t fov);  // `fov` in radians.
@@ -38,8 +35,6 @@ public:
     void get_view_direction(vec3& out_view_direction);
 
     // Camera frontend.
-    void set_follow_object(UUID game_object_ref);
-    UUID get_follow_object();
     bool is_capture_fly();
     bool is_follow_orbit();
     void update_frontend(Input_handler::State const& input_state, float_t delta_time);

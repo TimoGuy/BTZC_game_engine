@@ -1,224 +1,334 @@
 {
-    "cam_following_game_obj": "aae5ebfb-7c2b-49a8-bcb9-658fdea987af",
-    "game_objects": [
+    "entities": [
         {
-            "children": [
-                "d33f01dc-b0b5-4954-9771-71a1c42e5209"
-            ],
-            "guid": "aae5ebfb-7c2b-49a8-bcb9-658fdea987af",
-            "name": "My Gay object",
-            "parent": null,
-            "physics_obj": {
-                "crouch_height": 1.0,
-                "guid": "08743552-fff6-49d2-ad15-efbd121ab773",
-                "height": 2.0,
-                "init_transform": [
-                    [
-                        0.0,
-                        5.099999904632568,
-                        0.0
-                    ],
-                    [
-                        0.0,
-                        0.0,
-                        0.0,
-                        1.0
-                    ]
-                ],
-                "interpolate_transform": true,
-                "radius": 0.5,
-                "type": "character_controller"
-            },
-            "render_obj": null,
-            "scripts": [
+            "entity_uuid": "019a2251-50bc-7074-8da2-ea4565067327",
+            "components": [
                 {
-                    "script_datas": {
-                        "apply_facing_angle_game_obj_key": "d33f01dc-b0b5-4954-9771-71a1c42e5209",
-                        "phys_obj_key": "08743552-fff6-49d2-ad15-efbd121ab773"
-                    },
-                    "script_type": "script_player_character_movement"
-                },
-                {
-                    "script_datas": {
-                        "game_obj_key": "aae5ebfb-7c2b-49a8-bcb9-658fdea987af"
-                    },
-                    "script_type": "script_apply_physics_transform_to_render_object"
+                    "type_name": "component::Entity_metadata",
+                    "members_j": {
+                        "name": "My random floating entity woohoo!!!",
+                        "uuid": "019a2251-50bc-7074-8da2-ea4565067327"
+                    }
                 }
-            ],
-            "transform": {
-                "global": {
-                    "position": [
-                        0.0,
-                        0.0,
-                        0.0
-                    ],
-                    "rotation": [
-                        0.0,
-                        0.0,
-                        0.0,
-                        1.0
-                    ],
-                    "scale": [
-                        1.0,
-                        1.0,
-                        1.0
-                    ]
-                },
-                "local": {
-                    "position": [
-                        0.0,
-                        0.0,
-                        0.0
-                    ],
-                    "rotation": [
-                        0.0,
-                        0.0,
-                        0.0,
-                        1.0
-                    ],
-                    "scale": [
-                        1.0,
-                        1.0,
-                        1.0
-                    ]
-                }
-            }
+            ]
         },
         {
-            "children": [],
-            "guid": "aae5ebfb-7c2b-49a8-bcb9-658fdea987ae",
-            "name": "Static ground geometry",
-            "parent": null,
-            "physics_obj": {
-                "guid": "08743552-fff6-49d2-ad15-efbd121ab772",
-                "init_transform": [
-                    [
-                        0.0,
-                        0.0,
-                        0.0
-                    ],
-                    [
-                        0.0,
-                        0.0,
-                        0.0,
-                        1.0
-                    ]
-                ],
-                "interpolate_transform": false,
-                "model_name": "probuilder_example",
-                "motion_type": 0,
-                "type": "triangle_mesh"
-            },
-            "render_obj": {
-                "guid": "fa2a0c0c-cfd4-47a7-b4e7-01dbbd3b3538",
-                "render_layer": 1,
-                "renderable": {
-                    "model_name": "probuilder_example",
-                    "type": "Model"
-                }
-            },
-            "scripts": [],
-            "transform": {
-                "global": {
-                    "position": [
-                        0.0,
-                        0.0,
-                        0.0
-                    ],
-                    "rotation": [
-                        0.0,
-                        0.0,
-                        0.0,
-                        1.0
-                    ],
-                    "scale": [
-                        1.0,
-                        1.0,
-                        1.0
-                    ]
+            "entity_uuid": "aae5ebfb-7c2b-49a8-bcb9-658fdea987af",
+            "components": [
+                {
+                    "type_name": "component::Entity_metadata",
+                    "members_j": {
+                        "name": "My Gay object",
+                        "uuid": "aae5ebfb-7c2b-49a8-bcb9-658fdea987af"
+                    }
                 },
-                "local": {
-                    "position": [
-                        0.0,
-                        0.0,
-                        0.0
-                    ],
-                    "rotation": [
-                        0.0,
-                        0.0,
-                        0.0,
-                        1.0
-                    ],
-                    "scale": [
-                        1.0,
-                        1.0,
-                        1.0
-                    ]
+                {
+                    "type_name": "component::Transform",
+                    "members_j": {
+                        "position": {
+                            "x": 0.0,
+                            "y": 5.0,
+                            "z": 0.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0,
+                            "w": 1.0
+                        },
+                        "scale": {
+                            "x": 1.0,
+                            "y": 1.0,
+                            "z": 1.0
+                        }
+                    }
+                },
+                {
+                    "type_name": "component::Transform_hierarchy",
+                    "members_j": {
+                        "parent_entity": null,
+                        "children_entities": [
+                            "d33f01dc-b0b5-4954-9771-71a1c42e5209"
+                        ]
+                    }
+                },
+                {
+                    "type_name": "component::Player_character",
+                    "members_j": {
+                        "player_idx": 0
+                    }
+                },
+                {
+                    "type_name": "component::Character_world_space_input",
+                    "members_j": {}
+                },
+                {
+                    "type_name": "component::Character_mvt_state",
+                    "members_j": {}
+                },
+                {
+                    "type_name": "component::Display_repr_transform_ref",
+                    "members_j": {
+                        "display_repr_uuid": "d33f01dc-b0b5-4954-9771-71a1c42e5209"
+                    }
+                },
+                {
+                    "type_name": "component::Physics_object_settings",
+                    "members_j": {
+                        "phys_obj_type": 1
+                    }
+                },
+                {
+                    "type_name": "component::Physics_obj_type_char_con_settings",
+                    "members_j": {
+                        "radius": 0.5,
+                        "height": 2.0,
+                        "crouch_height": 1.0
+                    }
                 }
-            }
+            ]
         },
         {
-            "children": [],
-            "guid": "d33f01dc-b0b5-4954-9771-71a1c42e5209",
-            "name": "Character repr",
-            "parent": "aae5ebfb-7c2b-49a8-bcb9-658fdea987af",
-            "physics_obj": null,
-            "render_obj": {
-                "guid": "fa2a0c0c-cfd4-47a7-b4e7-01dbbd3b3537",
-                "render_layer": 1,
-                "renderable": {
-                    "model_name": "simple_combat_char",
-                    "type": "Deformed_model",
-                    "animator_template": "simple_combat_char.btanitor",
-                    "anim_frame_action_ctrls": "simple_combat_char.btafa"
-                }
-            },
-            "scripts": [
+            "entity_uuid": "d33f01dc-b0b5-4954-9771-71a1c42e5209",
+            "components": [
                 {
-                    "script_datas": {
-                        "render_obj": "fa2a0c0c-cfd4-47a7-b4e7-01dbbd3b3537"
-                    },
-                    "script_type": "script_animator_driven_hitcapsule_set"
-                }
-            ],
-            "transform": {
-                "global": {
-                    "position": [
-                        0.0,
-                        0.0,
-                        0.0
-                    ],
-                    "rotation": [
-                        0.0,
-                        0.0,
-                        0.0,
-                        1.0
-                    ],
-                    "scale": [
-                        1.0,
-                        1.0,
-                        1.0
-                    ]
+                    "type_name": "component::Entity_metadata",
+                    "members_j": {
+                        "name": "Character repr",
+                        "uuid": "d33f01dc-b0b5-4954-9771-71a1c42e5209"
+                    }
                 },
-                "local": {
-                    "position": [
-                        0.0,
-                        -2.980232238769531e-07,
-                        0.0
-                    ],
-                    "rotation": [
-                        0.0,
-                        0.0,
-                        0.0,
-                        1.0
-                    ],
-                    "scale": [
-                        1.0,
-                        1.0,
-                        1.0
-                    ]
+                {
+                    "type_name": "component::Transform",
+                    "members_j": {
+                        "position": {
+                            "x": 0.0,
+                            "y": 5.0,
+                            "z": 0.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0,
+                            "w": 1.0
+                        },
+                        "scale": {
+                            "x": 1.0,
+                            "y": 1.0,
+                            "z": 1.0
+                        }
+                    }
+                },
+                {
+                    "type_name": "component::Transform_hierarchy",
+                    "members_j": {
+                        "parent_entity": "aae5ebfb-7c2b-49a8-bcb9-658fdea987af",
+                        "children_entities": []
+                    }
+                },
+                {
+                    "type_name": "component::Follow_camera_follow_ref",
+                    "members_j": {
+                        "follow_offset_y": 2.0
+                    }
+                },
+                {
+                    "type_name": "component::Render_object_settings",
+                    "members_j": {
+                        "render_layer": 1,
+                        "model_name": "simple_combat_char",
+                        "is_deformed": true,
+                        "animator_template_name": "simple_combat_char.btanitor"
+                    }
+                },
+                {
+                    "type_name": "component::Anim_frame_action_controller",
+                    "members_j": {
+                        "anim_frame_action_controller_name": "simple_combat_char.btafa"
+                    }
                 }
-            }
+            ]
+        },
+        {
+            "entity_uuid": "aae5ebfb-7c2b-49a8-bcb9-658fdea987ae",
+            "components": [
+                {
+                    "type_name": "component::Entity_metadata",
+                    "members_j": {
+                        "name": "Static ground geometry",
+                        "uuid": "aae5ebfb-7c2b-49a8-bcb9-658fdea987ae"
+                    }
+                },
+                {
+                    "type_name": "component::Transform",
+                    "members_j": {
+                        "position": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0,
+                            "w": 1.0
+                        },
+                        "scale": {
+                            "x": 1.0,
+                            "y": 1.0,
+                            "z": 1.0
+                        }
+                    }
+                },
+                {
+                    "type_name": "component::Transform_hierarchy",
+                    "members_j": {
+                        "parent_entity": null,
+                        "children_entities": []
+                    }
+                },
+                {
+                    "type_name": "component::Render_object_settings",
+                    "members_j": {
+                        "render_layer": 1,
+                        "model_name": "probuilder_example",
+                        "is_deformed": false,
+                        "animator_template_name": ""
+                    }
+                },
+                {
+                    "type_name": "component::Physics_object_settings",
+                    "members_j": {
+                        "phys_obj_type": 0
+                    }
+                },
+                {
+                    "type_name": "component::Physics_obj_type_triangle_mesh_settings",
+                    "members_j": {
+                        "model_name": "probuilder_example",
+                        "motion_type": 0
+                    }
+                }
+            ]
+        },
+        {
+            "entity_uuid": "019a9611-b980-7378-aea7-17deb7f1b3db",
+            "components": [
+                {
+                    "type_name": "component::Entity_metadata",
+                    "members_j": {
+                        "name": "My NPC object",
+                        "uuid": "019a9611-b980-7378-aea7-17deb7f1b3db"
+                    }
+                },
+                {
+                    "type_name": "component::Transform",
+                    "members_j": {
+                        "position": {
+                            "x": -10.0,
+                            "y": 5.0,
+                            "z": 10.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0,
+                            "w": 1.0
+                        },
+                        "scale": {
+                            "x": 1.0,
+                            "y": 1.0,
+                            "z": 1.0
+                        }
+                    }
+                },
+                {
+                    "type_name": "component::Transform_hierarchy",
+                    "members_j": {
+                        "parent_entity": null,
+                        "children_entities": [
+                            "019a9613-1fee-731d-b9e4-1fcaad20f791"
+                        ]
+                    }
+                },
+                {
+                    "type_name": "component::Character_world_space_input",
+                    "members_j": {}
+                },
+                {
+                    "type_name": "component::Character_mvt_state",
+                    "members_j": {}
+                },
+                {
+                    "type_name": "component::Display_repr_transform_ref",
+                    "members_j": {
+                        "display_repr_uuid": "019a9613-1fee-731d-b9e4-1fcaad20f791"
+                    }
+                },
+                {
+                    "type_name": "component::Physics_object_settings",
+                    "members_j": {
+                        "phys_obj_type": 1
+                    }
+                },
+                {
+                    "type_name": "component::Physics_obj_type_char_con_settings",
+                    "members_j": {
+                        "radius": 0.5,
+                        "height": 2.0,
+                        "crouch_height": 1.0
+                    }
+                }
+            ]
+        },
+        {
+            "entity_uuid": "019a9613-1fee-731d-b9e4-1fcaad20f791",
+            "components": [
+                {
+                    "type_name": "component::Entity_metadata",
+                    "members_j": {
+                        "name": "Character repr",
+                        "uuid": "019a9613-1fee-731d-b9e4-1fcaad20f791"
+                    }
+                },
+                {
+                    "type_name": "component::Transform",
+                    "members_j": {
+                        "position": {
+                            "x": -10.0,
+                            "y": 5.0,
+                            "z": 10.0
+                        },
+                        "rotation": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0,
+                            "w": 1.0
+                        },
+                        "scale": {
+                            "x": 1.0,
+                            "y": 1.0,
+                            "z": 1.0
+                        }
+                    }
+                },
+                {
+                    "type_name": "component::Transform_hierarchy",
+                    "members_j": {
+                        "parent_entity": "019a9611-b980-7378-aea7-17deb7f1b3db",
+                        "children_entities": []
+                    }
+                },
+                {
+                    "type_name": "component::Render_object_settings",
+                    "members_j": {
+                        "render_layer": 1,
+                        "model_name": "simple_combat_char",
+                        "is_deformed": true,
+                        "animator_template_name": "simple_combat_char.btanitor"
+                    }
+                }
+            ]
         }
     ]
 }

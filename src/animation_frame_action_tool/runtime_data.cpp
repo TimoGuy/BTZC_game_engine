@@ -4,8 +4,8 @@
 #include "../renderer/animator_template.h"
 #include "../renderer/mesh.h"
 #include "../renderer/model_animator.h"
-#include "../service_finder/service_finder.h"
-#include <fstream>
+#include "btjson.h"
+
 #include <sstream>
 #include <string>
 #include <unordered_map>
@@ -73,7 +73,7 @@ BT::anim_frame_action::Runtime_controllable_data
     ::get_float_data_handle(Controllable_data_label label)
 {
     assert(get_data_type(label) == CTRL_DATA_TYPE_FLOAT);
-    return m_data_floats.at(label);
+    return data_floats.at(label);
 }
 
 BT::anim_frame_action::Runtime_controllable_data::Overridable_data<bool>&
@@ -81,7 +81,7 @@ BT::anim_frame_action::Runtime_controllable_data
     ::get_bool_data_handle(Controllable_data_label label)
 {
     assert(get_data_type(label) == CTRL_DATA_TYPE_BOOL);
-    return m_data_bools.at(label);
+    return data_bools.at(label);
 }
 
 BT::anim_frame_action::Runtime_controllable_data::Rising_edge_event&
@@ -89,7 +89,7 @@ BT::anim_frame_action::Runtime_controllable_data
     ::get_reeve_data_handle(Controllable_data_label label)
 {
     assert(get_data_type(label) == CTRL_DATA_TYPE_RISING_EDGE_EVENT);
-    return m_data_reeves.at(label);
+    return data_reeves.at(label);
 }
 
 void BT::anim_frame_action::Runtime_controllable_data
@@ -143,6 +143,29 @@ void BT::anim_frame_action::Runtime_controllable_data
     }
 }
 
+void BT::anim_frame_action::Runtime_controllable_data::map_animator_to_control_regions(
+    Model_animator const& animator,
+    Runtime_data_controls const& data_controls)
+{
+    anim_state_idx_to_timeline_idx_map.clear();
+
+    auto const& animator_states{ animator.get_animator_states() };
+    auto const& data_control_timelines{ data_controls.data.anim_frame_action_timelines };
+    assert(animator_states.size() == data_control_timelines.size());
+
+    anim_state_idx_to_timeline_idx_map.reserve(animator_states.size());
+    for (size_t anim_state_idx = 0; anim_state_idx < animator_states.size(); anim_state_idx++)
+        for (size_t timeline_idx = 0; timeline_idx < data_control_timelines.size(); timeline_idx++)
+            if (animator_states[anim_state_idx].state_name ==
+                data_control_timelines[timeline_idx].state_name)
+            {   // Found a mapping!
+                anim_state_idx_to_timeline_idx_map.emplace(anim_state_idx, timeline_idx);
+                break;
+            }
+
+    assert(anim_state_idx_to_timeline_idx_map.size() == animator_states.size());
+}
+
 void BT::anim_frame_action::Runtime_controllable_data
     ::assign_hitcapsule_enabled_flags()
 {
@@ -191,139 +214,22 @@ void BT::anim_frame_action::Runtime_controllable_data::update_hitcapsule_transfo
 
 
 // Data controls.
-namespace
-{
-
-std::unordered_map<std::string, size_t> compile_anim_state_name_to_idx_map(
-    std::vector<BT::Animator_template::Animator_state> const& animator_states)
-{
-    std::unordered_map<std::string, size_t> rei_no_map;
-    size_t idx{ 0 };
-    for (auto& anim_state : animator_states)
-    {
-        rei_no_map.emplace(anim_state.state_name, idx);
-        idx++;
-    }
-    return rei_no_map;
-}
-
-}  // namespace
-
 BT::anim_frame_action::Runtime_data_controls::Runtime_data_controls(std::string const& fname)
-{   // @COPYPASTA: See `scene_serialization.cpp` vvvv
-    static auto load_to_json_fn = [](std::string const& fname) {
-        std::ifstream f{ fname };
-        return json::parse(f);
-    };
-    json root = load_to_json_fn(fname);
-    serialize(SERIAL_MODE_DESERIALIZE, root);
-}
-
-void BT::anim_frame_action::Runtime_data_controls::serialize(
-    Serialization_mode mode,
-    json& node_ref)
 {
-    if (mode == SERIAL_MODE_DESERIALIZE)
-    {   // Load model from bank.
-        std::string model_name{ node_ref["animated_model_name"] };
-        model = Model_bank::get_model(model_name);
-        assert(model != nullptr);
+    // Deserialize json into data.
+    data = Data(json_load_from_disk(fname));
 
-        // Control items.
-        control_items.clear();
-        auto& nr_control_items{ node_ref["control_items"] };
-        if (!nr_control_items.is_null() && nr_control_items.is_array())
-        {
-            control_items.reserve(nr_control_items.size());
-            for (size_t i = 0; i < nr_control_items.size(); i++)
-            {   // Only include name since type calc happens later.
-                control_items.emplace_back(nr_control_items[i]["name"]);
-            }
+    // Load model from bank.
+    animated_model = Model_bank::get_model(data.animated_model_name);
+    assert(animated_model != nullptr);
 
-            // Ctrl items type calculation.
-            calculate_all_ctrl_item_types();
-        }
-
-        // Animations (use anim state names as key).
-        anim_frame_action_timelines.clear();
-        auto& nr_anims{ node_ref["anim_frame_action_timelines"] };
-        if (!nr_anims.is_null() && nr_anims.is_array())
-        {
-            auto anim_state_name_to_idx_map{
-                compile_anim_state_name_to_idx_map(service_finder
-                                                   ::find_service<Animator_template_bank>()
-                                                   .load_animator_template(model_name + ".btanitor")
-                                                   .animator_states) };
-
-            anim_frame_action_timelines.resize(anim_state_name_to_idx_map.size());
-            for (auto& nr_anim_entry : nr_anims)
-            {   // Animations level.
-                size_t anim_state_idx{ anim_state_name_to_idx_map.at(nr_anim_entry["state_name"]) };
-                auto& nr_anim_regions{ nr_anim_entry["regions"] };
-                if (!nr_anim_regions.is_null() && nr_anim_regions.is_array())
-                {   // Insert anim action regions.
-                    anim_frame_action_timelines[anim_state_idx]
-                        .regions.reserve(nr_anim_regions.size());
-                    for (auto& nr_region : nr_anim_regions)
-                        anim_frame_action_timelines[anim_state_idx].regions
-                            .emplace_back(nr_region["ctrl_item_idx"].get<uint32_t>(),
-                                          nr_region["start_frame"].get<int32_t>(),
-                                          nr_region["end_frame"].get<int32_t>());
-                }
-            }
-        }
-    }
-    else if (mode == SERIAL_MODE_SERIALIZE)
-    {   // Save model from bank.
-        std::string model_name{ Model_bank::get_model_name(model) };
-        node_ref["animated_model_name"] = model_name;
-
-        // Control items.
-        auto& nr_control_items{ node_ref["control_items"] };
-        for (size_t i = 0; i < control_items.size(); i++)
-        {   // Only save name of control item bc of type calc.
-            nr_control_items[i]["name"] = control_items[i].name;
-        }
-
-        // Animations.
-        auto& anim_states{ service_finder::find_service<Animator_template_bank>()
-                           .load_animator_template(model_name + ".btanitor")
-                           .animator_states };
-
-        auto& nr_anims{ node_ref["anim_frame_action_timelines"] };
-        nr_anims = json::array();
-        for (size_t anim_state_idx = 0;
-             anim_state_idx < anim_frame_action_timelines.size();
-             anim_state_idx++)
-        {   // Animations level.
-            json nr_anim_entry = {};
-            nr_anim_entry["state_name"] = anim_states[anim_state_idx].state_name;
-            auto& nr_anim_regions{ nr_anim_entry["regions"] };
-            nr_anim_regions = json::array();
-
-            for (size_t reg_idx = 0;
-                 reg_idx < anim_frame_action_timelines[anim_state_idx].regions.size();
-                 reg_idx++)
-            {   // Insert anim action regions.
-                auto const& region{ anim_frame_action_timelines[anim_state_idx].regions[reg_idx] };
-                json nr_region = {};
-                nr_region["ctrl_item_idx"] = region.ctrl_item_idx;
-                nr_region["start_frame"]   = region.start_frame;
-                nr_region["end_frame"]     = region.end_frame;
-                nr_anim_regions.emplace_back(nr_region);
-            }
-
-            nr_anims.emplace_back(nr_anim_entry);
-        }
-    }
-
-    hitcapsule_group_set_template.scene_serialize(static_cast<Scene_serialization_mode>(mode),
-                                                  node_ref["hitcapsule_group_set"]);
+    // Ctrl items type calculation.
+    calculate_all_ctrl_item_types();
 }
 
 void BT::anim_frame_action::Runtime_data_controls::calculate_all_ctrl_item_types()
 {
-    for (auto& ctrl_item : control_items)
+    for (auto& ctrl_item : data.control_items)
     {
         std::vector<std::string> tokens;
         {   // Get tokens in ctrl item name.

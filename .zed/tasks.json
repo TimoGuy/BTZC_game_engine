@@ -1,0 +1,19 @@
+[
+  {
+    "label": "CMake configure",
+    "command": "mkdir build ; cmake -DCMAKE_BUILD_TYPE:STRING=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DCMAKE_C_COMPILER:FILEPATH=f:\\clang+llvm-20.1.8-x86_64-pc-windows-msvc\\bin\\clang-cl.exe -DCMAKE_CXX_COMPILER:FILEPATH=f:\\clang+llvm-20.1.8-x86_64-pc-windows-msvc\\bin\\clang-cl.exe --no-warn-unused-cli -S . -B ./build -G Ninja",
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "hide": "on_success"
+  },
+  {
+    "label": "CMake build",
+    "command": "cmake --build .",
+    "cwd": "$ZED_WORKTREE_ROOT/build",
+    "hide": "on_success"
+  },
+  {
+    "label": "Project lint",
+    "command": "py ./project_lint.py",
+    "cwd": "$ZED_WORKTREE_ROOT"
+  }
+]

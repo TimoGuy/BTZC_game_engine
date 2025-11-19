@@ -8,6 +8,15 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
 *Simple OBJ loader with hacky lighting and a flying camera. (2025/05/22)*
 
 
+## Build gotchas.
+
+### Windows ARM64
+
+> In order to build for this platform, do the following below.
+
+Uncomment `third_party/cglm/include/cglm/simd/intrin.h:98` (where it includes "arm64_neon.h"). ARM64 on clang-cl on windows already defines the neon typenames.
+
+
 ## 0.1.0-develop.2 (NEXT VERSION, WIP)
 
 ### Adds
@@ -514,7 +523,11 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
     - [x] Animation authoring tool window. (So it lists out all the animations and one can be clicked to be edited and events and variable override times can get added to the animation. The variable overrides and events are integer frames.)
     - [x] Make custom hit/hurt capsule physics implementation (just doing overlaps), so that don't have to rely on jolt physics quite as much.
     - [ ] Use simple anim dude and make dummy character and create fighting animation movesets.
-    - [ ] 
+        - Deferred to fix script system issues (see "Script reform" below).
+            - The reason for this was due to no support to share data between scripts. Big oof.
+    - [x] Script reform.
+        - Blocks the deferred task above.
+        - @NOTE: ended up deciding to replace with EnTT ecs.
 
 1. ~~Unity to this engine migration.~~
     - [x] Import scene as yaml structure.
@@ -525,6 +538,15 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
         - [ ] Transform hierarchy.
     - [ ] Get mesh importing figured out.
     - @TODO.
+
+1. Move from GLSL to SLANG shaders.
+    > This should make the switch from OpenGL to Vulkan (and to Metal in the further future) a lot easier!!
+    > I think that reflection should be easier for this as well. Using the spirv reflection API was fine, but I worry that for something like Metal it wouldn't work quite the way it should.
+    > Reflection ref: https://youtu.be/OxOZ81N3NKw?si=44uyuV-CDp4hzBDx
+
+    - [ ] @TODO define tasks.
+    - [ ] Convert all glsl shaders to slang.
+
 
 1. Swordplay combat.
     - [x] @PREREQUISITE: Skeletal animations.
@@ -590,6 +612,7 @@ Bozzy-Thea Zelda-like Collectathon Game Engine. Simple to get off the ground.
 
 1. Add cascaded shadow maps to renderer.
     - @TODO.
+    - Nice shadow biasing post: https://www.reddit.com/r/GraphicsProgramming/s/p2HXNVNAXl
     - [ ] Add player shadow as well, but using a different camera setup.
         - Drop shadow.
 

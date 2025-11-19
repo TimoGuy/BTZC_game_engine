@@ -3,26 +3,32 @@
 #include "../animation_frame_action_tool/editor_state.h"
 #include "../animation_frame_action_tool/runtime_data.h"
 #include "../btzc_game_engine.h"
-#include "../game_object/game_object.h"
 #include "../input_handler/input_codes.h"
 #include "../input_handler/input_handler.h"
 #include "../service_finder/service_finder.h"
+#include "btzc_game_engine.h"
+#include "btglm.h"
+#include "btjson.h"
+#include "game_system_logic/system/imgui_render_transform_hierarchy_window.h"
+#include "game_system_logic/world/scene_loader.h"
+#include "game_system_logic/world/world_properties.h"
 #include "camera.h"
-#include "cglm/util.h"
 #include "debug_render_job.h"
 #include "imgui.h"
 #include "ImGuizmo.h"
 #include "imgui_internal.h"
-#include "logger.h"
+#include "btlogger.h"
 #include "mesh.h"
 #include "misc/cpp/imgui_stdlib.h"
 #include "model_animator.h"  // @CHECK: @NOCHECKIN: Is this needed?
+#include "renderer.h"
+#include "timer/timer.h"
 
 #include <array>
 #include <cmath>
 #include <cstdint>
 #include <cstring>
-#include <fstream>
+#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -32,9 +38,30 @@ BT::ImGui_renderer::ImGui_renderer()
     BT_SERVICE_FINDER_ADD_SERVICE(ImGui_renderer, this);
 }
 
-void BT::ImGui_renderer::set_selected_game_obj(Game_object* game_obj)
+
+namespace
 {
-    m_game_obj_pool->set_selected_game_obj(game_obj);
+
+using namespace BT;
+
+enum Editor_context
+{
+    LEVEL_EDITOR,
+    ANIMATION_FRAME_DATA_EDITOR,
+    NUM_EDITOR_CONTEXTS
+};
+static std::array<std::string, NUM_EDITOR_CONTEXTS> const k_editor_context_strs{
+    "Level Editor",
+    "Animation Frame Data Editor",
+};
+static Editor_context s_current_editor_context{ Editor_context(0) };
+
+}  // namespace
+
+
+bool BT::ImGui_renderer::is_anim_frame_data_editor_context() const
+{
+    return (s_current_editor_context == Editor_context::ANIMATION_FRAME_DATA_EDITOR);
 }
 
 void BT::ImGui_renderer::render_imgui(float_t delta_time)
@@ -65,21 +92,11 @@ void BT::ImGui_renderer::render_imgui(float_t delta_time)
 
     // Context switching.
     static bool s_entering_new_context{ true };
-    enum Editor_context
-    {
-        LEVEL_EDITOR,
-        ANIMATION_FRAME_DATA_EDITOR,
-        NUM_EDITOR_CONTEXTS
-    };
-    static std::array<std::string, NUM_EDITOR_CONTEXTS> const k_editor_context_strs{
-        "Level Editor",
-        "Animation Frame Data Editor",
-    };
+
     static std::array<void(ImGui_renderer::*)(bool, float_t), NUM_EDITOR_CONTEXTS> const k_editor_context_fns{
         &ImGui_renderer::render_imgui__level_editor_context,
         &ImGui_renderer::render_imgui__animation_frame_data_editor_context,
     };
-    static Editor_context s_current_editor_context{ Editor_context(0) };
 
     static auto const s_window_name_w_context_fn = [](char const* const name) {
         return (std::string(name)
@@ -90,40 +107,133 @@ void BT::ImGui_renderer::render_imgui(float_t delta_time)
     // Main menu bar.
     if (ImGui::BeginMainMenuBar())
     {
+        bool open_load_scene_modal_popup{ false };
         if (ImGui::BeginMenu("Menu##main_menu_bar_option"))
         {
-            if (ImGui::MenuItem("New")) {}
-            if (ImGui::MenuItem("Save"))
-            {   // @TODO: @NOCHECKIN: @DEBUG
-                // Serialize scene.
-                json root = {};
-                size_t game_obj_idx{ 0 };
-                auto const game_objs{ m_game_obj_pool->get_all_as_list_no_lock() };
-                for (auto game_obj : game_objs)
-                {
-                    game_obj->scene_serialize(BT::SCENE_SERIAL_MODE_SERIALIZE, root[game_obj_idx++]);
-                }
+            if (ImGui::MenuItem("New"))
+            {   // Clear loaded scene(s).
+                service_finder::find_service<world::Scene_loader>().unload_all_scenes();
+            }
 
-                // Save to disk.
-                std::ofstream f{ BTZC_GAME_ENGINE_ASSET_SCENE_PATH "sumthin_cumming_outta_me.btscene" };
-                f << root.dump(4);
+            if (ImGui::MenuItem("Load Scene.."))
+                open_load_scene_modal_popup = true;
+
+            if (ImGui::MenuItem("Save"))
+            {   // Serialize scene.
+                // @TODO: @NOCHECKIN: Create a persistent name for loading and editing and saving edited scenes!!!!  -Thea 2025/11/18
+                service_finder::find_service<world::Scene_loader>().save_all_entities_into_scene(
+                    "TODO_FILL_IN_NAME_FOR_SAVING_SYSTEM_HEREEEE.btscene");
             }
 
             ImGui::Separator();
 
             ImGui::MenuItem("Show ImGui demo window", nullptr, &s_show_demo_window);
 
-            if (ImGui::MenuItem("Show debug meshes", nullptr, get_main_debug_mesh_pool().get_visible()))
+            if (ImGui::BeginMenu("Show debug renderables"))
             {
-                get_main_debug_mesh_pool().set_visible(!get_main_debug_mesh_pool().get_visible());
+                if (ImGui::MenuItem("Lines", nullptr, get_main_debug_line_pool().get_visible()))
+                {
+                    get_main_debug_line_pool().set_visible(
+                        !get_main_debug_line_pool().get_visible());
+                }
+
+                // All the debug mesh masks.
+                static std::vector<std::pair<std::string, uint8_t>> const k_masks{
+                    { "Selected obj", Debug_mesh_pool::k_mask_selected_obj },
+                    { "Physics obj", Debug_mesh_pool::k_mask_phys_obj },
+                };
+                for (auto& [mask_str, mask_bit] : k_masks)
+                {
+                    if (ImGui::MenuItem(("Meshes: " + mask_str).c_str(),
+                                        nullptr,
+                                        get_main_debug_mesh_pool().get_visible(mask_bit)))
+                    {
+                        get_main_debug_mesh_pool().set_visible(
+                            mask_bit,
+                            !get_main_debug_mesh_pool().get_visible(mask_bit));
+                    }
+                }
+
+                ImGui::EndMenu();
             }
 
-            if (ImGui::MenuItem("Show debug lines", nullptr, get_main_debug_line_pool().get_visible()))
-            {
-                get_main_debug_line_pool().set_visible(!get_main_debug_line_pool().get_visible());
-            }
 
             ImGui::EndMenu();
+        }
+
+        {   // "Load scene" modal.
+            static std::string s_selected_scene_fname;
+            static std::vector<std::string> s_loadable_scene_fnames;
+
+            if (open_load_scene_modal_popup)
+            {   // Clear state.
+                s_selected_scene_fname = "";
+                s_loadable_scene_fnames.clear();
+
+                // Fetch all .btscene files.
+                for (auto const& entry : std::filesystem::recursive_directory_iterator(
+                         BTZC_GAME_ENGINE_ASSET_SCENE_PATH))
+                {   // Make sure is a regular file.
+                    if (!entry.is_regular_file())
+                        continue;
+
+                    // Make sure has the right extension.
+                    if (!entry.path().has_filename() || !entry.path().has_extension() ||
+                        entry.path().extension() != ".btscene")
+                        continue;
+
+                    s_loadable_scene_fnames.emplace_back(entry.path().filename().string());
+                }
+
+                // Open the popup.
+                ImGui::OpenPopup("Load Scene..##load_scene_modal_popup");
+            }
+
+            // @NOTE: Always center this window when appearing.
+            ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+            ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
+            if (ImGui::BeginPopupModal("Load Scene..##load_scene_modal_popup",
+                                       nullptr,
+                                       ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove |
+                                           ImGuiWindowFlags_NoSavedSettings))
+            {
+                ImGui::Text(
+                    "Below are the list of found \".btscene\" files in the scene asset folder "
+                    "(" BTZC_GAME_ENGINE_ASSET_SCENE_PATH ").\n\n"
+                    "If there are missing files, try closing and then reopening this modal.\n\n"
+                    "NOTE: Due to current limitations, only one scene will be loaded at a time.\n"
+                    "(Once multiple scenes can be separated out in the transform hierarchy then\n"
+                    " I think this isn't an issue anymore.  -Thea 2025/11/04)");
+
+                ImGui::Separator();
+
+                for (auto const& fname : s_loadable_scene_fnames)
+                {
+                    if (ImGui::RadioButton(fname.c_str(), s_selected_scene_fname == fname))
+                        s_selected_scene_fname = fname;
+                }
+
+                ImGui::Separator();
+
+                if (ImGui::Button("Load Scene", ImVec2(120, 0)))
+                {   // Unload everything and load the selected scene.
+                    auto& scene_loader{ service_finder::find_service<world::Scene_loader>() };
+                    scene_loader.unload_all_scenes();
+                    scene_loader.load_scene(s_selected_scene_fname);
+
+                    ImGui::CloseCurrentPopup();
+                }
+                ImGui::SetItemDefaultFocus();
+
+                ImGui::SameLine();
+                if (ImGui::Button("Cancel", ImVec2(120, 0)))
+                {
+                    ImGui::CloseCurrentPopup();
+                }
+
+                ImGui::EndPopup();
+            }
         }
 
         // Context switching menu.
@@ -206,16 +316,41 @@ void BT::ImGui_renderer::render_imgui(float_t delta_time)
         ImGui::SameLine();
 
         // Game controls.
-        ImGui::BeginDisabled();
-            ImGui::Button("Play");
+        auto& world_props{
+            service_finder::find_service<world::World_properties_container>().get_data_handle()
+        };
+        if (ImGui::Button(world_props.is_simulation_running ? "Stop" : "Play"))
+        {
+            Timer toggle_simulation_timer;  // For tracking how long the switch takes.
+            toggle_simulation_timer.start_timer();
 
-            ImGui::SameLine();
-            ImGui::Button("Stop");
-        ImGui::EndDisabled();
+            world_props.is_simulation_running = !world_props.is_simulation_running;
+
+            constexpr char const* const k_temp_save_fname{
+                "._temp_btscene_save_for_playmode.btscene"
+            };
+            if (world_props.is_simulation_running)
+                // Save entities to temp disk file if entering play mode.
+                service_finder::find_service<world::Scene_loader>().save_all_entities_into_scene(
+                    k_temp_save_fname);
+            else
+            {   // Load previously saved temp disk into the world, restoring the pre-play state.
+                auto& scene_loader{ service_finder::find_service<world::Scene_loader>() };
+                scene_loader.unload_all_scenes();
+                scene_loader.load_scene(k_temp_save_fname);
+            }
+
+            BT_TRACEF("Simulation running state set to %s in %0.6f seconds.",
+                      world_props.is_simulation_running ? "ON" : "OFF",
+                      toggle_simulation_timer.calc_delta_time());
+        }
 
         // Game play status.
         ImGui::SameLine(0, k_wide_spacing);
-        ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 0.5f), "Playing");
+        if (world_props.is_simulation_running)
+            ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 0.5f), "Simulation Playing");
+        else
+            ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "Simulation Stopped");
 
         ImGui::SameLine();
         ImGui::Text("%.1f FPS (%.3f ms)", io.Framerate, (1000.0f / io.Framerate));
@@ -297,14 +432,6 @@ void BT::ImGui_renderer::render_imgui(float_t delta_time)
             ImGui::Checkbox("Auto switch to player cam on play.",
                             &s_on_play_switch_to_player_camera);
 
-            int32_t s_gizmo_trans_space_selection{ Game_object::get_imgui_gizmo_trans_space() };
-            if (ImGui::Combo("Gizmo transform space",
-                             &s_gizmo_trans_space_selection,
-                             "World space\0Local space\0"))
-            {
-                Game_object::set_imgui_gizmo_trans_space(s_gizmo_trans_space_selection);
-            }
-
             ImGui::EndPopup();
         }
         ImGui::PopStyleVar();
@@ -363,6 +490,9 @@ void BT::ImGui_renderer::render_imgui(float_t delta_time)
 
         ImGui::Separator();
 
+        if (copy_logs)
+            ImGui::LogToClipboard();
+
         ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0, 0, 0, 1));
         ImGui::BeginChild("console_scrolling_region",
                           ImVec2(0, 0), //-footer_height_to_reserve),
@@ -403,6 +533,9 @@ void BT::ImGui_renderer::render_imgui(float_t delta_time)
         }
         ImGui::EndChild();
         ImGui::PopStyleColor();
+
+        if (copy_logs)
+            ImGui::LogFinish();
     }
     ImGui::End();
 
@@ -423,7 +556,9 @@ void BT::ImGui_renderer::render_imgui__level_editor_context(bool enter, float_t 
 {
     if (enter)
     {   // Load current loaded level.
-        m_request_switch_scene_callback("_dev_sample_scene.btscene");
+        auto& scene_loader{ service_finder::find_service<world::Scene_loader>() };
+        scene_loader.unload_all_scenes();
+        scene_loader.load_scene("_dev_sample_scene.btscene");
     }
 
     // Level select.
@@ -467,8 +602,8 @@ void BT::ImGui_renderer::render_imgui__level_editor_context(bool enter, float_t 
     }
     ImGui::End();
 
-    // Scene hierarchy.
-    m_game_obj_pool->render_imgui_scene_hierarchy();
+    // Scene transform hierarchy.
+    system::imgui_render_transform_hierarchy_window(enter);
 
     // Game obj palette.
     ImGui::Begin("Game obj palette");
@@ -482,80 +617,99 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
 {
     if (enter)
     {   // Load up editor-specific scene.
-        m_request_switch_scene_callback("_dev_animation_editor_view.btscene");
+        auto& scene_loader{ service_finder::find_service<world::Scene_loader>() };
+        scene_loader.unload_all_scenes();
+        scene_loader.load_scene("_dev_animation_editor_view.btscene");
+
         anim_frame_action::s_editor_state = {};  // Reset editor state.
     }
 
-    static size_t s_selected_timeline_idx{ 0 };
-    static int32_t s_current_animation_clip{ 0 };
-    static auto s_all_timeline_names{ anim_frame_action::Bank::get_all_names() };
+    static size_t s_selected_afa_idx{ 0 };
+    static int32_t s_current_animation_clip{ -1 };  // -1 means unset.
+    static auto s_all_afa_names{ anim_frame_action::Bank::get_all_names() };
+
+    // @NOCHECKIN
+    // system::imgui_render_transform_hierarchy_window(enter);
 
     // Timeline selection.
     ImGui::Begin("Timeline select");
     {
         static bool s_load_selected_timeline{ true };
-        if (ImGui::Button("Refresh list") ||
-            enter)
+
+        bool trigger_afa_list_refresh{ ImGui::Button("Refresh list") };
+
+        if (anim_frame_action::s_editor_state.is_editor_state_untouched)
+        {   // List refresh will load a timeline, initializing the editor state.
+            trigger_afa_list_refresh = true;
+            anim_frame_action::s_editor_state.is_editor_state_untouched = false;
+        }
+
+        if (trigger_afa_list_refresh)
         {   // Reset timeline selection and load first one from refreshed list.
-            s_selected_timeline_idx = 0;
-            s_all_timeline_names = anim_frame_action::Bank::get_all_names();
+            s_all_afa_names = anim_frame_action::Bank::get_all_names();
+            s_selected_afa_idx = 0;
             s_load_selected_timeline = true;
         }
 
         ImGui::SameLine();
         ImGui::Spacing();
         ImGui::SameLine();
-        ImGui::Text("Models:%llu Avg:6.9KB Mdn:6.9KB Max:69.4KB", s_all_timeline_names.size());
+        ImGui::Text("Models:%llu Avg:6.9KB Mdn:6.9KB Max:69.4KB", s_all_afa_names.size());
 
         ImGui::SeparatorText("List of Timelines");
 
-        for (size_t i = 0; i < s_all_timeline_names.size(); i++)
+        for (size_t i = 0; i < s_all_afa_names.size(); i++)
         {
-            auto& timeline_name{ s_all_timeline_names[i] };
-            bool is_active_timeline{ s_selected_timeline_idx == i };
-            bool is_active_timeline_dirty{ anim_frame_action::s_editor_state.is_working_timeline_dirty };
+            auto& afa_name{ s_all_afa_names[i] };
+            bool is_active_afa{ s_selected_afa_idx == i };
+            bool is_active_afa_dirty{ anim_frame_action::s_editor_state.is_working_afa_dirty };
 
-            ImGui::BeginDisabled(is_active_timeline_dirty || is_active_timeline);
-            if (ImGui::Button((timeline_name
-                               + (is_active_timeline && is_active_timeline_dirty
+            ImGui::BeginDisabled(is_active_afa_dirty || is_active_afa);
+            if (ImGui::Button((afa_name
+                               + (is_active_afa && is_active_afa_dirty
                                   ? "*"
                                   : "")).c_str()) &&
-                !is_active_timeline)
+                !is_active_afa)
             {   // Request loading new model.
-                s_selected_timeline_idx = i;
+                s_selected_afa_idx = i;
                 s_load_selected_timeline = true;
             }
             ImGui::EndDisabled();
 
-            if (is_active_timeline && is_active_timeline_dirty)
+            if (is_active_afa && is_active_afa_dirty)
             {   // Add save or discard buttons.
                 ImGui::SameLine();
                 if (ImGui::Button("Save changes"))
                 {
-                    auto const& timeline_name{ s_all_timeline_names[s_selected_timeline_idx] };
-                    {   // Apply hitcapsule group set to template copy for saving.
-                        anim_frame_action::s_editor_state.working_timeline_copy
-                            ->hitcapsule_group_set_template =
+                    auto const& afa_name{ s_all_afa_names[s_selected_afa_idx] };
+                    {   // Remove hitcapsule group set from overlap solver.
+                        // @NOTE: This gets unregistered right before serialization since a new
+                        //        working timeline copy is made and that hitcapsule group set gets
+                        //        added to the next created animator.
+                        auto& hitcapsule_grp_set{
                             anim_frame_action::s_editor_state.working_model_animator
                                 ->get_anim_frame_action_data_handle()
-                                .hitcapsule_group_set;
+                                .hitcapsule_group_set
+                        };
+                        hitcapsule_grp_set.unregister_from_overlap_solver();
 
-                        // Save changes.
-                        json working_timeline_copy_as_json;
-                        anim_frame_action::s_editor_state.working_timeline_copy
-                            ->serialize(anim_frame_action::SERIAL_MODE_SERIALIZE,
-                                        working_timeline_copy_as_json);
+                        // Apply hitcapsule group set to template copy for saving.
+                        anim_frame_action::s_editor_state.working_afa_ctrls_copy->data
+                            .hitcapsule_group_set_template = hitcapsule_grp_set;
+
+                        // Serialize the working timeline copy.
+                        json working_timeline_copy_as_json =
+                            anim_frame_action::s_editor_state.working_afa_ctrls_copy->data;
 
                         // Save to disk.
-                        std::ofstream f{
-                            BTZC_GAME_ENGINE_ASSET_ANIM_FRAME_ACTIONS_PATH
-                            + timeline_name };
-                        f << working_timeline_copy_as_json.dump(4);
+                        json_save_to_disk(working_timeline_copy_as_json,
+                                          BTZC_GAME_ENGINE_ASSET_ANIM_FRAME_ACTIONS_PATH +
+                                              afa_name);
                     }
 
                     anim_frame_action::Bank::replace(
-                        timeline_name,
-                        std::move(*anim_frame_action::s_editor_state.working_timeline_copy));
+                        afa_name,
+                        std::move(*anim_frame_action::s_editor_state.working_afa_ctrls_copy));
 
                     // Load the same timeline again.
                     s_load_selected_timeline = true;
@@ -566,8 +720,8 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                     anim_frame_action::s_editor_state.working_model_animator
                         ->get_anim_frame_action_data_handle()
                         .hitcapsule_group_set.replace_and_reregister(
-                            anim_frame_action::s_editor_state.working_timeline_copy
-                                ->hitcapsule_group_set_template);
+                            anim_frame_action::s_editor_state.working_afa_ctrls_copy
+                                ->data.hitcapsule_group_set_template);
 
                     // Discard changes by loading the same timeline again.
                     s_load_selected_timeline = true;
@@ -577,19 +731,25 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
 
         if (s_load_selected_timeline)
         {   // Process load timeline (and model) request.
-            if (anim_frame_action::s_editor_state.working_timeline_copy != nullptr)
-                delete anim_frame_action::s_editor_state.working_timeline_copy;
+            if (anim_frame_action::s_editor_state.working_afa_ctrls_copy != nullptr)
+                delete anim_frame_action::s_editor_state.working_afa_ctrls_copy;
 
-            anim_frame_action::s_editor_state.working_timeline_copy =
+            anim_frame_action::s_editor_state.working_afa_ctrls_copy =
                 new anim_frame_action::Runtime_data_controls(
-                    anim_frame_action::Bank::get(s_all_timeline_names[s_selected_timeline_idx]));
-            assert(anim_frame_action::s_editor_state.working_timeline_copy != nullptr);
+                    anim_frame_action::Bank::get(s_all_afa_names[s_selected_afa_idx]));
+            assert(anim_frame_action::s_editor_state.working_afa_ctrls_copy != nullptr);
 
             anim_frame_action::s_editor_state.working_model =
-                anim_frame_action::s_editor_state.working_timeline_copy->model;
+                anim_frame_action::s_editor_state.working_afa_ctrls_copy->animated_model;
             assert(anim_frame_action::s_editor_state.working_model != nullptr);
 
-            anim_frame_action::s_editor_state.is_working_timeline_dirty = false;  // Load from disk so not dirty.
+            anim_frame_action::s_editor_state.is_working_afa_dirty = false;  // Load from disk so not dirty.
+
+            // Reset selected indices.
+            anim_frame_action::s_editor_state.selected_anim_state_idx = 0;
+            anim_frame_action::s_editor_state.selected_action_timeline_idx = 0;
+            anim_frame_action::s_editor_state.anim_state_name_to_idx_map.clear();  // Cleared to prevent `s_current_animation_clip` from getting set to the wrong anim state idx immediately.
+            s_current_animation_clip = -1;
 
             s_load_selected_timeline = false;
         }
@@ -722,7 +882,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                                 0.0125f))
                         {
                             glm_vec3_copy(capsule.origin_a.raw, capsule.calcd_origin_a);
-                            anim_frame_action::s_editor_state.is_working_timeline_dirty = true;
+                            anim_frame_action::s_editor_state.is_working_afa_dirty = true;
                         }
 
                         if (ImGui::DragFloat3(
@@ -733,7 +893,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                                 0.0125f))
                         {
                             glm_vec3_copy(capsule.origin_b.raw, capsule.calcd_origin_b);
-                            anim_frame_action::s_editor_state.is_working_timeline_dirty = true;
+                            anim_frame_action::s_editor_state.is_working_afa_dirty = true;
                         }
 
                         if (ImGui::DragFloat(
@@ -743,7 +903,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                                 &capsule.radius,
                                 0.0125f))
                         {
-                            anim_frame_action::s_editor_state.is_working_timeline_dirty = true;
+                            anim_frame_action::s_editor_state.is_working_afa_dirty = true;
                         }
 
                         ImGui::TreePop();
@@ -764,7 +924,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
     ImGui::End();
 
     // Animation timeline.
-    ImGui::Begin("Animation timeline", nullptr, (anim_frame_action::s_editor_state.is_working_timeline_dirty
+    ImGui::Begin("Animation timeline", nullptr, (anim_frame_action::s_editor_state.is_working_afa_dirty
                                                  ? ImGuiWindowFlags_UnsavedDocument
                                                  : 0));
     {   // Build anim clips \0 string set.
@@ -793,16 +953,36 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
             }
         }
 
-        ImGui::BeginDisabled(anim_frame_action::s_editor_state.is_working_timeline_dirty);
+        if (s_current_animation_clip == -1 &&
+            !anim_frame_action::s_editor_state.anim_state_name_to_idx_map.empty())
+        {   // Set animation clip idx to currently set selected anim state idx.
+            size_t new_clip_idx{ 0 };
+            for (auto&& [anim_name, idx] : anim_frame_action::s_editor_state.anim_state_name_to_idx_map)
+                if (idx == anim_frame_action::s_editor_state.selected_anim_state_idx)
+                {   // Found.
+                    break;
+                }
+                else
+                {
+                    new_clip_idx++;
+                }
 
-        if (ImGui::Combo("Animation clip", &s_current_animation_clip, anim_names_0_delim.c_str()))
+            // Set found idx.
+            s_current_animation_clip = new_clip_idx;
+        }
+
+        ImGui::BeginDisabled(anim_frame_action::s_editor_state.is_working_afa_dirty);
+
+        if (ImGui::Combo("Animation clip action timelines",
+                         &s_current_animation_clip,
+                         anim_names_0_delim.c_str()))
         {   // Change selected anim idx.
             anim_frame_action::s_editor_state.selected_anim_state_idx =
                 anim_frame_action::s_editor_state.anim_state_name_to_idx_map.at(
                     anim_names_as_list[s_current_animation_clip]);
         }
         if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled) &&
-            anim_frame_action::s_editor_state.is_working_timeline_dirty)
+            anim_frame_action::s_editor_state.is_working_afa_dirty)
         {   // Set tooltip if disabled.
             ImGui::SetTooltip(
                 "Working timeline is dirty. Changing animation clip\n"
@@ -846,14 +1026,14 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                     m_input_handler->is_key_pressed(BT_KEY_ENTER))
                 {   // Create new ctrl item.
                     auto& afa_ctrl_items{ anim_frame_action::s_editor_state
-                                              .working_timeline_copy->control_items };
+                                              .working_afa_ctrls_copy->data.control_items };
                     afa_ctrl_items.emplace_back(s_new_ctrl_item_name_buffer);
 
                     // Ctrl items type calculation.
                     anim_frame_action::s_editor_state
-                        .working_timeline_copy->calculate_all_ctrl_item_types();
+                        .working_afa_ctrls_copy->calculate_all_ctrl_item_types();
 
-                    anim_frame_action::s_editor_state.is_working_timeline_dirty = true;
+                    anim_frame_action::s_editor_state.is_working_afa_dirty = true;
                     ImGui::CloseCurrentPopup();
                 }
 
@@ -883,7 +1063,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
             // Just show empty message.
             ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(209/256.0, 186/256.0, 73/256.0, 1));
             ImGui::TextWrapped("Selected model \"%s\" does not contain any animations.",
-                               s_all_timeline_names[s_selected_timeline_idx].c_str());
+                               s_all_afa_names[s_selected_afa_idx].c_str());
             ImGui::PopStyleColor();
         }
         else
@@ -891,12 +1071,13 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
             ImGui::SetWindowFontScale(1.0f);
 
             auto& afa_ctrl_items{ anim_frame_action::s_editor_state
-                                      .working_timeline_copy->control_items };
-            auto& afa_regions{ anim_frame_action::s_editor_state
-                                   .working_timeline_copy
-                                   ->anim_frame_action_timelines[
-                                       anim_frame_action::s_editor_state.selected_anim_state_idx]
-                                   .regions };
+                                      .working_afa_ctrls_copy->data.control_items };
+            auto& afa_timeline_regions{
+                anim_frame_action::s_editor_state.working_afa_ctrls_copy->data
+                    .anim_frame_action_timelines[anim_frame_action::s_editor_state
+                                                     .selected_action_timeline_idx]
+                    .regions
+            };
 
             static vec2s s_timeline_cell_size{ 16.0f, 24.0f };
 
@@ -1009,9 +1190,9 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
 
                         // Ctrl items type calculation.
                         anim_frame_action::s_editor_state
-                            .working_timeline_copy->calculate_all_ctrl_item_types();
+                            .working_afa_ctrls_copy->calculate_all_ctrl_item_types();
 
-                        anim_frame_action::s_editor_state.is_working_timeline_dirty = true;
+                        anim_frame_action::s_editor_state.is_working_afa_dirty = true;
                         ImGui::CloseCurrentPopup();
                     }
 
@@ -1097,7 +1278,8 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                         RIGHT_DRAG,
                     };
                     Select_state sel_state{ Select_state::UNSELECTED };
-                    using Region = anim_frame_action::Runtime_data_controls::Animation_frame_action_timeline::Region;
+                    using Region = anim_frame_action::Runtime_data_controls::Data::
+                        Animation_frame_action_timeline::Region;
                     Region* sel_reg{ nullptr };
                     float_t drag_x_amount{ 0.0f };
                     bool prev_lmb_pressed{ false };
@@ -1156,7 +1338,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                         }
 
                         // Mark working timeline as dirty.
-                        anim_frame_action::s_editor_state.is_working_timeline_dirty = true;
+                        anim_frame_action::s_editor_state.is_working_afa_dirty = true;
                     }
 
                     if (on_lmb_release)
@@ -1178,7 +1360,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                                                ImVec2(cr_timeline_max.x, glm_min(cr_timeline_max.y, cr_timeline_min.y + s_sequencer_y_offset + k_top_measuring_region_height + 2 + (s_timeline_cell_size.y * afa_ctrl_items.size())))) };
                 bool is_hovering_over_timeline_region{ false };  // Check in upcoming block.
 
-                for (auto& region : afa_regions)
+                for (auto& region : afa_timeline_regions)
                 {   // Draw bars for regions.
                     vec2s region_bar_top_bottom{
                         cr_timeline_min.y + s_sequencer_y_offset + k_top_measuring_region_height + 2 + (s_timeline_cell_size.y * region.ctrl_item_idx) + 1,
@@ -1339,18 +1521,16 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                         int32_t start_frame{
                             static_cast<int32_t>(std::floorf(zoom_relative_mouse_x)) };
 
-                        afa_regions.emplace_back(ctrl_item_idx,
-                                               start_frame,
-                                               start_frame + 4);
-                        
+                        afa_timeline_regions.emplace_back(ctrl_item_idx, start_frame, start_frame + 4);
+
                         // Immediately assign created region as selected.
                         // (Just in case there may be some kind of vector resizing
                         //  which makes the pointers stale. I hate this issue too)
                         s_reg_sel.sel_state = Region_selecting::SELECTED;
-                        s_reg_sel.sel_reg = &afa_regions.back();
+                        s_reg_sel.sel_reg = &afa_timeline_regions.back();
 
                         // Mark working timeline as dirty.
-                        anim_frame_action::s_editor_state.is_working_timeline_dirty = true;
+                        anim_frame_action::s_editor_state.is_working_afa_dirty = true;
                     }
 
                     s_prev_is_key_a_pressed = cur_is_key_a_pressed;
@@ -1358,11 +1538,11 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                 else if (on_del_press && s_reg_sel.sel_state == Region_selecting::SELECTED)
                 {   // Delete selected region.
                     assert(s_reg_sel.sel_reg != nullptr);
-                    for (size_t i = afa_regions.size() - 1;; i--)
+                    for (size_t i = afa_timeline_regions.size() - 1;; i--)
                     {
-                        if (&afa_regions[i] == s_reg_sel.sel_reg)
+                        if (&afa_timeline_regions[i] == s_reg_sel.sel_reg)
                         {   // Found the one to delete.
-                            afa_regions.erase(afa_regions.begin() + i);
+                            afa_timeline_regions.erase(afa_timeline_regions.begin() + i);
                             break;
                         }
                         if (i == 0)
@@ -1380,7 +1560,7 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                     s_reg_sel.sel_reg = nullptr;
 
                     // Mark working timeline as dirty.
-                    anim_frame_action::s_editor_state.is_working_timeline_dirty = true;
+                    anim_frame_action::s_editor_state.is_working_afa_dirty = true;
                 }
             }
             ImGui::PopClipRect();

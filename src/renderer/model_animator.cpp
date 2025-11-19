@@ -1,11 +1,8 @@
 #include "model_animator.h"
 
 #include "../animation_frame_action_tool/runtime_data.h"
-#include "cglm/affine.h"
-#include "cglm/mat4.h"
-#include "cglm/quat.h"
-#include "cglm/vec3.h"
-#include "logger.h"
+#include "btglm.h"
+#include "btlogger.h"
 #include "mesh.h"
 #include <algorithm>
 #include <cmath>
@@ -288,8 +285,10 @@ void BT::Model_animator::configure_anim_frame_action_controls(
     // Idk why I put this into a separate method instead of in the constructor but hey, here we are.
     m_anim_frame_action_controls = anim_frame_action_controls;
 
+    m_anim_frame_action_data.map_animator_to_control_regions(*this, *m_anim_frame_action_controls);
+
     m_anim_frame_action_data.hitcapsule_group_set.replace_and_reregister(
-        m_anim_frame_action_controls->hitcapsule_group_set_template);
+        m_anim_frame_action_controls->data.hitcapsule_group_set_template);
     m_anim_frame_action_data.hitcapsule_group_set.connect_animator(*this);
 }
 
@@ -305,14 +304,20 @@ BT::Model_animator::get_animator_state(size_t idx) const
     return m_animator_states[idx];
 }
 
+BT::Model_animator::Animator_state&
+BT::Model_animator::get_animator_state_write_handle(size_t idx)
+{
+    return m_animator_states[idx];
+}
+
 void BT::Model_animator::change_state_idx(uint32_t to_state)
 {
     uint32_t from_state_copy{ m_current_state_idx.load() };
     if (m_current_state_idx.compare_exchange_strong(from_state_copy,
                                                     to_state))
-    {
-        m_time = 0.0f;
-        m_prev_time = std::numeric_limits<float_t>::lowest();
+    {   // Reset all time profiles.
+        set_time(0.0f);
+        m_prev_sim_time = std::numeric_limits<float_t>::lowest();  // @TODO: Make abstract?
     }
 }
 
@@ -337,29 +342,40 @@ BT::Model_joint_animation const& BT::Model_animator::get_model_animation(size_t 
 
 void BT::Model_animator::set_time(float_t time)
 {
-    m_time = time;
+    m_sim_time  = time;
+    m_rend_time = time;
 }
 
-void BT::Model_animator::update(float_t delta_time)
-{   // Tick forward.
+void BT::Model_animator::update(Animator_timer_profile profile, float_t delta_time)
+{   // Get timer to work with.
+    animator_time_t& time_handle{ get_profile_time_handle(profile) };
+    
+    // Tick forward.
     float_t state_speed{ m_animator_states[m_current_state_idx].speed };
-    m_time += delta_time * state_speed;
+    time_handle += delta_time * state_speed;
 
-    if (m_anim_frame_action_controls != nullptr)
-    {   // Copy current and previous times.
-        float_t prev_time{ m_prev_time };
-        float_t curr_time{ m_time };
+    if (profile == SIMULATION_PROFILE &&
+        m_anim_frame_action_controls != nullptr)
+    {   // Get prev timer to work with.
+        animator_time_t& prev_time_handle{ get_profile_prev_time_handle(profile) };
+
+        // Copy current and previous times.
+        float_t prev_time{ prev_time_handle };
+        float_t curr_time{ time_handle };
 
         // Process anim frame action runtime.
-        auto& afa_timeline{ m_anim_frame_action_controls
-                            ->anim_frame_action_timelines[m_current_state_idx] };
+        auto current_action_timeline_idx{
+            m_anim_frame_action_data.anim_state_idx_to_timeline_idx_map.at(m_current_state_idx)
+        };
+        auto& afa_timeline{ m_anim_frame_action_controls->data
+                                .anim_frame_action_timelines[current_action_timeline_idx] };
 
         m_anim_frame_action_data.clear_all_data_overrides();
 
         for (auto const& region : afa_timeline.regions)
         {
             auto& ctrl_item{
-                m_anim_frame_action_controls->control_items[region.ctrl_item_idx] };
+                m_anim_frame_action_controls->data.control_items[region.ctrl_item_idx] };
             if (ctrl_item.type == anim_frame_action::CTRL_ITEM_TYPE_EVENT_TRIGGER)
             {   // Check if rising edge (start_frame) of event is within prev_time/curr_time.
                 float_t rising_edge_time = region.start_frame
@@ -426,23 +442,27 @@ void BT::Model_animator::update(float_t delta_time)
         }
 
         // Update prev time.
-        m_prev_time = m_time.load();
+        prev_time_handle = time_handle.load();
     }
 }
 
-void BT::Model_animator::calc_anim_pose(std::vector<mat4s>& out_joint_matrices) const
+void BT::Model_animator::calc_anim_pose(Animator_timer_profile profile,
+                                        std::vector<mat4s>& out_joint_matrices) const
 {
     auto& anim_state{ m_animator_states[m_current_state_idx] };
     m_model_animations[anim_state.animation_idx]
-        .calc_joint_matrices(m_time, anim_state.loop, out_joint_matrices);
+        .calc_joint_matrices(get_profile_time_handle(profile).load(),
+                             anim_state.loop,
+                             out_joint_matrices);
 }
 
-void BT::Model_animator::get_anim_floored_frame_pose(std::vector<mat4s>& out_joint_matrices) const
+void BT::Model_animator::get_anim_floored_frame_pose(Animator_timer_profile profile,
+                                                     std::vector<mat4s>& out_joint_matrices) const
 {
     auto& anim_state{ m_animator_states[m_current_state_idx] };
     uint32_t frame_idx{
         m_model_animations[anim_state.animation_idx]
-            .calc_frame_idx(m_time,
+            .calc_frame_idx(get_profile_time_handle(profile).load(),
                             anim_state.loop,
                             Model_joint_animation::FLOOR) };
     m_model_animations[anim_state.animation_idx]
@@ -453,4 +473,35 @@ BT::anim_frame_action::Runtime_controllable_data&
 BT::Model_animator::get_anim_frame_action_data_handle()
 {
     return m_anim_frame_action_data;
+}
+
+// Please ignore the const_cast's below!! (^_^;)
+
+BT::Model_animator::animator_time_t& BT::Model_animator::get_profile_time_handle(
+    Animator_timer_profile profile) const
+{
+    switch (profile)
+    {
+    case SIMULATION_PROFILE: return const_cast<animator_time_t&>(m_sim_time);
+    case RENDERER_PROFILE:   return const_cast<animator_time_t&>(m_rend_time);
+
+    default:
+        assert(false);
+        return *reinterpret_cast<animator_time_t*>(0xDEADBEEF);
+        break;
+    }
+}
+
+BT::Model_animator::animator_time_t& BT::Model_animator::get_profile_prev_time_handle(
+    Animator_timer_profile profile) const
+{
+    switch (profile)
+    {
+    case SIMULATION_PROFILE: return const_cast<animator_time_t&>(m_prev_sim_time);
+
+    default:
+        assert(false);
+        return *reinterpret_cast<animator_time_t*>(0xDEADBEEF);
+        break;
+    }
 }

@@ -86,79 +86,79 @@
             "name": "hitcapsule_group_1_enabled:ov:true"
         }
     ],
-    "hitcapsule_group_set": {
-        "hitcapsule_groups": [
+    "hitcapsule_group_set_template": {
+        "m_hitcapsule_grps": [
             {
-                "capsules": [
+                "m_capsules": [
                     {
                         "connecting_bone_name": "",
                         "connecting_bone_name_2": "",
-                        "origin_a": [
-                            0.0,
-                            0.0,
-                            0.0
-                        ],
-                        "origin_b": [
-                            1.0,
-                            1.0,
-                            1.0
-                        ],
+                        "origin_a": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        },
+                        "origin_b": {
+                            "x": 1.0,
+                            "y": 1.0,
+                            "z": 1.0
+                        },
                         "radius": 0.5
                     },
                     {
                         "connecting_bone_name": "Upper Arm.R",
                         "connecting_bone_name_2": "",
-                        "origin_a": [
-                            -0.10000000149011612,
-                            1.5,
-                            0.0
-                        ],
-                        "origin_b": [
-                            -0.5,
-                            1.5,
-                            0.0
-                        ],
+                        "origin_a": {
+                            "x": -0.10000000149011612,
+                            "y": 1.5,
+                            "z": 0.0
+                        },
+                        "origin_b": {
+                            "x": -0.5,
+                            "y": 1.5,
+                            "z": 0.0
+                        },
                         "radius": 0.10000000149011612
                     },
                     {
                         "connecting_bone_name": "Forearm.R",
                         "connecting_bone_name_2": "",
-                        "origin_a": [
-                            -0.5,
-                            1.5,
-                            0.0
-                        ],
-                        "origin_b": [
-                            -0.75,
-                            1.5,
-                            0.0
-                        ],
+                        "origin_a": {
+                            "x": -0.5,
+                            "y": 1.5,
+                            "z": 0.0
+                        },
+                        "origin_b": {
+                            "x": -0.75,
+                            "y": 1.5,
+                            "z": 0.0
+                        },
                         "radius": 0.10000000149011612
                     }
                 ],
-                "enabled": false,
-                "type": 0
+                "m_enabled": false,
+                "m_type": 0
             },
             {
-                "capsules": [
+                "m_capsules": [
                     {
                         "connecting_bone_name": "Hand Attachment",
                         "connecting_bone_name_2": "",
-                        "origin_a": [
-                            -0.824999988079071,
-                            1.475000023841858,
-                            1.0499999523162842
-                        ],
-                        "origin_b": [
-                            -0.824999988079071,
-                            1.475000023841858,
-                            0.07500000298023224
-                        ],
+                        "origin_a": {
+                            "x": -0.824999988079071,
+                            "y": 1.475000023841858,
+                            "z": 1.0499999523162842
+                        },
+                        "origin_b": {
+                            "x": -0.824999988079071,
+                            "y": 1.475000023841858,
+                            "z": 0.07500000298023224
+                        },
                         "radius": 0.10000000149011612
                     }
                 ],
-                "enabled": false,
-                "type": 1
+                "m_enabled": false,
+                "m_type": 1
             }
         ]
     }

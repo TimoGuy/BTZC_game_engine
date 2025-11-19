@@ -1,9 +1,9 @@
 #pragma once
 
 #include "../physics_engine/physics_engine.h"
-#include "../scene/scene_serialization_ifc.h"
 #include "../uuid/uuid_ifc.h"
-#include "cglm/cglm.h"
+#include "render_layer.h"
+#include "btglm.h"
 #include "material.h"
 #include "mesh.h"
 #include "model_animator.h"
@@ -23,27 +23,14 @@ namespace BT
 {
 
 class Game_object;
-
-enum Render_layer : uint8_t
-{
-    RENDER_LAYER_ALL          = 0b11111111,
-    RENDER_LAYER_NONE         = 0b00000000,
-
-    RENDER_LAYER_DEFAULT      = 0b00000001,
-    RENDER_LAYER_INVISIBLE    = 0b00000010,
-    RENDER_LAYER_LEVEL_EDITOR = 0b00000100,
-};
-
 class Physics_object;
 
-class Render_object : public Scene_serialization_ifc, public UUID_ifc
+class Render_object : public UUID_ifc
 {
 public:
-    Render_object(Game_object& game_obj,
-                  Render_layer layer,
-                  Renderable_ifc const* renderable = nullptr);
+    Render_object(Render_layer layer);
 
-    Game_object& get_owning_game_obj() { return m_game_obj; }
+    Renderable_ifc const* get_renderable() { return m_renderable; }
 
     void set_model(Model const* model)
     {
@@ -71,18 +58,19 @@ public:
     }
     Model_animator* get_model_animator() { return m_model_animator.get(); }
 
+    /// Read and write handle for render transform.
+    vec4* render_transform() { return m_render_transform; }
+
     void render(Render_layer active_layers,
                 Material_ifc* override_material = nullptr);
 
-    // Scene_serialization_ifc.
-    void scene_serialize(Scene_serialization_mode mode, json& node_ref) override;
-
 private:
-    Game_object& m_game_obj;
     Render_layer m_layer;
     Renderable_ifc const* m_renderable;
     unique_ptr<Deformed_model> m_deformed_model{ nullptr };  // For owning a deformed model (since models are stored in a bank).
     unique_ptr<Model_animator> m_model_animator{ nullptr };
+
+    mat4 m_render_transform = GLM_MAT4_IDENTITY_INIT;
 };
 
 // @COPYPASTA: Not quite copypasta. It's a little bit different.
@@ -94,6 +82,9 @@ public:
     vector<Render_object*> checkout_all_render_objs();
     vector<Render_object*> checkout_render_obj_by_key(vector<UUID>&& keys);
     void return_render_objs(vector<Render_object*>&& render_objs);
+
+    /// Gets number of render objects in this pool.
+    size_t get_num_render_objects() const;
 
 private:
     unordered_map<UUID, Render_object> m_render_objects;

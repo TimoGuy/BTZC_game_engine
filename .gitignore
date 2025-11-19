@@ -13,3 +13,6 @@ compile_commands.json
 # Scene importer tool python env.
 scene_importer_tool/venv/
 scene_importer_tool/env/
+
+# This specific file that's used as a temp file during editing time should be ignored.
+assets/scenes/._temp_btscene_save_for_playmode.btscene

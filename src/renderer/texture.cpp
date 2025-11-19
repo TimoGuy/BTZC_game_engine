@@ -1,8 +1,8 @@
 #include "texture.h"
 
+#include "btlogger.h"
 // @NOTE: This should be abstract but is actually a specialization of OpenGL code.
 #include "glad/glad.h"
-#include "logger.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #include <cassert>

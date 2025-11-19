@@ -3,11 +3,7 @@
 #include "../btzc_game_engine.h"
 #include "../renderer/model_animator.h"
 #include "../service_finder/service_finder.h"
-
-#include "nlohmann/json.hpp"
-using json = nlohmann::json;
-
-#include <fstream>
+#include "btjson.h"
 
 
 BT::Animator_template_bank::Animator_template_bank()
@@ -21,12 +17,8 @@ BT::Animator_template const& BT::Animator_template_bank::load_animator_template(
 {
     if (m_anim_template_cache.find(anim_template_name) == m_anim_template_cache.end())
     {   // Load from disk.
-        static auto load_to_json_fn = [](std::string const& fname) {  // @COPYPASTA.
-            std::ifstream f{ fname };
-            return json::parse(f);
-        };
-        json root = load_to_json_fn(BTZC_GAME_ENGINE_ASSET_ANIMATOR_TEMPLATES_PATH
-                                    + anim_template_name);
+        json root = json_load_from_disk(BTZC_GAME_ENGINE_ASSET_ANIMATOR_TEMPLATES_PATH +
+                                        anim_template_name);
 
         // Fill in new struct.
         Animator_template new_template;

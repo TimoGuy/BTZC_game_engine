@@ -18,11 +18,12 @@ namespace BT
 
 class Model;
 
-class Phys_obj_impl_char_controller : public Physics_object_type_impl_ifc, public JPH::CharacterContactListener
+class Phys_obj_impl_char_controller
+    : public Physics_object_type_impl_ifc
+    , public JPH::CharacterContactListener
 {
 public:
-    Phys_obj_impl_char_controller(Physics_engine& phys_engine,
-                                  float_t radius,
+    Phys_obj_impl_char_controller(float_t radius,
                                   float_t height,
                                   float_t crouch_height,
                                   Physics_transform&& init_transform);
@@ -51,9 +52,6 @@ public:
     Physics_transform read_transform() override;
     void update_debug_mesh() override;
 
-    // Scene_serialization_ifc.
-    void scene_serialize(Scene_serialization_mode mode, json& node_ref) override;
-
     // Character contact listener.
     void OnAdjustBodyVelocity(JPH::CharacterVirtual const* inCharacter,
                               JPH::Body const& in_body2,
@@ -81,9 +79,7 @@ public:
                         JPH::Vec3Arg in_character_velocity,
                         JPH::Vec3& io_new_character_velocity) override;
 
-
 private:
-    Physics_engine& m_phys_engine;
     JPH::PhysicsSystem& m_phys_system;
     JPH::TempAllocator& m_phys_temp_allocator;
     float_t m_radius;

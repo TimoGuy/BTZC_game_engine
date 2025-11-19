@@ -1,9 +1,7 @@
 #pragma once
 
-#include <functional>
 #include <string>
 
-using std::function;
 using std::string;
 
 
@@ -21,18 +19,15 @@ class ImGui_renderer
 public:
     ImGui_renderer();
 
-    void set_game_obj_pool_ref(Game_object_pool* pool) { m_game_obj_pool = pool; }
     void set_camera_ref(Camera* camera) { m_camera = camera; }
     void set_renderer_ref(Renderer* renderer) { m_renderer = renderer; }
     void set_input_handler_ref(Input_handler* input_handler) { m_input_handler = input_handler; }
 
-    using Switch_scene_fn = function<void(string const&)>;
-    void set_switch_scene_callback(Switch_scene_fn&& request_switch_scene_callback)
-    {
-        m_request_switch_scene_callback = std::move(request_switch_scene_callback);
-    }
+    /// This flag is retrieved for getting different behavior amongst systems when the AFA editor is
+    /// being used.
+    /// As in, this is @HACK ... very verrry hacky!!!  -Thea 2025/11/09
+    bool is_anim_frame_data_editor_context() const;
 
-    void set_selected_game_obj(Game_object* game_obj);
     void render_imgui(float_t delta_time);
 
 private:
@@ -40,7 +35,6 @@ private:
     Camera* m_camera{ nullptr };
     Renderer* m_renderer{ nullptr };
     Input_handler* m_input_handler{ nullptr };
-    Switch_scene_fn m_request_switch_scene_callback;
 
     void render_imgui__level_editor_context(bool enter, float_t delta_time);
     void render_imgui__animation_frame_data_editor_context(bool enter, float_t delta_time);

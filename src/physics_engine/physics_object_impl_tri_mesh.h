@@ -20,8 +20,7 @@ class Model;
 class Phys_obj_impl_tri_mesh : public Physics_object_type_impl_ifc
 {
 public:
-    Phys_obj_impl_tri_mesh(Physics_engine& phys_engine,
-                           Model const* model,
+    Phys_obj_impl_tri_mesh(Model const* model,
                            JPH::EMotionType motion_type,
                            Physics_transform&& init_transform);
     Phys_obj_impl_tri_mesh(const Phys_obj_impl_tri_mesh&)            = delete;
@@ -35,8 +34,6 @@ public:
     Physics_transform read_transform() override;
     void update_debug_mesh() override;
 
-    // Scene_serialization_ifc.
-    void scene_serialize(Scene_serialization_mode mode, json& node_ref) override;
 private:
     JPH::BodyInterface& m_phys_body_ifc;
     Model const* m_model;  // Save for serialization purposes, and debug rendering purposes.

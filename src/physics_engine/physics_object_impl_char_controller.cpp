@@ -11,16 +11,15 @@
 #include "Jolt/Physics/Collision/Shape/RotatedTranslatedShape.h"
 #include "Jolt/Physics/PhysicsSystem.h"
 #include "physics_engine_impl_layers.h"
+#include "service_finder/service_finder.h"
 
 
-BT::Phys_obj_impl_char_controller::Phys_obj_impl_char_controller(Physics_engine& phys_engine,
-                                                                 float_t radius,
+BT::Phys_obj_impl_char_controller::Phys_obj_impl_char_controller(float_t radius,
                                                                  float_t height,
                                                                  float_t crouch_height,
                                                                  Physics_transform&& init_transform)
-    : m_phys_engine{ phys_engine }
-    , m_phys_system{ *reinterpret_cast<JPH::PhysicsSystem*>(m_phys_engine.get_physics_system_ptr()) }
-    , m_phys_temp_allocator{ *reinterpret_cast<JPH::TempAllocator*>(m_phys_engine.get_physics_temp_allocator_ptr()) }
+    : m_phys_system{ *reinterpret_cast<JPH::PhysicsSystem*>(service_finder::find_service<Physics_engine>().get_physics_system_ptr()) }
+    , m_phys_temp_allocator{ *reinterpret_cast<JPH::TempAllocator*>(service_finder::find_service<Physics_engine>().get_physics_temp_allocator_ptr()) }
     , m_radius{ radius }
     , m_height{ height - 2.0f * radius }
     , m_crouch_height{ crouch_height - 2.0f * radius }
@@ -72,11 +71,11 @@ BT::Phys_obj_impl_char_controller::Phys_obj_impl_char_controller(Physics_engine&
 
     // Create debug render job.
     static auto s_debug_model{ Model_bank::get_model("unit_box") };
-    m_debug_mesh_id =
-        get_main_debug_mesh_pool().emplace_debug_mesh({
-            *s_debug_model,
-            Material_bank::get_material("debug_physics_wireframe_fore_material"),
-            Material_bank::get_material("debug_physics_wireframe_back_material") });
+    m_debug_mesh_id = get_main_debug_mesh_pool().emplace_debug_mesh(
+        { s_debug_model,
+          Debug_mesh_pool::k_mask_phys_obj,
+          Material_bank::get_material("debug_physics_wireframe_fore_material"),
+          Material_bank::get_material("debug_physics_wireframe_back_material") });
 }
 
 BT::Phys_obj_impl_char_controller::~Phys_obj_impl_char_controller()
@@ -235,10 +234,12 @@ void BT::Phys_obj_impl_char_controller::update_debug_mesh()
     current_trans.position.SetY(
         current_trans.position.GetY() + 0.5f * height + m_radius);
 
+    // @TODO: When camera or renderer changes, this needs to change.
+    //        Ensure matching with `write_render_transforms.cpp`.
     mat4 graphic_trans;
-    glm_translate_make(graphic_trans, vec3{ current_trans.position.GetX(),
-                                            current_trans.position.GetY(),
-                                            current_trans.position.GetZ() });
+    glm_translate_make(graphic_trans, vec3{ static_cast<float_t>(current_trans.position.GetX()),
+                                            static_cast<float_t>(current_trans.position.GetY()),
+                                            static_cast<float_t>(current_trans.position.GetZ()) });
     glm_quat_rotate(graphic_trans, versor{ current_trans.rotation.GetX(),
                                            current_trans.rotation.GetY(),
                                            current_trans.rotation.GetZ(),
@@ -249,23 +250,6 @@ void BT::Phys_obj_impl_char_controller::update_debug_mesh()
     glm_mat4_copy(graphic_trans,
                   get_main_debug_mesh_pool()
                       .get_debug_mesh_volatile_handle(m_debug_mesh_id).transform);
-}
-
-// Scene_serialization_ifc.
-void BT::Phys_obj_impl_char_controller::scene_serialize(Scene_serialization_mode mode,
-                                                        json& node_ref)
-{
-    if (mode == SCENE_SERIAL_MODE_SERIALIZE)
-    {
-        node_ref["radius"] = m_radius;
-        node_ref["height"] = (m_height + 2.0f * m_radius);
-        node_ref["crouch_height"] = (m_crouch_height + 2.0f * m_radius);
-    }
-    else if (mode == SCENE_SERIAL_MODE_DESERIALIZE)
-    {
-        // @TODO: Get rid of the assymetrical creation/serialization structure. (or not! Depends on how you feel during the upcoming code review)  -Thea 2025/06/03
-        assert(false);
-    }
 }
 
 // Character contact listener.

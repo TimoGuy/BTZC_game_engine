@@ -1,10 +1,7 @@
 #pragma once
 
 #include "../animation_frame_action_tool/runtime_data.h"
-#include "cglm/mat4.h"
-#include "cglm/types-struct.h"
-#include "cglm/types.h"
-#include "cglm/util.h"
+#include "btglm.h"
 #include <atomic>
 #include <limits>
 #include <string>
@@ -105,15 +102,35 @@ public:
 
     std::vector<Animator_state> const& get_animator_states() const;
     Animator_state const& get_animator_state(size_t idx) const;
+
+    Animator_state& get_animator_state_write_handle(size_t idx);
+
     void change_state_idx(uint32_t to_state);
 
     size_t get_model_animation_idx(std::string anim_name) const;
     Model_joint_animation const& get_model_animation(size_t idx) const;
 
+    /// Sets time for all timer profiles of the animator.
     void set_time(float_t time);
-    void update(float_t delta_time);
-    void calc_anim_pose(std::vector<mat4s>& out_joint_matrices) const;
-    void get_anim_floored_frame_pose(std::vector<mat4s>& out_joint_matrices) const;
+
+    /// Profile enum for which timing of the animator to base calculations off of.
+    enum Animator_timer_profile
+    {
+        SIMULATION_PROFILE,
+        RENDERER_PROFILE,
+    };
+
+    /// Updates the animator, supplying a deltatime.
+    /// There are two animator timers, so you need to give which timer to update.
+    void update(Animator_timer_profile profile, float_t delta_time);
+
+    /// Calculates the set of joint matrices, interpolated.
+    void calc_anim_pose(Animator_timer_profile profile,
+                        std::vector<mat4s>& out_joint_matrices) const;
+
+    /// Calculates the set of joint matrices, floored. Note this one will be faster.
+    void get_anim_floored_frame_pose(Animator_timer_profile profile,
+                                     std::vector<mat4s>& out_joint_matrices) const;
 
     anim_frame_action::Runtime_controllable_data& get_anim_frame_action_data_handle();
 
@@ -123,8 +140,17 @@ private:
 
     // @TEMP: Super simple animator right here for now.
     std::atomic_uint32_t m_current_state_idx{ 0 };
-    std::atomic<float_t> m_time{ 0.0f };
-    std::atomic<float_t> m_prev_time{ std::numeric_limits<float_t>::lowest() };  // For rising edge events.
+
+    // @NOTE: Times need to be atomic since `change_state_idx()` and `set_time()` can be called from
+    //        any thread.
+    using animator_time_t = typename std::atomic<float_t>;
+
+    animator_time_t& get_profile_time_handle(Animator_timer_profile profile) const;
+    animator_time_t& get_profile_prev_time_handle(Animator_timer_profile profile) const;
+
+    animator_time_t m_sim_time{ 0.0f };
+    animator_time_t m_prev_sim_time{ std::numeric_limits<float_t>::lowest() };  // For rising edge events.
+    animator_time_t m_rend_time{ 0.0f };
     ///////////////////////////////////////////////////
 
     std::vector<Animator_state> m_animator_states;

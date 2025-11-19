@@ -1,14 +1,12 @@
 #pragma once
 
-#include "../scene/scene_serialization_ifc.h"
 #include "../uuid/uuid_ifc.h"
-#include "cglm/cglm.h"
 #include "Jolt/Jolt.h"
 #include "Jolt/Math/MathTypes.h"
 #include "Jolt/Math/Quat.h"
 #include "Jolt/Physics/Body/MotionType.h"
 #include "Jolt/Physics/Character/CharacterVirtual.h"
-#include "rvec3.h"
+#include "btglm.h"
 #include <atomic>
 #include <cassert>
 #include <memory>
@@ -42,9 +40,11 @@ struct Physics_transform
 {
     JPH::RVec3 position = JPH::RVec3::sZero();
     JPH::Quat rotation = JPH::Quat::sIdentity();
+    
+    static Physics_transform make_phys_trans(rvec3s pos, versors rot);
 };
 
-class Physics_object_type_impl_ifc : public Scene_serialization_ifc
+class Physics_object_type_impl_ifc
 {
 public:
     virtual ~Physics_object_type_impl_ifc() = default;
@@ -74,22 +74,14 @@ public:
 class Physics_engine;
 class Model;
 
-class Physics_object : public Scene_serialization_ifc, public UUID_ifc
+class Physics_object : public UUID_ifc
 {
 public:
-    static unique_ptr<Physics_object> create_physics_object_from_serialization(
-        Game_object& game_obj,
-        Physics_engine& phys_engine,
-        json& node_ref);
-    static unique_ptr<Physics_object> create_triangle_mesh(Game_object& game_obj,
-                                                           Physics_engine& phys_engine,
-                                                           bool interpolate_transform,
+    static unique_ptr<Physics_object> create_triangle_mesh(bool interpolate_transform,
                                                            Model const* model,
                                                            JPH::EMotionType motion_type,
                                                            Physics_transform&& init_transform);
-    static unique_ptr<Physics_object> create_character_controller(Game_object& game_obj,
-                                                                  Physics_engine& phys_engine,
-                                                                  bool interpolate_transform,
+    static unique_ptr<Physics_object> create_character_controller(bool interpolate_transform,
                                                                   float_t radius,
                                                                   float_t height,
                                                                   float_t crouch_height,
@@ -97,9 +89,7 @@ public:
 
 private:
     // Required to use a factory function to init.
-    Physics_object(Game_object& game_obj,
-                   Physics_engine const* phys_engine,
-                   bool interpolate_transform,
+    Physics_object(bool interpolate_transform,
                    unique_ptr<Physics_object_type_impl_ifc>&& impl_type);
 public:
     Physics_object(Physics_object const&)            = delete;
@@ -110,14 +100,9 @@ public:
     Physics_object_type_impl_ifc* get_impl() { return m_type_pimpl.get(); }
     void read_and_store_new_transform();
 
-    void get_transform_for_game_obj(rvec3& out_position, versor& out_rotation);
-
-    // Scene_serialization_ifc.
-    void scene_serialize(Scene_serialization_mode mode, json& node_ref) override;
+    void get_transform_for_entity(rvec3& out_position, versor& out_rotation);
 
 private:
-    Game_object& m_game_obj;
-    Physics_engine const* m_phys_engine;
     bool m_interpolate;
 
     unique_ptr<Physics_object_type_impl_ifc> m_type_pimpl;

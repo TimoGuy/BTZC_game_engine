@@ -16,6 +16,7 @@ public:
     float_t calc_delta_time();
 
 private:
+    bool m_started{ false };
     high_res_time_t m_prev_time;
 };
 

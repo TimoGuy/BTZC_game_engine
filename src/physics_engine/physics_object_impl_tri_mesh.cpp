@@ -13,18 +13,18 @@
 #include "Jolt/Physics/Body/MotionType.h"
 #include "Jolt/Physics/Collision/Shape/MeshShape.h"
 #include "Jolt/Physics/EActivation.h"
-#include "cglm/affine.h"
-#include "logger.h"
+#include "btglm.h"
+#include "btlogger.h"
 #include "physics_engine.h"
 #include "physics_engine_impl_layers.h"
+#include "service_finder/service_finder.h"
 #include <cassert>
 
 
-BT::Phys_obj_impl_tri_mesh::Phys_obj_impl_tri_mesh(Physics_engine& phys_engine,
-                                                   Model const* model,
+BT::Phys_obj_impl_tri_mesh::Phys_obj_impl_tri_mesh(Model const* model,
                                                    JPH::EMotionType motion_type,
                                                    Physics_transform&& init_transform)
-    : m_phys_body_ifc{ *reinterpret_cast<JPH::BodyInterface*>(phys_engine.get_physics_body_ifc()) }
+    : m_phys_body_ifc{ *reinterpret_cast<JPH::BodyInterface*>(service_finder::find_service<Physics_engine>().get_physics_body_ifc()) }
     , m_model{ model }
     , m_can_move{ motion_type == JPH::EMotionType::Kinematic }
 {
@@ -88,11 +88,11 @@ BT::Phys_obj_impl_tri_mesh::Phys_obj_impl_tri_mesh(Physics_engine& phys_engine,
     m_body_id = m_phys_body_ifc.CreateAndAddBody(mesh_body_settings, JPH::EActivation::DontActivate);
 
     // Create debug render job.
-    m_debug_mesh_id =
-        get_main_debug_mesh_pool().emplace_debug_mesh({
-            *m_model,
-            Material_bank::get_material("debug_physics_wireframe_fore_material"),
-            Material_bank::get_material("debug_physics_wireframe_back_material") });
+    m_debug_mesh_id = get_main_debug_mesh_pool().emplace_debug_mesh(
+        { m_model,
+          Debug_mesh_pool::k_mask_phys_obj,
+          Material_bank::get_material("debug_physics_wireframe_fore_material"),
+          Material_bank::get_material("debug_physics_wireframe_back_material") });
 }
 
 BT::Phys_obj_impl_tri_mesh::~Phys_obj_impl_tri_mesh()
@@ -106,7 +106,14 @@ void BT::Phys_obj_impl_tri_mesh::move_kinematic(Physics_transform&& new_transfor
     if (!m_can_move)
     {
         logger::printe(logger::ERROR, "Object marked as unmovable.");
-        assert(false);
+
+        constexpr bool k_error_on_try_move{ false };
+        if constexpr (k_error_on_try_move)
+        {
+            assert(false);
+        }
+
+        return;
     }
     m_phys_body_ifc.MoveKinematic(m_body_id,
                                   new_transform.position,
@@ -124,10 +131,12 @@ void BT::Phys_obj_impl_tri_mesh::update_debug_mesh()
 {
     auto current_trans{ read_transform() };
 
+    // @TODO: When camera or renderer changes, this needs to change.
+    //        Ensure matching with `write_render_transforms.cpp`.
     mat4 graphic_trans;
-    glm_translate_make(graphic_trans, vec3{ current_trans.position.GetX(),
-                                            current_trans.position.GetY(),
-                                            current_trans.position.GetZ() });
+    glm_translate_make(graphic_trans, vec3{ static_cast<float_t>(current_trans.position.GetX()),
+                                            static_cast<float_t>(current_trans.position.GetY()),
+                                            static_cast<float_t>(current_trans.position.GetZ()) });
     glm_quat_rotate(graphic_trans, versor{ current_trans.rotation.GetX(),
                                            current_trans.rotation.GetY(),
                                            current_trans.rotation.GetZ(),
@@ -135,20 +144,4 @@ void BT::Phys_obj_impl_tri_mesh::update_debug_mesh()
     glm_mat4_copy(graphic_trans,
                   get_main_debug_mesh_pool()
                       .get_debug_mesh_volatile_handle(m_debug_mesh_id).transform);
-}
-
-// Scene_serialization_ifc.
-void BT::Phys_obj_impl_tri_mesh::scene_serialize(Scene_serialization_mode mode,
-                                                 json& node_ref)
-{
-    if (mode == SCENE_SERIAL_MODE_SERIALIZE)
-    {
-        node_ref["model_name"] = Model_bank::get_model_name(m_model);
-        node_ref["motion_type"] = m_phys_body_ifc.GetMotionType(m_body_id);
-    }
-    else if (mode == SCENE_SERIAL_MODE_DESERIALIZE)
-    {
-        // @TODO: Get rid of the assymetrical creation/serialization structure. (or not! Depends on how you feel during the upcoming code review)  -Thea 2025/06/03
-        assert(false);
-    }
 }

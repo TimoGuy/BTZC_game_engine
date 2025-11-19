@@ -46,6 +46,9 @@ public:
     void return_physics_object(Physics_object* phys_obj);
     void return_physics_objects(vector<Physics_object*>&& phys_objs);
 
+    /// Gets number of physics objects.
+    size_t get_num_physics_objects() const;
+
 private:
     static constexpr float_t k_accumulate_delta_time_limit{ k_simulation_delta_time * 3 };
 

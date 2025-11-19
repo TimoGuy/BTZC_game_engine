@@ -1,6 +1,6 @@
 #include "material_impl_opaque_texture_shaded.h"
 
-#include "cglm/util.h"
+#include "btglm.h"
 #include "material.h"
 #include "shader.h"
 #include <cmath>

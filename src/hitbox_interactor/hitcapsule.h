@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../scene/scene_serialization_ifc.h"
-#include "cglm/types-struct.h"
+#include "btglm.h"
+#include "btjson.h"
 
 #include <string>
 #include <vector>
@@ -21,6 +21,14 @@ struct Hitcapsule
 
     std::string connecting_bone_name{ "" };  // Leave empty str for no bone connection.
     std::string connecting_bone_name_2{ "" };  // Leave empty str for same as `connecting_bone_name`.
+
+    /// Serialization/deserialization.
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(Hitcapsule,
+                                   origin_a,
+                                   origin_b,
+                                   radius,
+                                   connecting_bone_name,
+                                   connecting_bone_name_2);
 
     // Calculated info.
     vec3    calcd_origin_a;       // Set to `origin_a` on init. Updated to connect to joint mat in
@@ -48,10 +56,6 @@ public:
         HITBOX_TYPE_GIVE_HURT,
     };
 
-    Hitcapsule_group(bool enabled,
-                     Type type,
-                     std::vector<Hitcapsule>&& capsules);
-
     void set_enabled(bool enabled);
     bool is_enabled();
     Type get_type();
@@ -62,21 +66,23 @@ public:
     void emplace_debug_render_repr() const;
 
 private:
-    bool m_enabled;
-    Type m_type;
+    bool m_enabled{ false };
+    Type m_type{ 0 };
     std::vector<Hitcapsule> m_capsules;
 
-    void copy_into_me();
+public:
+    /// Serialization/deserialization.
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(Hitcapsule_group, m_enabled, m_type, m_capsules);
 };
 
-class Hitcapsule_group_set : public Scene_serialization_ifc
+class Hitcapsule_group_set
 {
 public:
     ~Hitcapsule_group_set();
 
-    void scene_serialize(Scene_serialization_mode mode, json& node_ref) override;
-
     void replace_and_reregister(Hitcapsule_group_set const& other);
+    void unregister_from_overlap_solver();
+
     void connect_animator(Model_animator const& animator);
 
     std::vector<Hitcapsule_group>& get_hitcapsule_groups();
@@ -86,7 +92,12 @@ public:
 
 private:
     std::vector<Hitcapsule_group> m_hitcapsule_grps;
+    bool m_is_connected_to_animator{ false };
     bool m_is_registered_in_overlap_solver{ false };
+
+public:
+    /// Serialization/deserialization.
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(Hitcapsule_group_set, m_hitcapsule_grps);
 };
 
 class Hitcapsule_group_overlap_solver
@@ -96,6 +107,7 @@ public:
 
     bool add_group_set(Hitcapsule_group_set& group_set);
     bool remove_group_set(Hitcapsule_group_set& group_set);
+    size_t get_num_group_sets() const;
 
     void update_overlaps();
 
