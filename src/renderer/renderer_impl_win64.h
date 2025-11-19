@@ -25,7 +25,7 @@ public:
 
     bool get_requesting_close();
     void poll_events();
-    void render(float_t delta_time, function<void()>&& debug_views_render_fn);
+    void render(float_t delta_time);
 
     inline Input_handler& get_input_handler() { return m_input_handler; }
 
@@ -94,7 +94,7 @@ private:
     void render_scene_to_picking_framebuffer();
     void find_owning_entity_and_set_as_selected(Render_object* render_object);
     void render_hdr_color_to_ldr_framebuffer();
-    void render_debug_views_to_ldr_framebuffer(float_t delta_time, function<void()>&& debug_views_render_fn);
+    void render_debug_views_to_ldr_framebuffer(float_t delta_time);
     void present_display_frame();
 
     // HDR rendering.

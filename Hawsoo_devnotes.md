@@ -550,7 +550,9 @@ while (running_game_loop)
         - [x] Make another non-player character that has simple movement.
         - [x] Test it with an imgui edit.
 
-- [ ] Delete the old system. Gut it out.
+- [x] Delete the old system. Gut it out.
+    - [x] Ensure that saving the scene actually saves the scene.
+    - [x] Remove the debug draw lambda from the renderer.
 
 - [ ] Make merge request.
 >-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-

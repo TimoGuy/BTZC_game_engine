@@ -1,12 +1,8 @@
 #include "imgui_renderer.h"
 
-#include "game_system_logic/world/world_properties.h"
-#include "refactor_to_entt.h"
-
 #include "../animation_frame_action_tool/editor_state.h"
 #include "../animation_frame_action_tool/runtime_data.h"
 #include "../btzc_game_engine.h"
-#include "../game_object/game_object.h"
 #include "../input_handler/input_codes.h"
 #include "../input_handler/input_handler.h"
 #include "../service_finder/service_finder.h"
@@ -15,6 +11,7 @@
 #include "btjson.h"
 #include "game_system_logic/system/imgui_render_transform_hierarchy_window.h"
 #include "game_system_logic/world/scene_loader.h"
+#include "game_system_logic/world/world_properties.h"
 #include "camera.h"
 #include "debug_render_job.h"
 #include "imgui.h"
@@ -122,26 +119,10 @@ void BT::ImGui_renderer::render_imgui(float_t delta_time)
                 open_load_scene_modal_popup = true;
 
             if (ImGui::MenuItem("Save"))
-            {   // @TODO: @NOCHECKIN: @DEBUG
-                // Serialize scene.
+            {   // Serialize scene.
+                // @TODO: @NOCHECKIN: Create a persistent name for loading and editing and saving edited scenes!!!!  -Thea 2025/11/18
                 service_finder::find_service<world::Scene_loader>().save_all_entities_into_scene(
                     "TODO_FILL_IN_NAME_FOR_SAVING_SYSTEM_HEREEEE.btscene");
-
-                // @TODO: @NOCHECKIN: @THEA: vv CLEAN UP THIS DEAD CODE!!!! vv
-//                 json root = {};
-//                 size_t game_obj_idx{ 0 };
-// #if !BTZC_REFACTOR_TO_ENTT
-//                 auto const game_objs{ m_game_obj_pool->get_all_as_list_no_lock() };
-//                 for (auto game_obj : game_objs)
-//                 {
-//                     game_obj->scene_serialize(BT::SCENE_SERIAL_MODE_SERIALIZE, root[game_obj_idx++]);
-//                 }
-// #endif  // !BTZC_REFACTOR_TO_ENTT
-
-//                 // Save to disk.
-//                 json_save_to_disk(root,
-//                                   BTZC_GAME_ENGINE_ASSET_SCENE_PATH
-//                                   "sumthin_cumming_outta_me.btscene");
             }
 
             ImGui::Separator();
@@ -451,16 +432,6 @@ void BT::ImGui_renderer::render_imgui(float_t delta_time)
             ImGui::Checkbox("Auto switch to player cam on play.",
                             &s_on_play_switch_to_player_camera);
 
-#if !BTZC_REFACTOR_TO_ENTT
-            int32_t s_gizmo_trans_space_selection{ Game_object::get_imgui_gizmo_trans_space() };
-            if (ImGui::Combo("Gizmo transform space",
-                             &s_gizmo_trans_space_selection,
-                             "World space\0Local space\0"))
-            {
-                Game_object::set_imgui_gizmo_trans_space(s_gizmo_trans_space_selection);
-            }
-#endif  // !BTZC_REFACTOR_TO_ENTT
-
             ImGui::EndPopup();
         }
         ImGui::PopStyleVar();
@@ -631,13 +602,8 @@ void BT::ImGui_renderer::render_imgui__level_editor_context(bool enter, float_t 
     }
     ImGui::End();
 
-#if BTZC_REFACTOR_TO_ENTT
     // Scene transform hierarchy.
     system::imgui_render_transform_hierarchy_window(enter);
-#else
-    // Scene hierarchy.
-    m_game_obj_pool->render_imgui_scene_hierarchy();
-#endif  // !BTZC_REFACTOR_TO_ENTT
 
     // Game obj palette.
     ImGui::Begin("Game obj palette");

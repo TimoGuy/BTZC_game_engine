@@ -1,7 +1,5 @@
 #include "renderer_impl_win64.h"
 
-#include "refactor_to_entt.h"
-
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
@@ -14,7 +12,6 @@
 
 #include "../btzc_game_engine.h"
 #include "../input_handler/input_handler.h"
-#include "../game_object/game_object.h"
 #include "btglm.h"
 #include "btlogger.h"
 #include "debug_render_job.h"
@@ -218,7 +215,7 @@ void BT::Renderer::Impl::poll_events()
     glfwPollEvents();
 }
 
-void BT::Renderer::Impl::render(float_t delta_time, function<void()>&& debug_views_render_fn)
+void BT::Renderer::Impl::render(float_t delta_time)
 {
     if (m_main_viewport_wanted_dims.width != m_main_viewport_dims.width ||
         m_main_viewport_wanted_dims.height != m_main_viewport_dims.height)
@@ -258,7 +255,7 @@ void BT::Renderer::Impl::render(float_t delta_time, function<void()>&& debug_vie
     }
 
     render_hdr_color_to_ldr_framebuffer();
-    render_debug_views_to_ldr_framebuffer(delta_time, std::move(debug_views_render_fn));
+    render_debug_views_to_ldr_framebuffer(delta_time);
     render_imgui(delta_time);
 
     present_display_frame();
@@ -865,7 +862,6 @@ void BT::Renderer::Impl::render_scene_to_picking_framebuffer()
 
 void BT::Renderer::Impl::find_owning_entity_and_set_as_selected(Render_object* render_object)
 {
-#if BTZC_REFACTOR_TO_ENTT
     entt::entity ecs_entity{ entt::null };
 
     if (render_object != nullptr)
@@ -888,16 +884,6 @@ void BT::Renderer::Impl::find_owning_entity_and_set_as_selected(Render_object* r
     }
 
     system::set_selected_entity(ecs_entity);
-#else
-    Game_object* selected_game_obj{ nullptr };
-
-    if (render_object)
-    {
-        selected_game_obj = &render_object->get_owning_game_obj();
-    }
-
-    m_imgui_renderer.set_selected_game_obj(selected_game_obj);
-#endif  // !BTZC_REFACTOR_TO_ENTT
 }
 
 void BT::Renderer::Impl::render_hdr_color_to_ldr_framebuffer()
@@ -924,7 +910,7 @@ void BT::Renderer::Impl::render_hdr_color_to_ldr_framebuffer()
     }
 }
 
-void BT::Renderer::Impl::render_debug_views_to_ldr_framebuffer(float_t delta_time, function<void()>&& debug_views_render_fn)
+void BT::Renderer::Impl::render_debug_views_to_ldr_framebuffer(float_t delta_time)
 {
     glEnable(GL_DEPTH_TEST);
 
@@ -940,9 +926,6 @@ void BT::Renderer::Impl::render_debug_views_to_ldr_framebuffer(float_t delta_tim
     glBlitFramebuffer(0, 0, m_main_viewport_dims.width, m_main_viewport_dims.height,
                       0, 0, m_main_viewport_dims.width, m_main_viewport_dims.height,
                       GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-
-    // Render debug views.
-    debug_views_render_fn();
 
     // Render debug meshes.
     get_main_debug_mesh_pool().render_all_meshes();

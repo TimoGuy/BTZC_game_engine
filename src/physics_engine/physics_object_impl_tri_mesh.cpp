@@ -1,7 +1,5 @@
 #include "physics_object_impl_tri_mesh.h"
 
-#include "refactor_to_entt.h"
-
 #include "../renderer/debug_render_job.h"
 #include "../renderer/material.h"
 #include "../renderer/mesh.h"
@@ -23,11 +21,7 @@
 #include <cassert>
 
 
-BT::Phys_obj_impl_tri_mesh::Phys_obj_impl_tri_mesh(
-                                                   #if !BTZC_REFACTOR_TO_ENTT
-                                                   Physics_engine& phys_engine,
-                                                   #endif  // !BTZC_REFACTOR_TO_ENTT
-                                                   Model const* model,
+BT::Phys_obj_impl_tri_mesh::Phys_obj_impl_tri_mesh(Model const* model,
                                                    JPH::EMotionType motion_type,
                                                    Physics_transform&& init_transform)
     : m_phys_body_ifc{ *reinterpret_cast<JPH::BodyInterface*>(service_finder::find_service<Physics_engine>().get_physics_body_ifc()) }
@@ -149,22 +143,3 @@ void BT::Phys_obj_impl_tri_mesh::update_debug_mesh()
                   get_main_debug_mesh_pool()
                       .get_debug_mesh_volatile_handle(m_debug_mesh_id).transform);
 }
-
-
-#if !BTZC_REFACTOR_TO_ENTT
-// Scene_serialization_ifc.
-void BT::Phys_obj_impl_tri_mesh::scene_serialize(Scene_serialization_mode mode,
-                                                 json& node_ref)
-{
-    if (mode == SCENE_SERIAL_MODE_SERIALIZE)
-    {
-        node_ref["model_name"] = Model_bank::get_model_name(m_model);
-        node_ref["motion_type"] = m_phys_body_ifc.GetMotionType(m_body_id);
-    }
-    else if (mode == SCENE_SERIAL_MODE_DESERIALIZE)
-    {
-        // @TODO: Get rid of the assymetrical creation/serialization structure. (or not! Depends on how you feel during the upcoming code review)  -Thea 2025/06/03
-        assert(false);
-    }
-}
-#endif  // !BTZC_REFACTOR_TO_ENTT

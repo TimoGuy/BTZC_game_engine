@@ -1,8 +1,5 @@
 #include "physics_object.h"
 
-#include "refactor_to_entt.h"
-
-#include "../game_object/game_object.h"
 #include "../renderer/mesh.h"
 #include "Jolt/Jolt.h"
 #include "Jolt/Math/MathTypes.h"
@@ -57,128 +54,36 @@ BT::Physics_transform BT::Physics_transform::make_phys_trans(rvec3s pos, versors
     return { JPH::RVec3(pos.x, pos.y, pos.z), JPH::Quat(rot.x, rot.y, rot.z, rot.w) };
 }
 
-unique_ptr<BT::Physics_object> BT::Physics_object::create_physics_object_from_serialization(
-    Game_object& game_obj,
-    Physics_engine& phys_engine,
-    json& node_ref)
-{
-    // @TODO: @REFACTOR: 
-    string str_type{ node_ref["type"] };
-    assert(!str_type.empty());
-
-    Physics_object_type type;
-    for (auto& type_pair : k_phys_obj_str_type_pairs)
-        if (type_pair.first == str_type)
-        {
-            type = type_pair.second;
-            break;
-        }
-
-    // Create physics obj.
-    unique_ptr<Physics_object> new_phys_obj{ nullptr };
-    switch (type)
-    {
-#if !BTZC_REFACTOR_TO_ENTT
-        case PHYSICS_OBJECT_TYPE_TRIANGLE_MESH:
-            new_phys_obj = create_triangle_mesh(game_obj,
-                                                phys_engine,
-                                                node_ref["interpolate_transform"],
-                                                Model_bank::get_model(node_ref["model_name"]),
-                                                node_ref["motion_type"],
-                                                { json_to_vec3(node_ref["init_transform"][0]),
-                                                  json_to_quat(node_ref["init_transform"][1]) });
-            break;
-
-        case PHYSICS_OBJECT_TYPE_CHARACTER_CONTROLLER:
-            new_phys_obj =
-                create_character_controller(game_obj,
-                                            phys_engine,
-                                            node_ref["interpolate_transform"],
-                                            node_ref["radius"],
-                                            node_ref["height"],
-                                            node_ref["crouch_height"],
-                                            { json_to_vec3(node_ref["init_transform"][0]),
-                                              json_to_quat(node_ref["init_transform"][1]) });
-            break;
-#endif  // !BTZC_REFACTOR_TO_ENTT
-
-        default:
-            logger::printef(logger::ERROR, "Unknown phys obj type: %u", type);
-            assert(false);
-            break;
-    }
-
-    assert(new_phys_obj != nullptr);
-    new_phys_obj->assign_uuid(node_ref["guid"], true);
-    return new_phys_obj;
-}
-
 unique_ptr<BT::Physics_object> BT::Physics_object::create_triangle_mesh(
-                                                                        #if !BTZC_REFACTOR_TO_ENTT
-                                                                        Game_object& game_obj,
-                                                                        Physics_engine& phys_engine,
-                                                                        #endif  // !BTZC_REFACTOR_TO_ENTT
-                                                                        bool interpolate_transform,
-                                                                        Model const* model,
-                                                                        JPH::EMotionType motion_type,
-                                                                        Physics_transform&& init_transform)
+    bool interpolate_transform,
+    Model const* model,
+    JPH::EMotionType motion_type,
+    Physics_transform&& init_transform)
 {
     auto tri_mesh =
-        make_unique<Phys_obj_impl_tri_mesh>(
-                                            #if !BTZC_REFACTOR_TO_ENTT
-                                            phys_engine,
-                                            #endif  // !BTZC_REFACTOR_TO_ENTT
-                                            model,
+        make_unique<Phys_obj_impl_tri_mesh>(model,
                                             motion_type,
                                             std::move(init_transform));
     return unique_ptr<Physics_object>(
-        new Physics_object(
-            #if !BTZC_REFACTOR_TO_ENTT
-            game_obj, &phys_engine,
-            #endif  // !BTZC_REFACTOR_TO_ENTT
-            interpolate_transform, std::move(tri_mesh)));
+        new Physics_object(interpolate_transform, std::move(tri_mesh)));
 }
 
 unique_ptr<BT::Physics_object> BT::Physics_object::create_character_controller(
-                                                                               #if !BTZC_REFACTOR_TO_ENTT
-                                                                               Game_object& game_obj,
-                                                                               Physics_engine& phys_engine,
-                                                                               #endif  // !BTZC_REFACTOR_TO_ENTT
-                                                                               bool interpolate_transform,
-                                                                               float_t radius,
-                                                                               float_t height,
-                                                                               float_t crouch_height,
-                                                                               Physics_transform&& init_transform)
+    bool interpolate_transform,
+    float_t radius,
+    float_t height,
+    float_t crouch_height,
+    Physics_transform&& init_transform)
 {
-    auto cc =
-        make_unique<Phys_obj_impl_char_controller>(
-                                                   #if !BTZC_REFACTOR_TO_ENTT
-                                                   phys_engine,
-                                                   #endif  // !BTZC_REFACTOR_TO_ENTT
-                                                   radius,
-                                                   height,
-                                                   crouch_height,
-                                                   std::move(init_transform));
-    return unique_ptr<Physics_object>(
-        new Physics_object(
-            #if !BTZC_REFACTOR_TO_ENTT
-            game_obj, &phys_engine,
-            #endif  // !BTZC_REFACTOR_TO_ENTT
-            interpolate_transform, std::move(cc)));
+    auto cc = make_unique<Phys_obj_impl_char_controller>(radius,
+                                                         height,
+                                                         crouch_height,
+                                                         std::move(init_transform));
+    return unique_ptr<Physics_object>(new Physics_object(interpolate_transform, std::move(cc)));
 }
 
-BT::Physics_object::Physics_object(
-                                   #if !BTZC_REFACTOR_TO_ENTT
-                                   Game_object& game_obj,
-                                   Physics_engine const* phys_engine,
-                                   #endif  // !BTZC_REFACTOR_TO_ENTT
-                                   bool interpolate_transform,
+BT::Physics_object::Physics_object(bool interpolate_transform,
                                    unique_ptr<Physics_object_type_impl_ifc>&& impl_type)
-    
-    #if !BTZC_REFACTOR_TO_ENTT
-    : m_game_obj{ game_obj }
-    , m_phys_engine{ phys_engine }
-    #endif  // !BTZC_REFACTOR_TO_ENTT
     : m_interpolate{ interpolate_transform }
     , m_type_pimpl{ std::move(impl_type) }
 {
@@ -238,35 +143,3 @@ void BT::Physics_object::get_transform_for_entity(rvec3& out_position, versor& o
         s_convert_transform_fn(trans_b.position, trans_b.rotation, out_position, out_rotation);
     }
 }
-
-#if !BTZC_REFACTOR_TO_ENTT
-// Scene_serialization_ifc.
-void BT::Physics_object::scene_serialize(Scene_serialization_mode mode, json& node_ref)
-{
-    if (mode == SCENE_SERIAL_MODE_SERIALIZE)
-    {
-        Physics_object_type type{ m_type_pimpl->get_type() };
-
-        for (auto& type_pair : k_phys_obj_str_type_pairs)
-            if (type_pair.second == type)
-            {
-                node_ref["type"] = type_pair.first;
-                break;
-            }
-        assert(!node_ref["type"].is_null());
-
-        node_ref["guid"] = UUID_helper::to_pretty_repr(get_uuid());
-        node_ref["interpolate_transform"] = m_interpolate;
-        m_type_pimpl->scene_serialize(mode, node_ref);
-
-        auto phys_transform{ m_type_pimpl->read_transform() };
-        vec3_to_json(phys_transform.position, node_ref["init_transform"][0]);
-        quat_to_json(phys_transform.rotation, node_ref["init_transform"][1]);
-    }
-    else if (mode == SCENE_SERIAL_MODE_DESERIALIZE)
-    {
-        // @TODO: Get rid of the assymetrical creation/serialization structure. (or not! Depends on how you feel during the upcoming code review)  -Thea 2025/06/03
-        assert(false);
-    }
-}
-#endif  // !BTZC_REFACTOR_TO_ENTT

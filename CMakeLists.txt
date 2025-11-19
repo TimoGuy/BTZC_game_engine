@@ -70,20 +70,6 @@ set(MAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/bt_lib/btlogger.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/bt_lib/btlogger.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/btzc_game_engine.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/component_registry.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/component_registry.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/components.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/components.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/game_object.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/game_object.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/system/concrete_systems.h
-    # ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/system/system__dev__anim_editor_tool_state_agent.cpp  @TEMP: To reduce errors for refactor.
-    # ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/system/system_animator_driven_hitcapsule_set.cpp  @TEMP: To reduce errors for refactor.
-    # ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/system/system_apply_phys_xform_to_rend_obj.cpp  @TEMP: To reduce errors for refactor.
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/system/system_ifc.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/system/system_ifc.h
-    # ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/system/system_player_character_movement.cpp  @TEMP: To reduce errors for refactor.
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_object/UNUSED_serialization.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/_dev_animation_frame_action_editor_agent.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/anim_frame_action_controller.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/animator_driven_hitcapsule_set.h
@@ -149,7 +135,6 @@ set(MAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_object.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/raycast_helper.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/raycast_helper.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/refactor_to_entt.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/animator_template.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/animator_template.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/camera_read_ifc.h
@@ -188,8 +173,6 @@ set(MAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/shader.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/texture.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/texture.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/scene/scene_serialization_ifc.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/scene/scene_serialization.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/service_finder/service_finder.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/service_finder/service_finder.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/settings/settings.cpp

@@ -26,7 +26,7 @@ public:
 
     bool get_requesting_close();
     void poll_events();
-    void render(float_t delta_time, function<void()>&& debug_views_render_fn);
+    void render(float_t delta_time);
 
     // Camera read.
     void fetch_camera_matrices(mat4& out_projection,

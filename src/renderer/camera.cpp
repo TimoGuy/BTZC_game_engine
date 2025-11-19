@@ -1,8 +1,5 @@
 #include "camera.h"
 
-#include "refactor_to_entt.h"
-
-#include "../game_object/game_object.h"
 #include "../input_handler/input_handler.h"
 #include "../renderer/imgui_renderer.h"
 #include "btglm.h"
@@ -524,7 +521,6 @@ void BT::Camera::update_frontend_follow_orbit(Input_handler::State const& input_
 
     vec3 mvt_velocity{ 0.0f, 0.0f, 0.0f };
 
-#if BTZC_REFACTOR_TO_ENTT
     float_t follow_offset_y{ 0 };
     {   // Follow a camera follow ref's transform, if one exists.
         auto follow_cam_view{
@@ -559,24 +555,6 @@ void BT::Camera::update_frontend_follow_orbit(Input_handler::State const& input_
             first = false;
         }
     }
-#else
-    if (!fo.game_object_ref.is_nil())
-    {   // Follow game object with camera.
-        auto game_obj{ fo.game_object_pool->get_one_no_lock(fo.game_object_ref) };
-        assert(game_obj != nullptr);
-
-        // Copy prev follow position.
-        vec3 from_follow_pos;
-        glm_vec3_copy(fo.current_follow_pos, from_follow_pos);
-
-        // Update follow position.
-        game_obj->get_transform_handle().get_position(fo.current_follow_pos);
-
-        // Calc mvt velocity (@NOTE: deltatime independant).
-        glm_vec3_sub(fo.current_follow_pos, from_follow_pos, mvt_velocity);
-        glm_vec3_scale(mvt_velocity, 1.0f / delta_time, mvt_velocity);
-    }
-#endif  // !BTZC_REFACTOR_TO_ENTT
 
     float_t auto_turn_delta{ 0.0f };
     mvt_velocity[1] = 0.0f;

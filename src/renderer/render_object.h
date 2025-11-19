@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../physics_engine/physics_engine.h"
-#include "../scene/scene_serialization_ifc.h"
 #include "../uuid/uuid_ifc.h"
 #include "render_layer.h"
 #include "btglm.h"
@@ -26,27 +25,10 @@ namespace BT
 class Game_object;
 class Physics_object;
 
-class Render_object
-#if BTZC_REFACTOR_TO_ENTT
-    : public UUID_ifc
-#else
-    : public Scene_serialization_ifc, public UUID_ifc
-#endif  // !BTZC_REFACTOR_TO_ENTT
+class Render_object : public UUID_ifc
 {
 public:
-    Render_object(
-#if !BTZC_REFACTOR_TO_ENTT
-        Game_object& game_obj,
-#endif  // !BTZC_REFACTOR_TO_ENTT
-        Render_layer layer
-#if !BTZC_REFACTOR_TO_ENTT
-        , Renderable_ifc const* renderable = nullptr
-#endif  // !BTZC_REFACTOR_TO_ENTT
-        );
-
-#if !BTZC_REFACTOR_TO_ENTT
-    Game_object& get_owning_game_obj() { return m_game_obj; }
-#endif  // !BTZC_REFACTOR_TO_ENTT
+    Render_object(Render_layer layer);
 
     Renderable_ifc const* get_renderable() { return m_renderable; }
 
@@ -82,15 +64,7 @@ public:
     void render(Render_layer active_layers,
                 Material_ifc* override_material = nullptr);
 
-#if !BTZC_REFACTOR_TO_ENTT
-    // Scene_serialization_ifc.
-    void scene_serialize(Scene_serialization_mode mode, json& node_ref) override;
-#endif  // !BTZC_REFACTOR_TO_ENTT
-
 private:
-#if !BTZC_REFACTOR_TO_ENTT
-    Game_object& m_game_obj;
-#endif  // !BTZC_REFACTOR_TO_ENTT
     Render_layer m_layer;
     Renderable_ifc const* m_renderable;
     unique_ptr<Deformed_model> m_deformed_model{ nullptr };  // For owning a deformed model (since models are stored in a bank).

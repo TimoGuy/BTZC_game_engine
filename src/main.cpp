@@ -4,9 +4,6 @@
 #include "game_system_logic/system/_dev_animation_frame_action_editor.h"
 #include "game_system_logic/system/animator_driven_hitcapsule_sets_update.h"
 #include "renderer/camera.h"
-#include "game_object/component_registry.h"
-#include "game_object/system/concrete_systems.h"
-#include "game_object/game_object.h"
 #include "game_system_logic/entity_container.h"
 #include "game_system_logic/component/component_registry.h"
 #include "game_system_logic/system/imgui_render_transform_hierarchy_window.h"
@@ -28,7 +25,6 @@
 #include "physics_engine/physics_engine.h"
 #include "physics_engine/physics_object.h"
 #include "physics_engine/raycast_helper.h"
-#include "refactor_to_entt.h"
 #include "renderer/animator_template.h"
 #include "renderer/imgui_renderer.h"  // @DEBUG
 #include "renderer/material.h"  // @DEBUG
@@ -43,7 +39,6 @@
 #include "renderer/renderer.h"
 #include "renderer/shader.h"  // @DEBUG
 #include "renderer/texture.h"  // @DEBUG
-#include "scene/scene_serialization_ifc.h"
 #include "service_finder/service_finder.h"
 #include "settings/settings.h"
 #include "timer/timer.h"
@@ -62,21 +57,6 @@ int32_t main()
     auto const& app_settings{ BT::get_app_settings_read_handle() };
 
     BT::Watchdog_timer main_watchdog;
-
-#if !BTZC_REFACTOR_TO_ENTT
-    // ---- Initialization of entity component system --------------------------------------------------------------
-    BT::component_system::Registry main_component_registry;
-    main_component_registry.register_all_components();
-
-    BT::component_system::system::System__dev__anim_editor_tool_state_agent main_system_sdaetsa;
-    BT::component_system::system::System_animator_driven_hitcapsule_set main_system_sadhs;
-    BT::component_system::system::System_apply_phys_xform_to_rend_obj main_system_sapxtro;
-    BT::component_system::system::System_player_character_movement main_system_spcm;
-
-    #define INVOKE_SYSTEM(_sys_type)                                                               \
-        BT::service_finder::find_service<BT::component_system::system::_sys_type>().invoke_system()
-    // ---------------------------------------------------------------------------------------------
-#endif  // !BTZC_REFACTOR_TO_ENTT
 
     BT::Input_handler main_input_handler;
     BT::ImGui_renderer main_renderer_imgui_renderer;
@@ -271,116 +251,17 @@ int32_t main()
     // Hitcapsule solver.
     BT::Hitcapsule_group_overlap_solver hitcapsule_solver;
 
-#if BTZC_REFACTOR_TO_ENTT
     // Entity container.
     BT::component::register_all_components();
     BT::Entity_container entity_container;
-#else
-    // Game objects.
-    BT::Game_object_pool game_object_pool;
-    game_object_pool.set_callback_fn([&]() {
-        auto new_game_obj = unique_ptr<BT::Game_object>{
-            new BT::Game_object(main_input_handler,
-                                main_physics_engine,
-                                main_renderer,
-                                game_object_pool) };
-        new_game_obj->set_name("New Game Object");
-        new_game_obj->assign_generated_uuid();
-        return new_game_obj;
-    });
-
-    main_renderer.get_camera_obj()->set_game_object_pool(game_object_pool);
-#endif  // !BTZC_REFACTOR_TO_ENTT
-
-#if !BTZC_REFACTOR_TO_ENTT
-    // Setup scene serialization IO helper.
-    BT::scene_serialization_io_helper::set_load_scene_callbacks(
-        [&]() {
-            return new BT::Game_object(main_input_handler,
-                                       main_physics_engine,
-                                       main_renderer,
-                                       game_object_pool);
-        },
-        [&](BT::Game_object* game_obj) {
-            game_object_pool.emplace(unique_ptr<BT::Game_object>{ game_obj });
-        },
-        [&](BT::UUID follow_obj) {
-            main_renderer.get_camera_obj()->set_follow_object(follow_obj);
-        });
-#endif  // !BTZC_REFACTOR_TO_ENTT
 
     // Load default scene.
     BT::world::Scene_loader main_scene_loader;
 
-#if 0
-    class Scene_switching_cache
-    {   // Simple class for holding scene switching logic.
-    public:     Scene_switching_cache(BT::Game_object_pool& game_object_pool)
-                    : m_game_object_pool{ game_object_pool }
-                {
-                }
-
-                void request_new_scene(std::string const& scene_name)
-                {
-                    m_scene_name = scene_name;
-                    m_new_request = true;
-                }
-
-                void process_scene_load_request()
-                {
-                    if (!m_new_request)
-                        return;
-
-                    BT::Timer perf_timer;
-                    perf_timer.start_timer();
-
-#if BTZC_REFACTOR_TO_ENTT
-                    assert(false);  // @TODO implement.
-#else
-                    // Unload whole scene.
-                    auto const all_game_objs{ m_game_object_pool.get_all_as_list_no_lock() };
-                    for (auto game_obj : all_game_objs)
-                    {
-                        m_game_object_pool.remove(game_obj->get_uuid());
-                    }
-
-                    // Load new scene.
-                    BT::scene_serialization_io_helper::load_scene_from_disk(m_scene_name);
-#endif  // !BTZC_REFACTOR_TO_ENTT
-
-                    BT::logger::printef(BT::logger::TRACE,
-                                        "Switch to scene \"%s\" from disk finished in %.3fms.",
-                                        m_scene_name.c_str(),
-                                        perf_timer.calc_delta_time() * 1000.0f);
-
-                    m_new_request = false;
-                }
-
-    private:    std::string m_scene_name;
-                bool m_new_request;
-
-                BT::Game_object_pool& m_game_object_pool;
-    };
-#if !BTZC_REFACTOR_TO_ENTT
-    Scene_switching_cache main_scene_switcher{ game_object_pool };
-    main_scene_switcher.request_new_scene("_dev_sample_scene.btscene");
-    main_scene_switcher.process_scene_load_request();
-#endif  // !BTZC_REFACTOR_TO_ENTT
-#endif  // 0
-
     // Setup imgui renderer.
-#if !BTZC_REFACTOR_TO_ENTT
-    main_renderer_imgui_renderer.set_game_obj_pool_ref(&game_object_pool);
-#endif  // !BTZC_REFACTOR_TO_ENTT
     main_renderer_imgui_renderer.set_camera_ref(main_renderer.get_camera_obj());
     main_renderer_imgui_renderer.set_renderer_ref(&main_renderer);
     main_renderer_imgui_renderer.set_input_handler_ref(&main_input_handler);
-#if !BTZC_REFACTOR_TO_ENTT
-    main_renderer_imgui_renderer.set_switch_scene_callback(
-        [&main_scene_switcher](std::string const& new_scene_name) {
-            main_scene_switcher.request_new_scene(new_scene_name);
-        });
-#endif  // !BTZC_REFACTOR_TO_ENTT
 
     // Setup world properties.
     BT::world::World_properties_container world_properties;
@@ -415,32 +296,15 @@ int32_t main()
             main_physics_engine.limit_delta_time(
                 main_timer.calc_delta_time());
 
-        #if !BTZC_REFACTOR_TO_ENTT
-        auto const all_game_objs{ game_object_pool.checkout_all_as_list() };
-        #endif  // !BTZC_REFACTOR_TO_ENTT
-
         // Simulation loop.
         main_physics_engine.accumulate_delta_time(delta_time);
         while (main_physics_engine.calc_wants_to_tick() ||  // @TODO: Change the `wants_to_tick()` to something that's not the physics engine. Perhaps a simulation manager or something???  -Thea 2025/10/31
                iter_type == Iteration_type::TEARDOWN_ITERATION)  // Force one iteration if teardown.
-        {   // Run all pre-physics systems.
-            #if !BTZC_REFACTOR_TO_ENTT
-            for (auto game_obj : all_game_objs)
-            {
-                game_obj->run_pre_physics_scripts(main_physics_engine.k_simulation_delta_time);
-            }
-            #endif  // !BTZC_REFACTOR_TO_ENTT
-
-            // Pre-physics.
+        {   // Pre-physics.
             BT::system::process_physics_object_lifetime();
 
             BT::system::player_character_world_space_input();
             BT::system::input_controlled_character_movement();
-
-            #if !BTZC_REFACTOR_TO_ENTT
-            INVOKE_SYSTEM(System_player_character_movement);
-            INVOKE_SYSTEM(System_animator_driven_hitcapsule_set);
-            #endif  // !BTZC_REFACTOR_TO_ENTT
 
             // Physics calculations.
             main_physics_engine.update_physics();
@@ -460,13 +324,6 @@ int32_t main()
         // Render loop.
         main_physics_engine.calc_interpolation_alpha();
         {   // Run all pre-render systems.
-            #if !BTZC_REFACTOR_TO_ENTT
-            for (auto game_obj : all_game_objs)
-            {
-                game_obj->run_pre_render_scripts(delta_time);
-            }
-            #endif  // !BTZC_REFACTOR_TO_ENTT
-
             bool is_afa_editor_context{
                 main_renderer_imgui_renderer.is_anim_frame_data_editor_context() };
             if (is_afa_editor_context)
@@ -476,39 +333,9 @@ int32_t main()
             BT::system::write_render_transforms();
             BT::system::update_selected_entity_debug_render_transform();
 
-            #if !BTZC_REFACTOR_TO_ENTT
-            INVOKE_SYSTEM(System__dev__anim_editor_tool_state_agent);
-            INVOKE_SYSTEM(System_apply_phys_xform_to_rend_obj);
-            #endif  // !BTZC_REFACTOR_TO_ENTT
-
             if (iter_type < Iteration_type::TEARDOWN_ITERATION)
             {
-                main_renderer.render(delta_time, [&]() {
-                    #if !BTZC_REFACTOR_TO_ENTT
-                    // Render selected game obj.
-                    auto selected_game_obj{ game_object_pool.get_selected_game_obj() };
-                    if (!selected_game_obj.is_nil())
-                    {
-                        auto game_obj = game_object_pool.get_one_no_lock(selected_game_obj);
-                        auto rend_obj_key{ game_obj->get_rend_obj_key() };
-                        if (!rend_obj_key.is_nil())
-                        {
-                            auto rend_obj =
-                                main_renderer.get_render_object_pool()
-                                    .checkout_render_obj_by_key({ rend_obj_key })[0];
-
-                            static auto s_material_fore{
-                                BT::Material_bank::get_material("debug_selected_wireframe_fore_material") };
-                            static auto s_material_back{
-                                BT::Material_bank::get_material("debug_selected_wireframe_back_material") };
-                            rend_obj->render(BT::Render_layer::RENDER_LAYER_ALL, s_material_fore);
-                            rend_obj->render(BT::Render_layer::RENDER_LAYER_ALL, s_material_back);
-
-                            main_renderer.get_render_object_pool().return_render_objs({ rend_obj });
-                        }
-                    }
-                    #endif  // !BTZC_REFACTOR_TO_ENTT
-                });
+                main_renderer.render(delta_time);
 
                 if (is_afa_editor_context)
                     // @HACK: @IMPROVE: Run AFA editor again in case if animator reconfiguration is
@@ -519,15 +346,6 @@ int32_t main()
                     BT::system::_dev_animation_frame_action_editor();
             }
         }
-
-        #if !BTZC_REFACTOR_TO_ENTT
-        for (auto game_obj : all_game_objs)
-        {   // Updates game obj and inner parts if any changes are detected.
-            game_obj->process_change_requests();
-        }
-
-        game_object_pool.return_list(std::move(all_game_objs));
-        #endif  // !BTZC_REFACTOR_TO_ENTT
 
         // Switch iteration type.
         switch (iter_type)
@@ -564,13 +382,8 @@ int32_t main()
             break;
         }
 
-#if BTZC_REFACTOR_TO_ENTT
         // Tick scene loader.
         main_scene_loader.process_scene_loading_requests();
-#else
-        // Tick level loading.
-        main_scene_switcher.process_scene_load_request();
-#endif  // !BTZC_REFACTOR_TO_ENTT
     }
 
     // Write final state of settings file.

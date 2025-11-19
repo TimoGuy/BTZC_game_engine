@@ -1,7 +1,5 @@
 #include "physics_object_impl_char_controller.h"
 
-#include "refactor_to_entt.h"
-
 #include "../renderer/debug_render_job.h"
 #include "../renderer/material.h"
 #include "../renderer/mesh.h"
@@ -16,17 +14,10 @@
 #include "service_finder/service_finder.h"
 
 
-BT::Phys_obj_impl_char_controller::Phys_obj_impl_char_controller(
-                                                                 #if !BTZC_REFACTOR_TO_ENTT
-                                                                 Physics_engine& phys_engine,
-                                                                 #endif  // !BTZC_REFACTOR_TO_ENTT
-                                                                 float_t radius,
+BT::Phys_obj_impl_char_controller::Phys_obj_impl_char_controller(float_t radius,
                                                                  float_t height,
                                                                  float_t crouch_height,
                                                                  Physics_transform&& init_transform)
-    #if !BTZC_REFACTOR_TO_ENTT
-    : m_phys_engine{ phys_engine }
-    #endif  // !BTZC_REFACTOR_TO_ENTT
     : m_phys_system{ *reinterpret_cast<JPH::PhysicsSystem*>(service_finder::find_service<Physics_engine>().get_physics_system_ptr()) }
     , m_phys_temp_allocator{ *reinterpret_cast<JPH::TempAllocator*>(service_finder::find_service<Physics_engine>().get_physics_temp_allocator_ptr()) }
     , m_radius{ radius }
@@ -258,25 +249,6 @@ void BT::Phys_obj_impl_char_controller::update_debug_mesh()
                   get_main_debug_mesh_pool()
                       .get_debug_mesh_volatile_handle(m_debug_mesh_id).transform);
 }
-
-#if !BTZC_REFACTOR_TO_ENTT
-// Scene_serialization_ifc.
-void BT::Phys_obj_impl_char_controller::scene_serialize(Scene_serialization_mode mode,
-                                                        json& node_ref)
-{
-    if (mode == SCENE_SERIAL_MODE_SERIALIZE)
-    {
-        node_ref["radius"] = m_radius;
-        node_ref["height"] = (m_height + 2.0f * m_radius);
-        node_ref["crouch_height"] = (m_crouch_height + 2.0f * m_radius);
-    }
-    else if (mode == SCENE_SERIAL_MODE_DESERIALIZE)
-    {
-        // @TODO: Get rid of the assymetrical creation/serialization structure. (or not! Depends on how you feel during the upcoming code review)  -Thea 2025/06/03
-        assert(false);
-    }
-}
-#endif  // !BTZC_REFACTOR_TO_ENTT
 
 // Character contact listener.
 void BT::Phys_obj_impl_char_controller::OnAdjustBodyVelocity(JPH::CharacterVirtual const* inCharacter,

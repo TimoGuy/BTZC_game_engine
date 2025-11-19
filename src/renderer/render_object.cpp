@@ -1,8 +1,5 @@
 #include "render_object.h"
 
-#include "refactor_to_entt.h"
-
-#include "../game_object/game_object.h"
 #include "../service_finder/service_finder.h"
 #include "animator_template.h"
 #include "btglm.h"
@@ -10,22 +7,8 @@
 #include "mesh.h"
 
 
-BT::Render_object::Render_object(
-#if !BTZC_REFACTOR_TO_ENTT
-    Game_object& game_obj,
-#endif  // !BTZC_REFACTOR_TO_ENTT
-    Render_layer layer
-#if !BTZC_REFACTOR_TO_ENTT
-    , Renderable_ifc const* renderable /*= nullptr*/
-#endif  // !BTZC_REFACTOR_TO_ENTT
-    )
-#if BTZC_REFACTOR_TO_ENTT
+BT::Render_object::Render_object(Render_layer layer)
     : m_layer(layer)
-#else
-    : m_game_obj(game_obj)
-    , m_layer(layer)
-    , m_renderable(renderable)
-#endif  // !BTZC_REFACTOR_TO_ENTT
 {
     // Check that the layer is a single layer, not an aggregate layer.
     constexpr uint32_t k_num_shifts{ sizeof(Render_layer) * 8 };
@@ -57,70 +40,9 @@ void BT::Render_object::render(Render_layer active_layers,
 {
     if (m_layer & active_layers)
     {
-#if BTZC_REFACTOR_TO_ENTT
         m_renderable->render(m_render_transform, override_material);
-#else
-        mat4 transform;
-        m_game_obj.get_transform_handle().get_transform_as_mat4(transform);
-        m_renderable->render(transform, override_material);
-#endif  // !BTZC_REFACTOR_TO_ENTT
     }
 }
-
-#if !BTZC_REFACTOR_TO_ENTT
-// Scene_serialization_ifc.
-void BT::Render_object::scene_serialize(Scene_serialization_mode mode, json& node_ref)
-{
-    if (mode == SCENE_SERIAL_MODE_SERIALIZE)
-    {
-        node_ref["guid"] = UUID_helper::to_pretty_repr(get_uuid());
-
-        node_ref["renderable"]["type"] = m_renderable->get_type_str();
-        node_ref["renderable"]["model_name"] = m_renderable->get_model_name();
-
-        if (m_renderable->get_type_str() == "Deformed_model")
-        {
-            node_ref["renderable"]["animator_template"] = (m_renderable->get_model_name() + ".btanitor");
-            node_ref["renderable"]["anim_frame_action_ctrls"] = (m_renderable->get_model_name() + ".btafa");
-        }
-
-        node_ref["render_layer"] = static_cast<uint8_t>(m_layer);
-    }
-    else if (mode == SCENE_SERIAL_MODE_DESERIALIZE)
-    {
-        assign_uuid(node_ref["guid"], true);
-
-        std::string rend_type{ node_ref["renderable"]["type"] };
-        if (rend_type == "Model")
-        {
-            m_renderable = Model_bank::get_model(node_ref["renderable"]["model_name"]);
-        }
-        else if (rend_type == "Deformed_model")
-        {
-            auto const& model{ *Model_bank::get_model(node_ref["renderable"]["model_name"]) };
-            set_deformed_model(std::make_unique<Deformed_model>(model));
-
-            auto animator{ std::make_unique<Model_animator>(model) };
-
-            service_finder::find_service<Animator_template_bank>()
-                .load_animator_template_into_animator(*animator,
-                                                      node_ref["renderable"]["animator_template"]);
-
-            animator->configure_anim_frame_action_controls(
-                &anim_frame_action::Bank::get(node_ref["renderable"]["anim_frame_action_ctrls"]));
-
-            set_model_animator(std::move(animator));
-        }
-        else
-        {   // Unsupported renderable type.
-            assert(false);
-            return;
-        }
-
-        m_layer = Render_layer(static_cast<uint8_t>(node_ref["render_layer"]));
-    }
-}
-#endif  // !BTZC_REFACTOR_TO_ENTT
 
 BT::UUID BT::Render_object_pool::emplace(Render_object&& rend_obj)
 {
