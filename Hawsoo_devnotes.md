@@ -596,6 +596,8 @@ while (running_game_loop)
             > This interaction could get simplified with data, but maybe having scripts could be good... ahh but having a way to send messages like this is gonna be kinda hard I think. The way described above would work if the `find_script()` func was sophisticated and could find a script attached to the game object that has a certain interface tho.
             >
             > Maybe then "interface groups" would be a useful thing to attach to scripts? Or like a script tag system? And `find_script_by_tag()` or something.
+        - [x] I thought I did it.
+        - [ ] For some reason the capsule-capsule collision isn't quite working right? Investigate this.
 
 - [ ] ~~REFACTOR: Delete the `calc_orig_pt_distance()` method in hitcapsule bc this info is really only needed when doing the actual collision and isn't needed most of the time.~~
     - No. This is used in the spherization of the capsules in the broad phase of the overlap check.

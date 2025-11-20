@@ -320,8 +320,73 @@ void BT::Hitcapsule_group_overlap_solver::update_overlaps()
 
         if (found_overlap)
         {   // Continue to narrow phase check!
+            // @TODO: @FIXME: This needs to happen right after the sphere that passed the original spherized bounding test! Instead of reiterating thru everything and doing meaningless checks!
             found_overlap = false;
-            assert(false);  // @TODO: Implement!
+
+            // Capsule-to-capsule overlap.
+            // Ref: https://wickedengine.net/2020/04/capsule-collision-detection/
+            for (size_t a_i = 0; a_i < give_hurt_caps_a.size() && !found_overlap; a_i++)
+            for (size_t b_i = 0; b_i < rece_hurt_caps_b.size() && !found_overlap; b_i++)
+            {
+                auto& cap_a{ *give_hurt_caps_a[a_i] };
+                auto& cap_b{ *rece_hurt_caps_b[b_i] };
+
+                // Distances betwixt capsule origins.
+                auto d0{ glm_vec3_distance2(const_cast<float_t*>(cap_a.calcd_origin_a),
+                                            const_cast<float_t*>(cap_b.calcd_origin_a)) };
+                auto d1{ glm_vec3_distance2(const_cast<float_t*>(cap_a.calcd_origin_a),
+                                            const_cast<float_t*>(cap_b.calcd_origin_b)) };
+                auto d2{ glm_vec3_distance2(const_cast<float_t*>(cap_a.calcd_origin_b),
+                                            const_cast<float_t*>(cap_b.calcd_origin_a)) };
+                auto d3{ glm_vec3_distance2(const_cast<float_t*>(cap_a.calcd_origin_b),
+                                            const_cast<float_t*>(cap_b.calcd_origin_b)) };
+
+                // Find initial best `a` test point.
+                vec3 best_a;
+                if (d2 < d0 || d2 < d1 || d3 < d0 || d3 < d1)
+                    glm_vec3_copy(const_cast<float_t*>(cap_a.calcd_origin_b), best_a);
+                else
+                    glm_vec3_copy(const_cast<float_t*>(cap_a.calcd_origin_a), best_a);
+
+                // Finds point `out_closest_pt` on line segment `a` `b` that is closest to point `pt`.
+                static auto const closest_point_on_line_segment_fn =
+                    [](vec3 a, vec3 b, vec3 pt, vec3& out_closest_pt) {
+                        // Ref: https://wickedengine.net/2020/04/capsule-collision-detection/
+                        vec3 ab;
+                        glm_vec3_sub(b, a, ab);
+
+                        vec3 a_to_pt;
+                        glm_vec3_sub(pt, a, a_to_pt);
+
+                        float_t t{ glm_dot(a_to_pt, ab) / glm_dot(ab, ab) };
+
+                        // Calc result of lerp.
+                        glm_vec3_scale(ab, glm_clamp_zo(t), out_closest_pt);
+                        glm_vec3_add(a, out_closest_pt, out_closest_pt);
+                    };
+
+                // Find best `b` test point.
+                vec3 best_b;
+                closest_point_on_line_segment_fn(const_cast<float_t*>(cap_b.calcd_origin_a),
+                                                 const_cast<float_t*>(cap_b.calcd_origin_b),
+                                                 best_a,
+                                                 best_b);
+
+                // Find corrected best `a` test point.
+                closest_point_on_line_segment_fn(const_cast<float_t*>(cap_a.calcd_origin_a),
+                                                 const_cast<float_t*>(cap_a.calcd_origin_b),
+                                                 best_b,
+                                                 best_a);
+
+                // Check for overlap.
+                // @COPYPASTA
+                float_t combined_rads{ cap_a.radius + cap_b.radius };
+                if (glm_vec3_distance2(best_a, best_b) < combined_rads * combined_rads)
+                {   // Found overlap! No more need to look.
+                    found_overlap = true;
+                    break;
+                }
+            }
         }
 
         if (found_overlap)
