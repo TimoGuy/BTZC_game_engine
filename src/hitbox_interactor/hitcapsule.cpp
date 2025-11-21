@@ -402,7 +402,123 @@ bool BT::Hitcapsule_group_overlap_solver::check_narrow_phase_hitcapsule_pair(
     Hitcapsule const& give_hurt_capsule,
     Hitcapsule const& receive_hurt_capsule) const
 {   // Capsule-to-capsule overlap.
+
+    #define GML_CODE 0
+    #if GML_CODE
     // Ref: https://github.com/DragoniteSpam-GameMaker-Tutorials/3DCollisions/blob/7cd8c3a7006db84094816b750698c039548dc1fc/scripts/Col_Shape_Line/Col_Shape_Line.gml#L170-L203
+    function ColLine(start, finish) constructor {
+        self.start = start;                     // Vec3
+        self.finish = finish;                   // Vec3
+        
+        var sx = start.x, sy = start.y, sz = start.z;
+        var fx = finish.x, fy = finish.y, fz = finish.z;
+        self.property_min = new Vector3(min(sx, fx), min(sy, fy), min(sz, fz));
+        self.property_max = new Vector3(max(sx, fx), max(sy, fy), max(sz, fz));
+        self.property_ray = new ColRay(start, new Vector3(fx - sx, fy - sy, fz - sz));
+        self.property_length = point_distance_3d(sx, sy, sz, fx, fy, fz);
+        self.property_center = new Vector3(mean(sx, fx), mean(sy, fy), mean(sz, fz));
+    };
+    
+    static NearestConnectionToRay = function(ray) {
+        var line1 = self;
+        var line2 = ray;
+        
+        var start = line1.start;
+        var finish = line1.finish;
+        var origin = line2.origin;
+        var dir = line2.direction;
+        
+        var d1x = finish.x - start.x;
+        var d1y = finish.y - start.y;
+        var d1z = finish.z - start.z;
+        var d2x = dir.x;
+        var d2y = dir.y;
+        var d2z = dir.z;
+        var rx = start.x - origin.x;
+        var ry = start.y - origin.y;
+        var rz = start.z - origin.z;
+        
+        var f = dot_product_3d(d2x, d2y, d2z, rx, ry, rz);
+        var c = dot_product_3d(d1x, d1y, d1z, rx, ry, rz);
+        var b = dot_product_3d(d1x, d1y, d1z, d2y, d2z, d2z);
+        var length_squared = dot_product_3d(d1x, d1y, d1z, d1x, d1y, d1z);
+        
+        // special case if the line segment is actually just
+        // two of the same points
+        if (length_squared == 0) {
+            return new ColLine(start, line2.NearestPoint(start));
+        }
+        
+        var f1 = 0;
+        var f2 = 0;
+        var denominator = length_squared - b * b;
+        
+        // if the two lines are parallel, there are infinitely many shortest
+        // connecting lines, so you can just pick a random point on line1 to
+        // work from - we'll pick the starting point
+        if (denominator == 0) {
+            f1 = 0;
+        } else {
+            f1 = clamp((b * f - c - 1) / denominator, 0, 1);
+        }
+        f2 = f1 * b + f;
+        
+        if (f2 < 0) {
+            f2 = 0;
+            f1 = clamp(-c / length_squared, 0, 1);
+        }
+        
+        return new ColLine(
+            new Vector3(
+                start.x + d1x * f1,
+                start.y + d1y * f1,
+                start.z + d1z * f1
+            ), new Vector3(
+                origin.x + d2x * f2,
+                origin.y + d2y * f2,
+                origin.z + d2z * f2
+            )
+        );
+    };
+
+    static NearestConnectionToLine = function(line) {
+        var nearest_connection_to_ray = self.NearestConnectionToRay(line.property_ray);
+        
+        var start = self.start;
+        var finish = self.finish;
+        var lvx = finish.x - start.x;
+        var lvy = finish.y - start.y;
+        var lvz = finish.z - start.z;
+        var ldd = dot_product_3d(lvx, lvy, lvz, lvx, lvy, lvz);
+        
+        var p = nearest_connection_to_ray.start;
+        var px = p.x - start.x;
+        var py = p.y - start.y;
+        var pz = p.z - start.z;
+        var t = clamp(dot_product_3d(px, py, pz, lvx, lvy, lvz) / ldd, 0, 1);
+        
+        var starting_point = new Vector3(
+            start.x + lvx * t,
+            start.y + lvy * t,
+            start.z + lvz * t
+        );
+        
+        var lstart = line.start;
+        p = nearest_connection_to_ray.finish;
+        px = p.x - lstart.x;
+        py = p.y - lstart.y;
+        pz = p.z - lstart.z;
+        t = clamp(dot_product_3d(px, py, pz, lvx, lvy, lvz) / ldd, 0, 1);
+        
+        var ending_point = new Vector3(
+            lstart.x + lvx * t,
+            lstart.y + lvy * t,
+            lstart.z + lvz * t
+        );
+        
+        return new ColLine(starting_point, ending_point);
+    };
+    #endif  // GML_CODE
 
 
 
@@ -416,8 +532,8 @@ bool BT::Hitcapsule_group_overlap_solver::check_narrow_phase_hitcapsule_pair(
 
 
 
-
-
+    #define WICKED_METHOD 0
+    #if WICKED_METHOD
     // Ref: https://wickedengine.net/2020/04/capsule-collision-detection/
     auto cap_a_origin_a{ const_cast<float_t*>(give_hurt_capsule.calcd_origin_a) };
     auto cap_a_origin_b{ const_cast<float_t*>(give_hurt_capsule.calcd_origin_b) };
@@ -466,6 +582,10 @@ bool BT::Hitcapsule_group_overlap_solver::check_narrow_phase_hitcapsule_pair(
 
     // Idk one more iter?
     closest_point_on_line_segment_fn(cap_b_origin_a, cap_b_origin_b, best_a, best_b);
+    #endif  // WICKED_METHOD
+
+
+
 
     // Check for overlap.
     bool found_overlap{ false };
