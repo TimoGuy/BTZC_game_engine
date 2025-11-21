@@ -117,6 +117,11 @@ public:
 
 private:
     std::unordered_set<Hitcapsule_group_set const*> m_group_sets;
+
+    bool check_broad_phase_hitcapsule_pair(Hitcapsule const& give_hurt_capsule,
+                                           Hitcapsule const& receive_hurt_capsule) const;
+    bool check_narrow_phase_hitcapsule_pair(Hitcapsule const& give_hurt_capsule,
+                                            Hitcapsule const& receive_hurt_capsule) const;
 };
 
 }  // namespace BT
