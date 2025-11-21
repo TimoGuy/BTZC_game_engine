@@ -599,6 +599,7 @@ while (running_game_loop)
         - [x] I thought I did it.
         - [ ] For some reason the capsule-capsule collision isn't quite working right? Investigate this.
             - Yeah so basically none of these algos work. I feel like Joseph Smith rn.
+            - [ ] Try this method: https://stackoverflow.com/questions/2824478/shortest-distance-between-two-line-segments
 
 - [ ] ~~REFACTOR: Delete the `calc_orig_pt_distance()` method in hitcapsule bc this info is really only needed when doing the actual collision and isn't needed most of the time.~~
     - No. This is used in the spherization of the capsules in the broad phase of the overlap check.
