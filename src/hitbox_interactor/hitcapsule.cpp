@@ -5,6 +5,8 @@
 #include "../service_finder/service_finder.h"
 #include "btglm.h"
 #include "btlogger.h"
+#include "cglm/util.h"
+#include "cglm/vec3.h"
 
 #include <cassert>
 
@@ -520,6 +522,104 @@ bool BT::Hitcapsule_group_overlap_solver::check_narrow_phase_hitcapsule_pair(
     };
     #endif  // GML_CODE
 
+    // Preparation.
+    struct Line_segment
+    {
+        vec3 pt1;
+        vec3 pt2;
+    };
+    Line_segment cap_a_ls;
+    glm_vec3_copy(const_cast<float_t*>(give_hurt_capsule.calcd_origin_a), cap_a_ls.pt1);
+    glm_vec3_copy(const_cast<float_t*>(give_hurt_capsule.calcd_origin_b), cap_a_ls.pt2);
+
+    Line_segment cap_b_ls;
+    glm_vec3_copy(const_cast<float_t*>(receive_hurt_capsule.calcd_origin_a), cap_b_ls.pt1);
+    glm_vec3_copy(const_cast<float_t*>(receive_hurt_capsule.calcd_origin_b), cap_b_ls.pt2);
+
+    // Nearest connection line to rays.
+    Line_segment rays_conn_line;
+    {
+        struct Ray
+        {
+            vec3 origin;
+            vec3 dir;
+        };
+        Ray ray_a;
+        glm_vec3_copy(cap_a_ls.pt1, ray_a.origin);
+        glm_vec3_sub(cap_a_ls.pt2, cap_a_ls.pt1, ray_a.dir);
+
+        Ray ray_b;
+        glm_vec3_copy(cap_b_ls.pt1, ray_b.origin);
+        glm_vec3_sub(cap_b_ls.pt2, cap_b_ls.pt1, ray_b.dir);
+
+        vec3 delta_ray_origin;
+        glm_vec3_sub(ray_a.origin, ray_b.origin, delta_ray_origin);
+
+        float_t f{ glm_vec3_dot(ray_b.dir, delta_ray_origin) };
+        float_t c{ glm_vec3_dot(ray_a.dir, delta_ray_origin) };
+        float_t b{ glm_vec3_dot(ray_a.dir, ray_b.dir) };
+        float_t length_sqr{ glm_vec3_dot(ray_a.dir, ray_a.dir) };
+
+        // @TODO: Special case if the line segment is actually just two of the same points.
+
+        float_t f1{ 0 };
+        float_t f2{ 0 };
+        float_t denominator{ length_sqr - b * b };
+
+        if (glm_eq(denominator, 0))
+        {   // Choose starting point since lines are parallel.
+            f1 = 0;
+        }
+        else
+        {
+            f1 = glm_clamp_zo((b * f - c - 1) / denominator);
+        }
+
+        f2 = f1 * b + f;
+        if (f2 < 0)
+        {
+            f2 = 0;
+            f1 = glm_clamp_zo(-c / length_sqr);
+        }
+
+        // Return connection line.
+        glm_vec3_copy(ray_a.origin, rays_conn_line.pt1);
+        glm_vec3_muladds(ray_a.dir, f1, rays_conn_line.pt1);
+
+        glm_vec3_copy(ray_b.origin, rays_conn_line.pt2);
+        glm_vec3_muladds(ray_b.dir, f2, rays_conn_line.pt2);
+    }
+
+    // Nearest connection line to line segments.
+    Line_segment lines_conn_line;
+    {
+        vec3 lv;
+        glm_vec3_sub(cap_a_ls.pt2, cap_a_ls.pt1, lv);
+        auto ldd{ glm_vec3_dot(lv, lv) };
+
+        vec3 pda;
+        glm_vec3_sub(rays_conn_line.pt1, cap_a_ls.pt1, pda);
+        auto ta{ glm_clamp_zo(glm_vec3_dot(pda, lv) / ldd) };
+
+        vec3 pdb;
+        glm_vec3_sub(rays_conn_line.pt2, cap_b_ls.pt1, pdb);
+        auto tb{ glm_clamp_zo(glm_vec3_dot(pdb, lv) / ldd) };
+
+        // Return connection line.
+        glm_vec3_copy(cap_a_ls.pt1, lines_conn_line.pt1);
+        glm_vec3_muladds(lv, ta, lines_conn_line.pt1);
+
+        glm_vec3_copy(cap_b_ls.pt1, lines_conn_line.pt2);
+        glm_vec3_muladds(lv, tb, lines_conn_line.pt2);
+    }
+
+    // Copy result to vars for overlap check.
+    vec3 best_a;
+    glm_vec3_copy(lines_conn_line.pt1, best_a);
+    vec3 best_b;
+    glm_vec3_copy(lines_conn_line.pt2, best_b);
+    auto cap_a_radius{ give_hurt_capsule.radius };
+    auto cap_b_radius{ receive_hurt_capsule.radius };
 
 
 
