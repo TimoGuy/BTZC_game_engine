@@ -575,31 +575,30 @@ bool BT::Hitcapsule_group_overlap_solver::check_narrow_phase_hitcapsule_pair(
         found_overlap = true;
     }
 
-    #if 0
-    // @DEBUG.
-    get_main_debug_line_pool().emplace_debug_line_based_capsule(
-        best_a,
-        best_a,
-        cap_a_radius,
-        found_overlap ? vec4{ 0.610, 0.00, 0.254 } : vec4{ 0.0285, 0.570, 0.00 },
-    #if BT_HITCAPSULE_DEBUG_RENDER_REPRESENTATION_LONG_HOLD
-        0.5f);
-    #else
-        0.03f);
-    #endif
+    if (found_overlap)
+    {   // @DEBUG show collision spheres.
+        get_main_debug_line_pool().emplace_debug_line_based_capsule(
+            best_a,
+            best_a,
+            cap_a_radius,
+            vec4{ 0.610, 0.00, 0.254 },
+        #if BT_HITCAPSULE_DEBUG_RENDER_REPRESENTATION_LONG_HOLD
+            0.5f);
+        #else
+            0.03f);
+        #endif
 
-    get_main_debug_line_pool().emplace_debug_line_based_capsule(
-        best_b,
-        best_b,
-        cap_b_radius,
-        found_overlap ? vec4{ 0.560, 0.00560, 0.514 } : vec4{ 0.478, 0.590, 0.0295 },
-    #if BT_HITCAPSULE_DEBUG_RENDER_REPRESENTATION_LONG_HOLD
-        0.5f);
-    #else
-        0.03f);
-    #endif
-
-    #endif  // @DEBUG
+        get_main_debug_line_pool().emplace_debug_line_based_capsule(
+            best_b,
+            best_b,
+            cap_b_radius,
+            vec4{ 0.560, 0.00560, 0.514 },
+        #if BT_HITCAPSULE_DEBUG_RENDER_REPRESENTATION_LONG_HOLD
+            0.5f);
+        #else
+            0.03f);
+        #endif
+    }
 
     return found_overlap;
 }
