@@ -276,8 +276,11 @@ size_t BT::Hitcapsule_group_overlap_solver::get_num_group_sets() const
     return m_group_sets.size();
 }
 
-void BT::Hitcapsule_group_overlap_solver::update_overlaps()
+BT::Overlap_result_set BT::Hitcapsule_group_overlap_solver::update_overlaps()
 {
+    Overlap_result_set result;
+
+    // Check for all capsule group overlaps.
     for (auto grp_set_ptr_a : m_group_sets)
     for (auto grp_set_ptr_b : m_group_sets)
     if (grp_set_ptr_a != grp_set_ptr_b)
@@ -308,6 +311,7 @@ void BT::Hitcapsule_group_overlap_solver::update_overlaps()
         if (found_overlap)
         {   // Report that A hurt B!
             assert(false);  // @TODO: Implement!
+            result.emplace_back(UUID(), UUID());  // @HERE: @TODO: Something like this.
         }
     }
 
@@ -316,6 +320,8 @@ void BT::Hitcapsule_group_overlap_solver::update_overlaps()
     {
         group_set_ptr->emplace_debug_render_repr();
     }
+
+    return result;
 }
 
 bool BT::Hitcapsule_group_overlap_solver::check_broad_phase_hitcapsule_pair(

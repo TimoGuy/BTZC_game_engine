@@ -2,6 +2,7 @@
 
 #include "btglm.h"
 #include "btjson.h"
+#include "uuid/uuid.h"
 
 #include <string>
 #include <vector>
@@ -104,6 +105,10 @@ public:
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(Hitcapsule_group_set, m_hitcapsule_grps);
 };
 
+/// Result set for checking overlaps in the solver. The first UUID is the offender entity UUID and
+/// the second is the defender entity UUID.
+using Overlap_result_set = std::vector<std::pair<UUID, UUID>>;
+
 class Hitcapsule_group_overlap_solver
 {
 public:
@@ -113,7 +118,7 @@ public:
     bool remove_group_set(Hitcapsule_group_set& group_set);
     size_t get_num_group_sets() const;
 
-    void update_overlaps();
+    Overlap_result_set update_overlaps();
 
 private:
     std::unordered_set<Hitcapsule_group_set const*> m_group_sets;
