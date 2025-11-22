@@ -632,6 +632,14 @@ while (running_game_loop)
                     > This completely negates and causes no damage to be taken.
                     > Usually only marked this way for props and such.
 
+        - [x] Get offender/defender ids and components into the system.
+
+        - [ ] Implement processing attack logic.
+            - See below for an example.
+            - Use time debounce.
+                - [x] Add time field to combat.
+                - [ ] Move time field to health stats component.
+
         - Below is some example code I thoguht of for processing attacks.
         ```cpp
         enum Offense_type
