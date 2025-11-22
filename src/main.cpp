@@ -308,13 +308,13 @@ int32_t main()
 
             // Physics calculations.
             main_physics_engine.update_physics();
-            hitcapsule_solver.update_overlaps();
 
             // Post-physics.
             BT::system::write_entity_transforms_from_physics();
             BT::system::propagate_changed_transforms();
 
             BT::system::animator_driven_hitcapsule_sets_update();
+            hitcapsule_solver.update_overlaps();
 
             // Only run once if teardown iteration.
             if (iter_type == Iteration_type::TEARDOWN_ITERATION)

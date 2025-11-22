@@ -307,9 +307,7 @@ void BT::Hitcapsule_group_overlap_solver::update_overlaps()
 
         if (found_overlap)
         {   // Report that A hurt B!
-        #if 0
             assert(false);  // @TODO: Implement!
-        #endif  // 0
         }
     }
 
