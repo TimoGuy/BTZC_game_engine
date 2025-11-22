@@ -4,6 +4,8 @@
 #include "btglm.h"
 #include "btlogger.h"
 #include "mesh.h"
+#include "uuid/uuid.h"
+
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
@@ -280,7 +282,8 @@ void BT::Model_animator::configure_animator_states(
 }
 
 void BT::Model_animator::configure_anim_frame_action_controls(
-    anim_frame_action::Runtime_data_controls const* anim_frame_action_controls)
+    anim_frame_action::Runtime_data_controls const* anim_frame_action_controls,
+    UUID resp_entity_uuid)
 {
     // Idk why I put this into a separate method instead of in the constructor but hey, here we are.
     m_anim_frame_action_controls = anim_frame_action_controls;
@@ -288,7 +291,8 @@ void BT::Model_animator::configure_anim_frame_action_controls(
     m_anim_frame_action_data.map_animator_to_control_regions(*this, *m_anim_frame_action_controls);
 
     m_anim_frame_action_data.hitcapsule_group_set.replace_and_reregister(
-        m_anim_frame_action_controls->data.hitcapsule_group_set_template);
+        m_anim_frame_action_controls->data.hitcapsule_group_set_template,
+        resp_entity_uuid);
     m_anim_frame_action_data.hitcapsule_group_set.connect_animator(*this);
 }
 

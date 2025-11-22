@@ -605,8 +605,8 @@ while (running_game_loop)
     - [ ] Create the attacking interface.
         - Maybe as a system that runs after `update_overlaps()` runs.
 
-        - [ ] Have the hitcapsule overlap solver return which overlaps happened and what entities attacked what entities in a vector.
-            - [ ] Should return Entity UUID of the offender and defender.
+        - [x] Have the hitcapsule overlap solver return which overlaps happened and what entities attacked what entities in a vector.
+            - [x] Should return Entity UUID of the offender and defender.
                 - [x] Stubbed it out.
         - [x] Create `component::Base_combat_stats_data`
             - Has these data:

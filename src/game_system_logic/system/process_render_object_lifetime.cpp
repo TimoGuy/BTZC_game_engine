@@ -106,7 +106,8 @@ void destroy_render_objects(entt::registry& reg,
 }
 
 /// Goes thru all non-created render objects and creates render objects.
-void create_staged_render_objects(entt::registry& reg,
+void create_staged_render_objects(Entity_container& entity_container,
+                                  entt::registry& reg,
                                   Render_object_pool& rend_obj_pool,
                                   bool allow_deformed_creation)
 {
@@ -138,7 +139,8 @@ void create_staged_render_objects(entt::registry& reg,
             if (afa_ctrller != nullptr)
             {   // Configure anim frame action data.
                 new_rend_obj.get_model_animator()->configure_anim_frame_action_controls(
-                    &anim_frame_action::Bank::get(afa_ctrller->anim_frame_action_controller_name));
+                    &anim_frame_action::Bank::get(afa_ctrller->anim_frame_action_controller_name),
+                    entity_container.find_entity_uuid(entity));
 
                 // Add hitcapsule set driver.
                 reg.emplace_or_replace<component::Animator_driven_hitcapsule_set>(entity);
@@ -164,7 +166,8 @@ void create_staged_render_objects(entt::registry& reg,
 
 void BT::system::process_render_object_lifetime(bool force_allow_deformed_render_objs)
 {
-    auto& reg{ service_finder::find_service<Entity_container>().get_ecs_registry() };
+    auto& entity_container{ service_finder::find_service<Entity_container>() };
+    auto& reg{ entity_container.get_ecs_registry() };
     auto& rend_obj_pool{ service_finder::find_service<Renderer>().get_render_object_pool() };
 
     // @TODO: Perhaps right @HERE there needs to be a lock on the renderer, since it's basically an
@@ -176,11 +179,11 @@ void BT::system::process_render_object_lifetime(bool force_allow_deformed_render
             .is_simulation_running)
     {
         destroy_render_objects(reg, rend_obj_pool, DESTROY_DANGLING_OR_SUPPOSED_TO_BE_DEFORMABLE);
-        create_staged_render_objects(reg, rend_obj_pool, true);
+        create_staged_render_objects(entity_container, reg, rend_obj_pool, true);
     }
     else
     {
         destroy_render_objects(reg, rend_obj_pool, DESTROY_DANGLING_OR_DEFORMABLE);
-        create_staged_render_objects(reg, rend_obj_pool, false);
+        create_staged_render_objects(entity_container, reg, rend_obj_pool, false);
     }
 }

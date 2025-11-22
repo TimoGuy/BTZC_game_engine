@@ -3,9 +3,8 @@
 #include "btlogger.h"
 #include "entt/entity/fwd.hpp"
 #include "entt/entity/registry.hpp"
-#include "game_system_logic/component/animator_driven_hitcapsule_set.h"
-#include "game_system_logic/component/render_object_settings.h"
-#include "game_system_logic/component/transform.h"
+#include "game_system_logic/component/combat_stats.h"
+#include "game_system_logic/component/health_stats.h"
 #include "game_system_logic/entity_container.h"
 #include "hitbox_interactor/hitcapsule.h"
 #include "physics_engine/physics_engine.h"  // For `k_simulation_delta_time`.
@@ -13,8 +12,10 @@
 #include "service_finder/service_finder.h"
 
 
-void BT::system::hitcapsule_attack_processing()
+void BT::system::hitcapsule_attack_processing(float_t delta_time)
 {
+    static double_t s_attack_timer{ 0 };
+
     // Update hitcapsules.
     auto attack_pairs{
         service_finder::find_service<Hitcapsule_group_overlap_solver>().update_overlaps()
@@ -30,10 +31,27 @@ void BT::system::hitcapsule_attack_processing()
     auto defender_view{ reg.view<component::Health_stats_data>() };  // `Base_combat_stats_data` is optional.
 
     for (auto&& [offender_uuid, defender_uuid] : attack_pairs)
-    {
-        offender_view.get<
-        entity_container.find_entity(offender_uuid)
+    {   // Get offender stats.
+        auto offender_ecs_entity{ entity_container.find_entity(offender_uuid) };
+        auto const& offe_combat_stats{ offender_view.get<component::Base_combat_stats_data const>(
+            offender_ecs_entity) };
+        auto& offe_health_stats{ offender_view.get<component::Health_stats_data>(
+            offender_ecs_entity) };
+
+        // Get defender stats.
+        auto defender_ecs_entity{ entity_container.find_entity(defender_uuid) };
+        auto& defe_health_stats{ offender_view.get<component::Health_stats_data>(
+            defender_ecs_entity) };
+
+        // @TODO: START HERE!!!!!
+        assert(false);  // Use `s_attack_timer` to update last time an attack was received. (Use `atk_receive_debounce_time` and `prev_atk_received_time`)
     }
+
+    // Update attack timer.
+    s_attack_timer += delta_time;
+
+
+
 
 
 

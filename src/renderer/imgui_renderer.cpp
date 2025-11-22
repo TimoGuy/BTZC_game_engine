@@ -720,8 +720,9 @@ void BT::ImGui_renderer::render_imgui__animation_frame_data_editor_context(bool 
                     anim_frame_action::s_editor_state.working_model_animator
                         ->get_anim_frame_action_data_handle()
                         .hitcapsule_group_set.replace_and_reregister(
-                            anim_frame_action::s_editor_state.working_afa_ctrls_copy
-                                ->data.hitcapsule_group_set_template);
+                            anim_frame_action::s_editor_state.working_afa_ctrls_copy->data
+                                .hitcapsule_group_set_template,
+                            anim_frame_action::s_editor_state.working_entity_uuid);
 
                     // Discard changes by loading the same timeline again.
                     s_load_selected_timeline = true;

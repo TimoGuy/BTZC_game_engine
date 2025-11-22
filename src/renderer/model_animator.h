@@ -2,6 +2,8 @@
 
 #include "../animation_frame_action_tool/runtime_data.h"
 #include "btglm.h"
+#include "uuid/uuid.h"
+
 #include <atomic>
 #include <limits>
 #include <string>
@@ -98,7 +100,8 @@ public:
     void configure_animator_states(
         std::vector<Animator_state>&& animator_states);
     void configure_anim_frame_action_controls(
-        anim_frame_action::Runtime_data_controls const* anim_frame_action_controls);
+        anim_frame_action::Runtime_data_controls const* anim_frame_action_controls,
+        UUID resp_entity_uuid);
 
     std::vector<Animator_state> const& get_animator_states() const;
     Animator_state const& get_animator_state(size_t idx) const;

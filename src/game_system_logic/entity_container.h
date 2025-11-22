@@ -23,6 +23,9 @@ public:
     /// Gets the ECS inner version of the entity.
     entt::entity find_entity(UUID uuid) const;
 
+    /// Gets the container UUID of the entity.
+    UUID find_entity_uuid(entt::entity ecs_entity) const;
+
     /// Gets the number of entities registered in this container.
     size_t get_num_entities() const;
 
@@ -35,6 +38,7 @@ public:
 
 private:
     std::unordered_map<UUID, entt::entity> m_uuid_to_inner_entity_map;
+    std::unordered_map<entt::entity, UUID> m_inner_entity_to_uuid_map;
     entt::registry m_ecs_registry;
 };
 

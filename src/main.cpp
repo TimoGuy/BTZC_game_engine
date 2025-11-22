@@ -315,7 +315,7 @@ int32_t main()
             BT::system::propagate_changed_transforms();
 
             BT::system::animator_driven_hitcapsule_sets_update();
-            BT::system::hitcapsule_attack_processing();
+            BT::system::hitcapsule_attack_processing(BT::Physics_engine::k_simulation_delta_time);
 
             // Only run once if teardown iteration.
             if (iter_type == Iteration_type::TEARDOWN_ITERATION)

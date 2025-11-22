@@ -81,12 +81,15 @@ class Hitcapsule_group_set
 public:
     ~Hitcapsule_group_set();
 
-    void replace_and_reregister(Hitcapsule_group_set const& other);
+    void replace_and_reregister(Hitcapsule_group_set const& other, UUID resp_entity_uuid);
     void unregister_from_overlap_solver();
 
     void connect_animator(Model_animator const& animator);
 
     std::vector<Hitcapsule_group>& get_hitcapsule_groups();
+
+    /// Gets responsible entity UUID.
+    UUID get_resp_entity_uuid() const;
 
     /// Submits debug render representation of hitcapsule groups.
     void emplace_debug_render_repr() const;
@@ -99,6 +102,7 @@ private:
     std::vector<Hitcapsule_group> m_hitcapsule_grps;
     bool m_is_connected_to_animator{ false };
     bool m_is_registered_in_overlap_solver{ false };
+    UUID m_resp_entity_uuid;  // The entity UUID that is responsible for responding for overlaps.
 
 public:
     /// Serialization/deserialization.
