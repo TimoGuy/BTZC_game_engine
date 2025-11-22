@@ -590,17 +590,108 @@ while (running_game_loop)
         - Then if the bounding sphere check succeeds, check the actual real capsule-to-capsule check.
             - @TODO look up a reference for this!!!!!
 
-    - [ ] If the real capsule-to-capsule check succeeds, then `break;` and show that the overlap occurred.
+    - [x] If the real capsule-to-capsule check succeeds, then `break;` and show that the overlap occurred.
         - This is where the callbacks or event for "got hit" would get triggered or something.
         - Mmmmm maybe the callback would be as the form of both game objects having a `script_hitcapsule_processing` script, both those scripts get searched and found, and then for set A's game obj's script, the "you hit a hitcapsule, deal hurt" func gets called, with set B's game obj's script supplied as a parameter so that inside that "deal hurt" func it calls set B's script's "i got hurt" with all the hurt stats, with set A's script, in case set B's script calls an "i was parrying" call.
             > This interaction could get simplified with data, but maybe having scripts could be good... ahh but having a way to send messages like this is gonna be kinda hard I think. The way described above would work if the `find_script()` func was sophisticated and could find a script attached to the game object that has a certain interface tho.
             >
             > Maybe then "interface groups" would be a useful thing to attach to scripts? Or like a script tag system? And `find_script_by_tag()` or something.
         - [x] I thought I did it.
-        - [ ] For some reason the capsule-capsule collision isn't quite working right? Investigate this.
+        - [x] For some reason the capsule-capsule collision isn't quite working right? Investigate this.
             - Yeah so basically none of these algos work. I feel like Joseph Smith rn.
             - [x] Try this method: https://stackoverflow.com/questions/2824478/shortest-distance-between-two-line-segments (Fnord's answer)
                 - This one works!!!
+
+    - [ ] Create the attacking interface.
+        - Maybe as a system that runs after `update_overlaps()` runs.
+        ```cpp
+        enum Offense_type
+        {
+            OFFENSE_SLASH_HIT,
+            NUM_OFFENSE_TYPES
+        };
+
+        struct Offense_snapshot
+        {
+            Offsense_type type;
+            int32_t dmg_pts;
+            int32_t posture_dmg_pts;
+            int32_t posture_dmg_def_pts;
+        };
+
+        enum Defense_type
+        {
+            DEFENSE_NONE,
+            DEFENSE_GUARD,
+            DEFENSE_PARRY,
+            NUM_DEFENSE_TYPES
+        };
+
+        struct Defense_snapshot
+        {
+            Defense_type type;
+            int32_t dmg_def_pts;
+            int32_t posture_dmg_def_pts;
+        };
+
+        struct Attack_hit_result
+        {
+            struct Result_data
+            {
+                int32_t delta_hit_pts{ 0 };
+                int32_t delta_posture_pts{ 0 };
+                bool can_enter_posture_break{ false };
+            };
+            Result_data defender;
+            Result_data offender;
+        };
+
+        Attack_hit_result process_attack_hit(Offense_snapshot const& oss, Defense_snapshot const& dss) const
+        {
+            Attack_hit_result result;
+
+            int32_t dmg_pts_real{ oss.dmg_pts - dss.dmg_def_pts };
+            if (dmg_pts_real < 0)
+            {
+                BT_WARNF("Dmg pts real is <0 : %i", dmg_pts_real);
+                dmg_pts_real = 0;
+            }
+
+            int32_t posture_dmg_pts_real{ oss.posture_dmg_pts - dss.dmg_def_pts };
+
+            int32_t posture_dmg_pts_sendback{ (oss.posture_dmg_pts - oss.posture_dmg_def_pts) * 0.5 };
+            if (posture_dmg_pts_sendback < 0)
+            {
+                BT_WARNF("Posture dmg pts sendback is <0 : %i", posture_dmg_pts_sendback);
+                posture_dmg_pts_sendback = 0;
+            }
+
+            switch (dss.type)
+            {
+            case DEFENSE_NONE:
+                posture_dmg_pts_sendback = 0;
+                result.defender.can_enter_posture_break = true;
+                break;
+            case DEFENSE_GUARD:
+                dmg_pts_real *= 0.5;
+                posture_dmg_pts_sendback = 0;
+                result.defender.can_enter_posture_break = true;
+                break;
+            case DEFENSE_PARRY:
+                dmg_pts_real = 0;
+                posture_dmg_pts_real *= 0.5
+                result.offender.can_enter_posture_break = true;
+                break;
+            }
+
+            // Write results.
+            result.defender.delta_hit_pts     = -dmg_pts_real;
+            result.defender.delta_posture_pts = -posture_dmg_pts_real;
+            result.offender.delta_posture_pts = -posture_dmg_pts_sendback;
+
+            return result;
+        }
+        ```
 
 - [ ] ~~REFACTOR: Delete the `calc_orig_pt_distance()` method in hitcapsule bc this info is really only needed when doing the actual collision and isn't needed most of the time.~~
     - No. This is used in the spherization of the capsules in the broad phase of the overlap check.
