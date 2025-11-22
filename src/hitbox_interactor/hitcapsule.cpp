@@ -514,11 +514,163 @@ bool BT::Hitcapsule_group_overlap_solver::check_narrow_phase_hitcapsule_pair(
     #endif  // PYTHON_CODE
 
 
-    // @TODO: Try the new method above!
-    // Ref: https://stackoverflow.com/questions/2824478/shortest-distance-between-two-line-segments
+    // Ref: https://stackoverflow.com/questions/2824478/shortest-distance-between-two-line-segments (Fnord's answer)
 
+    // Preparation.
+    vec3 a0;
+    glm_vec3_copy(const_cast<float_t*>(give_hurt_capsule.calcd_origin_a), a0);
+    vec3 a1;
+    glm_vec3_copy(const_cast<float_t*>(give_hurt_capsule.calcd_origin_b), a1);
 
+    vec3 b0;
+    glm_vec3_copy(const_cast<float_t*>(receive_hurt_capsule.calcd_origin_a), b0);
+    vec3 b1;
+    glm_vec3_copy(const_cast<float_t*>(receive_hurt_capsule.calcd_origin_b), b1);
 
+    // Calculate denominator.
+    vec3 A;
+    glm_vec3_sub(a1, a0, A);
+    vec3 B;
+    glm_vec3_sub(b1, b0, B);
+
+    auto magA{ glm_vec3_norm(A) };
+    auto magB{ glm_vec3_norm(B) };
+
+    vec3 _A;
+    glm_vec3_scale(A, 1.0f / magA, _A);
+    vec3 _B;
+    glm_vec3_scale(B, 1.0f / magB, _B);
+
+    vec3 cross;
+    glm_vec3_cross(_A, _B, cross);
+    auto denom{ glm_vec3_norm2(cross) };
+
+    // Results.
+    vec3 best_a;
+    vec3 best_b;
+
+    // If lines are parallel (denom=0), then test if lines overlap.
+    if (glm_eq(denom, 0))
+    {
+        vec3 b0_a0;
+        glm_vec3_sub(b0, a0, b0_a0);
+
+        auto d0{ glm_vec3_dot(_A, b0_a0) };
+
+        vec3 b1_a0;
+        glm_vec3_sub(b1, a0, b1_a0);
+
+        auto d1{ glm_vec3_dot(_A, b1_a0) };
+
+        // Is segment B before A?
+        if ((d0 < 0 || glm_eq(d0, 0)) && (d1 < 0 || glm_eq(d1, 0)))
+        {
+            if (std::abs(d0) < std::abs(d1))
+            {
+                glm_vec3_copy(a0, best_a);
+                glm_vec3_copy(b0, best_b);
+            }
+            else
+            {
+                glm_vec3_copy(a0, best_a);
+                glm_vec3_copy(b1, best_b);
+            }
+        }
+        // Is segment B after A?
+        else if ((d0 > magA || glm_eq(d0, magA)) && (d1 > 0 || glm_eq(d1, magA)))
+        {
+            if (std::abs(d0) < std::abs(d1))
+            {
+                glm_vec3_copy(a1, best_a);
+                glm_vec3_copy(b0, best_b);
+            }
+            else
+            {
+                glm_vec3_copy(a1, best_a);
+                glm_vec3_copy(b1, best_b);
+            }
+        }
+        // Segments overlap.
+        else
+        {   // Just do a random spot on the line segments.
+            glm_vec3_copy(a0, best_a);
+            glm_vec3_copy(b0, best_b);
+        }
+    }
+    // Lines cross-cross: Calculate the projected closest points.
+    else
+    {
+        vec3 t;
+        glm_vec3_sub(b0, a0, t);
+
+        float_t detA;
+        {
+            mat3 m;
+            glm_vec3_copy(t, m[0]);
+            glm_vec3_copy(_B, m[1]);
+            glm_vec3_copy(cross, m[2]);
+            detA = glm_mat3_det(m);
+        }
+        float_t detB;
+        {
+            mat3 m;
+            glm_vec3_copy(t, m[0]);
+            glm_vec3_copy(_A, m[1]);
+            glm_vec3_copy(cross, m[2]);
+            detB = glm_mat3_det(m);
+        }
+
+        auto t0{ detA / denom };
+        auto t1{ detB / denom };
+
+        vec3 pA;  // Projected closest point on segment A.
+        glm_vec3_copy(a0, pA);
+        glm_vec3_muladds(_A, t0, pA);
+        vec3 pB;  // Projected closest point on segment B.
+        glm_vec3_copy(b0, pB);
+        glm_vec3_muladds(_B, t1, pB);
+
+        // Clamp projections.
+        if (t0 < 0)
+            glm_vec3_copy(a0, pA);
+        else if (t0 > magA)
+            glm_vec3_copy(a1, pA);
+
+        if (t1 < 0)
+            glm_vec3_copy(b0, pB);
+        else if (t1 > magB)
+            glm_vec3_copy(b1, pB);
+
+        // Clamp projection A.
+        if (t0 < 0 || t0 > magA)
+        {
+            vec3 pA_b0;
+            glm_vec3_sub(pA, b0, pA_b0);
+
+            auto dot{ glm_vec3_dot(_B, pA_b0) };
+            dot = glm_clamp(dot, 0, magB);
+
+            glm_vec3_copy(b0, pB);
+            glm_vec3_muladds(_B, dot, pB);
+        }
+
+        // Clamp projection B.
+        if (t1 < 0 || t1 > magB)
+        {
+            vec3 pB_a0;
+            glm_vec3_sub(pB, a0, pB_a0);
+
+            auto dot{ glm_vec3_dot(_A, pB_a0) };
+            dot = glm_clamp(dot, 0, magA);
+
+            glm_vec3_copy(a0, pA);
+            glm_vec3_muladds(_A, dot, pA);
+        }
+
+        // Write result.
+        glm_vec3_copy(pA, best_a);
+        glm_vec3_copy(pB, best_b);
+    }
 
 
     #define DRAGONITESPAM_METHOD 0
@@ -798,7 +950,10 @@ bool BT::Hitcapsule_group_overlap_solver::check_narrow_phase_hitcapsule_pair(
     // Check for overlap.
     bool found_overlap{ false };
 
+    auto cap_a_radius{ give_hurt_capsule.radius };
+    auto cap_b_radius{ receive_hurt_capsule.radius };
     float_t combined_rads{ cap_a_radius + cap_b_radius };
+
     if (glm_vec3_distance2(best_a, best_b) < combined_rads * combined_rads)
     {   // Found overlap!
         found_overlap = true;
