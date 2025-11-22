@@ -608,14 +608,14 @@ while (running_game_loop)
         - [ ] Have the hitcapsule overlap solver return which overlaps happened and what entities attacked what entities in a vector.
             - [ ] Should return Entity UUID of the offender and defender.
                 - [x] Stubbed it out.
-        - [ ] Create `component::Base_combat_stats_data`
+        - [x] Create `component::Base_combat_stats_data`
             - Has these data:
                 - i32 dmg_pts;
                 - i32 dmg_def_pts;
                 - i32 posture_dmg_pts;
                 - i32 posture_dmg_def_pts;
             - @TODO: @FUTURE: In the future have some values in the animator that cause higher damage and higher defense in the form of multipliers to these base numbers!!
-        - [ ] Create `component::Health_stats_data`
+        - [x] Create `component::Health_stats_data`
             - Has these data:
                 - i32 health_pts;
                     > If this reaches 0 then the entity is destroyed.
