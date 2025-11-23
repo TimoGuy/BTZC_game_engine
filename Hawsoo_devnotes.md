@@ -738,6 +738,7 @@ while (running_game_loop)
     > First thing to do here is to think about the design for this.
     - [ ] @TODO: WRITE THINGIES!!!
 
+
 - [ ] Connect attack results to new animator.
     - [ ] Report the attack results to the animator (somehow).
 
@@ -754,3 +755,7 @@ while (running_game_loop)
     - Bc it seems like everything that needs to use the AFA data handle part of the animator is accessing it from _not_ the renderer, so it should be somewhere else.
 
 - [ ] BUGFIX: When selecting an object that has a debug mesh render job, when you switch context from level editor to animation frame action data editor, it crashes bc it can't find the mesh job renderable (dangling pointer).
+    - Confirmed that it's when it's displaying a deformed mesh (so if play mode is on and it's player model)
+    - [ ] ~~WORKAROUND: Make it so that only can change context when not in play mode?~~
+        - Nahh, this wouldn't work. I just need to remove all debug meshes and lines removed when switching contexts.
+    - [ ] BONUS POINTS: just remove all debug meshes and lines when in the animator editor context.

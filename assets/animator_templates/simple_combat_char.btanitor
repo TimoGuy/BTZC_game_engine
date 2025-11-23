@@ -25,5 +25,31 @@
             "loop": true
         }
     ],
-    "transition_states": []
+    "transition_intermediate_states": [],
+    "variables": [
+        "bool   is_moving",
+        "trig on_attack"
+    ],
+    "state_transitions": [
+        {
+            "from_to_state": ["st_idle", "st_running"],
+            "condition": "is_moving eq true"
+        },
+        {
+            "from_to_state": ["st_running", "st_idle"],
+            "condition": "is_moving eq false"
+        },
+        {
+            "from_to_state": ["st_idle", "st_attack_0"],
+            "condition": "attack"
+        },
+        {
+            "from_to_state": ["st_running", "st_attack_0"],
+            "condition": "on_attack"
+        },
+        {
+            "from_to_state": ["st_attack_0", "st_idle"],
+            "condition": "ON_ANIM_END"
+        }
+    ]
 }
