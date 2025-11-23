@@ -1,17 +1,17 @@
 #include "component_imgui_edit_functions.h"
 
 #include "btglm.h"
+#include "character_movement.h"
+#include "combat_stats.h"
 #include "entity_metadata.h"
-#include "game_system_logic/component/entity_metadata.h"
-#include "game_system_logic/component/render_object_settings.h"
-#include "game_system_logic/component/transform.h"
 #include "game_system_logic/entity_container.h"
+#include "health_stats.h"
 #include "imgui.h"
 #include "imgui_internal.h"
 #include "misc/cpp/imgui_stdlib.h"
 #include "physics_engine/physics_object.h"
 #include "physics_object_settings.h"
-#include "character_movement.h"
+#include "render_object_settings.h"
 #include "renderer/render_layer.h"
 #include "service_finder/service_finder.h"
 #include "transform.h"
@@ -486,5 +486,61 @@ void BT::component::edit::imgui_edit__created_physics_object_reference(entt::reg
     ImGui::TextWrapped("A physics object is created in the physics engine.\n  UUID: %s",
                        UUID_helper::to_pretty_repr(phys_obj_ref.physics_obj_uuid_ref).c_str());
 
+    ImGui::PopID();
+}
+
+void BT::component::edit::imgui_edit__health_stats_data(entt::registry& reg,
+                                                        entt::entity ecs_entity)
+{
+    auto& health_stats_data{ reg.get<component::Health_stats_data>(ecs_entity) };
+
+    ImGui::PushID(&health_stats_data);
+    ImGui::PushItemWidth(ImGui::GetFontSize() * -20);
+
+    ImGui::SeparatorText("Health");
+    ImGui::InputInt("max_health_pts", &health_stats_data.max_health_pts);
+    ImGui::InputInt("health_pts", &health_stats_data.health_pts);
+
+    ImGui::SeparatorText("Posture");
+    ImGui::InputInt("max_posture_pts", &health_stats_data.max_posture_pts);
+    ImGui::InputInt("posture_pts", &health_stats_data.posture_pts);
+    ImGui::DragFloat("posture_pts_regen_rate", &health_stats_data.posture_pts_regen_rate, 0.1f);
+
+    ImGui::SeparatorText("Other");
+
+    ImGui::Checkbox("is_invincible", &health_stats_data.is_invincible);
+
+    // atk_receive_debounce_time.
+    float_t atk_receive_debounce_time_f = health_stats_data.atk_receive_debounce_time;
+    if (ImGui::DragFloat("atk_receive_debounce_time", &atk_receive_debounce_time_f, 0.01f))
+        health_stats_data.atk_receive_debounce_time = atk_receive_debounce_time_f;
+
+    // Grayed out prev attack received time.
+    ImGui::BeginDisabled();
+    float_t prev_atk_rece_time_f = health_stats_data.prev_atk_received_time;
+    ImGui::InputFloat("prev_atk_received_time", &prev_atk_rece_time_f);
+    ImGui::EndDisabled();
+
+    ImGui::PopItemWidth();
+    ImGui::PopID();
+}
+
+void BT::component::edit::imgui_edit__base_combat_stats_data(entt::registry& reg,
+                                                             entt::entity ecs_entity)
+{
+    auto& combat_stats_data{ reg.get<component::Base_combat_stats_data>(ecs_entity) };
+
+    ImGui::PushID(&combat_stats_data);
+    ImGui::PushItemWidth(ImGui::GetFontSize() * -20);
+
+    ImGui::SeparatorText("Health");
+    ImGui::InputInt("dmg_pts", &combat_stats_data.dmg_pts);
+    ImGui::InputInt("dmg_def_pts", &combat_stats_data.dmg_def_pts);
+
+    ImGui::SeparatorText("Posture");
+    ImGui::InputInt("posture_dmg_pts", &combat_stats_data.posture_dmg_pts);
+    ImGui::InputInt("posture_dmg_def_pts", &combat_stats_data.posture_dmg_def_pts);
+
+    ImGui::PopItemWidth();
     ImGui::PopID();
 }

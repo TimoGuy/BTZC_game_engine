@@ -731,6 +731,8 @@ while (running_game_loop)
         }
         ```
 
+        - [x] Fix posture damage bug.
+
         - [ ] Report the attack results to the animator (somehow).
 
 - [ ] ~~REFACTOR: Delete the `calc_orig_pt_distance()` method in hitcapsule bc this info is really only needed when doing the actual collision and isn't needed most of the time.~~
@@ -738,3 +740,5 @@ while (running_game_loop)
 
 - [ ] REFACTOR: Move the AFA data handle from the animator to a component attached to the entity.
     - Bc it seems like everything that needs to use the AFA data handle part of the animator is accessing it from _not_ the renderer, so it should be somewhere else.
+
+- [ ] BUGFIX: When selecting an object that has a debug mesh render job, when you switch context from level editor to animation frame action data editor, it crashes bc it can't find the mesh job renderable (dangling pointer).

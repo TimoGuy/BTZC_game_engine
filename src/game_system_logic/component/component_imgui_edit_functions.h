@@ -40,6 +40,8 @@ void imgui_edit__physics_object_settings(entt::registry& reg, entt::entity ecs_e
 void imgui_edit__physics_obj_type_triangle_mesh_settings(entt::registry& reg, entt::entity ecs_entity);
 void imgui_edit__physics_obj_type_char_con_settings(entt::registry& reg, entt::entity ecs_entity);
 void imgui_edit__created_physics_object_reference(entt::registry& reg, entt::entity ecs_entity);
+void imgui_edit__health_stats_data(entt::registry& reg, entt::entity ecs_entity);
+void imgui_edit__base_combat_stats_data(entt::registry& reg, entt::entity ecs_entity);
 
 }  // namespace edit
 }  // namespace component

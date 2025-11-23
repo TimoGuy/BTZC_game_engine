@@ -116,8 +116,8 @@ void BT::component::register_all_components()
     REGISTER_COMPONENT__YES_SERIALIZE(component::Physics_obj_type_char_con_settings,          edit::imgui_edit__physics_obj_type_char_con_settings);
     REGISTER_COMPONENT___NO_SERIALIZE(component::Created_physics_object_reference,            edit::imgui_edit__created_physics_object_reference);
     REGISTER_COMPONENT__YES_SERIALIZE(component::_Dev_animation_frame_action_editor_agent,    edit::imgui_edit__sample);
-    REGISTER_COMPONENT__YES_SERIALIZE(component::Health_stats_data,                           edit::imgui_edit__sample);
-    REGISTER_COMPONENT__YES_SERIALIZE(component::Base_combat_stats_data,                      edit::imgui_edit__sample);
+    REGISTER_COMPONENT__YES_SERIALIZE(component::Health_stats_data,                           edit::imgui_edit__health_stats_data);
+    REGISTER_COMPONENT__YES_SERIALIZE(component::Base_combat_stats_data,                      edit::imgui_edit__base_combat_stats_data);
     //----------------------------------------------------------------------------------------------
 
     #undef REGISTER_COMPONENT

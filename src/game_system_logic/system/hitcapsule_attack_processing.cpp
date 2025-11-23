@@ -143,7 +143,7 @@ void BT::system::hitcapsule_attack_processing(float_t delta_time)
                 health_stats.posture_pts += atk_res.delta_posture_pts;
                 health_stats.posture_pts = std::min(health_stats.max_posture_pts +
                                                         (atk_res.can_enter_posture_break ? 0 : -1),
-                                                    health_stats.health_pts);
+                                                    health_stats.posture_pts);
             };
 
         s_apply_dmg_results_fn(offe_health_stats, atk_res.offender);
