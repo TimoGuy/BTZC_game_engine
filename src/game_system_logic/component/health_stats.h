@@ -22,6 +22,9 @@ struct Health_stats_data
 
     bool is_invincible{ false };           // `true` prevents death trigger and decrement of `health_pts`.
 
+    double_t atk_receive_debounce_time{ 0.1 };  // Min time between attacks in seconds.
+    double_t prev_atk_received_time{ std::numeric_limits<double_t>::lowest() };  // DO NOT INCLUDE IN SERIALIZATION.
+
     NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(
         Health_stats_data,
         max_health_pts,
@@ -29,7 +32,8 @@ struct Health_stats_data
         max_posture_pts,
         posture_pts,
         posture_pts_regen_rate,
-        is_invincible
+        is_invincible,
+        atk_receive_debounce_time
     );
 };
 

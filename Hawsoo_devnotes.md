@@ -634,11 +634,12 @@ while (running_game_loop)
 
         - [x] Get offender/defender ids and components into the system.
 
-        - [ ] Implement processing attack logic.
+        - [x] Implement processing attack logic.
             - See below for an example.
             - Use time debounce.
                 - [x] Add time field to combat.
-                - [ ] Move time field to health stats component.
+                - [x] Move time field to health stats component.
+            - [x] Implement handling of parrys/guards.
 
         - Below is some example code I thoguht of for processing attacks.
         ```cpp
@@ -730,5 +731,10 @@ while (running_game_loop)
         }
         ```
 
+        - [ ] Report the attack results to the animator (somehow).
+
 - [ ] ~~REFACTOR: Delete the `calc_orig_pt_distance()` method in hitcapsule bc this info is really only needed when doing the actual collision and isn't needed most of the time.~~
     - No. This is used in the spherization of the capsules in the broad phase of the overlap check.
+
+- [ ] REFACTOR: Move the AFA data handle from the animator to a component attached to the entity.
+    - Bc it seems like everything that needs to use the AFA data handle part of the animator is accessing it from _not_ the renderer, so it should be somewhere else.

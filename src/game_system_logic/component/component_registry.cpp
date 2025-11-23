@@ -4,6 +4,7 @@
 #include "anim_frame_action_controller.h"
 #include "btjson.h"
 #include "character_movement.h"
+#include "combat_stats.h"
 #include "component_imgui_edit_functions.h"
 #include "entity_metadata.h"
 #include "entt/core/fwd.hpp"
@@ -12,6 +13,7 @@
 #include "follow_camera.h"
 #include "game_system_logic/component/animator_driven_hitcapsule_set.h"
 #include "game_system_logic/entity_container.h"
+#include "health_stats.h"
 #include "physics_object_settings.h"
 #include "render_object_settings.h"
 #include "service_finder/service_finder.h"
@@ -114,6 +116,8 @@ void BT::component::register_all_components()
     REGISTER_COMPONENT__YES_SERIALIZE(component::Physics_obj_type_char_con_settings,          edit::imgui_edit__physics_obj_type_char_con_settings);
     REGISTER_COMPONENT___NO_SERIALIZE(component::Created_physics_object_reference,            edit::imgui_edit__created_physics_object_reference);
     REGISTER_COMPONENT__YES_SERIALIZE(component::_Dev_animation_frame_action_editor_agent,    edit::imgui_edit__sample);
+    REGISTER_COMPONENT__YES_SERIALIZE(component::Health_stats_data,                           edit::imgui_edit__sample);
+    REGISTER_COMPONENT__YES_SERIALIZE(component::Base_combat_stats_data,                      edit::imgui_edit__sample);
     //----------------------------------------------------------------------------------------------
 
     #undef REGISTER_COMPONENT
