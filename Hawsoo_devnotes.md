@@ -560,9 +560,9 @@ while (running_game_loop)
 
 ## (cont./unblocked) Use simple anim dude and make dummy character and create fighting animation movesets.
 
-- [ ] Add another dummy character that plays the same anim as player.
+- [x] Add another dummy character that plays the same anim as player.
 
-- [ ] Write the hitcapsule group sets interact w each other.
+- [x] Write the hitcapsule group sets interact w each other.
     > @NOTE: This is kind of the order of checking I think would be good for the interaction.
     - [x] Cancel check if same hitcapsule group set.
     - [x] Cancel check if hitcapsule group set A does not have any enabled hitcapsule (give hurt).
@@ -602,7 +602,7 @@ while (running_game_loop)
             - [x] Try this method: https://stackoverflow.com/questions/2824478/shortest-distance-between-two-line-segments (Fnord's answer)
                 - This one works!!!
 
-    - [ ] Create the attacking interface.
+    - [x] Create the attacking interface.
         - Maybe as a system that runs after `update_overlaps()` runs.
 
         - [x] Have the hitcapsule overlap solver return which overlaps happened and what entities attacked what entities in a vector.
@@ -733,7 +733,19 @@ while (running_game_loop)
 
         - [x] Fix posture damage bug.
 
-        - [ ] Report the attack results to the animator (somehow).
+
+- [ ] Create animator that can change animation states for attacks.
+    > First thing to do here is to think about the design for this.
+    - [ ] @TODO: WRITE THINGIES!!!
+
+- [ ] Connect attack results to new animator.
+    - [ ] Report the attack results to the animator (somehow).
+
+    - [ ] Create knockback.
+        - [ ] Hurt.
+        - [ ] Parry.
+        - [ ] Guard.
+
 
 - [ ] ~~REFACTOR: Delete the `calc_orig_pt_distance()` method in hitcapsule bc this info is really only needed when doing the actual collision and isn't needed most of the time.~~
     - No. This is used in the spherization of the capsules in the broad phase of the overlap check.
