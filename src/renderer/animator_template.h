@@ -1,5 +1,6 @@
 #pragma once
 
+#include "animator_template_types.h"
 #include "btjson.h"
 
 #include <array>
@@ -50,20 +51,7 @@ struct Animator_template
     std::vector<std::string> variables;
 
     /// DO NOT INCLUDE IN SERIALIZATION.
-    struct Var_cooked
-    {
-        enum Type
-        {
-            TYPE_INVALID = -1,
-            TYPE_BOOL,
-            TYPE_INT,
-            TYPE_FLOAT,
-            TYPE_TRIGGER
-        } type;
-
-        std::string var_name;
-    };
-    std::vector<Var_cooked> variables_cooked;
+    std::vector<anim_tmpl_types::Animator_variable> variables_cooked;
 
     struct State_transition
     {
@@ -75,28 +63,7 @@ struct Animator_template
                                        condition);
 
         /// DO NOT INCLUDE IN SERIALIZATION.
-        struct Cooked
-        {
-            std::array<size_t, 2> from_to_state;
-
-            static constexpr size_t k_on_anim_end_idx{ (size_t)-2 };
-            size_t condition_var_idx;
-
-            enum Compare_op
-            {
-                COMP_EQ,       // equal ==
-                COMP_NEQ,      // not equal !=
-                COMP_LESS,     // less than <
-                COMP_LEQ,      // less than or equal to <=
-                COMP_GREATER,  // greater than >
-                COMP_GEQ,      // greater than or equal to >=
-            } compare_operator;
-
-            static constexpr float_t k_bool_false     = 0;
-            static constexpr float_t k_bool_true      = 1;
-            static constexpr float_t k_trig_triggered = 1;
-            float_t compare_value;
-        } cooked;
+        anim_tmpl_types::Animator_state_transition cooked;
     };
     std::vector<State_transition> state_transitions;
 

@@ -16,7 +16,7 @@
             "state_name": "st_attack_0",
             "anim_name": "Sample_attack",
             "speed": 1.0,
-            "loop": true
+            "loop": false
         },
         {
             "state_name": "_DEBUG_STATE",
@@ -27,7 +27,7 @@
     ],
     "transition_intermediate_states": [],
     "variables": [
-        "bool   is_moving",
+        "bool is_moving",
         "trig on_attack"
     ],
     "state_transitions": [
@@ -41,7 +41,7 @@
         },
         {
             "from_to_state": ["st_idle", "st_attack_0"],
-            "condition": "attack"
+            "condition": "on_attack"
         },
         {
             "from_to_state": ["st_running", "st_attack_0"],

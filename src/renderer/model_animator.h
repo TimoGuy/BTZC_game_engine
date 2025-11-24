@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../animation_frame_action_tool/runtime_data.h"
+#include "animator_template_types.h"
 #include "btglm.h"
 #include "uuid/uuid.h"
 
@@ -90,28 +91,36 @@ public:
 
     Model_skin const& get_model_skin() const;
 
-    struct Animator_state
-    {
-        std::string state_name;
-        uint32_t animation_idx;
-        float_t speed{ 1.0f };
-        bool loop{ true };
-    };
     void configure_animator_states(
-        std::vector<Animator_state>&& animator_states);
+        std::vector<anim_tmpl_types::Animator_state> animator_states,
+        std::vector<anim_tmpl_types::Animator_variable> animator_variables,
+        std::vector<anim_tmpl_types::Animator_state_transition> animator_state_transitions);
+
     void configure_anim_frame_action_controls(
         anim_frame_action::Runtime_data_controls const* anim_frame_action_controls,
         UUID resp_entity_uuid);
 
-    std::vector<Animator_state> const& get_animator_states() const;
-    Animator_state const& get_animator_state(size_t idx) const;
+    std::vector<anim_tmpl_types::Animator_state> const& get_animator_states() const;
+    anim_tmpl_types::Animator_state const& get_animator_state(size_t idx) const;
 
-    Animator_state& get_animator_state_write_handle(size_t idx);
+    anim_tmpl_types::Animator_state& get_animator_state_write_handle(size_t idx);
 
     void change_state_idx(uint32_t to_state);
 
     size_t get_model_animation_idx(std::string anim_name) const;
     Model_joint_animation const& get_model_animation(size_t idx) const;
+
+    /// Sets a variable inside the state machine.
+    void set_bool_variable(std::string const& var_name, bool value);
+
+    /// Sets a variable inside the state machine.
+    void set_int_variable(std::string const& var_name, int32_t value);
+
+    /// Sets a variable inside the state machine.
+    void set_float_variable(std::string const& var_name, float_t value);
+
+    /// Sets a variable inside the state machine.
+    void set_trigger_variable(std::string const& var_name);
 
     /// Sets time for all timer profiles of the animator.
     void set_time(float_t time);
@@ -156,9 +165,13 @@ private:
     animator_time_t m_rend_time{ 0.0f };
     ///////////////////////////////////////////////////
 
-    std::vector<Animator_state> m_animator_states;
+    std::vector<anim_tmpl_types::Animator_state> m_animator_states;
+    std::vector<anim_tmpl_types::Animator_variable> m_animator_variables;
+    std::vector<anim_tmpl_types::Animator_state_transition> m_animator_state_transitions;
     anim_frame_action::Runtime_data_controls const* m_anim_frame_action_controls{ nullptr };
     anim_frame_action::Runtime_controllable_data m_anim_frame_action_data;
+
+    anim_tmpl_types::Animator_variable& find_animator_variable(std::string const& var_name);
 };
 
 }  // namespace BT

@@ -1,6 +1,7 @@
 #include "model_animator.h"
 
 #include "../animation_frame_action_tool/runtime_data.h"
+#include "animator_template_types.h"
 #include "btglm.h"
 #include "btlogger.h"
 #include "mesh.h"
@@ -275,10 +276,15 @@ BT::Model_skin const& BT::Model_animator::get_model_skin() const
 }
 
 void BT::Model_animator::configure_animator_states(
-    std::vector<Animator_state>&& animator_states)
+    std::vector<anim_tmpl_types::Animator_state> animator_states,
+    std::vector<anim_tmpl_types::Animator_variable> animator_variables,
+    std::vector<anim_tmpl_types::Animator_state_transition> animator_state_transitions)
 {
     // Idk why I put this into a separate method instead of in the constructor but hey, here we are.
-    m_animator_states = std::move(animator_states);
+    // @NOTE: A lot of copying, but I'm @TEMP temporarily doing this for a looser interface.
+    m_animator_states = animator_states;
+    m_animator_variables = animator_variables;
+    m_animator_state_transitions = animator_state_transitions;
 }
 
 void BT::Model_animator::configure_anim_frame_action_controls(
@@ -296,19 +302,19 @@ void BT::Model_animator::configure_anim_frame_action_controls(
     m_anim_frame_action_data.hitcapsule_group_set.connect_animator(*this);
 }
 
-std::vector<BT::Model_animator::Animator_state> const&
+std::vector<BT::anim_tmpl_types::Animator_state> const&
 BT::Model_animator::get_animator_states() const
 {
     return m_animator_states;
 }
 
-BT::Model_animator::Animator_state const&
+BT::anim_tmpl_types::Animator_state const&
 BT::Model_animator::get_animator_state(size_t idx) const
 {
     return m_animator_states[idx];
 }
 
-BT::Model_animator::Animator_state&
+BT::anim_tmpl_types::Animator_state&
 BT::Model_animator::get_animator_state_write_handle(size_t idx)
 {
     return m_animator_states[idx];
@@ -344,6 +350,59 @@ BT::Model_joint_animation const& BT::Model_animator::get_model_animation(size_t 
     return m_model_animations[idx];
 }
 
+void BT::Model_animator::set_bool_variable(std::string const& var_name, bool value)
+{
+    auto& var_handle{ find_animator_variable(var_name) };
+
+    if (var_handle.type != anim_tmpl_types::Animator_variable::TYPE_BOOL)
+    {
+        assert(false);
+        return;
+    }
+
+    var_handle.var_value = (value ? anim_tmpl_types::k_bool_true
+                                  : anim_tmpl_types::k_bool_false);
+}
+
+void BT::Model_animator::set_int_variable(std::string const& var_name, int32_t value)
+{
+    auto& var_handle{ find_animator_variable(var_name) };
+
+    if (var_handle.type != anim_tmpl_types::Animator_variable::TYPE_INT)
+    {
+        assert(false);
+        return;
+    }
+
+    var_handle.var_value = value;
+}
+
+void BT::Model_animator::set_float_variable(std::string const& var_name, float_t value)
+{
+    auto& var_handle{ find_animator_variable(var_name) };
+
+    if (var_handle.type != anim_tmpl_types::Animator_variable::TYPE_FLOAT)
+    {
+        assert(false);
+        return;
+    }
+
+    var_handle.var_value = value;
+}
+
+void BT::Model_animator::set_trigger_variable(std::string const& var_name)
+{
+    auto& var_handle{ find_animator_variable(var_name) };
+
+    if (var_handle.type != anim_tmpl_types::Animator_variable::TYPE_TRIGGER)
+    {
+        assert(false);
+        return;
+    }
+
+    var_handle.var_value = anim_tmpl_types::k_trig_triggered;
+}
+
 void BT::Model_animator::set_time(float_t time)
 {
     m_sim_time  = time;
@@ -353,11 +412,86 @@ void BT::Model_animator::set_time(float_t time)
 void BT::Model_animator::update(Animator_timer_profile profile, float_t delta_time)
 {   // Get timer to work with.
     animator_time_t& time_handle{ get_profile_time_handle(profile) };
-    
+
+    // @TODO: There needs to be some kind of time syncing between timers. Since the creation of
+    //        setting triggers and variables to switch states, there will be issues when changing
+    //        states.
+    // @THOUGHT: Well, ig since `set_time()` will be setting all the timers, then it will start out
+    //           synced up enough? Only the simulation loop is going to be changing states inside
+    //           the animator.
+
     // Tick forward.
     float_t state_speed{ m_animator_states[m_current_state_idx].speed };
     time_handle += delta_time * state_speed;
 
+    // Process animator state transitions.
+    if (profile == SIMULATION_PROFILE)
+    {
+        bool state_changed{ false };
+        uint32_t prev_state_idx;
+        uint32_t curr_state_idx{ m_current_state_idx };
+        do
+        {   // Keep track of whether state changes.
+            prev_state_idx = curr_state_idx;
+
+            // Look for possible state transitions.
+            for (auto const& state_trans : m_animator_state_transitions)
+            if (state_trans.from_to_state[0] == curr_state_idx)
+            {   // Possible state transition.
+                bool do_transition{ false };
+                auto const& anim_var{ m_animator_variables[state_trans.condition_var_idx] };
+
+                switch (state_trans.compare_operator)
+                {
+                case anim_tmpl_types::Animator_state_transition::COMP_EQ:
+                    do_transition = glm_eq(anim_var.var_value, state_trans.compare_value);
+                    break;
+
+                case anim_tmpl_types::Animator_state_transition::COMP_NEQ:
+                    do_transition = !glm_eq(anim_var.var_value, state_trans.compare_value);
+                    break;
+
+                case anim_tmpl_types::Animator_state_transition::COMP_LESS:
+                    do_transition = (anim_var.var_value < state_trans.compare_value);
+                    break;
+
+                case anim_tmpl_types::Animator_state_transition::COMP_LEQ:
+                    do_transition = (anim_var.var_value <= state_trans.compare_value);
+                    break;
+
+                case anim_tmpl_types::Animator_state_transition::COMP_GREATER:
+                    do_transition = (anim_var.var_value > state_trans.compare_value);
+                    break;
+
+                case anim_tmpl_types::Animator_state_transition::COMP_GEQ:
+                    do_transition = (anim_var.var_value >= state_trans.compare_value);
+                    break;
+
+                default: assert(false); break;
+                }
+
+                if (do_transition)
+                {   // Transition states!
+                    curr_state_idx = state_trans.from_to_state[1];
+                    state_changed = true;
+                    break;
+                }
+            }
+        } while (prev_state_idx != curr_state_idx);
+
+        // Erase all trigger activations!
+        for (auto& anim_var : m_animator_variables)
+        if (anim_var.type == anim_tmpl_types::Animator_variable::TYPE_TRIGGER)
+        {
+            anim_var.var_value = 0;
+        }
+
+        // Perform actual state change!
+        if (state_changed)
+            change_state_idx(curr_state_idx);
+    }
+
+    // Process anim frame action controls.
     if (profile == SIMULATION_PROFILE &&
         m_anim_frame_action_controls != nullptr)
     {   // Get prev timer to work with.
@@ -508,4 +642,10 @@ BT::Model_animator::animator_time_t& BT::Model_animator::get_profile_prev_time_h
         return *reinterpret_cast<animator_time_t*>(0xDEADBEEF);
         break;
     }
+}
+
+BT::anim_tmpl_types::Animator_variable& BT::Model_animator::find_animator_variable(
+    std::string const& var_name)
+{
+    assert(false);;  // @TODO Implement!!
 }

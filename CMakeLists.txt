@@ -139,6 +139,7 @@ set(MAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_object.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/raycast_helper.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/raycast_helper.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/animator_template_types.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/animator_template.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/animator_template.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/camera_read_ifc.h

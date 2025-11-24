@@ -352,9 +352,10 @@ int32_t main()
         switch (iter_type)
         {
         case Iteration_type::FIRST_RUNNING_ITERATION:
-            // Turn off logging to the console.
-            BT_TRACE("Set logger to not print to console.");
-            BT::logger::set_logging_print_mask(BT::logger::NONE);
+            // Turn off logging to the console (except for errors and warnings).
+            BT_TRACE("Set logger to not print to console (except for errors and warnings).");
+            BT::logger::set_logging_print_mask(  // @TODO: @FIXME: Make bitmask support better. This sucks ass.  -Thea 2025/11/23
+                (BT::logger::Log_type)((uint32_t)BT::logger::ERROR | (uint32_t)BT::logger::WARN));
 
             BT_TRACE("==== ENTERING RUNNING ==========================================");
             iter_type = Iteration_type::RUNNING_ITERATION;

@@ -734,9 +734,13 @@ while (running_game_loop)
         - [x] Fix posture damage bug.
 
 
-- [ ] Create animator that can change animation states for attacks.
+- [ ] Create animator that can change animator states for attacks.
     > First thing to do here is to think about the design for this.
-    - [ ] @TODO: WRITE THINGIES!!!
+    - [ ] Created variables and state transitions.
+        - [x] Initial
+        > Yknow, it seems like there's no real animator component, so it's gonna be tough trying to make an imgui panel for it. Ig I could just use the `created_render_object_reference` component to do that tho.
+        - [ ] Make the imgui panel insdie the `created_render_object_reference` component.
+        - [ ] Test it.
 
 
 - [ ] Connect attack results to new animator.
