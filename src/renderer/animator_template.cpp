@@ -85,7 +85,7 @@ BT::Animator_template const& BT::Animator_template_bank::load_animator_template(
 
             if (tokens[0] == "ON_ANIM_END")
             {   // Special case.
-                ckd.condition_var_idx = anim_tmpl_types::k_on_anim_end_idx;
+                ckd.condition_var_idx = anim_tmpl_types::k_on_anim_end_var_idx;
                 var_type = anim_tmpl_types::Animator_variable::TYPE_TRIGGER;
             }
             else

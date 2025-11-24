@@ -736,11 +736,13 @@ while (running_game_loop)
 
 - [ ] Create animator that can change animator states for attacks.
     > First thing to do here is to think about the design for this.
-    - [ ] Created variables and state transitions.
+    - [x] Created variables and state transitions.
         - [x] Initial
         > Yknow, it seems like there's no real animator component, so it's gonna be tough trying to make an imgui panel for it. Ig I could just use the `created_render_object_reference` component to do that tho.
-        - [ ] Make the imgui panel insdie the `created_render_object_reference` component.
-        - [ ] Test it.
+        - [x] Make the imgui panel insdie the `created_render_object_reference` component.
+        - [x] Implement `find_animator_variable()`.
+        - [x] Test it.
+    - [ ] Connect the animator to the character movement system.
 
 
 - [ ] Connect attack results to new animator.

@@ -56,7 +56,7 @@ struct Animator_state_transition
 };
 
 /// Special condition var indexes.
-static constexpr size_t k_on_anim_end_idx{ (size_t)-2 };
+static constexpr size_t k_on_anim_end_var_idx{ (size_t)-2 };
 
 /// Var values for special types.
 static constexpr float_t k_bool_false     = 0;

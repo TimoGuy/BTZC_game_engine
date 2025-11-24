@@ -320,6 +320,21 @@ BT::Model_animator::get_animator_state_write_handle(size_t idx)
     return m_animator_states[idx];
 }
 
+size_t BT::Model_animator::get_num_animator_variables() const
+{
+    return m_animator_variables.size();
+}
+
+BT::anim_tmpl_types::Animator_variable const& BT::Model_animator::get_animator_variable(size_t idx) const
+{
+    return m_animator_variables[idx];
+}
+
+BT::anim_tmpl_types::Animator_variable& BT::Model_animator::get_animator_variable_write_handle(size_t idx)
+{
+    return m_animator_variables[idx];
+}
+
 void BT::Model_animator::change_state_idx(uint32_t to_state)
 {
     uint32_t from_state_copy{ m_current_state_idx.load() };
@@ -421,8 +436,8 @@ void BT::Model_animator::update(Animator_timer_profile profile, float_t delta_ti
     //           the animator.
 
     // Tick forward.
-    float_t state_speed{ m_animator_states[m_current_state_idx].speed };
-    time_handle += delta_time * state_speed;
+    auto const& anim_state{ m_animator_states[m_current_state_idx] };
+    time_handle += delta_time * anim_state.speed;
 
     // Process animator state transitions.
     if (profile == SIMULATION_PROFILE)
@@ -439,35 +454,55 @@ void BT::Model_animator::update(Animator_timer_profile profile, float_t delta_ti
             if (state_trans.from_to_state[0] == curr_state_idx)
             {   // Possible state transition.
                 bool do_transition{ false };
-                auto const& anim_var{ m_animator_variables[state_trans.condition_var_idx] };
-
-                switch (state_trans.compare_operator)
+                if (state_trans.condition_var_idx == anim_tmpl_types::k_on_anim_end_var_idx)
                 {
-                case anim_tmpl_types::Animator_state_transition::COMP_EQ:
-                    do_transition = glm_eq(anim_var.var_value, state_trans.compare_value);
-                    break;
+                    if (!state_changed)
+                    {   // Special ON_ANIM_END case.
+                        // @NOTE: Since this is frame dependent, we need to make sure that we're
+                        //        using the correct animation idx (hence `!state_changed` check).
+                        //        -Thea 2025/11/23
+                        auto const& model_anim{ m_model_animations[anim_state.animation_idx] };
+                        if (model_anim.calc_frame_idx(time_handle.load(),
+                                                      false,
+                                                      Model_joint_animation::FLOOR) ==
+                            model_anim.get_num_frames() - 1)
+                        {
+                            do_transition = true;
+                        }
+                    }
+                }
+                else
+                {   // Normal condition var.
+                    auto const& anim_var{ m_animator_variables[state_trans.condition_var_idx] };
 
-                case anim_tmpl_types::Animator_state_transition::COMP_NEQ:
-                    do_transition = !glm_eq(anim_var.var_value, state_trans.compare_value);
-                    break;
+                    switch (state_trans.compare_operator)
+                    {
+                    case anim_tmpl_types::Animator_state_transition::COMP_EQ:
+                        do_transition = glm_eq(anim_var.var_value, state_trans.compare_value);
+                        break;
 
-                case anim_tmpl_types::Animator_state_transition::COMP_LESS:
-                    do_transition = (anim_var.var_value < state_trans.compare_value);
-                    break;
+                    case anim_tmpl_types::Animator_state_transition::COMP_NEQ:
+                        do_transition = !glm_eq(anim_var.var_value, state_trans.compare_value);
+                        break;
 
-                case anim_tmpl_types::Animator_state_transition::COMP_LEQ:
-                    do_transition = (anim_var.var_value <= state_trans.compare_value);
-                    break;
+                    case anim_tmpl_types::Animator_state_transition::COMP_LESS:
+                        do_transition = (anim_var.var_value < state_trans.compare_value);
+                        break;
 
-                case anim_tmpl_types::Animator_state_transition::COMP_GREATER:
-                    do_transition = (anim_var.var_value > state_trans.compare_value);
-                    break;
+                    case anim_tmpl_types::Animator_state_transition::COMP_LEQ:
+                        do_transition = (anim_var.var_value <= state_trans.compare_value);
+                        break;
 
-                case anim_tmpl_types::Animator_state_transition::COMP_GEQ:
-                    do_transition = (anim_var.var_value >= state_trans.compare_value);
-                    break;
+                    case anim_tmpl_types::Animator_state_transition::COMP_GREATER:
+                        do_transition = (anim_var.var_value > state_trans.compare_value);
+                        break;
 
-                default: assert(false); break;
+                    case anim_tmpl_types::Animator_state_transition::COMP_GEQ:
+                        do_transition = (anim_var.var_value >= state_trans.compare_value);
+                        break;
+
+                    default: assert(false); break;
+                    }
                 }
 
                 if (do_transition)
@@ -647,5 +682,13 @@ BT::Model_animator::animator_time_t& BT::Model_animator::get_profile_prev_time_h
 BT::anim_tmpl_types::Animator_variable& BT::Model_animator::find_animator_variable(
     std::string const& var_name)
 {
-    assert(false);;  // @TODO Implement!!
+    for (auto& anim_var : m_animator_variables)
+        if (anim_var.var_name == var_name)
+        {   // Found variable!
+            return anim_var;
+        }
+
+    // Crash the program when don't find the var.
+    assert(false);
+    throw new std::exception(("Did not find var name: " + var_name).c_str());
 }

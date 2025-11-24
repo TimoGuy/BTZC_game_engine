@@ -102,8 +102,11 @@ public:
 
     std::vector<anim_tmpl_types::Animator_state> const& get_animator_states() const;
     anim_tmpl_types::Animator_state const& get_animator_state(size_t idx) const;
-
     anim_tmpl_types::Animator_state& get_animator_state_write_handle(size_t idx);
+
+    size_t get_num_animator_variables() const;
+    anim_tmpl_types::Animator_variable const& get_animator_variable(size_t idx) const;
+    anim_tmpl_types::Animator_variable& get_animator_variable_write_handle(size_t idx);
 
     void change_state_idx(uint32_t to_state);
 

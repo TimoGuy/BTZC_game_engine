@@ -8,19 +8,20 @@
             "regions": [
                 {
                     "ctrl_item_idx": 4,
-                    "end_frame": 13,
-                    "start_frame": 0
-                },
-                {
-                    "ctrl_item_idx": 5,
-                    "end_frame": 14,
+                    "end_frame": 11,
                     "start_frame": 0
                 }
             ],
             "state_name": "st_idle"
         },
         {
-            "regions": [],
+            "regions": [
+                {
+                    "ctrl_item_idx": 4,
+                    "end_frame": 41,
+                    "start_frame": 0
+                }
+            ],
             "state_name": "st_running"
         },
         {
@@ -54,6 +55,11 @@
                     "ctrl_item_idx": 3,
                     "end_frame": 101,
                     "start_frame": 100
+                },
+                {
+                    "ctrl_item_idx": 4,
+                    "end_frame": 121,
+                    "start_frame": 0
                 }
             ],
             "state_name": "st_attack_0"
@@ -241,7 +247,7 @@
                         "radius": 0.25
                     }
                 ],
-                "m_enabled": true,
+                "m_enabled": false,
                 "m_type": 1
             }
         ]

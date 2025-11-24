@@ -13,6 +13,7 @@
 #include "physics_object_settings.h"
 #include "render_object_settings.h"
 #include "renderer/render_layer.h"
+#include "renderer/renderer.h"
 #include "service_finder/service_finder.h"
 #include "transform.h"
 #include "uuid/uuid.h"
@@ -378,6 +379,66 @@ void BT::component::edit::imgui_edit__created_render_object_reference(entt::regi
 
     ImGui::TextWrapped("A render object is created in the renderer.\n  UUID: %s",
                        UUID_helper::to_pretty_repr(rend_obj_ref.render_obj_uuid_ref).c_str());
+
+    // Extras for if there's an animator.
+    auto& rend_obj_pool{ service_finder::find_service<Renderer>().get_render_object_pool() };
+    auto& rend_obj{
+        *rend_obj_pool.checkout_render_obj_by_key({ rend_obj_ref.render_obj_uuid_ref }).front()
+    };
+
+    if (auto animator{ rend_obj.get_model_animator() }; animator != nullptr)
+    {   // EXTRAS!!
+        // Control the state machine!!
+        ImGui::SeparatorText("Extras: animator controls");
+
+        for (size_t var_idx = 0; var_idx < animator->get_num_animator_variables(); var_idx++)
+        {
+            auto const& anim_var{ animator->get_animator_variable(var_idx) };
+            switch (anim_var.type)
+            {
+            case anim_tmpl_types::Animator_variable::TYPE_BOOL:
+            {
+                bool var_val{ glm_eq(anim_var.var_value, anim_tmpl_types::k_bool_true) };
+                if (ImGui::Checkbox(anim_var.var_name.c_str(), &var_val))
+                {
+                    animator->set_bool_variable(anim_var.var_name, var_val);
+                }
+                break;
+            }
+
+            case anim_tmpl_types::Animator_variable::TYPE_INT:
+            {
+                int32_t var_val{ static_cast<int32_t>(anim_var.var_value) };
+                if (ImGui::InputInt(anim_var.var_name.c_str(), &var_val))
+                {
+                    animator->set_int_variable(anim_var.var_name, var_val);
+                }
+                break;
+            }
+
+            case anim_tmpl_types::Animator_variable::TYPE_FLOAT:
+            {
+                float_t var_val{ anim_var.var_value };
+                if (ImGui::DragFloat(anim_var.var_name.c_str(), &var_val, 0.1f))
+                {
+                    animator->set_float_variable(anim_var.var_name, var_val);
+                }
+                break;
+            }
+
+            case anim_tmpl_types::Animator_variable::TYPE_TRIGGER:
+                if (ImGui::Button(("Trigger \"" + anim_var.var_name + "\"").c_str()))
+                {
+                    animator->set_trigger_variable(anim_var.var_name);
+                }
+                break;
+
+            default: assert(false); break;
+            }
+        }
+    }
+
+    rend_obj_pool.return_render_objs({ &rend_obj });
 
     ImGui::PopID();
 }
