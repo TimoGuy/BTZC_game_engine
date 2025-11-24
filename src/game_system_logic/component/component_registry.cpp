@@ -109,6 +109,7 @@ void BT::component::register_all_components()
     REGISTER_COMPONENT__YES_SERIALIZE(component::Follow_camera_follow_ref,                    edit::imgui_edit__sample);
     REGISTER_COMPONENT__YES_SERIALIZE(component::Render_object_settings,                      edit::imgui_edit__render_object_settings);
     REGISTER_COMPONENT___NO_SERIALIZE(component::Created_render_object_reference,             edit::imgui_edit__created_render_object_reference);
+    REGISTER_COMPONENT__YES_SERIALIZE(component::Character_mvt_animated_state,                edit::imgui_edit__sample);
     REGISTER_COMPONENT__YES_SERIALIZE(component::Anim_frame_action_controller,                edit::imgui_edit__sample);
     REGISTER_COMPONENT___NO_SERIALIZE(component::Animator_driven_hitcapsule_set,              edit::imgui_edit__sample);
     REGISTER_COMPONENT__YES_SERIALIZE(component::Physics_object_settings,                     edit::imgui_edit__physics_object_settings);

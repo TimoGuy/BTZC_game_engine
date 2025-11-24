@@ -743,6 +743,9 @@ while (running_game_loop)
         - [x] Implement `find_animator_variable()`.
         - [x] Test it.
     - [ ] Connect the animator to the character movement system.
+        - [x] `is_moving`
+        - [ ] `on_attack`
+        - [x] Connect the char mvt anim state component to the actual animator.
 
 
 - [ ] Connect attack results to new animator.
@@ -759,6 +762,9 @@ while (running_game_loop)
 
 - [ ] REFACTOR: Move the AFA data handle from the animator to a component attached to the entity.
     - Bc it seems like everything that needs to use the AFA data handle part of the animator is accessing it from _not_ the renderer, so it should be somewhere else.
+
+- [ ] REFACTOR: Move the animator out into its own component.
+    - This just needs to get out, bc reserving a render obj from the renderer and then grabbing the animator from there is just way too much of a hassle.
 
 - [ ] BUGFIX: When selecting an object that has a debug mesh render job, when you switch context from level editor to animation frame action data editor, it crashes bc it can't find the mesh job renderable (dangling pointer).
     - Confirmed that it's when it's displaying a deformed mesh (so if play mode is on and it's player model)

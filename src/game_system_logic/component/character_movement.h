@@ -105,5 +105,20 @@ struct Display_repr_transform_ref
     );
 };
 
+/// Communicates state of the animated model from the `input_controlled_character_movement` system.
+struct Character_mvt_animated_state
+{
+    /// UUID that contains the animator to affect.
+    UUID affecting_animator_uuid;
+
+    bool is_moving{ false };
+    bool on_attack{ false };
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(
+        Character_mvt_animated_state,
+        affecting_animator_uuid
+    );
+};
+
 }  // namespace component
 }  // namespace BT

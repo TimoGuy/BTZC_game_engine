@@ -1,6 +1,7 @@
 #include "animation_frame_action_tool/runtime_data.h"
 #include "btzc_game_engine.h"
 #include "btglm.h"
+#include "game_system_logic/system/set_animator_variables.h"
 #include "renderer/camera.h"
 #include "game_system_logic/entity_container.h"
 #include "game_system_logic/component/component_registry.h"
@@ -314,6 +315,7 @@ int32_t main()
             BT::system::write_entity_transforms_from_physics();
             BT::system::propagate_changed_transforms();
 
+            BT::system::set_animator_variables();
             BT::system::animator_driven_hitcapsule_sets_update();
             BT::system::hitcapsule_attack_processing(BT::Physics_engine::k_simulation_delta_time);
 

@@ -8,12 +8,9 @@
 #include "game_system_logic/component/physics_object_settings.h"
 #include "game_system_logic/component/transform.h"
 #include "game_system_logic/entity_container.h"
-#include "input_handler/input_handler.h"
 #include "physics_engine/physics_engine.h"
 #include "physics_engine/physics_object.h"
 #include "physics_engine/raycast_helper.h"
-#include "renderer/camera.h"
-#include "renderer/renderer.h"
 #include "service_finder/service_finder.h"
 
 #include <cassert>
@@ -272,6 +269,7 @@ struct Char_mvt_logic_results
 Char_mvt_logic_results character_controller_movement_logic(
     component::Character_world_space_input const& char_ws_input,
     component::Character_mvt_state& char_mvt_state,
+    component::Character_mvt_animated_state* char_mvt_anim_state,
     Physics_object& phys_obj)
 {   // Get current character controller state.
     auto char_con_impl{ phys_obj.get_impl() };
@@ -355,9 +353,13 @@ Char_mvt_logic_results character_controller_movement_logic(
     {   // Grounded turn & speed movement.
         auto& grounded_state{ char_mvt_state.grounded_state };
 
-        if (glm_vec3_norm2(const_cast<float_t*>(char_ws_input.ws_flat_clamped_input.raw)) >
-            1e-6f * 1e-6f)
+        auto input_norm2{ glm_vec3_norm2(
+            const_cast<float_t*>(char_ws_input.ws_flat_clamped_input.raw)) };
+        if (input_norm2 > 1e-6f * 1e-6f)
             apply_grounded_facing_angle(grounded_state, mvt_settings, desired_velocity);
+
+        if (char_mvt_anim_state)
+            char_mvt_anim_state->is_moving = (input_norm2 > 0.5f * 0.5f);
 
         apply_grounded_linear_speed(grounded_state, mvt_settings, desired_velocity);
 
@@ -458,6 +460,9 @@ void BT::system::input_controlled_character_movement()
         auto const& char_ws_input{ view.get<component::Character_world_space_input const>(entity) };
         auto& char_mvt_state{ view.get<component::Character_mvt_state>(entity) };
 
+        // Get char anim state.
+        auto char_mvt_anim_state{ reg.try_get<component::Character_mvt_animated_state>(entity) };
+
         // Process input into character movement logic.
         auto& phys_engine{ service_finder::find_service<Physics_engine>() };
         auto phys_obj_uuid{
@@ -465,8 +470,10 @@ void BT::system::input_controlled_character_movement()
         };
         auto& phys_obj{ *phys_engine.checkout_physics_object(phys_obj_uuid) };
 
-        auto mvt_logic_result =
-            character_controller_movement_logic(char_ws_input, char_mvt_state, phys_obj);
+        auto mvt_logic_result = character_controller_movement_logic(char_ws_input,
+                                                                    char_mvt_state,
+                                                                    char_mvt_anim_state,
+                                                                    phys_obj);
 
         // Apply movement logic outputs to physics object character controller inputs.
         auto const& physics_gravity{
