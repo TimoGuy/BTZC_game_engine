@@ -748,6 +748,13 @@ while (running_game_loop)
         - [x] Connect the char mvt anim state component to the actual animator.
 
 
+## Animation root motion.
+
+- [ ] @TODO.
+
+
+## Have CPU character attack, and have there be guard, parry, hurt -type interaction.
+
 - [ ] Connect attack results to new animator.
     - [ ] Report the attack results to the animator (somehow).
 

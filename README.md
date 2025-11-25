@@ -522,12 +522,14 @@ Uncomment `third_party/cglm/include/cglm/simd/intrin.h:98` (where it includes "a
     - [x] Change animation frames and physics to 60hz instead of 50hz. (This allows for a 1:1 experience for 60fps gamers, but it will definitely be harder on the system)
     - [x] Animation authoring tool window. (So it lists out all the animations and one can be clicked to be edited and events and variable override times can get added to the animation. The variable overrides and events are integer frames.)
     - [x] Make custom hit/hurt capsule physics implementation (just doing overlaps), so that don't have to rely on jolt physics quite as much.
-    - [ ] Use simple anim dude and make dummy character and create fighting animation movesets.
+    - [x] Use simple anim dude and make dummy character and create fighting animation movesets.
         - Deferred to fix script system issues (see "Script reform" below).
             - The reason for this was due to no support to share data between scripts. Big oof.
     - [x] Script reform.
         - Blocks the deferred task above.
         - @NOTE: ended up deciding to replace with EnTT ecs.
+    - [ ] Animation root motion.
+    - [ ] Have CPU character attack, and have there be guard, parry, hurt -type interaction.
 
 1. ~~Unity to this engine migration.~~
     - [x] Import scene as yaml structure.
