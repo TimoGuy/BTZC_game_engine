@@ -41,11 +41,12 @@ void BT::system::set_animator_variables()
             }
 
             // Set animator vars.
-            animator->set_bool_variable("is_moving", char_mvt_anim_state.is_moving);
+            animator->set_bool_variable("is_moving",
+                                        char_mvt_anim_state.write_to_animator_data.is_moving);
 
-            if (char_mvt_anim_state.on_attack)
+            if (char_mvt_anim_state.write_to_animator_data.on_attack)
                 animator->set_trigger_variable("on_attack");
-            char_mvt_anim_state.on_attack = false;
+            char_mvt_anim_state.write_to_animator_data.on_attack = false;
 
             // Finish.
             rend_obj_pool.return_render_objs({ &affecting_rend_obj });

@@ -796,6 +796,8 @@ bool BT::Renderer::Impl::is_requesting_picking()
 
     return (on_le_select_val_pressed &&
             !ImGui::GetIO().WantCaptureMouse &&
+            (m_camera.is_static_cam() ||
+                 m_camera.is_ortho_cam()) &&
             !m_camera.is_mouse_captured() &&
             !ImGuizmo::IsOver() &&
             !ImGuizmo::IsUsing());

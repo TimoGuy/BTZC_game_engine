@@ -359,7 +359,7 @@ Char_mvt_logic_results character_controller_movement_logic(
             apply_grounded_facing_angle(grounded_state, mvt_settings, desired_velocity);
 
         if (char_mvt_anim_state)
-            char_mvt_anim_state->is_moving = (input_norm2 > 0.5f * 0.5f);
+            char_mvt_anim_state->write_to_animator_data.is_moving = (input_norm2 > 0.5f * 0.5f);
 
         apply_grounded_linear_speed(grounded_state, mvt_settings, desired_velocity);
 

@@ -42,7 +42,7 @@ enum Controllable_data_label : std::uint32_t
         /* Bools */                                     \
         X__bool(is_parry_active,            false)      \
         X__bool(is_guard_active,            false)      \
-        X__bool(can_move_exit,              true)       \
+        X__bool(can_move,                   true)       \
         X__bool(can_guard_exit,             true)       \
         X__bool(can_attack_exit,            true)       \
         X__bool(blade_has_mizunokata,       false)      \

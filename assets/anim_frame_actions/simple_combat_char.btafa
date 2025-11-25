@@ -60,6 +60,16 @@
                     "ctrl_item_idx": 4,
                     "end_frame": 121,
                     "start_frame": 0
+                },
+                {
+                    "ctrl_item_idx": 6,
+                    "end_frame": 40,
+                    "start_frame": 14
+                },
+                {
+                    "ctrl_item_idx": 6,
+                    "end_frame": 107,
+                    "start_frame": 57
                 }
             ],
             "state_name": "st_attack_0"
@@ -84,6 +94,9 @@
         },
         {
             "name": "hitcapsule_group_1_enabled:ov:true"
+        },
+        {
+            "name": "can_move:ov:false"
         }
     ],
     "hitcapsule_group_set_template": {

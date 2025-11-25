@@ -734,7 +734,7 @@ while (running_game_loop)
         - [x] Fix posture damage bug.
 
 
-- [ ] Create animator that can change animator states for attacks.
+- [x] Create animator that can change animator states for attacks.
     > First thing to do here is to think about the design for this.
     - [x] Created variables and state transitions.
         - [x] Initial
@@ -742,9 +742,9 @@ while (running_game_loop)
         - [x] Make the imgui panel insdie the `created_render_object_reference` component.
         - [x] Implement `find_animator_variable()`.
         - [x] Test it.
-    - [ ] Connect the animator to the character movement system.
+    - [x] Connect the animator to the character movement system.
         - [x] `is_moving`
-        - [ ] `on_attack`
+        - [x] `on_attack`
         - [x] Connect the char mvt anim state component to the actual animator.
 
 

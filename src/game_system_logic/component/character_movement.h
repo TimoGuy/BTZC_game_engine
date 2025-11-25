@@ -111,8 +111,16 @@ struct Character_mvt_animated_state
     /// UUID that contains the animator to affect.
     UUID affecting_animator_uuid;
 
-    bool is_moving{ false };
-    bool on_attack{ false };
+    struct Write_to_animator_data
+    {
+        bool is_moving{ false };
+        bool on_attack{ false };
+    } write_to_animator_data;
+
+    struct State
+    {
+        bool prev_attack_pressed{ false };
+    } state;
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(
         Character_mvt_animated_state,
