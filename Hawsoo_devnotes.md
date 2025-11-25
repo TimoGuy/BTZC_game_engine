@@ -750,7 +750,14 @@ while (running_game_loop)
 
 ## Animation root motion.
 
-- [ ] @TODO.
+- [ ] Find root bone.
+    > This bone will have the name "Root" (case insensitive).
+    - [ ] If there are bones/joints and there is _not_ a "root" bone, then error out.
+
+- [ ] Find velocity at every frame.
+    - [ ] Delta position from current frame to next frame.
+    - [ ] For last frame, get as far to the end as possible.
+        - Perhaps this needs a different method for the last frame?
 
 
 ## Have CPU character attack, and have there be guard, parry, hurt -type interaction.

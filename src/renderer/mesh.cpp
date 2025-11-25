@@ -765,8 +765,7 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
             std::vector<uint32_t> indices;
             indices.reserve(indices_accessor.count);
 
-            for (uint32_t ind :
-                     fastgltf::iterateAccessor<uint32_t>(asset, indices_accessor))
+            for (uint32_t ind : fastgltf::iterateAccessor<uint32_t>(asset, indices_accessor))
             {
                 // Offset indices to ensure they're referencing the correct
                 // mesh.
