@@ -108,6 +108,7 @@ uint32_t BT::Model_joint_animation::calc_frame_idx(float_t time,
 
 void BT::Model_joint_animation::calc_joint_matrices(float_t time,
                                                     bool loop,
+                                                    bool root_motion_zeroing,
                                                     std::vector<mat4s>& out_joint_matrices) const
 {
     uint32_t frame_idx_a{ calc_frame_idx(time, loop, FLOOR) };
@@ -139,6 +140,11 @@ void BT::Model_joint_animation::calc_joint_matrices(float_t time,
             m_frames[frame_idx_a].joint_transforms_in_order[i].interpolate_fast(
                 m_frames[frame_idx_b].joint_transforms_in_order[i],
                 interp_t) };
+        
+        if (i == 0 && root_motion_zeroing)
+        {   // Delete root motion (for XZ axes).
+            local_joint_transform.position[0] = local_joint_transform.position[2] = 0;
+        }
 
         mat4 global_joint_transform;
         glm_translate_make(global_joint_transform, local_joint_transform.position);
@@ -263,10 +269,112 @@ void BT::Model_joint_animation::get_joint_matrices_at_frame(
     }
 }
 
+void BT::Model_joint_animation::get_joint_matrices_at_frame_with_root_motion(
+    uint32_t frame_idx,
+    vec3& out_root_motion_delta_pos,
+    std::vector<mat4s>& out_joint_matrices) const
+{   ////////////////////////////////////////////////////////////////////////////////////////////////
+    // @COPYPASTA below from `calc_joint_matrices()` (and then `get_joint_matrices_at_frame()`)
+    //   Note the commented out sections of code. This marks the parts that are removed from the
+    //   original source material. And then, lines with `// +` at the end are marked for showing
+    //   addition of the source material.
+    //
+    // @NOTE: So I think that the best thing to do here is just copy the contents of the
+    //   `calc_joint_matrices()` function and then instead of using `interpolate_fast()`, just
+    //   return the first one essentially. It'll just be copypasta for this run around but maybe in
+    //   the future a more efficient way for `get_joint_matrices_at_frame()` can be concocted when
+    //   the program demands the performance.  -Thea 2025/09/27
+    //
+    // @NOTE: Hey, I really don't like these copypastas. These really need some kind of
+    //   consolidation/abstraction for this!!!  -Thea 2025/11/26
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
-BT::Model_animator::Model_animator(Model const& model)
+    // uint32_t frame_idx_a{ calc_frame_idx(time, loop, FLOOR) };
+    // uint32_t frame_idx_b{ calc_frame_idx(time, loop, CEIL) };
+
+    // float_t interp_t{ (time / k_frames_per_second)
+    //                   - std::floor(time / k_frames_per_second) };
+
+    // Allocate calculation cache.
+    std::vector<mat4s> joint_global_transform_cache;
+    joint_global_transform_cache.resize(m_model_skin.joints_sorted_breadth_first.size());
+
+    out_joint_matrices.resize(m_model_skin.joints_sorted_breadth_first.size());
+
+    // Calculate joint matrices.
+    for (size_t i = 0; i < m_model_skin.joints_sorted_breadth_first.size(); i++)
+    {
+        auto& joint{ m_model_skin.joints_sorted_breadth_first[i] };
+        if (i == 0 && joint.parent_idx != (uint32_t)-1)
+        {
+            logger::printe(logger::ERROR,
+                           "First joint parent is not null. Joint list probably not sorted. Aborting.");
+            assert(false);
+            return;
+        }
+
+        // Calculate global transform (relative to parent bone -> model space).
+
+        // auto local_joint_transform{
+        //     m_frames[frame_idx_a].joint_transforms_in_order[i].interpolate_fast(
+        //         m_frames[frame_idx_b].joint_transforms_in_order[i],
+        //         interp_t) };
+        auto& local_joint_transform{                                                            // +
+            const_cast<Model_joint_animation_frame::Joint_local_transform&>(                    // +
+                m_frames[frame_idx].joint_transforms_in_order[i])                               // +
+        };                                                                                      // +
+
+        if (i == 0)                                                                             // +
+        {   // Delete root motion (for XZ axes).                                                // +
+            local_joint_transform.position[0] = local_joint_transform.position[2] = 0;          // +
+        }                                                                                       // +
+
+        mat4 global_joint_transform;
+        glm_translate_make(global_joint_transform, local_joint_transform.position);
+        glm_quat_rotate(global_joint_transform, local_joint_transform.rotation, global_joint_transform);
+        glm_scale(global_joint_transform, local_joint_transform.scale);
+
+        if (joint.parent_idx == (uint32_t)-1)
+        {   // Use skin baseline transform.
+            glm_mat4_mul(const_cast<vec4*>(m_model_skin.baseline_transform),
+                 global_joint_transform,
+                 global_joint_transform);
+        }
+        else
+        {   // Use cached parent global trans to make global trans.
+            glm_mat4_mul(joint_global_transform_cache[joint.parent_idx].raw,
+                         global_joint_transform,
+                         global_joint_transform);
+        }
+
+        // Insert global transform into cache.
+        glm_mat4_copy(global_joint_transform, joint_global_transform_cache[i].raw);
+
+        // Calculate joint matrix.
+        // @RANT: I hate how all the glm functions don't mark the params as const,
+        //   and also since they're not getting mutated! Aaaaggghhhh
+        // @RANT: I hate how the rant above was a rant!!! The amount of strenuous
+        //   work to get this whole shitshow working was insane!!!! Hahahahahahaha  -Thea 2025/07/20
+        mat4 joint_matrix;
+        glm_mat4_mul(const_cast<vec4*>(m_model_skin.inverse_global_transform),
+                     global_joint_transform,
+                     joint_matrix);
+        glm_mat4_mul(joint_matrix,
+                     const_cast<vec4*>(joint.inverse_bind_matrix),
+                     out_joint_matrices[i].raw);
+    }
+
+    // Include root motion delta position (Just XZ axes).                                       // +
+    glm_vec3_copy(const_cast<float_t*>(m_frames[frame_idx].root_motion_delta_pos),              // +
+                  out_root_motion_delta_pos);                                                   // +
+    out_root_motion_delta_pos[1] = 0;                                                           // +
+}
+
+
+BT::Model_animator::Model_animator(Model const& model, bool use_root_motion)
     : m_model_animations{ model.m_animations }
     , m_model_skin{ model.m_model_skin }
+    , m_is_using_root_motion{ use_root_motion }
 {
 }
 
@@ -626,7 +734,25 @@ void BT::Model_animator::calc_anim_pose(Animator_timer_profile profile,
     m_model_animations[anim_state.animation_idx]
         .calc_joint_matrices(get_profile_time_handle(profile).load(),
                              anim_state.loop,
+                             false,
                              out_joint_matrices);
+}
+
+void BT::Model_animator::calc_anim_pose_with_root_motion_zeroing(
+    Animator_timer_profile profile,
+    std::vector<mat4s>& out_joint_matrices) const
+{
+    auto& anim_state{ m_animator_states[m_current_state_idx] };
+    m_model_animations[anim_state.animation_idx]
+        .calc_joint_matrices(get_profile_time_handle(profile).load(),
+                             anim_state.loop,
+                             true,
+                             out_joint_matrices);
+}
+
+bool BT::Model_animator::get_is_using_root_motion() const
+{
+    return m_is_using_root_motion;
 }
 
 void BT::Model_animator::get_anim_floored_frame_pose(Animator_timer_profile profile,
@@ -638,8 +764,25 @@ void BT::Model_animator::get_anim_floored_frame_pose(Animator_timer_profile prof
             .calc_frame_idx(get_profile_time_handle(profile).load(),
                             anim_state.loop,
                             Model_joint_animation::FLOOR) };
-    m_model_animations[anim_state.animation_idx]
-        .get_joint_matrices_at_frame(frame_idx, out_joint_matrices);
+    m_model_animations[anim_state.animation_idx].get_joint_matrices_at_frame(frame_idx,
+                                                                             out_joint_matrices);
+}
+
+void BT::Model_animator::get_anim_floored_frame_pose_with_root_motion(
+    Animator_timer_profile profile,
+    vec3& out_root_motion_delta_pos,
+    std::vector<mat4s>& out_joint_matrices) const
+{
+    auto& anim_state{ m_animator_states[m_current_state_idx] };
+    uint32_t frame_idx{
+        m_model_animations[anim_state.animation_idx]
+            .calc_frame_idx(get_profile_time_handle(profile).load(),
+                            anim_state.loop,
+                            Model_joint_animation::FLOOR) };
+    m_model_animations[anim_state.animation_idx].get_joint_matrices_at_frame_with_root_motion(
+        frame_idx,
+        out_root_motion_delta_pos,
+        out_joint_matrices);
 }
 
 BT::anim_frame_action::Runtime_controllable_data&

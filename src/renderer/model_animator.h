@@ -56,6 +56,7 @@ struct Model_joint_animation_frame
                                                float_t t) const;
     };
     std::vector<Joint_local_transform> joint_transforms_in_order;
+
     vec3 root_motion_delta_pos;
 };
 
@@ -71,8 +72,15 @@ public:
 
     enum Rounding_func{ FLOOR, CEIL };
     uint32_t calc_frame_idx(float_t time, bool loop, Rounding_func rounding) const;
-    void calc_joint_matrices(float_t time, bool loop, std::vector<mat4s>& out_joint_matrices) const;
-    void get_joint_matrices_at_frame(uint32_t frame_idx, std::vector<mat4s>& out_joint_matrices) const;
+    void calc_joint_matrices(float_t time,
+                             bool loop,
+                             bool root_motion_zeroing,
+                             std::vector<mat4s>& out_joint_matrices) const;
+    void get_joint_matrices_at_frame(uint32_t frame_idx,
+                                     std::vector<mat4s>& out_joint_matrices) const;
+    void get_joint_matrices_at_frame_with_root_motion(uint32_t frame_idx,
+                                                      vec3& out_root_motion_delta_pos,
+                                                      std::vector<mat4s>& out_joint_matrices) const;
 
     static constexpr float_t k_frames_per_second{ 60.0f };
 
@@ -88,7 +96,7 @@ class Model;
 class Model_animator
 {
 public:
-    Model_animator(Model const& model);
+    Model_animator(Model const& model, bool use_root_motion);
 
     Model_skin const& get_model_skin() const;
 
@@ -144,9 +152,21 @@ public:
     void calc_anim_pose(Animator_timer_profile profile,
                         std::vector<mat4s>& out_joint_matrices) const;
 
+    /// Calculates the set of joint matrices, interpolated, taking into account root motion zeroing.
+    void calc_anim_pose_with_root_motion_zeroing(Animator_timer_profile profile,
+                                                 std::vector<mat4s>& out_joint_matrices) const;
+
+    /// Gets whether root motion is enabled or not on this animator.
+    bool get_is_using_root_motion() const;
+
     /// Calculates the set of joint matrices, floored. Note this one will be faster.
     void get_anim_floored_frame_pose(Animator_timer_profile profile,
                                      std::vector<mat4s>& out_joint_matrices) const;
+
+    /// Calculates the set of joint matrices, floored, with delta pos and zeroing from root motion.
+    void get_anim_floored_frame_pose_with_root_motion(Animator_timer_profile profile,
+                                                      vec3& out_root_motion_delta_pos,
+                                                      std::vector<mat4s>& out_joint_matrices) const;
 
     anim_frame_action::Runtime_controllable_data& get_anim_frame_action_data_handle();
 
@@ -167,6 +187,8 @@ private:
     animator_time_t m_sim_time{ 0.0f };
     animator_time_t m_prev_sim_time{ std::numeric_limits<float_t>::lowest() };  // For rising edge events.
     animator_time_t m_rend_time{ 0.0f };
+
+    bool m_is_using_root_motion;
     ///////////////////////////////////////////////////
 
     std::vector<anim_tmpl_types::Animator_state> m_animator_states;

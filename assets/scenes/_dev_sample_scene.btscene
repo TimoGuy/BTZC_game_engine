@@ -154,6 +154,10 @@
                     }
                 },
                 {
+                    "type_name": "component::Animator_root_motion",
+                    "members_j": {}
+                },
+                {
                     "type_name": "component::Health_stats_data",
                     "members_j": {}
                 },
@@ -356,6 +360,10 @@
                     "members_j": {
                         "anim_frame_action_controller_name": "simple_combat_char.btafa"
                     }
+                },
+                {
+                    "type_name": "component::Animator_root_motion",
+                    "members_j": {}
                 },
                 {
                     "type_name": "component::Health_stats_data",

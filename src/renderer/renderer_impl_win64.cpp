@@ -677,7 +677,12 @@ bool BT::Renderer::Impl::update_animators_and_compute_mesh_skinning(float_t delt
             animator.update(Model_animator::RENDERER_PROFILE, delta_time);
 
             std::vector<mat4s> joint_matrices;
-            animator.calc_anim_pose(Model_animator::RENDERER_PROFILE, joint_matrices);
+            if (animator.get_is_using_root_motion())
+                animator.calc_anim_pose_with_root_motion_zeroing(Model_animator::RENDERER_PROFILE,
+                                                                 joint_matrices);
+            else
+                animator.calc_anim_pose(Model_animator::RENDERER_PROFILE, joint_matrices);
+
             rend_obj->get_deformed_model()->dispatch_compute_deform(std::move(joint_matrices));
 
             mutated = true;

@@ -5,6 +5,7 @@
 #include "entt/entity/registry.hpp"
 #include "game_system_logic/component/anim_frame_action_controller.h"
 #include "game_system_logic/component/animator_driven_hitcapsule_set.h"
+#include "game_system_logic/component/animator_root_motion.h"
 #include "game_system_logic/component/render_object_settings.h"
 #include "game_system_logic/entity_container.h"
 #include "game_system_logic/world/world_properties.h"
@@ -126,7 +127,10 @@ void create_staged_render_objects(Entity_container& entity_container,
         if (allow_deformed_creation && rend_obj_settings.is_deformed)
         {   // Create deformed model w/ animator.
             auto deformed_model{ std::make_unique<Deformed_model>(model) };
-            auto model_animator{ std::make_unique<Model_animator>(model) };
+
+            bool has_root_motion_tag{ reg.any_of<component::Animator_root_motion>(entity) };
+            auto model_animator{ std::make_unique<Model_animator>(model, has_root_motion_tag) };
+
             service_finder::find_service<Animator_template_bank>()
                 .load_animator_template_into_animator(*model_animator,
                                                       rend_obj_settings.animator_template_name);

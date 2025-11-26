@@ -764,18 +764,27 @@ while (running_game_loop)
             - I think this is a good approx. If there's more need to do more, then I'll redo this.
     - [x] TEST: make sure that the values are correct for delta pos.
 
-- [ ] Change animator to use root motion or not.
-    - [ ] Have a `bool use_root_motion` in the animator.
-    - [ ] Do this for rendering:
+- [x] Change animator to use root motion or not.
+    - [x] Have a `bool use_root_motion` in the animator.
+    - [x] Do this for rendering:
             ```cpp
             calc_joint_matrices(time, loop, use_root_motion, joint_matrices);
             ```
             @NOTE: All it does is make the root bone be (0,0,0) position.
-    - [ ] Do this for simulation:
+    - [x] Do this for simulation:
             ```cpp
             get_joint_matrices_at_frame_with_root_motion(time, loop, root_motion_delta_pos, joint_matrices);
             ```
             This makes the root bone be (0,0,0) position but also returns the delta pos for the root motion.
+
+- [ ] Include movement with root motion.
+    - [ ] Search for the `component::Animator_root_motion` component inside the entity when doing the `input_controlled_character_movement()` system.
+        - [ ] If exists, use it for the movement, and use the world space input for turning and facing angle stuff.
+            - [ ] Grab the AFA data of `turn_speed` from the animator's AFA.
+                - Aaaaaa I wish this weren't _inside_ the animator like this 😭
+                - There is a refactor below that should help sooo much for all of this.
+        - [ ] If doesn't exist, then use world space input for both movement and turning.
+            - I.e. the current solution (well, not after this change).
 
 
 

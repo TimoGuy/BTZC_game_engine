@@ -391,6 +391,9 @@ void BT::component::edit::imgui_edit__created_render_object_reference(entt::regi
         // Control the state machine!!
         ImGui::SeparatorText("Extras: animator controls");
 
+        ImGui::Text("is_using_root_motion: %s",
+                    (animator->get_is_using_root_motion() ? "TRUE" : "FALSE"));
+
         for (size_t var_idx = 0; var_idx < animator->get_num_animator_variables(); var_idx++)
         {
             auto const& anim_var{ animator->get_animator_variable(var_idx) };
