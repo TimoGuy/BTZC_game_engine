@@ -56,6 +56,7 @@ struct Model_joint_animation_frame
                                                float_t t) const;
     };
     std::vector<Joint_local_transform> joint_transforms_in_order;
+    vec3 root_motion_delta_pos;
 };
 
 class Model_joint_animation

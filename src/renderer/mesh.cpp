@@ -1010,10 +1010,13 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
         new_anim_frames.reserve(perceived_frames);
         {   // Record animation frames.
             float_t curr_time{ start_time };
+
             for (size_t _ = 0; _ < perceived_frames; _++)
             {   // Get interpolation of current frame.
                 std::unordered_map<size_t, Model_joint_animation_frame::Joint_local_transform>
                     joint_idx_to_local_trans_map;
+                vec3 root_pos;
+
                 for (auto const& channel : channel_datas)
                 {
                     if (joint_idx_to_local_trans_map.find(channel.target_joint_idx)
@@ -1045,6 +1048,11 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
                                                   const_cast<float_t*>(output1.raw),
                                                   interp_t,
                                                   joint_trans.position);
+
+                                    if (channel.target_joint_idx == 0)
+                                    {   // Root bone detected. Insert into root position.
+                                        glm_vec3_copy(joint_trans.position, root_pos);
+                                    }
                                     break;
 
                                 case fastgltf::AnimationPath::Rotation:
@@ -1094,11 +1102,35 @@ void BT::Model::load_gltf2_as_meshes(string const& fname, string const& material
                     new_frame.joint_transforms_in_order.emplace_back(
                         std::move(joint_idx_to_local_trans_map.at(i)));
                 }
+
+                // @NOTE: Just copying the root position and will do delta calculations later.
+                glm_vec3_copy(root_pos, new_frame.root_motion_delta_pos);
+
                 new_anim_frames.emplace_back(std::move(new_frame));
 
                 // Tick next frame (and clamp to end time for any possible extra frames).
                 curr_time = std::min(curr_time + k_anim_frame_time,
                                      end_time);
+            }
+
+            // Turn root positions (stored in `.root_motion_delta_pos`) into delta positions.
+            for (size_t i = 1; i < new_anim_frames.size(); i++)
+            {
+                glm_vec3_sub(new_anim_frames[i - 0].root_motion_delta_pos,
+                             new_anim_frames[i - 1].root_motion_delta_pos,
+                             new_anim_frames[i - 1].root_motion_delta_pos);
+            }
+            {   // Special case for last frame (avg prev and last deltas (^_^;) ).
+                assert(new_anim_frames.size() >= 2);
+                vec3 avg_delta_pos = GLM_VEC3_ZERO_INIT;
+                glm_vec3_muladds(new_anim_frames[new_anim_frames.size() - 2].root_motion_delta_pos,
+                                 0.5f,
+                                 avg_delta_pos);
+                glm_vec3_muladds(new_anim_frames[0].root_motion_delta_pos,
+                                 0.5f,
+                                 avg_delta_pos);
+                glm_vec3_copy(avg_delta_pos,
+                              new_anim_frames[new_anim_frames.size() - 1].root_motion_delta_pos);
             }
         }
 

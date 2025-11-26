@@ -750,14 +750,33 @@ while (running_game_loop)
 
 ## Animation root motion.
 
-- [ ] Find root bone.
+- [x] Find root bone.
     > This bone will have the name "Root" (case insensitive).
-    - [ ] If there are bones/joints and there is _not_ a "root" bone, then error out.
+    - [ ] ~~If there are bones/joints and there is _not_ a "root" bone, then error out.~~
+    - ~~Or maybe just look for all bones that don't have parents and select one or if multiple select the one that has the word "root" in its name.~~
+    - I just ended up choosing the first bone that was in the `joints_sorted_breadth_first` list as the root bone.
 
-- [ ] Find velocity at every frame.
-    - [ ] Delta position from current frame to next frame.
-    - [ ] For last frame, get as far to the end as possible.
+- [x] Find velocity at every frame.
+    - [x] Delta position from current frame to next frame.
+    - [x] ~~For last frame, get as far to the end as possible.~~
         - Perhaps this needs a different method for the last frame?
+        - DIFFERENT METHOD: I ended up just averaging the delta root pos of the first and second-to-last (could be the same as the first) frame.
+            - I think this is a good approx. If there's more need to do more, then I'll redo this.
+    - [x] TEST: make sure that the values are correct for delta pos.
+
+- [ ] Change animator to use root motion or not.
+    - [ ] Have a `bool use_root_motion` in the animator.
+    - [ ] Do this for rendering:
+            ```cpp
+            calc_joint_matrices(time, loop, use_root_motion, joint_matrices);
+            ```
+            @NOTE: All it does is make the root bone be (0,0,0) position.
+    - [ ] Do this for simulation:
+            ```cpp
+            get_joint_matrices_at_frame_with_root_motion(time, loop, root_motion_delta_pos, joint_matrices);
+            ```
+            This makes the root bone be (0,0,0) position but also returns the delta pos for the root motion.
+
 
 
 ## Have CPU character attack, and have there be guard, parry, hurt -type interaction.
