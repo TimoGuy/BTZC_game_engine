@@ -308,7 +308,8 @@ Char_mvt_logic_results character_controller_movement_logic(
                              anim_root_motion->delta_pos[2] };
 
         // @NOTE: This is correct root motion, even tho it may look slow,
-        //        it is correct.  -Thea 2025/11/27
+        //        it is correct.
+        //        Maybe make your anim travel further if it looks slow?  -Thea 2025/11/27
         desired_velocity *=
             anim_root_motion->root_motion_multiplier * Model_joint_animation::k_frames_per_second;
     }
