@@ -780,12 +780,12 @@ while (running_game_loop)
 - [ ] Include movement with root motion.
     - [ ] Search for the `component::Animator_root_motion` component inside the entity when doing the `input_controlled_character_movement()` system.
         - [ ] If exists, use it for the movement, and use the world space input for turning and facing angle stuff.
+            - [x] Initial separation of movement velocity and world space input for turning.
             - [ ] Grab the AFA data of `turn_speed` from the animator's AFA.
                 - Aaaaaa I wish this weren't _inside_ the animator like this 😭
                 - There is a refactor below that should help sooo much for all of this.
         - [ ] If doesn't exist, then use world space input for both movement and turning.
             - I.e. the current solution (well, not after this change).
-
 
 
 ## Have CPU character attack, and have there be guard, parry, hurt -type interaction.

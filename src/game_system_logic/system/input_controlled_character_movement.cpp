@@ -4,6 +4,7 @@
 #include "Jolt/Physics/PhysicsSystem.h"
 #include "Jolt/Math/Vec3.h"
 #include "btglm.h"
+#include "game_system_logic/component/animator_root_motion.h"
 #include "game_system_logic/component/character_movement.h"
 #include "game_system_logic/component/physics_object_settings.h"
 #include "game_system_logic/component/transform.h"
@@ -187,10 +188,8 @@ float_t find_grounded_turn_speed(component::Character_mvt_state::Settings const&
 /// Processes input to turn the character when in the grounded state.
 void apply_grounded_facing_angle(component::Character_mvt_state::Grounded_state& grounded_state,
                                  component::Character_mvt_state::Settings const& mvt_settings,
-                                 JPH::Vec3Arg input_velocity)
+                                 float_t desired_facing_angle)
 {
-    float_t desired_facing_angle{ atan2f(input_velocity.GetX(), input_velocity.GetZ()) };
-
     float_t delta_direction{ desired_facing_angle - grounded_state.facing_angle };
     while (delta_direction > glm_rad(180.0f)) delta_direction -= glm_rad(360.0f);
     while (delta_direction <= glm_rad(-180.0f)) delta_direction += glm_rad(360.0f);
@@ -270,6 +269,7 @@ Char_mvt_logic_results character_controller_movement_logic(
     component::Character_world_space_input const& char_ws_input,
     component::Character_mvt_state& char_mvt_state,
     component::Character_mvt_animated_state* char_mvt_anim_state,
+    component::Animator_root_motion const* anim_root_motion,
     Physics_object& phys_obj)
 {   // Get current character controller state.
     auto char_con_impl{ phys_obj.get_impl() };
@@ -297,11 +297,25 @@ Char_mvt_logic_results character_controller_movement_logic(
     // Change input into desired velocity.
     auto const& mvt_settings{ char_mvt_state.settings };
 
-    JPH::Vec3 desired_velocity{ char_ws_input.ws_flat_clamped_input.x,
-                                0.0f,
-                                char_ws_input.ws_flat_clamped_input.z };
-    desired_velocity *= (char_con_impl->get_cc_stance() ? mvt_settings.crouched_speed
-                                                        : mvt_settings.standing_speed);
+    JPH::Vec3 desired_velocity;
+    if (anim_root_motion)
+    {
+        // @TODO: @FIXME: This is not getting transformed into the facing direction!!!
+        //                Idk if it should get reoriented here or later though.
+        desired_velocity = { anim_root_motion->delta_pos[0],
+                             anim_root_motion->delta_pos[1],
+                             anim_root_motion->delta_pos[2] };
+        desired_velocity *=  // @TODO: @FIXME: Why is there a `2` needed? It's way too slow with the current root motion, so mult by 2 is added, but is it even correct?  -Thea 2025/11/27
+            anim_root_motion->root_motion_multiplier * 2 / Physics_engine::k_simulation_delta_time;
+    }
+    else
+    {
+        desired_velocity = { char_ws_input.ws_flat_clamped_input.x,
+                             0.0f,
+                             char_ws_input.ws_flat_clamped_input.z };
+        desired_velocity *= (char_con_impl->get_cc_stance() ? mvt_settings.crouched_speed
+                                                            : mvt_settings.standing_speed);
+    }
 
     // Extra input checks.
     bool on_jump_press{ char_ws_input.jump_pressed && !char_ws_input.prev_jump_pressed };
@@ -347,19 +361,25 @@ Char_mvt_logic_results character_controller_movement_logic(
         }
     }
 
+    // Desired facing angle.
+    bool has_desired_facing_angle{ glm_vec3_norm2(const_cast<float_t*>(
+                                       char_ws_input.ws_flat_clamped_input.raw)) > 1e-6f * 1e-6f };
+    float_t desired_facing_angle{ has_desired_facing_angle
+                                      ? atan2f(char_ws_input.ws_flat_clamped_input.x,
+                                               char_ws_input.ws_flat_clamped_input.z)
+                                      : 0 };
+
     // Desired velocity.
     float_t display_facing_angle;
     if (is_grounded)
     {   // Grounded turn & speed movement.
         auto& grounded_state{ char_mvt_state.grounded_state };
 
-        auto input_norm2{ glm_vec3_norm2(
-            const_cast<float_t*>(char_ws_input.ws_flat_clamped_input.raw)) };
-        if (input_norm2 > 1e-6f * 1e-6f)
-            apply_grounded_facing_angle(grounded_state, mvt_settings, desired_velocity);
+        if (has_desired_facing_angle)
+            apply_grounded_facing_angle(grounded_state, mvt_settings, desired_facing_angle);
 
         if (char_mvt_anim_state)
-            char_mvt_anim_state->write_to_animator_data.is_moving = (input_norm2 > 0.5f * 0.5f);
+            char_mvt_anim_state->write_to_animator_data.is_moving = has_desired_facing_angle;
 
         apply_grounded_linear_speed(grounded_state, mvt_settings, desired_velocity);
 
@@ -389,11 +409,8 @@ Char_mvt_logic_results character_controller_movement_logic(
         JPH::Vec3 effective_velocity{ flat_linear_velo + delta_velocity };
         new_velocity += effective_velocity;
 
-        if (glm_vec3_norm2(const_cast<float_t*>(char_ws_input.ws_flat_clamped_input.raw)) >
-            1e-6f * 1e-6f)
+        if (has_desired_facing_angle)
         {   // Move towards input angle.
-            float_t desired_facing_angle{ atan2f(char_ws_input.ws_flat_clamped_input.x,
-                                                 char_ws_input.ws_flat_clamped_input.z) };
             float_t delta_direction{ desired_facing_angle - airborne_state.input_facing_angle };
 
             while (delta_direction > glm_rad(180.0f))
@@ -470,9 +487,16 @@ void BT::system::input_controlled_character_movement()
         };
         auto& phys_obj{ *phys_engine.checkout_physics_object(phys_obj_uuid) };
 
+        auto anim_root_motion{ char_mvt_anim_state
+                                   ? reg.try_get<component::Animator_root_motion const>(
+                                         entity_container.find_entity(
+                                             char_mvt_anim_state->affecting_animator_uuid))
+                                   : nullptr };
+
         auto mvt_logic_result = character_controller_movement_logic(char_ws_input,
                                                                     char_mvt_state,
                                                                     char_mvt_anim_state,
+                                                                    anim_root_motion,
                                                                     phys_obj);
 
         // Apply movement logic outputs to physics object character controller inputs.
