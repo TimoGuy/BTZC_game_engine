@@ -47,7 +47,9 @@
 #include "timer/watchdog_timer.h"
 #include "uuid/uuid.h"
 #include <cstdint>
+#include <fstream>
 #include <memory>
+#include <sstream>
 
 using std::make_unique;
 using std::unique_ptr;
@@ -55,6 +57,108 @@ using std::unique_ptr;
 
 int32_t main()
 {
+    BT::Timer benchmark_timer;
+
+    std::vector<float_t> timings;
+
+
+    // Benchmark: load up the file I need.
+    std::vector<mat4s> matrices;
+    {
+        benchmark_timer.start_timer();
+
+        // Load file contents.
+        std::ifstream fs;
+        fs.open("assets/bunch_o_numbers.txt");
+
+        std::stringstream ss;
+        ss << fs.rdbuf();
+
+        fs.close();
+
+        // Parse into tokens.
+        std::vector<std::string> tokens;
+        std::copy(std::istream_iterator<std::string>(ss),
+                  std::istream_iterator<std::string>(),
+                  std::back_inserter(tokens));
+
+        // Convert to float values.
+        std::vector<float_t> tokens_as_floats;
+        tokens_as_floats.reserve(tokens.size());
+
+        for (auto const& token : tokens)
+        {
+            tokens_as_floats.emplace_back(std::stof(token));
+        }
+
+        assert(tokens.size() == tokens_as_floats.size());
+
+        // Move to matrices list.
+        for (size_t i = 16; i < tokens_as_floats.size(); i += 16)
+        {
+            matrices.emplace_back(mat4s{ tokens_as_floats[i - 16],
+                                         tokens_as_floats[i - 15],
+                                         tokens_as_floats[i - 14],
+                                         tokens_as_floats[i - 13],
+
+                                         tokens_as_floats[i - 12],
+                                         tokens_as_floats[i - 11],
+                                         tokens_as_floats[i - 10],
+                                         tokens_as_floats[i - 9],
+
+                                         tokens_as_floats[i - 8],
+                                         tokens_as_floats[i - 7],
+                                         tokens_as_floats[i - 6],
+                                         tokens_as_floats[i - 5],
+
+                                         tokens_as_floats[i - 4],
+                                         tokens_as_floats[i - 3],
+                                         tokens_as_floats[i - 2],
+                                         tokens_as_floats[i - 1] });
+        }
+
+        // Finish.
+        auto dt{ benchmark_timer.calc_delta_time() };
+        timings.emplace_back(dt);
+
+        // Result.
+        BT_TRACEF("Num mat4s: %llu", matrices.size());
+    }
+
+    // Perform matrix multiplication.
+    {
+        benchmark_timer.start_timer();
+
+        mat4 cum_val = GLM_MAT4_IDENTITY_INIT;
+        for (auto& matrix : matrices)
+        {
+            glm_mat4_mul(cum_val, matrix.raw, cum_val);
+        }
+
+        // Finish.
+        auto dt{ benchmark_timer.calc_delta_time() };
+        timings.emplace_back(dt);
+    }
+
+    // Results.
+    BT_TRACEF("File loading time (sec): %0.10f\n"
+              "Matrix multi time (sec): %0.10f", timings[0], timings[1]);
+
+    return 0;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     BT::initialize_app_settings_from_file_or_fallback_to_defaults();
     auto const& app_settings{ BT::get_app_settings_read_handle() };
 

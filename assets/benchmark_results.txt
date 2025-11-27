@@ -1,0 +1,78 @@
+[trace](0) :: Num mat4s: 39
+[trace](0) :: File loading time (sec): 0.0036881999
+   Matrix multi time (sec): 0.0000069000
+
+[trace](0) :: Num mat4s: 39
+[trace](0) :: File loading time (sec): 0.0045622000
+   Matrix multi time (sec): 0.0000098000
+
+[trace](0) :: Num mat4s: 39
+[trace](0) :: File loading time (sec): 0.0025460001
+   Matrix multi time (sec): 0.0000042000
+
+[trace](0) :: Num mat4s: 39
+[trace](0) :: File loading time (sec): 0.0022615001
+   Matrix multi time (sec): 0.0000080000
+
+[trace](0) :: Num mat4s: 39
+[trace](0) :: File loading time (sec): 0.0022352999
+   Matrix multi time (sec): 0.0000043000
+
+[trace](0) :: Num mat4s: 39
+[trace](0) :: File loading time (sec): 0.0026030999
+   Matrix multi time (sec): 0.0000041000
+
+[trace](0) :: Num mat4s: 39
+[trace](0) :: File loading time (sec): 0.0022410001
+   Matrix multi time (sec): 0.0000042000
+
+   [trace](0) :: Num mat4s: 39
+[trace](0) :: File loading time (sec): 0.0022849999
+   Matrix multi time (sec): 0.0000042000
+
+   [trace](0) :: Num mat4s: 39
+[trace](0) :: File loading time (sec): 0.0061145001
+   Matrix multi time (sec): 0.0000068000
+
+   [trace](0) :: Num mat4s: 39
+[trace](0) :: File loading time (sec): 0.0027654001
+   Matrix multi time (sec): 0.0000041000
+
+
+
+File loading time (sec): 0.0006252000
+Matrix multi time (sec): 0.0000120000
+
+File loading time (sec): 0.0004298000
+Matrix multi time (sec): 0.0000011000
+
+File loading time (sec): 0.0004198000
+Matrix multi time (sec): 0.0000012000
+
+File loading time (sec): 0.0004355000
+Matrix multi time (sec): 0.0000041000
+
+File loading time (sec): 0.0004370000
+Matrix multi time (sec): 0.0000013000
+
+File loading time (sec): 0.0004228000
+Matrix multi time (sec): 0.0000040000
+
+File loading time (sec): 0.0004073000
+Matrix multi time (sec): 0.0000039000
+
+File loading time (sec): 0.0004084000
+Matrix multi time (sec): 0.0000040000
+
+File loading time (sec): 0.0004024000
+Matrix multi time (sec): 0.0000012000
+
+File loading time (sec): 0.0004035000
+Matrix multi time (sec): 0.0000042000
+
+File loading time (sec): 0.0005112000
+Matrix multi time (sec): 0.0000015000
+
+
+
+
