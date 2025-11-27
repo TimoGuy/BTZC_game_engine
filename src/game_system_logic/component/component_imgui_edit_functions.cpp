@@ -4,6 +4,7 @@
 #include "character_movement.h"
 #include "combat_stats.h"
 #include "entity_metadata.h"
+#include "game_system_logic/component/animator_root_motion.h"
 #include "game_system_logic/entity_container.h"
 #include "health_stats.h"
 #include "imgui.h"
@@ -443,6 +444,23 @@ void BT::component::edit::imgui_edit__created_render_object_reference(entt::regi
 
     rend_obj_pool.return_render_objs({ &rend_obj });
 
+    ImGui::PopID();
+}
+
+void BT::component::edit::imgui_edit__animator_root_motion(entt::registry& reg,
+                                                           entt::entity ecs_entity)
+{
+    auto& anim_root_motion{ reg.get<component::Animator_root_motion>(ecs_entity) };
+
+    ImGui::PushID(&anim_root_motion);
+    ImGui::PushItemWidth(ImGui::GetFontSize() * -10);
+
+    // Show vals.
+    ImGui::DragFloat("root_motion_multiplier", &anim_root_motion.root_motion_multiplier);
+    ImGui::DragFloat3("delta_pos", anim_root_motion.delta_pos);
+    ImGui::Text("%.9f", anim_root_motion.delta_pos[2]);
+
+    ImGui::PopItemWidth();
     ImGui::PopID();
 }
 

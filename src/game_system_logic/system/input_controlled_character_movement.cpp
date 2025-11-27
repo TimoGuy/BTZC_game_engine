@@ -12,6 +12,7 @@
 #include "physics_engine/physics_engine.h"
 #include "physics_engine/physics_object.h"
 #include "physics_engine/raycast_helper.h"
+#include "renderer/model_animator.h"
 #include "service_finder/service_finder.h"
 
 #include <cassert>
@@ -306,7 +307,8 @@ Char_mvt_logic_results character_controller_movement_logic(
                              anim_root_motion->delta_pos[1],
                              anim_root_motion->delta_pos[2] };
         desired_velocity *=  // @TODO: @FIXME: Why is there a `2` needed? It's way too slow with the current root motion, so mult by 2 is added, but is it even correct?  -Thea 2025/11/27
-            anim_root_motion->root_motion_multiplier * 2 / Physics_engine::k_simulation_delta_time;
+            // anim_root_motion->root_motion_multiplier * 2 / Physics_engine::k_simulation_delta_time;  // @REPLY: 2 is not correct, it's too fast. But really, what is the correct length anyways???
+            anim_root_motion->root_motion_multiplier * Model_joint_animation::k_frames_per_second;
     }
     else
     {

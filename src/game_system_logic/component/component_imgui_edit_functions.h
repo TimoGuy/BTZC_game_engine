@@ -36,6 +36,7 @@ void imgui_edit__transform_changed(entt::registry& reg, entt::entity ecs_entity)
 void imgui_edit__character_world_space_input(entt::registry& reg, entt::entity ecs_entity);
 void imgui_edit__render_object_settings(entt::registry& reg, entt::entity ecs_entity);
 void imgui_edit__created_render_object_reference(entt::registry& reg, entt::entity ecs_entity);
+void imgui_edit__animator_root_motion(entt::registry& reg, entt::entity ecs_entity);
 void imgui_edit__physics_object_settings(entt::registry& reg, entt::entity ecs_entity);
 void imgui_edit__physics_obj_type_triangle_mesh_settings(entt::registry& reg, entt::entity ecs_entity);
 void imgui_edit__physics_obj_type_char_con_settings(entt::registry& reg, entt::entity ecs_entity);
