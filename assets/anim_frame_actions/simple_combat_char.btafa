@@ -10,6 +10,11 @@
                     "ctrl_item_idx": 4,
                     "end_frame": 11,
                     "start_frame": 0
+                },
+                {
+                    "ctrl_item_idx": 7,
+                    "end_frame": 11,
+                    "start_frame": 0
                 }
             ],
             "state_name": "st_idle"
@@ -18,6 +23,11 @@
             "regions": [
                 {
                     "ctrl_item_idx": 4,
+                    "end_frame": 41,
+                    "start_frame": 0
+                },
+                {
+                    "ctrl_item_idx": 8,
                     "end_frame": 41,
                     "start_frame": 0
                 }
@@ -70,6 +80,21 @@
                     "ctrl_item_idx": 6,
                     "end_frame": 107,
                     "start_frame": 57
+                },
+                {
+                    "ctrl_item_idx": 8,
+                    "end_frame": 24,
+                    "start_frame": 0
+                },
+                {
+                    "ctrl_item_idx": 8,
+                    "end_frame": 63,
+                    "start_frame": 40
+                },
+                {
+                    "ctrl_item_idx": 8,
+                    "end_frame": 121,
+                    "start_frame": 100
                 }
             ],
             "state_name": "st_attack_0"
@@ -97,6 +122,12 @@
         },
         {
             "name": "can_move:ov:false"
+        },
+        {
+            "name": "turn_speed:ov:1000000"
+        },
+        {
+            "name": "turn_speed:ov:10"
         }
     ],
     "hitcapsule_group_set_template": {

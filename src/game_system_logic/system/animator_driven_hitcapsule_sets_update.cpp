@@ -1,5 +1,6 @@
 #include "animator_driven_hitcapsule_sets_update.h"
 
+#include "animation_frame_action_tool/runtime_data.h"
 #include "btlogger.h"
 #include "entt/entity/fwd.hpp"
 #include "entt/entity/registry.hpp"
@@ -41,10 +42,17 @@ void BT::system::animator_driven_hitcapsule_sets_update()
 
         std::vector<mat4s> joint_matrices;
         if (animator.get_is_using_root_motion())
+        {   // @NOTE: This below will lag behind 1 sim-tick. @TODO: @THEA: @NOCHECKIN: FIX THIS!!!!!
+            auto& anim_root_motion{ reg.get<component::Animator_root_motion>(entity) };
+            anim_root_motion.turn_speed =
+                animator.get_anim_frame_action_data_handle()
+                    .get_float_data_handle(anim_frame_action::CTRL_DATA_LABEL_turn_speed)
+                    .get_val();
             animator.get_anim_floored_frame_pose_with_root_motion(
                 Model_animator::SIMULATION_PROFILE,
-                reg.get<component::Animator_root_motion>(entity).delta_pos,  // Different system will use this information.
+                anim_root_motion.delta_pos,  // Different system will use this information.
                 joint_matrices);
+        }
         else
             animator.get_anim_floored_frame_pose(Model_animator::SIMULATION_PROFILE,
                                                  joint_matrices);

@@ -62,20 +62,7 @@ struct Character_mvt_state
         float_t grounded_acceleration{ 80.0f };
         float_t grounded_deceleration{ 120.0f };
 
-        struct Contextual_turn_speed
-        {
-            float_t turn_speed;
-            float_t max_speed_of_context;
-
-            NLOHMANN_DEFINE_TYPE_INTRUSIVE(Contextual_turn_speed, turn_speed, max_speed_of_context);
-        };
-        std::array<Contextual_turn_speed, 3> grounded_turn_speeds{
-            Contextual_turn_speed{ 1000000.0f, crouched_speed + 0.1f },
-            Contextual_turn_speed{ 10.0f, standing_speed + 0.1f },
-            Contextual_turn_speed{ 5.0f, 50.0f } };
-
         float_t airborne_acceleration{ 60.0f };
-        float_t airborne_turn_speed{ 7.5f };
         float_t jump_speed{ 30.0f };
 
         NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(Settings,
@@ -83,9 +70,7 @@ struct Character_mvt_state
                                                     standing_speed,
                                                     grounded_acceleration,
                                                     grounded_deceleration,
-                                                    grounded_turn_speeds,
                                                     airborne_acceleration,
-                                                    airborne_turn_speed,
                                                     jump_speed);
     } settings;
 

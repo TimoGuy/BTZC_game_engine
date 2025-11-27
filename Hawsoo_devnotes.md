@@ -779,21 +779,22 @@ while (running_game_loop)
 
 - [ ] Include movement with root motion.
     - [ ] Search for the `component::Animator_root_motion` component inside the entity when doing the `input_controlled_character_movement()` system.
-        - [ ] If exists, use it for the movement, and use the world space input for turning and facing angle stuff.
+        - [x] If exists, use it for the movement, and use the world space input for turning and facing angle stuff.
             - [x] Initial separation of movement velocity and world space input for turning.
             - [x] Fix speed issue.
                 - [x] Write imgui for the component.
                     - I'ts really consistent. Just `0.081`. Idk if this is the right speed or not.
                 - So um, it turns out that the `*2` hack made the animation root motion twice as fast... and times one... it's correct even tho it looks wrong.
                     - I did math to verify, and then looked real closely at the feet and the grid lines and yup it's correct.
-            - [ ] To make look better, zoom in the camera.
-            - [ ] Grab the AFA data of `turn_speed` from the animator's AFA.
+            - [x] To make look better, zoom in the camera.
+            - [x] Grab the AFA data of `turn_speed` from the animator's AFA.
                 - Aaaaaa I wish this weren't _inside_ the animator like this 😭
                 - There is a refactor below that should help sooo much for all of this.
-        - [ ] If doesn't exist, then use world space input for both movement and turning.
+        - [x] If doesn't exist, then use world space input for both movement and turning.
             - I.e. the current solution (well, not after this change).
+        - [ ] BUG: Fix the one bug where the running animation gets stuck after the attack animation. It's kinda weird?
 
-- [ ] Separate root motion update from updating hitcapsule positions.
+- [ ] Separate root motion update from updating hitcapsule positions. (To fix the 1 sim-tick lag)
     - [ ] Put root motion fetch after player input and before input_controlled_char_mvt()
     - [ ] Leave hitcapsule positions in same place (right before hitcapsule overlap check).
 

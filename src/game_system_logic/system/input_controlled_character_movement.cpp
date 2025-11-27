@@ -171,31 +171,16 @@ void process_midair_jump_interactions(
     #endif  // REFACTOR_WALL_INTERACTIONS
 }
 
-/// Swithes ground turn speed depending on the running speed/linear speed.
-float_t find_grounded_turn_speed(component::Character_mvt_state::Settings const& mvt_settings,
-                                 float_t linear_speed)
-{
-    float_t turn_speed{ 0.0f };
-    for (auto& context : mvt_settings.grounded_turn_speeds)
-        if (linear_speed <= context.max_speed_of_context)
-        {
-            turn_speed = context.turn_speed;
-            break;
-        }
-
-    return turn_speed;
-}
-
 /// Processes input to turn the character when in the grounded state.
 void apply_grounded_facing_angle(component::Character_mvt_state::Grounded_state& grounded_state,
                                  component::Character_mvt_state::Settings const& mvt_settings,
-                                 float_t desired_facing_angle)
+                                 float_t desired_facing_angle,
+                                 float_t turn_speed)
 {
     float_t delta_direction{ desired_facing_angle - grounded_state.facing_angle };
     while (delta_direction > glm_rad(180.0f)) delta_direction -= glm_rad(360.0f);
     while (delta_direction <= glm_rad(-180.0f)) delta_direction += glm_rad(360.0f);
 
-    float_t turn_speed{ find_grounded_turn_speed(mvt_settings, grounded_state.speed) };
     bool is_quick_turn_speed{ turn_speed > 1000.0f };  // Idk just some number.
 
     if (is_quick_turn_speed)
@@ -373,6 +358,7 @@ Char_mvt_logic_results character_controller_movement_logic(
                                       ? atan2f(char_ws_input.ws_flat_clamped_input.x,
                                                char_ws_input.ws_flat_clamped_input.z)
                                       : 0 };
+    float_t turn_speed{ anim_root_motion ? anim_root_motion->turn_speed : 1000000.0f };
 
     // Desired velocity.
     float_t display_facing_angle;
@@ -381,7 +367,10 @@ Char_mvt_logic_results character_controller_movement_logic(
         auto& grounded_state{ char_mvt_state.grounded_state };
 
         if (has_desired_facing_angle)
-            apply_grounded_facing_angle(grounded_state, mvt_settings, desired_facing_angle);
+            apply_grounded_facing_angle(grounded_state,
+                                        mvt_settings,
+                                        desired_facing_angle,
+                                        turn_speed);
 
         if (char_mvt_anim_state)
             char_mvt_anim_state->write_to_animator_data.is_moving = has_desired_facing_angle;
@@ -417,14 +406,10 @@ Char_mvt_logic_results character_controller_movement_logic(
         if (has_desired_facing_angle)
         {   // Move towards input angle.
             float_t delta_direction{ desired_facing_angle - airborne_state.input_facing_angle };
+            while (delta_direction > glm_rad(180.0f)) delta_direction -= glm_rad(360.0f);
+            while (delta_direction <= glm_rad(-180.0f)) delta_direction += glm_rad(360.0f);
 
-            while (delta_direction > glm_rad(180.0f))
-                delta_direction -= glm_rad(360.0f);
-            while (delta_direction <= glm_rad(-180.0f))
-                delta_direction += glm_rad(360.0f);
-
-            float_t max_turn_delta{ mvt_settings.airborne_turn_speed *
-                                    Physics_engine::k_simulation_delta_time };
+            float_t max_turn_delta{ turn_speed * Physics_engine::k_simulation_delta_time };
             if (abs(delta_direction) > max_turn_delta)
             {   // Limit turn speed.
                 delta_direction = max_turn_delta * glm_signf(delta_direction);
