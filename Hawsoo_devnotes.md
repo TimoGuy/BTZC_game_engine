@@ -793,6 +793,9 @@ while (running_game_loop)
         - [x] If doesn't exist, then use world space input for both movement and turning.
             - I.e. the current solution (well, not after this change).
         - [ ] BUG: Fix the one bug where the running animation gets stuck after the attack animation. It's kinda weird?
+            - Ok the bug appears to happen when it's a turnaround angle-level turn while doing the attack animation, and the char cannot turn around.
+                - Ok, it also just happens while in the running anim. Nothing needed here!
+                - It looks like the character just literally can't turn around for some reason.
 
 - [ ] Separate root motion update from updating hitcapsule positions. (To fix the 1 sim-tick lag)
     - [ ] Put root motion fetch after player input and before input_controlled_char_mvt()
