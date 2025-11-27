@@ -781,7 +781,7 @@ while (running_game_loop)
     - [ ] Search for the `component::Animator_root_motion` component inside the entity when doing the `input_controlled_character_movement()` system.
         - [ ] If exists, use it for the movement, and use the world space input for turning and facing angle stuff.
             - [x] Initial separation of movement velocity and world space input for turning.
-            - [ ] Fix speed issue.
+            - [x] Fix speed issue.
                 - [x] Write imgui for the component.
                     - I'ts really consistent. Just `0.081`. Idk if this is the right speed or not.
                 - So um, it turns out that the `*2` hack made the animation root motion twice as fast... and times one... it's correct even tho it looks wrong.

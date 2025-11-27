@@ -306,8 +306,10 @@ Char_mvt_logic_results character_controller_movement_logic(
         desired_velocity = { anim_root_motion->delta_pos[0],
                              anim_root_motion->delta_pos[1],
                              anim_root_motion->delta_pos[2] };
-        desired_velocity *=  // @TODO: @FIXME: Why is there a `2` needed? It's way too slow with the current root motion, so mult by 2 is added, but is it even correct?  -Thea 2025/11/27
-            // anim_root_motion->root_motion_multiplier * 2 / Physics_engine::k_simulation_delta_time;  // @REPLY: 2 is not correct, it's too fast. But really, what is the correct length anyways???
+
+        // @NOTE: This is correct root motion, even tho it may look slow,
+        //        it is correct.  -Thea 2025/11/27
+        desired_velocity *=
             anim_root_motion->root_motion_multiplier * Model_joint_animation::k_frames_per_second;
     }
     else
