@@ -40,7 +40,18 @@
             "state_name": "st_running"
         },
         {
-            "regions": [],
+            "regions": [
+                {
+                    "ctrl_item_idx": 8,
+                    "end_frame": 10,
+                    "start_frame": 0
+                },
+                {
+                    "ctrl_item_idx": 8,
+                    "end_frame": 41,
+                    "start_frame": 33
+                }
+            ],
             "state_name": "st_running_turnaround"
         },
         {
@@ -282,7 +293,7 @@
                         "radius": 0.10000000149011612
                     }
                 ],
-                "m_enabled": true,
+                "m_enabled": false,
                 "m_type": 0
             },
             {

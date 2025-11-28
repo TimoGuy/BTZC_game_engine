@@ -1,6 +1,7 @@
 #include "input_controlled_character_movement.h"
 
 #include "Jolt/Jolt.h"
+#include "Jolt/Math/MathTypes.h"
 #include "Jolt/Physics/PhysicsSystem.h"
 #include "Jolt/Math/Vec3.h"
 #include "btglm.h"
@@ -214,29 +215,6 @@ void apply_grounded_facing_angle(component::Character_mvt_state::Grounded_state&
         grounded_state.facing_angle += delta_direction;
     }
 }
-
-/// Processes the linear speed after acceleration/deceleration accounted for.
-void apply_grounded_linear_speed(component::Character_mvt_state::Grounded_state& grounded_state,
-                                 component::Character_mvt_state::Settings const& mvt_settings,
-                                 JPH::Vec3Arg desired_velocity)
-{
-    float_t desired_speed{ glm_vec2_norm(vec2{ desired_velocity.GetX(), desired_velocity.GetZ() }) };
-
-    float_t delta_speed{ desired_speed - grounded_state.speed };
-    float_t acceleration{ delta_speed < 0.0f ? -mvt_settings.grounded_deceleration *
-                                                   Physics_engine::k_simulation_delta_time
-                                             : mvt_settings.grounded_acceleration *
-                                                   Physics_engine::k_simulation_delta_time };
-    if (abs(delta_speed) > abs(acceleration))
-    {
-        // Limit delta speed to acceleration.
-        delta_speed = acceleration;
-    }
-
-    // Apply new linear speed.
-    grounded_state.speed += delta_speed;
-}
-
 /// Result from movement logic.
 struct Char_mvt_logic_results
 {
@@ -363,21 +341,25 @@ Char_mvt_logic_results character_controller_movement_logic(
         auto& grounded_state{ char_mvt_state.grounded_state };
 
         if (has_desired_facing_angle)
+        {
             apply_grounded_facing_angle(grounded_state,
                                         mvt_settings,
                                         char_mvt_anim_state,
                                         anim_root_motion,
                                         desired_facing_angle,
                                         turn_speed);
+            grounded_state.allow_grounded_sliding = true;
+        }
+        else
+        {
+            grounded_state.allow_grounded_sliding = false;
+        }
 
         if (char_mvt_anim_state)
             char_mvt_anim_state->write_to_animator_data.is_moving = has_desired_facing_angle;
 
-        apply_grounded_linear_speed(grounded_state, mvt_settings, desired_velocity);
-
-        new_velocity += JPH::Vec3{ sinf(grounded_state.facing_angle) * grounded_state.speed,
-                                   0.0f,
-                                   cosf(grounded_state.facing_angle) * grounded_state.speed };
+        new_velocity += (JPH::Quat::sEulerAngles(JPH::Vec3Arg(0, grounded_state.facing_angle, 0)) *
+                         desired_velocity);
 
         // Keep airborne state up to date.
         char_mvt_state.airborne_state.input_facing_angle = grounded_state.facing_angle;
@@ -417,7 +399,6 @@ Char_mvt_logic_results character_controller_movement_logic(
         }
 
         // Keep grounded state up to date.
-        char_mvt_state.grounded_state.speed = effective_velocity.Length();
         if (effective_velocity.IsNearZero())
             char_mvt_state.grounded_state.facing_angle = airborne_state.input_facing_angle;
         else
@@ -442,7 +423,7 @@ void apply_velocity_to_char_con(
     JPH::Vec3 velo_w_grav{ velocity };
     velo_w_grav += (up_rotation * physics_gravity) * Physics_engine::k_simulation_delta_time;
 
-    phys_obj.get_impl()->set_cc_allow_sliding(is_grounded && (grounded_state.speed > 1e-6f));
+    phys_obj.get_impl()->set_cc_allow_sliding(is_grounded && grounded_state.allow_grounded_sliding);
     phys_obj.get_impl()->set_cc_velocity(velo_w_grav);
 }
 

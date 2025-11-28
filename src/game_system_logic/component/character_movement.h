@@ -44,7 +44,7 @@ struct Character_mvt_state
 {
     struct Grounded_state
     {
-        float_t speed{ 0.0f };
+        bool allow_grounded_sliding{ false };
         float_t facing_angle{ 0.0f };
     } grounded_state;
 
@@ -58,17 +58,12 @@ struct Character_mvt_state
         float_t crouched_speed{ 5.0f };
         float_t standing_speed{ 15.0f };
 
-        float_t grounded_acceleration{ 80.0f };
-        float_t grounded_deceleration{ 120.0f };
-
         float_t airborne_acceleration{ 60.0f };
         float_t jump_speed{ 30.0f };
 
         NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(Settings,
                                                     crouched_speed,
                                                     standing_speed,
-                                                    grounded_acceleration,
-                                                    grounded_deceleration,
                                                     airborne_acceleration,
                                                     jump_speed);
     } settings;

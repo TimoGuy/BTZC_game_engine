@@ -797,6 +797,9 @@ while (running_game_loop)
                 - Ok, it also just happens while in the running anim. Nothing needed here!
                 - It looks like the character just literally can't turn around for some reason.
         - [ ] Make Grounded not just use the magnitude. Have it use the actual root motion delta pos but rotated from the facing direction.
+            - [x] Initial.
+            - [ ] Fix attack anim root motion not working.
+                - It (I think) is bc `grounded_state.allow_grounded_sliding` is false.
 
 - [ ] Separate root motion update from updating hitcapsule positions. (To fix the 1 sim-tick lag)
     - [ ] Put root motion fetch after player input and before input_controlled_char_mvt()
