@@ -304,6 +304,9 @@ Char_mvt_logic_results character_controller_movement_logic(
         else if (!char_con_impl->get_cc_stance() && on_jump_press)
         {   // Jump.
             new_velocity += mvt_settings.jump_speed * up_direction;
+
+            if (char_mvt_anim_state)
+                char_mvt_anim_state->write_to_animator_data.on_jump = true;
         }
     }
     else
@@ -402,6 +405,9 @@ Char_mvt_logic_results character_controller_movement_logic(
 
         display_facing_angle = airborne_state.input_facing_angle;
     }
+
+    if (char_mvt_anim_state)
+        char_mvt_anim_state->write_to_animator_data.is_grounded = is_grounded;
 
     return { is_grounded, up_rotation, new_velocity, display_facing_angle };
 }

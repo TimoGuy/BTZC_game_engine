@@ -19,6 +19,18 @@
             "loop": false
         },
         {
+            "state_name": "st_jump",
+            "anim_name": "Jump",
+            "speed": 1.0,
+            "loop": false
+        },
+        {
+            "state_name": "st_fall",
+            "anim_name": "Fall",
+            "speed": 1.0,
+            "loop": false
+        },
+        {
             "state_name": "st_attack_0",
             "anim_name": "Sample_attack",
             "speed": 1.0,
@@ -34,9 +46,10 @@
     "transition_intermediate_states": [],
     "variables": [
         "bool is_moving",
-        "trig on_attack",
         "trig on_turnaround",
-        "trig on_jump"
+        "bool is_grounded",
+        "trig on_jump",
+        "trig on_attack"
     ],
     "state_transitions": [
         {
@@ -54,6 +67,22 @@
         {
             "from_to_state": [["st_running_turnaround"], "st_running"],
             "condition": "ON_ANIM_END"
+        },
+        {
+            "from_to_state": [["st_idle", "st_running", "st_fall", "st_attack_0"], "st_jump"],
+            "condition": "on_jump"
+        },
+        {
+            "from_to_state": [["st_jump"], "st_fall"],
+            "condition": "ON_ANIM_END"
+        },
+        {
+            "from_to_state": [["st_idle", "st_running", "st_attack_0"], "st_fall"],
+            "condition": "is_grounded eq false"
+        },
+        {
+            "from_to_state": [["st_fall"], "st_idle"],
+            "condition": "is_grounded eq true"
         },
         {
             "from_to_state": [["st_idle", "st_running"], "st_attack_0"],

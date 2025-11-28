@@ -44,13 +44,20 @@ void BT::system::set_animator_variables()
             animator->set_bool_variable("is_moving",
                                         char_mvt_anim_state.write_to_animator_data.is_moving);
 
-            if (char_mvt_anim_state.write_to_animator_data.on_attack)
-                animator->set_trigger_variable("on_attack");
-            char_mvt_anim_state.write_to_animator_data.on_attack = false;
-
             if (char_mvt_anim_state.write_to_animator_data.on_turnaround)
                 animator->set_trigger_variable("on_turnaround");
             char_mvt_anim_state.write_to_animator_data.on_turnaround = false;
+
+            animator->set_bool_variable("is_grounded",
+                                        char_mvt_anim_state.write_to_animator_data.is_grounded);
+
+            if (char_mvt_anim_state.write_to_animator_data.on_jump)
+                animator->set_trigger_variable("on_jump");
+            char_mvt_anim_state.write_to_animator_data.on_jump = false;
+
+            if (char_mvt_anim_state.write_to_animator_data.on_attack)
+                animator->set_trigger_variable("on_attack");
+            char_mvt_anim_state.write_to_animator_data.on_attack = false;
 
             // Finish.
             rend_obj_pool.return_render_objs({ &affecting_rend_obj });

@@ -93,8 +93,10 @@ struct Character_mvt_animated_state
     struct Write_to_animator_data
     {
         bool is_moving{ false };
-        bool on_attack{ false };
         bool on_turnaround{ false };
+        bool is_grounded{ false };
+        bool on_jump{ false };
+        bool on_attack{ false };
     } write_to_animator_data;
 
     struct State

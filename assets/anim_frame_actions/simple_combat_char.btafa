@@ -55,6 +55,14 @@
             "state_name": "st_running_turnaround"
         },
         {
+            "regions": [],
+            "state_name": "st_jump"
+        },
+        {
+            "regions": [],
+            "state_name": "st_fall"
+        },
+        {
             "regions": [
                 {
                     "ctrl_item_idx": 5,
