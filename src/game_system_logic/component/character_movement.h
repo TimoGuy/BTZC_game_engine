@@ -55,16 +55,9 @@ struct Character_mvt_state
 
     struct Settings
     {
-        // float_t crouched_speed{ 5.0f };  // @DELETEME: This should get controlled from the AFA data and root motion delta pos data.
-        // float_t standing_speed{ 15.0f };
-
-        // float_t airborne_acceleration{ 60.0f };  // @DELETEME
         float_t jump_speed{ 30.0f };
 
         NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(Settings,
-                                                    // crouched_speed,  // @DELETEME
-                                                    // standing_speed,  // @DELETEME
-                                                    // airborne_acceleration,  // @DELETEME
                                                     jump_speed);
     } settings;
 

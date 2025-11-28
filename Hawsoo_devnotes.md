@@ -777,7 +777,7 @@ while (running_game_loop)
             ```
             This makes the root bone be (0,0,0) position but also returns the delta pos for the root motion.
 
-- [ ] Include movement with root motion.
+- [x] Include movement with root motion.
     - [x] Search for the `component::Animator_root_motion` component inside the entity when doing the `input_controlled_character_movement()` system.
         - [x] If exists, use it for the movement, and use the world space input for turning and facing angle stuff.
             - [x] Initial separation of movement velocity and world space input for turning.

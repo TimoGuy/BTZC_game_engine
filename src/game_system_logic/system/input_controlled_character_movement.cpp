@@ -389,8 +389,6 @@ Char_mvt_logic_results character_controller_movement_logic(
         {
             delta_velocity = delta_velocity.Normalized() * airborne_accel;
         }
-        // BT_TRACEF("DESIREEEE %0.3f, %0.3f, %0.3f", desired_velocity.GetX(), desired_velocity.GetY(), desired_velocity.GetZ());
-        BT_TRACEF("JOJOJ %0.3f, %0.3f, %0.3f", delta_velocity.GetX(), delta_velocity.GetY(), delta_velocity.GetZ());
 
         JPH::Vec3 effective_velocity{ flat_linear_velo + delta_velocity };
         new_velocity += effective_velocity;
