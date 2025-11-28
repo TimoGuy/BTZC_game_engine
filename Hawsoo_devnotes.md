@@ -792,10 +792,11 @@ while (running_game_loop)
                 - There is a refactor below that should help sooo much for all of this.
         - [x] If doesn't exist, then use world space input for both movement and turning.
             - I.e. the current solution (well, not after this change).
-        - [ ] BUG: Fix the one bug where the running animation gets stuck after the attack animation. It's kinda weird?
+        - [x] BUG: Fix the one bug where the running animation gets stuck after the attack animation. It's kinda weird?
             - Ok the bug appears to happen when it's a turnaround angle-level turn while doing the attack animation, and the char cannot turn around.
                 - Ok, it also just happens while in the running anim. Nothing needed here!
                 - It looks like the character just literally can't turn around for some reason.
+        - [ ] Make Grounded not just use the magnitude. Have it use the actual root motion delta pos but rotated from the facing direction.
 
 - [ ] Separate root motion update from updating hitcapsule positions. (To fix the 1 sim-tick lag)
     - [ ] Put root motion fetch after player input and before input_controlled_char_mvt()

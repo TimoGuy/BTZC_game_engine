@@ -13,6 +13,12 @@
             "loop": true
         },
         {
+            "state_name": "st_running_turnaround",
+            "anim_name": "Running_turnaround",
+            "speed": 1.0,
+            "loop": false
+        },
+        {
             "state_name": "st_attack_0",
             "anim_name": "Sample_attack",
             "speed": 1.0,
@@ -28,7 +34,8 @@
     "transition_intermediate_states": [],
     "variables": [
         "bool is_moving",
-        "trig on_attack"
+        "trig on_attack",
+        "trig on_turnaround"
     ],
     "state_transitions": [
         {
@@ -38,6 +45,14 @@
         {
             "from_to_state": ["st_running", "st_idle"],
             "condition": "is_moving eq false"
+        },
+        {
+            "from_to_state": ["st_running", "st_running_turnaround"],
+            "condition": "on_turnaround"
+        },
+        {
+            "from_to_state": ["st_running_turnaround", "st_running"],
+            "condition": "ON_ANIM_END"
         },
         {
             "from_to_state": ["st_idle", "st_attack_0"],

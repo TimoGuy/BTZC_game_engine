@@ -48,6 +48,10 @@ void BT::system::set_animator_variables()
                 animator->set_trigger_variable("on_attack");
             char_mvt_anim_state.write_to_animator_data.on_attack = false;
 
+            if (char_mvt_anim_state.write_to_animator_data.on_turnaround)
+                animator->set_trigger_variable("on_turnaround");
+            char_mvt_anim_state.write_to_animator_data.on_turnaround = false;
+
             // Finish.
             rend_obj_pool.return_render_objs({ &affecting_rend_obj });
         }

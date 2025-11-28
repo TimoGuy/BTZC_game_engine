@@ -38,15 +38,21 @@ void BT::system::animator_driven_hitcapsule_sets_update()
         animator.update(Model_animator::SIMULATION_PROFILE,
                         Physics_engine::k_simulation_delta_time);
 
-        animator.get_anim_frame_action_data_handle().assign_hitcapsule_enabled_flags();
+        auto& anim_afa_data_handle{ animator.get_anim_frame_action_data_handle() };
+
+        anim_afa_data_handle.assign_hitcapsule_enabled_flags();
 
         std::vector<mat4s> joint_matrices;
         if (animator.get_is_using_root_motion())
         {   // @NOTE: This below will lag behind 1 sim-tick. @TODO: @THEA: @NOCHECKIN: FIX THIS!!!!!
             auto& anim_root_motion{ reg.get<component::Animator_root_motion>(entity) };
             anim_root_motion.turn_speed =
-                animator.get_anim_frame_action_data_handle()
+                anim_afa_data_handle
                     .get_float_data_handle(anim_frame_action::CTRL_DATA_LABEL_turn_speed)
+                    .get_val();
+            anim_root_motion.can_do_turnaround_anim =
+                anim_afa_data_handle
+                    .get_bool_data_handle(anim_frame_action::CTRL_DATA_LABEL_can_do_turnaround_anim)
                     .get_val();
             animator.get_anim_floored_frame_pose_with_root_motion(
                 Model_animator::SIMULATION_PROFILE,
@@ -57,7 +63,7 @@ void BT::system::animator_driven_hitcapsule_sets_update()
             animator.get_anim_floored_frame_pose(Model_animator::SIMULATION_PROFILE,
                                                  joint_matrices);
 
-        animator.get_anim_frame_action_data_handle().update_hitcapsule_transforms(
+        anim_afa_data_handle.update_hitcapsule_transforms(
             rend_obj.render_transform(),
             joint_matrices);
 

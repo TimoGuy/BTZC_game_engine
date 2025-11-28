@@ -30,9 +30,18 @@
                     "ctrl_item_idx": 8,
                     "end_frame": 41,
                     "start_frame": 0
+                },
+                {
+                    "ctrl_item_idx": 9,
+                    "end_frame": 41,
+                    "start_frame": 0
                 }
             ],
             "state_name": "st_running"
+        },
+        {
+            "regions": [],
+            "state_name": "st_running_turnaround"
         },
         {
             "regions": [
@@ -128,6 +137,9 @@
         },
         {
             "name": "turn_speed:ov:10"
+        },
+        {
+            "name": "can_do_turnaround_anim:ov:true"
         }
     ],
     "hitcapsule_group_set_template": {

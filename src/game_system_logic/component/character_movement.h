@@ -46,7 +46,6 @@ struct Character_mvt_state
     {
         float_t speed{ 0.0f };
         float_t facing_angle{ 0.0f };
-        bool turnaround_enabled{ false };
     } grounded_state;
 
     struct Airborne_state
@@ -100,6 +99,7 @@ struct Character_mvt_animated_state
     {
         bool is_moving{ false };
         bool on_attack{ false };
+        bool on_turnaround{ false };
     } write_to_animator_data;
 
     struct State

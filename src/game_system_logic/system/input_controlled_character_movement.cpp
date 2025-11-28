@@ -174,6 +174,8 @@ void process_midair_jump_interactions(
 /// Processes input to turn the character when in the grounded state.
 void apply_grounded_facing_angle(component::Character_mvt_state::Grounded_state& grounded_state,
                                  component::Character_mvt_state::Settings const& mvt_settings,
+                                 component::Character_mvt_animated_state* char_mvt_anim_state,
+                                 component::Animator_root_motion const* anim_root_motion,
                                  float_t desired_facing_angle,
                                  float_t turn_speed)
 {
@@ -181,23 +183,42 @@ void apply_grounded_facing_angle(component::Character_mvt_state::Grounded_state&
     while (delta_direction > glm_rad(180.0f)) delta_direction -= glm_rad(360.0f);
     while (delta_direction <= glm_rad(-180.0f)) delta_direction += glm_rad(360.0f);
 
-    bool is_quick_turn_speed{ turn_speed > 1000.0f };  // Idk just some number.
+    // bool is_quick_turn_speed{ turn_speed > 1000.0f };  // Idk just some number.
 
-    if (is_quick_turn_speed)
+    // if (is_quick_turn_speed)
+    // {
+    //     // Disable turnaround mode.
+    //     grounded_state.turnaround_enabled = false;
+    // }
+
+    // constexpr float_t k_turn_around_back_angle{ 45.0f };
+    // bool turnaround_mode{ grounded_state.turnaround_enabled ||
+    //                       (!is_quick_turn_speed &&
+    //                        abs(delta_direction) >
+    //                            glm_rad(180.0f - (k_turn_around_back_angle * 0.5f))) };
+    // if (turnaround_mode)
+    // {
+    //     // Lock in turnaround.
+    //     grounded_state.turnaround_enabled = true;
+    // }
+    // else
+
+    bool do_turnaround_anim{ false };
+    if (anim_root_motion && anim_root_motion->can_do_turnaround_anim)
     {
-        // Disable turnaround mode.
-        grounded_state.turnaround_enabled = false;
+        constexpr float_t k_turn_around_back_angle{ 45.0f };
+        do_turnaround_anim =
+            abs(delta_direction) > glm_rad(180.0f - (k_turn_around_back_angle * 0.5f));
     }
 
-    constexpr float_t k_turn_around_back_angle{ 45.0f };
-    bool turnaround_mode{ grounded_state.turnaround_enabled ||
-                          (!is_quick_turn_speed &&
-                           abs(delta_direction) >
-                               glm_rad(180.0f - (k_turn_around_back_angle * 0.5f))) };
-    if (turnaround_mode)
-    {
-        // Lock in turnaround.
-        grounded_state.turnaround_enabled = true;
+    if (do_turnaround_anim)
+    {   // Reverse facing angle (by snapping to the desired facing angle).
+        if (char_mvt_anim_state)
+            char_mvt_anim_state->write_to_animator_data.on_turnaround = true;
+
+        while (desired_facing_angle > glm_rad(180.0f)) desired_facing_angle -= glm_rad(360.0f);
+        while (desired_facing_angle <= glm_rad(-180.0f)) desired_facing_angle += glm_rad(360.0f);
+        grounded_state.facing_angle = desired_facing_angle;
     }
     else
     {
@@ -221,10 +242,10 @@ void apply_grounded_linear_speed(component::Character_mvt_state::Grounded_state&
 {
     float_t desired_speed{ glm_vec2_norm(vec2{ input_velocity.GetX(), input_velocity.GetZ() }) };
 
-    if (grounded_state.turnaround_enabled)
-    {   // Zero desired speed if doing turnaround.
-        desired_speed = 0.0f;
-    }
+    // if (grounded_state.turnaround_enabled)
+    // {   // Zero desired speed if doing turnaround.
+    //     desired_speed = 0.0f;
+    // }
 
     float_t delta_speed{ desired_speed - grounded_state.speed };
     float_t acceleration{ delta_speed < 0.0f ? -mvt_settings.grounded_deceleration *
@@ -369,6 +390,8 @@ Char_mvt_logic_results character_controller_movement_logic(
         if (has_desired_facing_angle)
             apply_grounded_facing_angle(grounded_state,
                                         mvt_settings,
+                                        char_mvt_anim_state,
+                                        anim_root_motion,
                                         desired_facing_angle,
                                         turn_speed);
 
@@ -426,7 +449,7 @@ Char_mvt_logic_results character_controller_movement_logic(
             char_mvt_state.grounded_state.facing_angle =
                 atan2f(effective_velocity.GetX(), effective_velocity.GetZ());
 
-        char_mvt_state.grounded_state.turnaround_enabled = false;
+        // char_mvt_state.grounded_state.turnaround_enabled = false;
 
         display_facing_angle = airborne_state.input_facing_angle;
     }
