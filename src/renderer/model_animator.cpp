@@ -559,7 +559,8 @@ void BT::Model_animator::update(Animator_timer_profile profile, float_t delta_ti
 
             // Look for possible state transitions.
             for (auto const& state_trans : m_animator_state_transitions)
-            if (state_trans.from_to_state[0] == curr_state_idx)
+            for (auto from_state_idx : state_trans.from_to_state.first)
+            if (from_state_idx == curr_state_idx)
             {   // Possible state transition.
                 bool do_transition{ false };
                 if (state_trans.condition_var_idx == anim_tmpl_types::k_on_anim_end_var_idx)
@@ -615,7 +616,7 @@ void BT::Model_animator::update(Animator_timer_profile profile, float_t delta_ti
 
                 if (do_transition)
                 {   // Transition states!
-                    curr_state_idx = state_trans.from_to_state[1];
+                    curr_state_idx = state_trans.from_to_state.second;
                     state_changed = true;
                     break;
                 }

@@ -801,6 +801,7 @@ while (running_game_loop)
             - [x] Fix attack anim root motion not working.
                 - It (I think) is bc `grounded_state.allow_grounded_sliding` is false.
     - [x] MISC: Some tuning (now it's like KUSR).
+    - [ ] MISC: Make transitions easier by doing a many-to-one system for from-to-anim transitions.
     - [ ] Figure out midair movement.
         - [ ] @THINK: Should multiple anims be working together for this in a blendtree or should it be some kind of AFA data control where it changes the mode of control?
             - I mean, I think having an AFA control to change the mode makes sense and would be good.

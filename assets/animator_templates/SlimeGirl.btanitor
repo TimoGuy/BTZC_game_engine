@@ -22,7 +22,7 @@
     "transition_states": [
         {
             "trans_state_name": "trst_start_run",
-            "from_to_state": ["st_idle", "st_running"],
+            "from_to_state": [["st_idle"], "st_running"],
             "anim_name": "Start_running",
             "speed": 1.0
         }

@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <limits>
 #include <string>
+#include <vector>
 
 
 namespace BT
@@ -38,7 +39,7 @@ struct Animator_variable
 
 struct Animator_state_transition
 {
-    std::array<size_t, 2> from_to_state;
+    std::pair<std::vector<size_t>, size_t> from_to_state;  // Many "from" states to one "to" state.
 
     size_t condition_var_idx;
 

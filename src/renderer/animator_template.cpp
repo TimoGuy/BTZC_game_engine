@@ -62,13 +62,29 @@ BT::Animator_template const& BT::Animator_template_bank::load_animator_template(
             auto& ckd{ state_trans.cooked };
 
             // Convert from-to-state.
-            for (size_t i = 0; i < state_trans.from_to_state.size(); i++)
-            for (size_t j = 0; j < new_template.animator_states.size(); j++)
-            if (state_trans.from_to_state[i] == new_template.animator_states[j].state_name)
-            {
-                ckd.from_to_state[i] = j;
-                break;
-            }
+            static auto const s_find_anim_state_idx =
+                [](std::vector<Animator_template::Animator_state> const& anim_states,
+                   std::string const& anim_state_name) {
+                    for (size_t j = 0; j < anim_states.size(); j++)
+                        if (anim_state_name == anim_states[j].state_name)
+                        {
+                            return j;
+                        }
+
+                    BT_ERRORF("Failed: Could not find anim state name: %s",
+                              anim_state_name.c_str());
+                    assert(false);
+                    return (size_t)-1;
+                };
+
+            ckd.from_to_state.first.resize(state_trans.from_to_state.first.size());
+            for (size_t i = 0; i < state_trans.from_to_state.first.size(); i++)
+                ckd.from_to_state.first[i] =
+                    s_find_anim_state_idx(new_template.animator_states,
+                                          state_trans.from_to_state.first[i]);
+
+            ckd.from_to_state.second = s_find_anim_state_idx(new_template.animator_states,
+                                                             state_trans.from_to_state.second);
 
             // Get tokens of condition string.
             std::vector<std::string> tokens;

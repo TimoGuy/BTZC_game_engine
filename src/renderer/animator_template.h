@@ -34,10 +34,10 @@ struct Animator_template
 
     struct Transition_intermediate_state
     {
-        std::string                         trans_state_name;
-        std::pair<std::string, std::string> from_to_state;
-        std::string                         anim_name;
-        float_t                             speed;
+        std::string                                      trans_state_name;
+        std::pair<std::vector<std::string>, std::string> from_to_state;  // Many "from" states to one "to" state.
+        std::string                                      anim_name;
+        float_t                                          speed;
 
         NLOHMANN_DEFINE_TYPE_INTRUSIVE(Transition_intermediate_state,
                                        trans_state_name,
@@ -55,7 +55,7 @@ struct Animator_template
 
     struct State_transition
     {
-        std::array<std::string, 2> from_to_state;
+        std::pair<std::vector<std::string>, std::string> from_to_state;  // Many "from" states to one "to" state.
         std::string condition;
 
         NLOHMANN_DEFINE_TYPE_INTRUSIVE(State_transition,
