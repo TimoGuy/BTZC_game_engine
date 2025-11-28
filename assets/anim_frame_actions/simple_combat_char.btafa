@@ -55,11 +55,23 @@
             "state_name": "st_running_turnaround"
         },
         {
-            "regions": [],
+            "regions": [
+                {
+                    "ctrl_item_idx": 7,
+                    "end_frame": 11,
+                    "start_frame": 0
+                }
+            ],
             "state_name": "st_jump"
         },
         {
-            "regions": [],
+            "regions": [
+                {
+                    "ctrl_item_idx": 10,
+                    "end_frame": 15,
+                    "start_frame": 0
+                }
+            ],
             "state_name": "st_fall"
         },
         {
@@ -159,6 +171,9 @@
         },
         {
             "name": "can_do_turnaround_anim:ov:true"
+        },
+        {
+            "name": "turn_speed:ov:7.5"
         }
     ],
     "hitcapsule_group_set_template": {
@@ -301,7 +316,7 @@
                         "radius": 0.10000000149011612
                     }
                 ],
-                "m_enabled": true,
+                "m_enabled": false,
                 "m_type": 0
             },
             {

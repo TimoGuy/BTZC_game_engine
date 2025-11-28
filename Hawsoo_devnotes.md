@@ -806,6 +806,9 @@ while (running_game_loop)
         - [ ] @THINK: Should multiple anims be working together for this in a blendtree or should it be some kind of AFA data control where it changes the mode of control?
             - I mean, I think having an AFA control to change the mode makes sense and would be good.
         - [x] Add jump and fall anims.
+        - [x] Allow turning while midair.
+            - Immediate for jump.
+            - 7.5 for fall.
 
 - [ ] Separate root motion update from updating hitcapsule positions. (To fix the 1 sim-tick lag)
     - [ ] Put root motion fetch after player input and before input_controlled_char_mvt()
