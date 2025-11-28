@@ -183,29 +183,9 @@ void apply_grounded_facing_angle(component::Character_mvt_state::Grounded_state&
     while (delta_direction > glm_rad(180.0f)) delta_direction -= glm_rad(360.0f);
     while (delta_direction <= glm_rad(-180.0f)) delta_direction += glm_rad(360.0f);
 
-    // bool is_quick_turn_speed{ turn_speed > 1000.0f };  // Idk just some number.
-
-    // if (is_quick_turn_speed)
-    // {
-    //     // Disable turnaround mode.
-    //     grounded_state.turnaround_enabled = false;
-    // }
-
-    // constexpr float_t k_turn_around_back_angle{ 45.0f };
-    // bool turnaround_mode{ grounded_state.turnaround_enabled ||
-    //                       (!is_quick_turn_speed &&
-    //                        abs(delta_direction) >
-    //                            glm_rad(180.0f - (k_turn_around_back_angle * 0.5f))) };
-    // if (turnaround_mode)
-    // {
-    //     // Lock in turnaround.
-    //     grounded_state.turnaround_enabled = true;
-    // }
-    // else
-
     bool do_turnaround_anim{ false };
     if (anim_root_motion && anim_root_motion->can_do_turnaround_anim)
-    {
+    {   // Check for turnaround input angle.
         constexpr float_t k_turn_around_back_angle{ 45.0f };
         do_turnaround_anim =
             abs(delta_direction) > glm_rad(180.0f - (k_turn_around_back_angle * 0.5f));
@@ -238,14 +218,9 @@ void apply_grounded_facing_angle(component::Character_mvt_state::Grounded_state&
 /// Processes the linear speed after acceleration/deceleration accounted for.
 void apply_grounded_linear_speed(component::Character_mvt_state::Grounded_state& grounded_state,
                                  component::Character_mvt_state::Settings const& mvt_settings,
-                                 JPH::Vec3Arg input_velocity)
+                                 JPH::Vec3Arg desired_velocity)
 {
-    float_t desired_speed{ glm_vec2_norm(vec2{ input_velocity.GetX(), input_velocity.GetZ() }) };
-
-    // if (grounded_state.turnaround_enabled)
-    // {   // Zero desired speed if doing turnaround.
-    //     desired_speed = 0.0f;
-    // }
+    float_t desired_speed{ glm_vec2_norm(vec2{ desired_velocity.GetX(), desired_velocity.GetZ() }) };
 
     float_t delta_speed{ desired_speed - grounded_state.speed };
     float_t acceleration{ delta_speed < 0.0f ? -mvt_settings.grounded_deceleration *
@@ -448,8 +423,6 @@ Char_mvt_logic_results character_controller_movement_logic(
         else
             char_mvt_state.grounded_state.facing_angle =
                 atan2f(effective_velocity.GetX(), effective_velocity.GetZ());
-
-        // char_mvt_state.grounded_state.turnaround_enabled = false;
 
         display_facing_angle = airborne_state.input_facing_angle;
     }
