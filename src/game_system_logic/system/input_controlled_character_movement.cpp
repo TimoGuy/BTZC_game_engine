@@ -257,8 +257,14 @@ Char_mvt_logic_results character_controller_movement_logic(
     // Change input into desired velocity.
     auto const& mvt_settings{ char_mvt_state.settings };
 
+    enum {
+        MVT_TYPE_ANIM_BASED,
+        MVT_TYPE_INPUT_BASED,
+    } mvt_type{ anim_root_motion && anim_root_motion->mvt_input.enabled ? MVT_TYPE_INPUT_BASED
+                                                                        : MVT_TYPE_ANIM_BASED };
+
     JPH::Vec3 desired_velocity;
-    if (anim_root_motion)
+    if (mvt_type == MVT_TYPE_ANIM_BASED)
     {
         // @TODO: @FIXME: This is not getting transformed into the facing direction!!!
         //                Idk if it should get reoriented here or later though.
@@ -272,14 +278,14 @@ Char_mvt_logic_results character_controller_movement_logic(
         desired_velocity *=
             anim_root_motion->root_motion_multiplier * Model_joint_animation::k_frames_per_second;
     }
-    else
+    else if (mvt_type == MVT_TYPE_INPUT_BASED)
     {
         desired_velocity = { char_ws_input.ws_flat_clamped_input.x,
                              0.0f,
                              char_ws_input.ws_flat_clamped_input.z };
-        desired_velocity *= (char_con_impl->get_cc_stance() ? mvt_settings.crouched_speed
-                                                            : mvt_settings.standing_speed);
+        desired_velocity *= anim_root_motion->mvt_input.max_speed;
     }
+    else assert(false);  // Unsupported movement type.
 
     // Extra input checks.
     bool on_jump_press{ char_ws_input.jump_pressed && !char_ws_input.prev_jump_pressed };
@@ -339,8 +345,8 @@ Char_mvt_logic_results character_controller_movement_logic(
 
     // Desired velocity.
     float_t display_facing_angle;
-    if (is_grounded)
-    {   // Grounded turn & speed movement.
+    if (mvt_type == MVT_TYPE_ANIM_BASED)
+    {   // Anim-based turn & speed movement.
         auto& grounded_state{ char_mvt_state.grounded_state };
 
         if (has_desired_facing_angle)
@@ -364,19 +370,27 @@ Char_mvt_logic_results character_controller_movement_logic(
 
         display_facing_angle = grounded_state.facing_angle;
     }
-    else
-    {   // Move towards desired velocity.
+    else if (mvt_type == MVT_TYPE_INPUT_BASED)
+    {   // Input-based velocity movement.
+        assert(anim_root_motion);
+        auto const& mvt_input{ anim_root_motion->mvt_input };
+
+        // Move towards desired velocity.
         auto& airborne_state{ char_mvt_state.airborne_state };
 
         JPH::Vec3 flat_linear_velo{ linear_velocity.GetX(), 0.0f, linear_velocity.GetZ() };
         JPH::Vec3 delta_velocity{ desired_velocity - flat_linear_velo };
+        auto delta_velo_length2{ delta_velocity.LengthSq() };
 
-        float_t airborne_accel{ mvt_settings.airborne_acceleration *
-                                Physics_engine::k_simulation_delta_time };
-        if (delta_velocity.LengthSq() > airborne_accel * airborne_accel)
+        float_t airborne_accel{ desired_velocity.LengthSq() < flat_linear_velo.LengthSq()
+                                    ? mvt_input.decel * Physics_engine::k_simulation_delta_time
+                                    : mvt_input.accel * Physics_engine::k_simulation_delta_time };
+        if (delta_velo_length2 > airborne_accel * airborne_accel)  // `airborne_accel**2` is always positive.
         {
             delta_velocity = delta_velocity.Normalized() * airborne_accel;
         }
+        // BT_TRACEF("DESIREEEE %0.3f, %0.3f, %0.3f", desired_velocity.GetX(), desired_velocity.GetY(), desired_velocity.GetZ());
+        BT_TRACEF("JOJOJ %0.3f, %0.3f, %0.3f", delta_velocity.GetX(), delta_velocity.GetY(), delta_velocity.GetZ());
 
         JPH::Vec3 effective_velocity{ flat_linear_velo + delta_velocity };
         new_velocity += effective_velocity;
@@ -405,6 +419,7 @@ Char_mvt_logic_results character_controller_movement_logic(
 
         display_facing_angle = airborne_state.input_facing_angle;
     }
+    else assert(false);  // Unsupported movement type.
 
     if (char_mvt_anim_state)
         char_mvt_anim_state->write_to_animator_data.is_grounded = is_grounded;

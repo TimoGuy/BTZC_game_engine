@@ -54,6 +54,22 @@ void BT::system::animator_driven_hitcapsule_sets_update()
                 anim_afa_data_handle
                     .get_bool_data_handle(anim_frame_action::CTRL_DATA_LABEL_can_do_turnaround_anim)
                     .get_val();
+            anim_root_motion.mvt_input.enabled =
+                anim_afa_data_handle
+                    .get_bool_data_handle(anim_frame_action::CTRL_DATA_LABEL_mvt_input_enabled)
+                    .get_val();
+            anim_root_motion.mvt_input.max_speed =
+                anim_afa_data_handle
+                    .get_float_data_handle(anim_frame_action::CTRL_DATA_LABEL_mvt_input_max_speed)
+                    .get_val();
+            anim_root_motion.mvt_input.accel =
+                anim_afa_data_handle
+                    .get_float_data_handle(anim_frame_action::CTRL_DATA_LABEL_mvt_input_accel)
+                    .get_val();
+            anim_root_motion.mvt_input.decel =
+                anim_afa_data_handle
+                    .get_float_data_handle(anim_frame_action::CTRL_DATA_LABEL_mvt_input_decel)
+                    .get_val();
             animator.get_anim_floored_frame_pose_with_root_motion(
                 Model_animator::SIMULATION_PROFILE,
                 anim_root_motion.delta_pos,  // Different system will use this information.

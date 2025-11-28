@@ -802,13 +802,22 @@ while (running_game_loop)
                 - It (I think) is bc `grounded_state.allow_grounded_sliding` is false.
     - [x] MISC: Some tuning (now it's like KUSR).
     - [x] MISC: Make transitions easier by doing a many-to-one system for from-to-anim transitions.
-    - [ ] Figure out midair movement.
-        - [ ] @THINK: Should multiple anims be working together for this in a blendtree or should it be some kind of AFA data control where it changes the mode of control?
+    - [x] Figure out midair movement.
+        - [x] @THINK: Should multiple anims be working together for this in a blendtree or should it be some kind of AFA data control where it changes the mode of control?
             - I mean, I think having an AFA control to change the mode makes sense and would be good.
+            - I think yeah having the mode switching would be best, especially if could adjust some parameters like drag and friction and acceleration/deceleration from the AFA data too. That could make some really good ice animations probably?
+                - For now tho it would just be best to have the bool for doing freeform movement.
+                - Also have a float value for accel, decel, and max speed.
         - [x] Add jump and fall anims.
         - [x] Allow turning while midair.
             - Immediate for jump.
             - 7.5 for fall.
+        - [x] Add these AFA data:
+            - bool use_mvt_input
+            - float mvt_input_accel
+            - float mvt_input decel
+            - float mvt_input_max_speed
+        - [x] Connect AFA data to movement system.
 
 - [ ] Separate root motion update from updating hitcapsule positions. (To fix the 1 sim-tick lag)
     - [ ] Put root motion fetch after player input and before input_controlled_char_mvt()

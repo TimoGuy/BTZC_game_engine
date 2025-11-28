@@ -60,6 +60,26 @@
                     "ctrl_item_idx": 7,
                     "end_frame": 11,
                     "start_frame": 0
+                },
+                {
+                    "ctrl_item_idx": 11,
+                    "end_frame": 11,
+                    "start_frame": 0
+                },
+                {
+                    "ctrl_item_idx": 12,
+                    "end_frame": 11,
+                    "start_frame": 0
+                },
+                {
+                    "ctrl_item_idx": 13,
+                    "end_frame": 11,
+                    "start_frame": 0
+                },
+                {
+                    "ctrl_item_idx": 14,
+                    "end_frame": 11,
+                    "start_frame": 0
                 }
             ],
             "state_name": "st_jump"
@@ -68,6 +88,26 @@
             "regions": [
                 {
                     "ctrl_item_idx": 10,
+                    "end_frame": 15,
+                    "start_frame": 0
+                },
+                {
+                    "ctrl_item_idx": 11,
+                    "end_frame": 15,
+                    "start_frame": 0
+                },
+                {
+                    "ctrl_item_idx": 12,
+                    "end_frame": 15,
+                    "start_frame": 0
+                },
+                {
+                    "ctrl_item_idx": 13,
+                    "end_frame": 15,
+                    "start_frame": 0
+                },
+                {
+                    "ctrl_item_idx": 14,
                     "end_frame": 15,
                     "start_frame": 0
                 }
@@ -174,6 +214,18 @@
         },
         {
             "name": "turn_speed:ov:7.5"
+        },
+        {
+            "name": "mvt_input_enabled:ov:true"
+        },
+        {
+            "name": "mvt_input_accel:ov:60"
+        },
+        {
+            "name": "mvt_input_decel:ov:30"
+        },
+        {
+            "name": "mvt_input_max_speed:ov:15"
         }
     ],
     "hitcapsule_group_set_template": {
@@ -316,7 +368,7 @@
                         "radius": 0.10000000149011612
                     }
                 ],
-                "m_enabled": false,
+                "m_enabled": true,
                 "m_type": 0
             },
             {
