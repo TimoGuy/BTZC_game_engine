@@ -58,13 +58,13 @@
             "regions": [
                 {
                     "ctrl_item_idx": 5,
-                    "end_frame": 40,
-                    "start_frame": 20
+                    "end_frame": 30,
+                    "start_frame": 15
                 },
                 {
                     "ctrl_item_idx": 5,
-                    "end_frame": 100,
-                    "start_frame": 60
+                    "end_frame": 76,
+                    "start_frame": 50
                 },
                 {
                     "ctrl_item_idx": 2,
@@ -88,33 +88,33 @@
                 },
                 {
                     "ctrl_item_idx": 4,
-                    "end_frame": 121,
+                    "end_frame": 89,
                     "start_frame": 0
                 },
                 {
                     "ctrl_item_idx": 6,
-                    "end_frame": 40,
+                    "end_frame": 30,
                     "start_frame": 14
                 },
                 {
                     "ctrl_item_idx": 6,
-                    "end_frame": 107,
-                    "start_frame": 57
+                    "end_frame": 76,
+                    "start_frame": 49
                 },
                 {
                     "ctrl_item_idx": 8,
-                    "end_frame": 24,
+                    "end_frame": 16,
                     "start_frame": 0
                 },
                 {
                     "ctrl_item_idx": 8,
-                    "end_frame": 63,
-                    "start_frame": 40
+                    "end_frame": 51,
+                    "start_frame": 29
                 },
                 {
                     "ctrl_item_idx": 8,
-                    "end_frame": 121,
-                    "start_frame": 100
+                    "end_frame": 89,
+                    "start_frame": 77
                 }
             ],
             "state_name": "st_attack_0"
@@ -293,7 +293,7 @@
                         "radius": 0.10000000149011612
                     }
                 ],
-                "m_enabled": false,
+                "m_enabled": true,
                 "m_type": 0
             },
             {
