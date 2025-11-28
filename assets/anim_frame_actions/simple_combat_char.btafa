@@ -225,7 +225,7 @@
             "name": "mvt_input_decel:ov:30"
         },
         {
-            "name": "mvt_input_max_speed:ov:15"
+            "name": "mvt_input_max_speed:ov:10"
         }
     ],
     "hitcapsule_group_set_template": {
