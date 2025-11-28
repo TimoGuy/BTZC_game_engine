@@ -778,7 +778,7 @@ while (running_game_loop)
             This makes the root bone be (0,0,0) position but also returns the delta pos for the root motion.
 
 - [ ] Include movement with root motion.
-    - [ ] Search for the `component::Animator_root_motion` component inside the entity when doing the `input_controlled_character_movement()` system.
+    - [x] Search for the `component::Animator_root_motion` component inside the entity when doing the `input_controlled_character_movement()` system.
         - [x] If exists, use it for the movement, and use the world space input for turning and facing angle stuff.
             - [x] Initial separation of movement velocity and world space input for turning.
             - [x] Fix speed issue.
@@ -796,10 +796,13 @@ while (running_game_loop)
             - Ok the bug appears to happen when it's a turnaround angle-level turn while doing the attack animation, and the char cannot turn around.
                 - Ok, it also just happens while in the running anim. Nothing needed here!
                 - It looks like the character just literally can't turn around for some reason.
-        - [ ] Make Grounded not just use the magnitude. Have it use the actual root motion delta pos but rotated from the facing direction.
+        - [x] Make Grounded not just use the magnitude. Have it use the actual root motion delta pos but rotated from the facing direction.
             - [x] Initial.
-            - [ ] Fix attack anim root motion not working.
+            - [x] Fix attack anim root motion not working.
                 - It (I think) is bc `grounded_state.allow_grounded_sliding` is false.
+    - [ ] Figure out midair movement.
+        - [ ] @THINK: Should multiple anims be working together for this in a blendtree or should it be some kind of AFA data control where it changes the mode of control?
+            - I mean, I think having an AFA control to change the mode makes sense and would be good.
 
 - [ ] Separate root motion update from updating hitcapsule positions. (To fix the 1 sim-tick lag)
     - [ ] Put root motion fetch after player input and before input_controlled_char_mvt()

@@ -341,22 +341,17 @@ Char_mvt_logic_results character_controller_movement_logic(
         auto& grounded_state{ char_mvt_state.grounded_state };
 
         if (has_desired_facing_angle)
-        {
             apply_grounded_facing_angle(grounded_state,
                                         mvt_settings,
                                         char_mvt_anim_state,
                                         anim_root_motion,
                                         desired_facing_angle,
                                         turn_speed);
-            grounded_state.allow_grounded_sliding = true;
-        }
-        else
-        {
-            grounded_state.allow_grounded_sliding = false;
-        }
 
         if (char_mvt_anim_state)
-            char_mvt_anim_state->write_to_animator_data.is_moving = has_desired_facing_angle;
+            char_mvt_anim_state->write_to_animator_data.is_moving = has_desired_facing_angle;  // @THEA: @NOCHECKIN: Hmmm maybe this needs reordering to solve the 1 sim-tick lag as well?  -Thea 2025/11/27
+
+        grounded_state.allow_grounded_sliding = (desired_velocity.LengthSq() > 1e-6f * 1e-6f);
 
         new_velocity += (JPH::Quat::sEulerAngles(JPH::Vec3Arg(0, grounded_state.facing_angle, 0)) *
                          desired_velocity);
