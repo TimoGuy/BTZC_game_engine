@@ -819,7 +819,7 @@ while (running_game_loop)
             - float mvt_input_max_speed
         - [x] Connect AFA data to movement system.
 
-- [ ] Separate root motion update from updating hitcapsule positions. (To fix the 1 sim-tick lag)
+- [x] Separate root motion update from updating hitcapsule positions. (To fix the 1 sim-tick lag)
     - [ ] ~~Put root motion fetch after player input and before input_controlled_char_mvt()~~
         - Nothing special happens in player input really, and other things that set the animator vars happen in the `input_controlled_char_mvt()` so it just needs to happen before player input and char mvt.
             - [x] Do ^^ above ^^
@@ -832,7 +832,7 @@ while (running_game_loop)
     - [x] Complete the reordering.
         - It works!!!
     - [x] rename `system::set_animator_variables()` to something like updating the animator vars, animator, and writing the root motion things.
-    - [ ] combine `get_joint_matrices_at_frame()` and `get_joint_matrices_at_frame_with_root_motion()` similar to `get_joint_matrices_at_frame()` with the `bool root_motion_zeroing` param.
+    - [x] combine `get_joint_matrices_at_frame()` and `get_joint_matrices_at_frame_with_root_motion()` similar to `get_joint_matrices_at_frame()` with the `bool root_motion_zeroing` param.
 
 
 ## Have CPU character attack, and have there be guard, parry, hurt -type interaction.

@@ -77,9 +77,8 @@ public:
                              bool root_motion_zeroing,
                              std::vector<mat4s>& out_joint_matrices) const;
     void get_joint_matrices_at_frame(uint32_t frame_idx,
+                                     bool root_motion_zeroing,
                                      std::vector<mat4s>& out_joint_matrices) const;
-    void get_joint_matrices_at_frame_with_root_motion(uint32_t frame_idx,
-                                                      std::vector<mat4s>& out_joint_matrices) const;
     void get_root_motion_delta_pos_at_frame(uint32_t frame_idx,
                                             vec3& out_root_motion_delta_pos) const;
 
