@@ -843,11 +843,25 @@ while (running_game_loop)
     - [x] Fix not getting the right reference for the `Character_mvt_animated_state`
         - Ok so now I can say that I tested this. It works as far as it should.
 
-    - [ ] Create knockback anims in blender.
-        - [ ] Hurt.
-        - [ ] Parry.
-        - [ ] Guard.
-    - [ ] Add knockback anims into the .btanitor and .btafa
+- [ ] Create knockback anims in blender.
+    - [x] Hurt.
+        - [x] Hurt_receive
+        - [x] Hurt_receive_strong
+    - [ ] Parry.
+        - [ ] Parry_left (when attack comes from left)
+        - [ ] Parry_right (when attack comes from right/up/down)
+        - [ ] Parry_strong (drag sword in ground)
+    - [ ] Guard.
+        - [ ] Guard
+        - [ ] Guard_strong (reel/stumble back but stay on two feel)
+- [ ] Create other anims in blender.
+    - [ ] Ready parry
+        - [ ] From idle/walk/attack
+        - [ ] From running
+    - [ ] Hold guard (slightly more relaxed than the parry anim)
+        - [ ] Idle
+        - [ ] Slow walk
+- [ ] Add knockback anims into the .btanitor and .btafa
 
 
 - [ ] ~~REFACTOR: Delete the `calc_orig_pt_distance()` method in hitcapsule bc this info is really only needed when doing the actual collision and isn't needed most of the time.~~
