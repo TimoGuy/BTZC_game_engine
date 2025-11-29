@@ -35,51 +35,19 @@ void BT::system::animator_driven_hitcapsule_sets_update()
         // Update whether capsules are enabled and keep capsules attached to connecting bone in
         // animator.
         auto& animator{ *rend_obj.get_model_animator() };
-        animator.update(Model_animator::SIMULATION_PROFILE,
-                        Physics_engine::k_simulation_delta_time);
 
-        auto& anim_afa_data_handle{ animator.get_anim_frame_action_data_handle() };
-
-        anim_afa_data_handle.assign_hitcapsule_enabled_flags();
+        animator.get_anim_frame_action_data_handle().assign_hitcapsule_enabled_flags();
 
         std::vector<mat4s> joint_matrices;
         if (animator.get_is_using_root_motion())
-        {   // @NOTE: This below will lag behind 1 sim-tick. @TODO: @THEA: @NOCHECKIN: FIX THIS!!!!!
-            auto& anim_root_motion{ reg.get<component::Animator_root_motion>(entity) };
-            anim_root_motion.turn_speed =
-                anim_afa_data_handle
-                    .get_float_data_handle(anim_frame_action::CTRL_DATA_LABEL_turn_speed)
-                    .get_val();
-            anim_root_motion.can_do_turnaround_anim =
-                anim_afa_data_handle
-                    .get_bool_data_handle(anim_frame_action::CTRL_DATA_LABEL_can_do_turnaround_anim)
-                    .get_val();
-            anim_root_motion.mvt_input.enabled =
-                anim_afa_data_handle
-                    .get_bool_data_handle(anim_frame_action::CTRL_DATA_LABEL_mvt_input_enabled)
-                    .get_val();
-            anim_root_motion.mvt_input.max_speed =
-                anim_afa_data_handle
-                    .get_float_data_handle(anim_frame_action::CTRL_DATA_LABEL_mvt_input_max_speed)
-                    .get_val();
-            anim_root_motion.mvt_input.accel =
-                anim_afa_data_handle
-                    .get_float_data_handle(anim_frame_action::CTRL_DATA_LABEL_mvt_input_accel)
-                    .get_val();
-            anim_root_motion.mvt_input.decel =
-                anim_afa_data_handle
-                    .get_float_data_handle(anim_frame_action::CTRL_DATA_LABEL_mvt_input_decel)
-                    .get_val();
-            animator.get_anim_floored_frame_pose_with_root_motion(
+            animator.get_anim_floored_frame_pose_with_root_motion_zeroing(
                 Model_animator::SIMULATION_PROFILE,
-                anim_root_motion.delta_pos,  // Different system will use this information.
                 joint_matrices);
-        }
         else
             animator.get_anim_floored_frame_pose(Model_animator::SIMULATION_PROFILE,
                                                  joint_matrices);
 
-        anim_afa_data_handle.update_hitcapsule_transforms(
+        animator.get_anim_frame_action_data_handle().update_hitcapsule_transforms(
             rend_obj.render_transform(),
             joint_matrices);
 

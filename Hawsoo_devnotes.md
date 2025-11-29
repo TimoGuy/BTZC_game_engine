@@ -820,8 +820,19 @@ while (running_game_loop)
         - [x] Connect AFA data to movement system.
 
 - [ ] Separate root motion update from updating hitcapsule positions. (To fix the 1 sim-tick lag)
-    - [ ] Put root motion fetch after player input and before input_controlled_char_mvt()
-    - [ ] Leave hitcapsule positions in same place (right before hitcapsule overlap check).
+    - [ ] ~~Put root motion fetch after player input and before input_controlled_char_mvt()~~
+        - Nothing special happens in player input really, and other things that set the animator vars happen in the `input_controlled_char_mvt()` so it just needs to happen before player input and char mvt.
+            - [x] Do ^^ above ^^
+    - [ ] ~~Leave hitcapsule positions in same place (right before hitcapsule overlap check).~~
+    - So ig the `write_to_animator_data` stuff will be lagging one sim-tick but I think that's fine?
+        - _Something_ has to lag, and having the movement of the current frame of the animation show up is most important imo.
+        - ~~So the order should be:~~
+            - 
+    - [x] Add missing `get_root_motion_delta_pos()` func.
+    - [x] Complete the reordering.
+        - It works!!!
+    - [ ] rename `system::set_animator_variables()` to something like updating the animator vars, animator, and writing the root motion things.
+    - [ ] combine `get_joint_matrices_at_frame()` and `get_joint_matrices_at_frame_with_root_motion()` similar to `get_joint_matrices_at_frame()` with the `bool root_motion_zeroing` param.
 
 
 ## Have CPU character attack, and have there be guard, parry, hurt -type interaction.

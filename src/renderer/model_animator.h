@@ -79,8 +79,9 @@ public:
     void get_joint_matrices_at_frame(uint32_t frame_idx,
                                      std::vector<mat4s>& out_joint_matrices) const;
     void get_joint_matrices_at_frame_with_root_motion(uint32_t frame_idx,
-                                                      vec3& out_root_motion_delta_pos,
                                                       std::vector<mat4s>& out_joint_matrices) const;
+    void get_root_motion_delta_pos_at_frame(uint32_t frame_idx,
+                                            vec3& out_root_motion_delta_pos) const;
 
     static constexpr float_t k_frames_per_second{ 60.0f };
 
@@ -164,9 +165,13 @@ public:
                                      std::vector<mat4s>& out_joint_matrices) const;
 
     /// Calculates the set of joint matrices, floored, with delta pos and zeroing from root motion.
-    void get_anim_floored_frame_pose_with_root_motion(Animator_timer_profile profile,
-                                                      vec3& out_root_motion_delta_pos,
-                                                      std::vector<mat4s>& out_joint_matrices) const;
+    void get_anim_floored_frame_pose_with_root_motion_zeroing(
+        Animator_timer_profile profile,
+        std::vector<mat4s>& out_joint_matrices) const;
+
+    /// Gets the root motion delta pos of the current frame.
+    void get_anim_root_motion_delta_pos(Animator_timer_profile profile,
+                                        vec3& out_root_motion_delta_pos) const;
 
     anim_frame_action::Runtime_controllable_data& get_anim_frame_action_data_handle();
 

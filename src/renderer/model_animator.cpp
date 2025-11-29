@@ -271,7 +271,6 @@ void BT::Model_joint_animation::get_joint_matrices_at_frame(
 
 void BT::Model_joint_animation::get_joint_matrices_at_frame_with_root_motion(
     uint32_t frame_idx,
-    vec3& out_root_motion_delta_pos,
     std::vector<mat4s>& out_joint_matrices) const
 {   ////////////////////////////////////////////////////////////////////////////////////////////////
     // @COPYPASTA below from `calc_joint_matrices()` (and then `get_joint_matrices_at_frame()`)
@@ -363,11 +362,15 @@ void BT::Model_joint_animation::get_joint_matrices_at_frame_with_root_motion(
                      const_cast<vec4*>(joint.inverse_bind_matrix),
                      out_joint_matrices[i].raw);
     }
+}
 
-    // Include root motion delta position (Just XZ axes).                                       // +
-    glm_vec3_copy(const_cast<float_t*>(m_frames[frame_idx].root_motion_delta_pos),              // +
-                  out_root_motion_delta_pos);                                                   // +
-    out_root_motion_delta_pos[1] = 0;                                                           // +
+void BT::Model_joint_animation::get_root_motion_delta_pos_at_frame(
+    uint32_t frame_idx,
+    vec3& out_root_motion_delta_pos) const
+{   // Include root motion delta position (Just XZ axes).
+    glm_vec3_copy(const_cast<float_t*>(m_frames[frame_idx].root_motion_delta_pos),
+                  out_root_motion_delta_pos);
+    out_root_motion_delta_pos[1] = 0;
 }
 
 
@@ -769,9 +772,8 @@ void BT::Model_animator::get_anim_floored_frame_pose(Animator_timer_profile prof
                                                                              out_joint_matrices);
 }
 
-void BT::Model_animator::get_anim_floored_frame_pose_with_root_motion(
+void BT::Model_animator::get_anim_floored_frame_pose_with_root_motion_zeroing(
     Animator_timer_profile profile,
-    vec3& out_root_motion_delta_pos,
     std::vector<mat4s>& out_joint_matrices) const
 {
     auto& anim_state{ m_animator_states[m_current_state_idx] };
@@ -782,8 +784,21 @@ void BT::Model_animator::get_anim_floored_frame_pose_with_root_motion(
                             Model_joint_animation::FLOOR) };
     m_model_animations[anim_state.animation_idx].get_joint_matrices_at_frame_with_root_motion(
         frame_idx,
-        out_root_motion_delta_pos,
         out_joint_matrices);
+}
+
+void BT::Model_animator::get_anim_root_motion_delta_pos(Animator_timer_profile profile,
+                                                        vec3& out_root_motion_delta_pos) const
+{
+    auto& anim_state{ m_animator_states[m_current_state_idx] };
+    uint32_t frame_idx{
+        m_model_animations[anim_state.animation_idx]
+            .calc_frame_idx(get_profile_time_handle(profile).load(),
+                            anim_state.loop,
+                            Model_joint_animation::FLOOR) };
+    m_model_animations[anim_state.animation_idx].get_root_motion_delta_pos_at_frame(
+        frame_idx,
+        out_root_motion_delta_pos);
 }
 
 BT::anim_frame_action::Runtime_controllable_data&

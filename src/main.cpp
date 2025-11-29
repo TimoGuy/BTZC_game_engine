@@ -305,6 +305,8 @@ int32_t main()
         {   // Pre-physics.
             BT::system::process_physics_object_lifetime();
 
+            BT::system::set_animator_variables();
+
             BT::system::player_character_world_space_input();
             BT::system::input_controlled_character_movement();
 
@@ -315,7 +317,6 @@ int32_t main()
             BT::system::write_entity_transforms_from_physics();
             BT::system::propagate_changed_transforms();
 
-            BT::system::set_animator_variables();
             BT::system::animator_driven_hitcapsule_sets_update();
             BT::system::hitcapsule_attack_processing(BT::Physics_engine::k_simulation_delta_time);
 
