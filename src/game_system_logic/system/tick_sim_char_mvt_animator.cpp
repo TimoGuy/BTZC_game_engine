@@ -1,4 +1,4 @@
-#include "set_animator_variables.h"
+#include "tick_sim_char_mvt_animator.h"
 
 #include "game_system_logic/component/animator_root_motion.h"
 #include "game_system_logic/component/character_movement.h"
@@ -10,7 +10,7 @@
 #include <cassert>
 
 
-void BT::system::set_animator_variables()
+void BT::system::tick_sim_char_mvt_animator()
 {
     auto& rend_obj_pool{ service_finder::find_service<Renderer>().get_render_object_pool() };
     auto& entity_container{ service_finder::find_service<Entity_container>() };
@@ -62,7 +62,7 @@ void BT::system::set_animator_variables()
                 animator->set_trigger_variable("on_attack");
             char_mvt_anim_state.write_to_animator_data.on_attack = false;
 
-            // Update aniamtor.
+            // Update animator.
             animator->update(Model_animator::SIMULATION_PROFILE,
                              Physics_engine::k_simulation_delta_time);
 

@@ -1,7 +1,7 @@
 #include "animation_frame_action_tool/runtime_data.h"
 #include "btzc_game_engine.h"
 #include "btglm.h"
-#include "game_system_logic/system/set_animator_variables.h"
+#include "game_system_logic/system/tick_sim_char_mvt_animator.h"
 #include "renderer/camera.h"
 #include "game_system_logic/entity_container.h"
 #include "game_system_logic/component/component_registry.h"
@@ -305,7 +305,7 @@ int32_t main()
         {   // Pre-physics.
             BT::system::process_physics_object_lifetime();
 
-            BT::system::set_animator_variables();
+            BT::system::tick_sim_char_mvt_animator();
 
             BT::system::player_character_world_space_input();
             BT::system::input_controlled_character_movement();

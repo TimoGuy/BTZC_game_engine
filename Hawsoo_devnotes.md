@@ -831,7 +831,7 @@ while (running_game_loop)
     - [x] Add missing `get_root_motion_delta_pos()` func.
     - [x] Complete the reordering.
         - It works!!!
-    - [ ] rename `system::set_animator_variables()` to something like updating the animator vars, animator, and writing the root motion things.
+    - [x] rename `system::set_animator_variables()` to something like updating the animator vars, animator, and writing the root motion things.
     - [ ] combine `get_joint_matrices_at_frame()` and `get_joint_matrices_at_frame_with_root_motion()` similar to `get_joint_matrices_at_frame()` with the `bool root_motion_zeroing` param.
 
 
