@@ -266,8 +266,8 @@ Char_mvt_logic_results character_controller_movement_logic(
     JPH::Vec3 desired_velocity;
     if (mvt_type == MVT_TYPE_ANIM_BASED)
     {
-        // @TODO: @FIXME: This is not getting transformed into the facing direction!!!
-        //                Idk if it should get reoriented here or later though.
+        // @NOTE: Desired velocity gets transformed into the input direction later
+        //        for anim-based movement.
         desired_velocity = { anim_root_motion->delta_pos[0],
                              anim_root_motion->delta_pos[1],
                              anim_root_motion->delta_pos[2] };

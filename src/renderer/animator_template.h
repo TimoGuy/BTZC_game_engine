@@ -32,7 +32,7 @@ struct Animator_template
     };
     std::vector<Animator_state> animator_states;
 
-    struct Transition_intermediate_state
+    struct Transition_intermediate_state  // @THINK: Is this going to be used?
     {
         std::string                                      trans_state_name;
         std::pair<std::vector<std::string>, std::string> from_to_state;  // Many "from" states to one "to" state.
