@@ -528,7 +528,7 @@ Uncomment `third_party/cglm/include/cglm/simd/intrin.h:98` (where it includes "a
     - [x] Script reform.
         - Blocks the deferred task above.
         - @NOTE: ended up deciding to replace with EnTT ecs.
-    - [ ] Animation root motion.
+    - [x] Animation root motion.
     - [ ] Have CPU character attack, and have there be guard, parry, hurt -type interaction.
 
 1. ~~Unity to this engine migration.~~
