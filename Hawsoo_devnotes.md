@@ -560,9 +560,9 @@ while (running_game_loop)
 
 ## (cont./unblocked) Use simple anim dude and make dummy character and create fighting animation movesets.
 
-- [ ] Add another dummy character that plays the same anim as player.
+- [x] Add another dummy character that plays the same anim as player.
 
-- [ ] Write the hitcapsule group sets interact w each other.
+- [x] Write the hitcapsule group sets interact w each other.
     > @NOTE: This is kind of the order of checking I think would be good for the interaction.
     - [x] Cancel check if same hitcapsule group set.
     - [x] Cancel check if hitcapsule group set A does not have any enabled hitcapsule (give hurt).
@@ -590,17 +590,273 @@ while (running_game_loop)
         - Then if the bounding sphere check succeeds, check the actual real capsule-to-capsule check.
             - @TODO look up a reference for this!!!!!
 
-    - [ ] If the real capsule-to-capsule check succeeds, then `break;` and show that the overlap occurred.
+    - [x] If the real capsule-to-capsule check succeeds, then `break;` and show that the overlap occurred.
         - This is where the callbacks or event for "got hit" would get triggered or something.
         - Mmmmm maybe the callback would be as the form of both game objects having a `script_hitcapsule_processing` script, both those scripts get searched and found, and then for set A's game obj's script, the "you hit a hitcapsule, deal hurt" func gets called, with set B's game obj's script supplied as a parameter so that inside that "deal hurt" func it calls set B's script's "i got hurt" with all the hurt stats, with set A's script, in case set B's script calls an "i was parrying" call.
             > This interaction could get simplified with data, but maybe having scripts could be good... ahh but having a way to send messages like this is gonna be kinda hard I think. The way described above would work if the `find_script()` func was sophisticated and could find a script attached to the game object that has a certain interface tho.
             >
             > Maybe then "interface groups" would be a useful thing to attach to scripts? Or like a script tag system? And `find_script_by_tag()` or something.
         - [x] I thought I did it.
-        - [ ] For some reason the capsule-capsule collision isn't quite working right? Investigate this.
+        - [x] For some reason the capsule-capsule collision isn't quite working right? Investigate this.
             - Yeah so basically none of these algos work. I feel like Joseph Smith rn.
             - [x] Try this method: https://stackoverflow.com/questions/2824478/shortest-distance-between-two-line-segments (Fnord's answer)
                 - This one works!!!
 
+    - [x] Create the attacking interface.
+        - Maybe as a system that runs after `update_overlaps()` runs.
+
+        - [x] Have the hitcapsule overlap solver return which overlaps happened and what entities attacked what entities in a vector.
+            - [x] Should return Entity UUID of the offender and defender.
+                - [x] Stubbed it out.
+        - [x] Create `component::Base_combat_stats_data`
+            - Has these data:
+                - i32 dmg_pts;
+                - i32 dmg_def_pts;
+                - i32 posture_dmg_pts;
+                - i32 posture_dmg_def_pts;
+            - @TODO: @FUTURE: In the future have some values in the animator that cause higher damage and higher defense in the form of multipliers to these base numbers!!
+        - [x] Create `component::Health_stats_data`
+            - Has these data:
+                - i32 health_pts;
+                    > If this reaches 0 then the entity is destroyed.
+                - i32 max_health_pts;
+                    > Max HP.
+                - i32 posture_pts;
+                    > If this reaches `max_posture_pts` then the entity is posture-broken.
+                - i32 max_posture_pts;
+                    > Max posture pts.
+                - float posture_pts_regen_rate;
+                    > Rate per second of posture pts regeneration.
+                    > @NOTE: This value should also be scaled by the animations (e.g. if a guard is held, that causes the posture to regen quicker. )
+                - bool is_invincible;
+                    > This completely negates and causes no damage to be taken.
+                    > Usually only marked this way for props and such.
+
+        - [x] Get offender/defender ids and components into the system.
+
+        - [x] Implement processing attack logic.
+            - See below for an example.
+            - Use time debounce.
+                - [x] Add time field to combat.
+                - [x] Move time field to health stats component.
+            - [x] Implement handling of parrys/guards.
+
+        - Below is some example code I thoguht of for processing attacks.
+        ```cpp
+        enum Offense_type
+        {
+            OFFENSE_SLASH_HIT,
+            NUM_OFFENSE_TYPES
+        };
+
+        struct Offense_snapshot
+        {
+            Offsense_type type;
+            int32_t dmg_pts;
+            int32_t posture_dmg_pts;
+            int32_t posture_dmg_def_pts;
+        };
+
+        enum Defense_type
+        {
+            DEFENSE_NONE,
+            DEFENSE_GUARD,
+            DEFENSE_PARRY,
+            NUM_DEFENSE_TYPES
+        };
+
+        struct Defense_snapshot
+        {
+            Defense_type type;
+            int32_t dmg_def_pts;
+            int32_t posture_dmg_def_pts;
+        };
+
+        struct Attack_hit_result
+        {
+            struct Result_data
+            {
+                int32_t delta_hit_pts{ 0 };
+                int32_t delta_posture_pts{ 0 };
+                bool can_enter_posture_break{ false };
+            };
+            Result_data defender;
+            Result_data offender;
+        };
+
+        Attack_hit_result process_attack_hit(Offense_snapshot const& oss, Defense_snapshot const& dss) const
+        {
+            Attack_hit_result result;
+
+            int32_t dmg_pts_real{ oss.dmg_pts - dss.dmg_def_pts };
+            if (dmg_pts_real < 0)
+            {
+                BT_WARNF("Dmg pts real is <0 : %i", dmg_pts_real);
+                dmg_pts_real = 0;
+            }
+
+            int32_t posture_dmg_pts_real{ oss.posture_dmg_pts - dss.dmg_def_pts };
+
+            int32_t posture_dmg_pts_sendback{ (oss.posture_dmg_pts - oss.posture_dmg_def_pts) * 0.5 };
+            if (posture_dmg_pts_sendback < 0)
+            {
+                BT_WARNF("Posture dmg pts sendback is <0 : %i", posture_dmg_pts_sendback);
+                posture_dmg_pts_sendback = 0;
+            }
+
+            switch (dss.type)
+            {
+            case DEFENSE_NONE:
+                posture_dmg_pts_sendback = 0;
+                result.defender.can_enter_posture_break = true;
+                break;
+            case DEFENSE_GUARD:
+                dmg_pts_real *= 0.5;
+                posture_dmg_pts_sendback = 0;
+                result.defender.can_enter_posture_break = true;
+                break;
+            case DEFENSE_PARRY:
+                dmg_pts_real = 0;
+                posture_dmg_pts_real *= 0.5
+                result.offender.can_enter_posture_break = true;
+                break;
+            }
+
+            // Write results.
+            result.defender.delta_hit_pts     = -dmg_pts_real;
+            result.defender.delta_posture_pts = -posture_dmg_pts_real;
+            result.offender.delta_posture_pts = -posture_dmg_pts_sendback;
+
+            return result;
+        }
+        ```
+
+        - [x] Fix posture damage bug.
+
+
+- [x] Create animator that can change animator states for attacks.
+    > First thing to do here is to think about the design for this.
+    - [x] Created variables and state transitions.
+        - [x] Initial
+        > Yknow, it seems like there's no real animator component, so it's gonna be tough trying to make an imgui panel for it. Ig I could just use the `created_render_object_reference` component to do that tho.
+        - [x] Make the imgui panel insdie the `created_render_object_reference` component.
+        - [x] Implement `find_animator_variable()`.
+        - [x] Test it.
+    - [x] Connect the animator to the character movement system.
+        - [x] `is_moving`
+        - [x] `on_attack`
+        - [x] Connect the char mvt anim state component to the actual animator.
+
+
+## Animation root motion.
+
+- [x] Find root bone.
+    > This bone will have the name "Root" (case insensitive).
+    - [ ] ~~If there are bones/joints and there is _not_ a "root" bone, then error out.~~
+    - ~~Or maybe just look for all bones that don't have parents and select one or if multiple select the one that has the word "root" in its name.~~
+    - I just ended up choosing the first bone that was in the `joints_sorted_breadth_first` list as the root bone.
+
+- [x] Find velocity at every frame.
+    - [x] Delta position from current frame to next frame.
+    - [x] ~~For last frame, get as far to the end as possible.~~
+        - Perhaps this needs a different method for the last frame?
+        - DIFFERENT METHOD: I ended up just averaging the delta root pos of the first and second-to-last (could be the same as the first) frame.
+            - I think this is a good approx. If there's more need to do more, then I'll redo this.
+    - [x] TEST: make sure that the values are correct for delta pos.
+
+- [x] Change animator to use root motion or not.
+    - [x] Have a `bool use_root_motion` in the animator.
+    - [x] Do this for rendering:
+            ```cpp
+            calc_joint_matrices(time, loop, use_root_motion, joint_matrices);
+            ```
+            @NOTE: All it does is make the root bone be (0,0,0) position.
+    - [x] Do this for simulation:
+            ```cpp
+            get_joint_matrices_at_frame_with_root_motion(time, loop, root_motion_delta_pos, joint_matrices);
+            ```
+            This makes the root bone be (0,0,0) position but also returns the delta pos for the root motion.
+
+- [x] Include movement with root motion.
+    - [x] Search for the `component::Animator_root_motion` component inside the entity when doing the `input_controlled_character_movement()` system.
+        - [x] If exists, use it for the movement, and use the world space input for turning and facing angle stuff.
+            - [x] Initial separation of movement velocity and world space input for turning.
+            - [x] Fix speed issue.
+                - [x] Write imgui for the component.
+                    - I'ts really consistent. Just `0.081`. Idk if this is the right speed or not.
+                - So um, it turns out that the `*2` hack made the animation root motion twice as fast... and times one... it's correct even tho it looks wrong.
+                    - I did math to verify, and then looked real closely at the feet and the grid lines and yup it's correct.
+            - [x] To make look better, zoom in the camera.
+            - [x] Grab the AFA data of `turn_speed` from the animator's AFA.
+                - Aaaaaa I wish this weren't _inside_ the animator like this 😭
+                - There is a refactor below that should help sooo much for all of this.
+        - [x] If doesn't exist, then use world space input for both movement and turning.
+            - I.e. the current solution (well, not after this change).
+        - [x] BUG: Fix the one bug where the running animation gets stuck after the attack animation. It's kinda weird?
+            - Ok the bug appears to happen when it's a turnaround angle-level turn while doing the attack animation, and the char cannot turn around.
+                - Ok, it also just happens while in the running anim. Nothing needed here!
+                - It looks like the character just literally can't turn around for some reason.
+        - [x] Make Grounded not just use the magnitude. Have it use the actual root motion delta pos but rotated from the facing direction.
+            - [x] Initial.
+            - [x] Fix attack anim root motion not working.
+                - It (I think) is bc `grounded_state.allow_grounded_sliding` is false.
+    - [x] MISC: Some tuning (now it's like KUSR).
+    - [x] MISC: Make transitions easier by doing a many-to-one system for from-to-anim transitions.
+    - [x] Figure out midair movement.
+        - [x] @THINK: Should multiple anims be working together for this in a blendtree or should it be some kind of AFA data control where it changes the mode of control?
+            - I mean, I think having an AFA control to change the mode makes sense and would be good.
+            - I think yeah having the mode switching would be best, especially if could adjust some parameters like drag and friction and acceleration/deceleration from the AFA data too. That could make some really good ice animations probably?
+                - For now tho it would just be best to have the bool for doing freeform movement.
+                - Also have a float value for accel, decel, and max speed.
+        - [x] Add jump and fall anims.
+        - [x] Allow turning while midair.
+            - Immediate for jump.
+            - 7.5 for fall.
+        - [x] Add these AFA data:
+            - bool use_mvt_input
+            - float mvt_input_accel
+            - float mvt_input decel
+            - float mvt_input_max_speed
+        - [x] Connect AFA data to movement system.
+
+- [x] Separate root motion update from updating hitcapsule positions. (To fix the 1 sim-tick lag)
+    - [ ] ~~Put root motion fetch after player input and before input_controlled_char_mvt()~~
+        - Nothing special happens in player input really, and other things that set the animator vars happen in the `input_controlled_char_mvt()` so it just needs to happen before player input and char mvt.
+            - [x] Do ^^ above ^^
+    - [ ] ~~Leave hitcapsule positions in same place (right before hitcapsule overlap check).~~
+    - So ig the `write_to_animator_data` stuff will be lagging one sim-tick but I think that's fine?
+        - _Something_ has to lag, and having the movement of the current frame of the animation show up is most important imo.
+        - ~~So the order should be:~~
+            - 
+    - [x] Add missing `get_root_motion_delta_pos()` func.
+    - [x] Complete the reordering.
+        - It works!!!
+    - [x] rename `system::set_animator_variables()` to something like updating the animator vars, animator, and writing the root motion things.
+    - [x] combine `get_joint_matrices_at_frame()` and `get_joint_matrices_at_frame_with_root_motion()` similar to `get_joint_matrices_at_frame()` with the `bool root_motion_zeroing` param.
+
+
+## Have CPU character attack, and have there be guard, parry, hurt -type interaction.
+
+- [ ] Connect attack results to new animator.
+    - [ ] Report the attack results to the animator (somehow).
+
+    - [ ] Create knockback.
+        - [ ] Hurt.
+        - [ ] Parry.
+        - [ ] Guard.
+
+
 - [ ] ~~REFACTOR: Delete the `calc_orig_pt_distance()` method in hitcapsule bc this info is really only needed when doing the actual collision and isn't needed most of the time.~~
     - No. This is used in the spherization of the capsules in the broad phase of the overlap check.
+
+- [ ] REFACTOR: Move the AFA data handle from the animator to a component attached to the entity.
+    - Bc it seems like everything that needs to use the AFA data handle part of the animator is accessing it from _not_ the renderer, so it should be somewhere else.
+
+- [ ] REFACTOR: Move the animator out into its own component.
+    - This just needs to get out, bc reserving a render obj from the renderer and then grabbing the animator from there is just way too much of a hassle.
+
+- [ ] BUGFIX: When selecting an object that has a debug mesh render job, when you switch context from level editor to animation frame action data editor, it crashes bc it can't find the mesh job renderable (dangling pointer).
+    - Confirmed that it's when it's displaying a deformed mesh (so if play mode is on and it's player model)
+    - [ ] ~~WORKAROUND: Make it so that only can change context when not in play mode?~~
+        - Nahh, this wouldn't work. I just need to remove all debug meshes and lines removed when switching contexts.
+    - [ ] BONUS POINTS: just remove all debug meshes and lines when in the animator editor context.

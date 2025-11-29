@@ -151,7 +151,8 @@ BT::Hitcapsule_group_set::~Hitcapsule_group_set()
     unregister_from_overlap_solver();
 }
 
-void BT::Hitcapsule_group_set::replace_and_reregister(Hitcapsule_group_set const& other)
+void BT::Hitcapsule_group_set::replace_and_reregister(Hitcapsule_group_set const& other,
+                                                      UUID resp_entity_uuid)
 {
     auto& overlap_solver{ service_finder::find_service<Hitcapsule_group_overlap_solver>() };
 
@@ -166,6 +167,9 @@ void BT::Hitcapsule_group_set::replace_and_reregister(Hitcapsule_group_set const
 
     m_is_registered_in_overlap_solver = overlap_solver.add_group_set(*this);
     assert(m_is_registered_in_overlap_solver);
+
+    m_resp_entity_uuid = resp_entity_uuid;
+    assert(!m_resp_entity_uuid.is_nil());
 }
 
 void BT::Hitcapsule_group_set::unregister_from_overlap_solver()
@@ -192,6 +196,11 @@ void BT::Hitcapsule_group_set::connect_animator(Model_animator const& animator)
 std::vector<BT::Hitcapsule_group>& BT::Hitcapsule_group_set::get_hitcapsule_groups()
 {
     return m_hitcapsule_grps;
+}
+
+BT::UUID BT::Hitcapsule_group_set::get_resp_entity_uuid() const
+{
+    return m_resp_entity_uuid;
 }
 
 void BT::Hitcapsule_group_set::emplace_debug_render_repr() const
@@ -276,8 +285,11 @@ size_t BT::Hitcapsule_group_overlap_solver::get_num_group_sets() const
     return m_group_sets.size();
 }
 
-void BT::Hitcapsule_group_overlap_solver::update_overlaps()
+BT::Overlap_result_set BT::Hitcapsule_group_overlap_solver::update_overlaps()
 {
+    Overlap_result_set result;
+
+    // Check for all capsule group overlaps.
     for (auto grp_set_ptr_a : m_group_sets)
     for (auto grp_set_ptr_b : m_group_sets)
     if (grp_set_ptr_a != grp_set_ptr_b)
@@ -307,7 +319,8 @@ void BT::Hitcapsule_group_overlap_solver::update_overlaps()
 
         if (found_overlap)
         {   // Report that A hurt B!
-            assert(false);  // @TODO: Implement!
+            result.emplace_back(grp_set_ptr_a->get_resp_entity_uuid(),
+                                grp_set_ptr_b->get_resp_entity_uuid());
         }
     }
 
@@ -316,6 +329,8 @@ void BT::Hitcapsule_group_overlap_solver::update_overlaps()
     {
         group_set_ptr->emplace_debug_render_repr();
     }
+
+    return result;
 }
 
 bool BT::Hitcapsule_group_overlap_solver::check_broad_phase_hitcapsule_pair(

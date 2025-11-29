@@ -92,7 +92,7 @@ struct Camera::Data
             float_t orbit_x_auto_turn_disable_time{ 0.5f };
             float_t orbit_x_auto_turn_speed{ 1.0f };
             float_t orbit_x_auto_turn_max_influence_magnitude{ 5.0f };  // @THOUGHT: Should this be based off the input instead of the effective velocity?
-            float_t cam_distance{ 10.0f };
+            float_t cam_distance{ 5.0f };
             float_t cam_return_to_distance_speed{ 10.0f };
 
             // Internal state.
@@ -225,6 +225,11 @@ void BT::Camera::get_view_direction(vec3& out_view_direction)
 }
 
 // Camera frontend.
+bool BT::Camera::is_static_cam()
+{
+    return (m_data->frontend.state == Data::Frontend::FRONTEND_CAMERA_STATE_STATIC);
+}
+
 bool BT::Camera::is_capture_fly()
 {
     return (m_data->frontend.state == Data::Frontend::FRONTEND_CAMERA_STATE_CAPTURE_FLY);
@@ -285,7 +290,12 @@ void BT::Camera::update_frontend(Input_handler::State const& input_state,
 
 bool BT::Camera::is_mouse_captured()
 {
-    return (m_data->frontend.state == Data::Frontend::FRONTEND_CAMERA_STATE_CAPTURE_FLY);
+    return (is_capture_fly() || is_ortho_cam_dragging());
+}
+
+bool BT::Camera::is_ortho_cam()
+{
+    return (m_data->frontend.state == Data::Frontend::FRONTEND_CAMERA_STATE_ORTHO);
 }
 
 bool BT::Camera::is_ortho_cam_dragging()

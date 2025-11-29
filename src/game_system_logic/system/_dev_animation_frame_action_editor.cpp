@@ -17,7 +17,8 @@
 
 void BT::system::_dev_animation_frame_action_editor()
 {
-    auto& reg{ service_finder::find_service<Entity_container>().get_ecs_registry() };
+    auto& entity_container{ service_finder::find_service<Entity_container>() };
+    auto& reg{ entity_container.get_ecs_registry() };
     auto view{ reg.view<component::_Dev_animation_frame_action_editor_agent>() };
 
     // This check is to ensure that editing the editor state will be used/practical.
@@ -38,6 +39,7 @@ void BT::system::_dev_animation_frame_action_editor()
         // Reset editor data when working model is changed.
         if (afa_agent.prev_working_model != eds.working_model)
         {
+            eds.working_entity_uuid = entity_container.find_entity_uuid(entity);
             eds.working_model_animator = nullptr;
             afa_agent.prev_working_afa_ctrls_copy = nullptr;  // Forces animator reconfiguration.
 
@@ -102,7 +104,8 @@ void BT::system::_dev_animation_frame_action_editor()
                 //        controller is assigned on this dynamic entity, this component is not
                 //        attached.
                 eds.working_model_animator->configure_anim_frame_action_controls(
-                    eds.working_afa_ctrls_copy);  // @TODO: @THINK: @THEA: How do we get these into the render object settings components or smth so that these automatically load up without this process here??
+                    eds.working_afa_ctrls_copy,
+                    eds.working_entity_uuid);
 
                 // Create and attach hitcapsule set driver.
                 // @NOTE: This is also manually added.

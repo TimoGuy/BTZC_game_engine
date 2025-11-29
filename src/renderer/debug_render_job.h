@@ -124,7 +124,7 @@ private:
 
     uint32_t m_ssbo{ (uint32_t)-1 };
 
-    std::atomic_bool m_visible{ true };
+    std::atomic_bool m_visible{ false };
 };
 
 Debug_line_pool& set_main_debug_line_pool(std::unique_ptr<Debug_line_pool>&& dbg_line_pool);

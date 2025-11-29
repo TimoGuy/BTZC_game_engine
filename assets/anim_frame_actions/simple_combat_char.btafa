@@ -7,43 +7,124 @@
         {
             "regions": [
                 {
-                    "ctrl_item_idx": 2,
-                    "end_frame": 5,
-                    "start_frame": 1
-                },
-                {
                     "ctrl_item_idx": 4,
-                    "end_frame": 13,
+                    "end_frame": 11,
                     "start_frame": 0
                 },
                 {
-                    "ctrl_item_idx": 2,
-                    "end_frame": 14,
-                    "start_frame": 7
-                },
-                {
-                    "ctrl_item_idx": 5,
-                    "end_frame": 14,
+                    "ctrl_item_idx": 7,
+                    "end_frame": 11,
                     "start_frame": 0
                 }
             ],
             "state_name": "st_idle"
         },
         {
-            "regions": [],
+            "regions": [
+                {
+                    "ctrl_item_idx": 4,
+                    "end_frame": 41,
+                    "start_frame": 0
+                },
+                {
+                    "ctrl_item_idx": 8,
+                    "end_frame": 41,
+                    "start_frame": 0
+                },
+                {
+                    "ctrl_item_idx": 9,
+                    "end_frame": 41,
+                    "start_frame": 0
+                }
+            ],
             "state_name": "st_running"
         },
         {
             "regions": [
                 {
+                    "ctrl_item_idx": 8,
+                    "end_frame": 10,
+                    "start_frame": 0
+                },
+                {
+                    "ctrl_item_idx": 8,
+                    "end_frame": 41,
+                    "start_frame": 33
+                }
+            ],
+            "state_name": "st_running_turnaround"
+        },
+        {
+            "regions": [
+                {
+                    "ctrl_item_idx": 7,
+                    "end_frame": 11,
+                    "start_frame": 0
+                },
+                {
+                    "ctrl_item_idx": 11,
+                    "end_frame": 11,
+                    "start_frame": 0
+                },
+                {
+                    "ctrl_item_idx": 12,
+                    "end_frame": 11,
+                    "start_frame": 0
+                },
+                {
+                    "ctrl_item_idx": 13,
+                    "end_frame": 11,
+                    "start_frame": 0
+                },
+                {
+                    "ctrl_item_idx": 14,
+                    "end_frame": 11,
+                    "start_frame": 0
+                }
+            ],
+            "state_name": "st_jump"
+        },
+        {
+            "regions": [
+                {
+                    "ctrl_item_idx": 10,
+                    "end_frame": 15,
+                    "start_frame": 0
+                },
+                {
+                    "ctrl_item_idx": 11,
+                    "end_frame": 15,
+                    "start_frame": 0
+                },
+                {
+                    "ctrl_item_idx": 12,
+                    "end_frame": 15,
+                    "start_frame": 0
+                },
+                {
+                    "ctrl_item_idx": 13,
+                    "end_frame": 15,
+                    "start_frame": 0
+                },
+                {
+                    "ctrl_item_idx": 14,
+                    "end_frame": 15,
+                    "start_frame": 0
+                }
+            ],
+            "state_name": "st_fall"
+        },
+        {
+            "regions": [
+                {
                     "ctrl_item_idx": 5,
-                    "end_frame": 40,
-                    "start_frame": 20
+                    "end_frame": 30,
+                    "start_frame": 15
                 },
                 {
                     "ctrl_item_idx": 5,
-                    "end_frame": 100,
-                    "start_frame": 60
+                    "end_frame": 76,
+                    "start_frame": 50
                 },
                 {
                     "ctrl_item_idx": 2,
@@ -64,6 +145,36 @@
                     "ctrl_item_idx": 3,
                     "end_frame": 101,
                     "start_frame": 100
+                },
+                {
+                    "ctrl_item_idx": 4,
+                    "end_frame": 89,
+                    "start_frame": 0
+                },
+                {
+                    "ctrl_item_idx": 6,
+                    "end_frame": 30,
+                    "start_frame": 14
+                },
+                {
+                    "ctrl_item_idx": 6,
+                    "end_frame": 76,
+                    "start_frame": 49
+                },
+                {
+                    "ctrl_item_idx": 8,
+                    "end_frame": 16,
+                    "start_frame": 0
+                },
+                {
+                    "ctrl_item_idx": 8,
+                    "end_frame": 51,
+                    "start_frame": 29
+                },
+                {
+                    "ctrl_item_idx": 8,
+                    "end_frame": 89,
+                    "start_frame": 77
                 }
             ],
             "state_name": "st_attack_0"
@@ -88,6 +199,33 @@
         },
         {
             "name": "hitcapsule_group_1_enabled:ov:true"
+        },
+        {
+            "name": "can_move:ov:false"
+        },
+        {
+            "name": "turn_speed:ov:1000000"
+        },
+        {
+            "name": "turn_speed:ov:10"
+        },
+        {
+            "name": "can_do_turnaround_anim:ov:true"
+        },
+        {
+            "name": "turn_speed:ov:7.5"
+        },
+        {
+            "name": "mvt_input_enabled:ov:true"
+        },
+        {
+            "name": "mvt_input_accel:ov:60"
+        },
+        {
+            "name": "mvt_input_decel:ov:30"
+        },
+        {
+            "name": "mvt_input_max_speed:ov:10"
         }
     ],
     "hitcapsule_group_set_template": {
@@ -251,7 +389,7 @@
                         "radius": 0.25
                     }
                 ],
-                "m_enabled": true,
+                "m_enabled": false,
                 "m_type": 1
             }
         ]

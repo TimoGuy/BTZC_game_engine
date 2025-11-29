@@ -1,11 +1,13 @@
 #include "animation_frame_action_tool/runtime_data.h"
 #include "btzc_game_engine.h"
 #include "btglm.h"
-#include "game_system_logic/system/_dev_animation_frame_action_editor.h"
-#include "game_system_logic/system/animator_driven_hitcapsule_sets_update.h"
+#include "game_system_logic/system/tick_sim_char_mvt_animator.h"
 #include "renderer/camera.h"
 #include "game_system_logic/entity_container.h"
 #include "game_system_logic/component/component_registry.h"
+#include "game_system_logic/system/_dev_animation_frame_action_editor.h"
+#include "game_system_logic/system/animator_driven_hitcapsule_sets_update.h"
+#include "game_system_logic/system/hitcapsule_attack_processing.h"
 #include "game_system_logic/system/imgui_render_transform_hierarchy_window.h"
 #include "game_system_logic/system/input_controlled_character_movement.h"
 #include "game_system_logic/system/player_character_world_space_input.h"
@@ -303,6 +305,8 @@ int32_t main()
         {   // Pre-physics.
             BT::system::process_physics_object_lifetime();
 
+            BT::system::tick_sim_char_mvt_animator();
+
             BT::system::player_character_world_space_input();
             BT::system::input_controlled_character_movement();
 
@@ -314,7 +318,7 @@ int32_t main()
             BT::system::propagate_changed_transforms();
 
             BT::system::animator_driven_hitcapsule_sets_update();
-            hitcapsule_solver.update_overlaps();
+            BT::system::hitcapsule_attack_processing(BT::Physics_engine::k_simulation_delta_time);
 
             // Only run once if teardown iteration.
             if (iter_type == Iteration_type::TEARDOWN_ITERATION)
@@ -351,9 +355,10 @@ int32_t main()
         switch (iter_type)
         {
         case Iteration_type::FIRST_RUNNING_ITERATION:
-            // Turn off logging to the console.
-            BT_TRACE("Set logger to not print to console.");
-            BT::logger::set_logging_print_mask(BT::logger::NONE);
+            // Turn off logging to the console (except for errors and warnings).
+            BT_TRACE("Set logger to not print to console (except for errors and warnings).");
+            BT::logger::set_logging_print_mask(  // @TODO: @FIXME: Make bitmask support better. This sucks ass.  -Thea 2025/11/23
+                (BT::logger::Log_type)((uint32_t)BT::logger::ERROR | (uint32_t)BT::logger::WARN));
 
             BT_TRACE("==== ENTERING RUNNING ==========================================");
             iter_type = Iteration_type::RUNNING_ITERATION;

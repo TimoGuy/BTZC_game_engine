@@ -35,10 +35,12 @@ public:
     void get_view_direction(vec3& out_view_direction);
 
     // Camera frontend.
+    bool is_static_cam();
     bool is_capture_fly();
     bool is_follow_orbit();
     void update_frontend(Input_handler::State const& input_state, float_t delta_time);
     bool is_mouse_captured();
+    bool is_ortho_cam();
     bool is_ortho_cam_dragging();
     std::string get_ortho_cam_dragging_tooltip_text() const;
 

@@ -1,18 +1,20 @@
 #include "component_imgui_edit_functions.h"
 
 #include "btglm.h"
+#include "character_movement.h"
+#include "combat_stats.h"
 #include "entity_metadata.h"
-#include "game_system_logic/component/entity_metadata.h"
-#include "game_system_logic/component/render_object_settings.h"
-#include "game_system_logic/component/transform.h"
+#include "game_system_logic/component/animator_root_motion.h"
 #include "game_system_logic/entity_container.h"
+#include "health_stats.h"
 #include "imgui.h"
 #include "imgui_internal.h"
 #include "misc/cpp/imgui_stdlib.h"
 #include "physics_engine/physics_object.h"
 #include "physics_object_settings.h"
-#include "character_movement.h"
+#include "render_object_settings.h"
 #include "renderer/render_layer.h"
+#include "renderer/renderer.h"
 #include "service_finder/service_finder.h"
 #include "transform.h"
 #include "uuid/uuid.h"
@@ -379,6 +381,86 @@ void BT::component::edit::imgui_edit__created_render_object_reference(entt::regi
     ImGui::TextWrapped("A render object is created in the renderer.\n  UUID: %s",
                        UUID_helper::to_pretty_repr(rend_obj_ref.render_obj_uuid_ref).c_str());
 
+    // Extras for if there's an animator.
+    auto& rend_obj_pool{ service_finder::find_service<Renderer>().get_render_object_pool() };
+    auto& rend_obj{
+        *rend_obj_pool.checkout_render_obj_by_key({ rend_obj_ref.render_obj_uuid_ref }).front()
+    };
+
+    if (auto animator{ rend_obj.get_model_animator() }; animator != nullptr)
+    {   // EXTRAS!!
+        // Control the state machine!!
+        ImGui::SeparatorText("Extras: animator controls");
+
+        ImGui::Text("is_using_root_motion: %s",
+                    (animator->get_is_using_root_motion() ? "TRUE" : "FALSE"));
+
+        for (size_t var_idx = 0; var_idx < animator->get_num_animator_variables(); var_idx++)
+        {
+            auto const& anim_var{ animator->get_animator_variable(var_idx) };
+            switch (anim_var.type)
+            {
+            case anim_tmpl_types::Animator_variable::TYPE_BOOL:
+            {
+                bool var_val{ glm_eq(anim_var.var_value, anim_tmpl_types::k_bool_true) };
+                if (ImGui::Checkbox(anim_var.var_name.c_str(), &var_val))
+                {
+                    animator->set_bool_variable(anim_var.var_name, var_val);
+                }
+                break;
+            }
+
+            case anim_tmpl_types::Animator_variable::TYPE_INT:
+            {
+                int32_t var_val{ static_cast<int32_t>(anim_var.var_value) };
+                if (ImGui::InputInt(anim_var.var_name.c_str(), &var_val))
+                {
+                    animator->set_int_variable(anim_var.var_name, var_val);
+                }
+                break;
+            }
+
+            case anim_tmpl_types::Animator_variable::TYPE_FLOAT:
+            {
+                float_t var_val{ anim_var.var_value };
+                if (ImGui::DragFloat(anim_var.var_name.c_str(), &var_val, 0.1f))
+                {
+                    animator->set_float_variable(anim_var.var_name, var_val);
+                }
+                break;
+            }
+
+            case anim_tmpl_types::Animator_variable::TYPE_TRIGGER:
+                if (ImGui::Button(("Trigger \"" + anim_var.var_name + "\"").c_str()))
+                {
+                    animator->set_trigger_variable(anim_var.var_name);
+                }
+                break;
+
+            default: assert(false); break;
+            }
+        }
+    }
+
+    rend_obj_pool.return_render_objs({ &rend_obj });
+
+    ImGui::PopID();
+}
+
+void BT::component::edit::imgui_edit__animator_root_motion(entt::registry& reg,
+                                                           entt::entity ecs_entity)
+{
+    auto& anim_root_motion{ reg.get<component::Animator_root_motion>(ecs_entity) };
+
+    ImGui::PushID(&anim_root_motion);
+    ImGui::PushItemWidth(ImGui::GetFontSize() * -10);
+
+    // Show vals.
+    ImGui::DragFloat("root_motion_multiplier", &anim_root_motion.root_motion_multiplier);
+    ImGui::DragFloat3("delta_pos", anim_root_motion.delta_pos);
+    ImGui::Text("%.9f", anim_root_motion.delta_pos[2]);
+
+    ImGui::PopItemWidth();
     ImGui::PopID();
 }
 
@@ -486,5 +568,61 @@ void BT::component::edit::imgui_edit__created_physics_object_reference(entt::reg
     ImGui::TextWrapped("A physics object is created in the physics engine.\n  UUID: %s",
                        UUID_helper::to_pretty_repr(phys_obj_ref.physics_obj_uuid_ref).c_str());
 
+    ImGui::PopID();
+}
+
+void BT::component::edit::imgui_edit__health_stats_data(entt::registry& reg,
+                                                        entt::entity ecs_entity)
+{
+    auto& health_stats_data{ reg.get<component::Health_stats_data>(ecs_entity) };
+
+    ImGui::PushID(&health_stats_data);
+    ImGui::PushItemWidth(ImGui::GetFontSize() * -20);
+
+    ImGui::SeparatorText("Health");
+    ImGui::InputInt("max_health_pts", &health_stats_data.max_health_pts);
+    ImGui::InputInt("health_pts", &health_stats_data.health_pts);
+
+    ImGui::SeparatorText("Posture");
+    ImGui::InputInt("max_posture_pts", &health_stats_data.max_posture_pts);
+    ImGui::InputInt("posture_pts", &health_stats_data.posture_pts);
+    ImGui::DragFloat("posture_pts_regen_rate", &health_stats_data.posture_pts_regen_rate, 0.1f);
+
+    ImGui::SeparatorText("Other");
+
+    ImGui::Checkbox("is_invincible", &health_stats_data.is_invincible);
+
+    // atk_receive_debounce_time.
+    float_t atk_receive_debounce_time_f = health_stats_data.atk_receive_debounce_time;
+    if (ImGui::DragFloat("atk_receive_debounce_time", &atk_receive_debounce_time_f, 0.01f))
+        health_stats_data.atk_receive_debounce_time = atk_receive_debounce_time_f;
+
+    // Grayed out prev attack received time.
+    ImGui::BeginDisabled();
+    float_t prev_atk_rece_time_f = health_stats_data.prev_atk_received_time;
+    ImGui::InputFloat("prev_atk_received_time", &prev_atk_rece_time_f);
+    ImGui::EndDisabled();
+
+    ImGui::PopItemWidth();
+    ImGui::PopID();
+}
+
+void BT::component::edit::imgui_edit__base_combat_stats_data(entt::registry& reg,
+                                                             entt::entity ecs_entity)
+{
+    auto& combat_stats_data{ reg.get<component::Base_combat_stats_data>(ecs_entity) };
+
+    ImGui::PushID(&combat_stats_data);
+    ImGui::PushItemWidth(ImGui::GetFontSize() * -20);
+
+    ImGui::SeparatorText("Health");
+    ImGui::InputInt("dmg_pts", &combat_stats_data.dmg_pts);
+    ImGui::InputInt("dmg_def_pts", &combat_stats_data.dmg_def_pts);
+
+    ImGui::SeparatorText("Posture");
+    ImGui::InputInt("posture_dmg_pts", &combat_stats_data.posture_dmg_pts);
+    ImGui::InputInt("posture_dmg_def_pts", &combat_stats_data.posture_dmg_def_pts);
+
+    ImGui::PopItemWidth();
     ImGui::PopID();
 }

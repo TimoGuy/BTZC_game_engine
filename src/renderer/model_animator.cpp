@@ -1,9 +1,12 @@
 #include "model_animator.h"
 
 #include "../animation_frame_action_tool/runtime_data.h"
+#include "animator_template_types.h"
 #include "btglm.h"
 #include "btlogger.h"
 #include "mesh.h"
+#include "uuid/uuid.h"
+
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
@@ -105,6 +108,7 @@ uint32_t BT::Model_joint_animation::calc_frame_idx(float_t time,
 
 void BT::Model_joint_animation::calc_joint_matrices(float_t time,
                                                     bool loop,
+                                                    bool root_motion_zeroing,
                                                     std::vector<mat4s>& out_joint_matrices) const
 {
     uint32_t frame_idx_a{ calc_frame_idx(time, loop, FLOOR) };
@@ -136,6 +140,11 @@ void BT::Model_joint_animation::calc_joint_matrices(float_t time,
             m_frames[frame_idx_a].joint_transforms_in_order[i].interpolate_fast(
                 m_frames[frame_idx_b].joint_transforms_in_order[i],
                 interp_t) };
+
+        if (i == 0 && root_motion_zeroing)
+        {   // Delete root motion (for XZ axes).
+            local_joint_transform.position[0] = local_joint_transform.position[2] = 0;
+        }
 
         mat4 global_joint_transform;
         glm_translate_make(global_joint_transform, local_joint_transform.position);
@@ -175,6 +184,7 @@ void BT::Model_joint_animation::calc_joint_matrices(float_t time,
 
 void BT::Model_joint_animation::get_joint_matrices_at_frame(
     uint32_t frame_idx,
+    bool root_motion_zeroing,
     std::vector<mat4s>& out_joint_matrices) const
 {   ////////////////////////////////////////////////////////////////////////////////////////////////
     // @COPYPASTA below from `calc_joint_matrices()`
@@ -187,6 +197,9 @@ void BT::Model_joint_animation::get_joint_matrices_at_frame(
     //   return the first one essentially. It'll just be copypasta for this run around but maybe in
     //   the future a more efficient way for `get_joint_matrices_at_frame()` can be concocted when
     //   the program demands the performance.  -Thea 2025/09/27
+    //
+    // @NOTE: Hey, I really don't like these copypastas. These really need some kind of
+    //   consolidation/abstraction for this!!!  -Thea 2025/11/26
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     // uint32_t frame_idx_a{ calc_frame_idx(time, loop, FLOOR) };
@@ -224,6 +237,11 @@ void BT::Model_joint_animation::get_joint_matrices_at_frame(
                 m_frames[frame_idx].joint_transforms_in_order[i])                               // +
         };                                                                                      // +
 
+        if (i == 0 && root_motion_zeroing)                                                      // +
+        {   // Delete root motion (for XZ axes).                                                // +
+            local_joint_transform.position[0] = local_joint_transform.position[2] = 0;          // +
+        }                                                                                       // +
+
         mat4 global_joint_transform;
         glm_translate_make(global_joint_transform, local_joint_transform.position);
         glm_quat_rotate(global_joint_transform, local_joint_transform.rotation, global_joint_transform);
@@ -260,10 +278,20 @@ void BT::Model_joint_animation::get_joint_matrices_at_frame(
     }
 }
 
+void BT::Model_joint_animation::get_root_motion_delta_pos_at_frame(
+    uint32_t frame_idx,
+    vec3& out_root_motion_delta_pos) const
+{   // Include root motion delta position (Just XZ axes).
+    glm_vec3_copy(const_cast<float_t*>(m_frames[frame_idx].root_motion_delta_pos),
+                  out_root_motion_delta_pos);
+    out_root_motion_delta_pos[1] = 0;
+}
 
-BT::Model_animator::Model_animator(Model const& model)
+
+BT::Model_animator::Model_animator(Model const& model, bool use_root_motion)
     : m_model_animations{ model.m_animations }
     , m_model_skin{ model.m_model_skin }
+    , m_is_using_root_motion{ use_root_motion }
 {
 }
 
@@ -273,14 +301,20 @@ BT::Model_skin const& BT::Model_animator::get_model_skin() const
 }
 
 void BT::Model_animator::configure_animator_states(
-    std::vector<Animator_state>&& animator_states)
+    std::vector<anim_tmpl_types::Animator_state> animator_states,
+    std::vector<anim_tmpl_types::Animator_variable> animator_variables,
+    std::vector<anim_tmpl_types::Animator_state_transition> animator_state_transitions)
 {
     // Idk why I put this into a separate method instead of in the constructor but hey, here we are.
-    m_animator_states = std::move(animator_states);
+    // @NOTE: A lot of copying, but I'm @TEMP temporarily doing this for a looser interface.
+    m_animator_states = animator_states;
+    m_animator_variables = animator_variables;
+    m_animator_state_transitions = animator_state_transitions;
 }
 
 void BT::Model_animator::configure_anim_frame_action_controls(
-    anim_frame_action::Runtime_data_controls const* anim_frame_action_controls)
+    anim_frame_action::Runtime_data_controls const* anim_frame_action_controls,
+    UUID resp_entity_uuid)
 {
     // Idk why I put this into a separate method instead of in the constructor but hey, here we are.
     m_anim_frame_action_controls = anim_frame_action_controls;
@@ -288,26 +322,42 @@ void BT::Model_animator::configure_anim_frame_action_controls(
     m_anim_frame_action_data.map_animator_to_control_regions(*this, *m_anim_frame_action_controls);
 
     m_anim_frame_action_data.hitcapsule_group_set.replace_and_reregister(
-        m_anim_frame_action_controls->data.hitcapsule_group_set_template);
+        m_anim_frame_action_controls->data.hitcapsule_group_set_template,
+        resp_entity_uuid);
     m_anim_frame_action_data.hitcapsule_group_set.connect_animator(*this);
 }
 
-std::vector<BT::Model_animator::Animator_state> const&
+std::vector<BT::anim_tmpl_types::Animator_state> const&
 BT::Model_animator::get_animator_states() const
 {
     return m_animator_states;
 }
 
-BT::Model_animator::Animator_state const&
+BT::anim_tmpl_types::Animator_state const&
 BT::Model_animator::get_animator_state(size_t idx) const
 {
     return m_animator_states[idx];
 }
 
-BT::Model_animator::Animator_state&
+BT::anim_tmpl_types::Animator_state&
 BT::Model_animator::get_animator_state_write_handle(size_t idx)
 {
     return m_animator_states[idx];
+}
+
+size_t BT::Model_animator::get_num_animator_variables() const
+{
+    return m_animator_variables.size();
+}
+
+BT::anim_tmpl_types::Animator_variable const& BT::Model_animator::get_animator_variable(size_t idx) const
+{
+    return m_animator_variables[idx];
+}
+
+BT::anim_tmpl_types::Animator_variable& BT::Model_animator::get_animator_variable_write_handle(size_t idx)
+{
+    return m_animator_variables[idx];
 }
 
 void BT::Model_animator::change_state_idx(uint32_t to_state)
@@ -340,6 +390,59 @@ BT::Model_joint_animation const& BT::Model_animator::get_model_animation(size_t 
     return m_model_animations[idx];
 }
 
+void BT::Model_animator::set_bool_variable(std::string const& var_name, bool value)
+{
+    auto& var_handle{ find_animator_variable(var_name) };
+
+    if (var_handle.type != anim_tmpl_types::Animator_variable::TYPE_BOOL)
+    {
+        assert(false);
+        return;
+    }
+
+    var_handle.var_value = (value ? anim_tmpl_types::k_bool_true
+                                  : anim_tmpl_types::k_bool_false);
+}
+
+void BT::Model_animator::set_int_variable(std::string const& var_name, int32_t value)
+{
+    auto& var_handle{ find_animator_variable(var_name) };
+
+    if (var_handle.type != anim_tmpl_types::Animator_variable::TYPE_INT)
+    {
+        assert(false);
+        return;
+    }
+
+    var_handle.var_value = value;
+}
+
+void BT::Model_animator::set_float_variable(std::string const& var_name, float_t value)
+{
+    auto& var_handle{ find_animator_variable(var_name) };
+
+    if (var_handle.type != anim_tmpl_types::Animator_variable::TYPE_FLOAT)
+    {
+        assert(false);
+        return;
+    }
+
+    var_handle.var_value = value;
+}
+
+void BT::Model_animator::set_trigger_variable(std::string const& var_name)
+{
+    auto& var_handle{ find_animator_variable(var_name) };
+
+    if (var_handle.type != anim_tmpl_types::Animator_variable::TYPE_TRIGGER)
+    {
+        assert(false);
+        return;
+    }
+
+    var_handle.var_value = anim_tmpl_types::k_trig_triggered;
+}
+
 void BT::Model_animator::set_time(float_t time)
 {
     m_sim_time  = time;
@@ -349,11 +452,107 @@ void BT::Model_animator::set_time(float_t time)
 void BT::Model_animator::update(Animator_timer_profile profile, float_t delta_time)
 {   // Get timer to work with.
     animator_time_t& time_handle{ get_profile_time_handle(profile) };
-    
-    // Tick forward.
-    float_t state_speed{ m_animator_states[m_current_state_idx].speed };
-    time_handle += delta_time * state_speed;
 
+    // @TODO: There needs to be some kind of time syncing between timers. Since the creation of
+    //        setting triggers and variables to switch states, there will be issues when changing
+    //        states.
+    // @THOUGHT: Well, ig since `set_time()` will be setting all the timers, then it will start out
+    //           synced up enough? Only the simulation loop is going to be changing states inside
+    //           the animator.
+
+    // Tick forward.
+    auto const& anim_state{ m_animator_states[m_current_state_idx] };
+    time_handle += delta_time * anim_state.speed;
+
+    // Process animator state transitions.
+    if (profile == SIMULATION_PROFILE)
+    {
+        bool state_changed{ false };
+        uint32_t prev_state_idx;
+        uint32_t curr_state_idx{ m_current_state_idx };
+        do
+        {   // Keep track of whether state changes.
+            prev_state_idx = curr_state_idx;
+
+            // Look for possible state transitions.
+            for (auto const& state_trans : m_animator_state_transitions)
+            for (auto from_state_idx : state_trans.from_to_state.first)
+            if (from_state_idx == curr_state_idx)
+            {   // Possible state transition.
+                bool do_transition{ false };
+                if (state_trans.condition_var_idx == anim_tmpl_types::k_on_anim_end_var_idx)
+                {
+                    if (!state_changed)
+                    {   // Special ON_ANIM_END case.
+                        // @NOTE: Since this is frame dependent, we need to make sure that we're
+                        //        using the correct animation idx (hence `!state_changed` check).
+                        //        -Thea 2025/11/23
+                        auto const& model_anim{ m_model_animations[anim_state.animation_idx] };
+                        if (model_anim.calc_frame_idx(time_handle.load(),
+                                                      false,
+                                                      Model_joint_animation::FLOOR) ==
+                            model_anim.get_num_frames() - 1)
+                        {
+                            do_transition = true;
+                        }
+                    }
+                }
+                else
+                {   // Normal condition var.
+                    auto const& anim_var{ m_animator_variables[state_trans.condition_var_idx] };
+
+                    switch (state_trans.compare_operator)
+                    {
+                    case anim_tmpl_types::Animator_state_transition::COMP_EQ:
+                        do_transition = glm_eq(anim_var.var_value, state_trans.compare_value);
+                        break;
+
+                    case anim_tmpl_types::Animator_state_transition::COMP_NEQ:
+                        do_transition = !glm_eq(anim_var.var_value, state_trans.compare_value);
+                        break;
+
+                    case anim_tmpl_types::Animator_state_transition::COMP_LESS:
+                        do_transition = (anim_var.var_value < state_trans.compare_value);
+                        break;
+
+                    case anim_tmpl_types::Animator_state_transition::COMP_LEQ:
+                        do_transition = (anim_var.var_value <= state_trans.compare_value);
+                        break;
+
+                    case anim_tmpl_types::Animator_state_transition::COMP_GREATER:
+                        do_transition = (anim_var.var_value > state_trans.compare_value);
+                        break;
+
+                    case anim_tmpl_types::Animator_state_transition::COMP_GEQ:
+                        do_transition = (anim_var.var_value >= state_trans.compare_value);
+                        break;
+
+                    default: assert(false); break;
+                    }
+                }
+
+                if (do_transition)
+                {   // Transition states!
+                    curr_state_idx = state_trans.from_to_state.second;
+                    state_changed = true;
+                    break;
+                }
+            }
+        } while (prev_state_idx != curr_state_idx);
+
+        // Erase all trigger activations!
+        for (auto& anim_var : m_animator_variables)
+        if (anim_var.type == anim_tmpl_types::Animator_variable::TYPE_TRIGGER)
+        {
+            anim_var.var_value = 0;
+        }
+
+        // Perform actual state change!
+        if (state_changed)
+            change_state_idx(curr_state_idx);
+    }
+
+    // Process anim frame action controls.
     if (profile == SIMULATION_PROFILE &&
         m_anim_frame_action_controls != nullptr)
     {   // Get prev timer to work with.
@@ -453,7 +652,25 @@ void BT::Model_animator::calc_anim_pose(Animator_timer_profile profile,
     m_model_animations[anim_state.animation_idx]
         .calc_joint_matrices(get_profile_time_handle(profile).load(),
                              anim_state.loop,
+                             false,
                              out_joint_matrices);
+}
+
+void BT::Model_animator::calc_anim_pose_with_root_motion_zeroing(
+    Animator_timer_profile profile,
+    std::vector<mat4s>& out_joint_matrices) const
+{
+    auto& anim_state{ m_animator_states[m_current_state_idx] };
+    m_model_animations[anim_state.animation_idx]
+        .calc_joint_matrices(get_profile_time_handle(profile).load(),
+                             anim_state.loop,
+                             true,
+                             out_joint_matrices);
+}
+
+bool BT::Model_animator::get_is_using_root_motion() const
+{
+    return m_is_using_root_motion;
 }
 
 void BT::Model_animator::get_anim_floored_frame_pose(Animator_timer_profile profile,
@@ -465,8 +682,38 @@ void BT::Model_animator::get_anim_floored_frame_pose(Animator_timer_profile prof
             .calc_frame_idx(get_profile_time_handle(profile).load(),
                             anim_state.loop,
                             Model_joint_animation::FLOOR) };
-    m_model_animations[anim_state.animation_idx]
-        .get_joint_matrices_at_frame(frame_idx, out_joint_matrices);
+    m_model_animations[anim_state.animation_idx].get_joint_matrices_at_frame(frame_idx,
+                                                                             false,
+                                                                             out_joint_matrices);
+}
+
+void BT::Model_animator::get_anim_floored_frame_pose_with_root_motion_zeroing(
+    Animator_timer_profile profile,
+    std::vector<mat4s>& out_joint_matrices) const
+{
+    auto& anim_state{ m_animator_states[m_current_state_idx] };
+    uint32_t frame_idx{
+        m_model_animations[anim_state.animation_idx]
+            .calc_frame_idx(get_profile_time_handle(profile).load(),
+                            anim_state.loop,
+                            Model_joint_animation::FLOOR) };
+    m_model_animations[anim_state.animation_idx].get_joint_matrices_at_frame(frame_idx,
+                                                                             true,
+                                                                             out_joint_matrices);
+}
+
+void BT::Model_animator::get_anim_root_motion_delta_pos(Animator_timer_profile profile,
+                                                        vec3& out_root_motion_delta_pos) const
+{
+    auto& anim_state{ m_animator_states[m_current_state_idx] };
+    uint32_t frame_idx{
+        m_model_animations[anim_state.animation_idx]
+            .calc_frame_idx(get_profile_time_handle(profile).load(),
+                            anim_state.loop,
+                            Model_joint_animation::FLOOR) };
+    m_model_animations[anim_state.animation_idx].get_root_motion_delta_pos_at_frame(
+        frame_idx,
+        out_root_motion_delta_pos);
 }
 
 BT::anim_frame_action::Runtime_controllable_data&
@@ -504,4 +751,18 @@ BT::Model_animator::animator_time_t& BT::Model_animator::get_profile_prev_time_h
         return *reinterpret_cast<animator_time_t*>(0xDEADBEEF);
         break;
     }
+}
+
+BT::anim_tmpl_types::Animator_variable& BT::Model_animator::find_animator_variable(
+    std::string const& var_name)
+{
+    for (auto& anim_var : m_animator_variables)
+        if (anim_var.var_name == var_name)
+        {   // Found variable!
+            return anim_var;
+        }
+
+    // Crash the program when don't find the var.
+    assert(false);
+    throw new std::exception(("Did not find var name: " + var_name).c_str());
 }

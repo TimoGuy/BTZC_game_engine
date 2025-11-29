@@ -73,6 +73,12 @@
                     }
                 },
                 {
+                    "type_name": "component::Character_mvt_animated_state",
+                    "members_j": {
+                        "affecting_animator_uuid": "d33f01dc-b0b5-4954-9771-71a1c42e5209"
+                    }
+                },
+                {
                     "type_name": "component::Physics_object_settings",
                     "members_j": {
                         "phys_obj_type": 1
@@ -145,6 +151,21 @@
                     "type_name": "component::Anim_frame_action_controller",
                     "members_j": {
                         "anim_frame_action_controller_name": "simple_combat_char.btafa"
+                    }
+                },
+                {
+                    "type_name": "component::Animator_root_motion",
+                    "members_j": {}
+                },
+                {
+                    "type_name": "component::Health_stats_data",
+                    "members_j": {}
+                },
+                {
+                    "type_name": "component::Base_combat_stats_data",
+                    "members_j": {
+                        "dmg_pts": 2,
+                        "posture_dmg_pts": 2
                     }
                 }
             ]
@@ -266,6 +287,12 @@
                     }
                 },
                 {
+                    "type_name": "component::Character_mvt_animated_state",
+                    "members_j": {
+                        "affecting_animator_uuid": "019a9613-1fee-731d-b9e4-1fcaad20f791"
+                    }
+                },
+                {
                     "type_name": "component::Physics_object_settings",
                     "members_j": {
                         "phys_obj_type": 1
@@ -332,6 +359,21 @@
                     "type_name": "component::Anim_frame_action_controller",
                     "members_j": {
                         "anim_frame_action_controller_name": "simple_combat_char.btafa"
+                    }
+                },
+                {
+                    "type_name": "component::Animator_root_motion",
+                    "members_j": {}
+                },
+                {
+                    "type_name": "component::Health_stats_data",
+                    "members_j": {}
+                },
+                {
+                    "type_name": "component::Base_combat_stats_data",
+                    "members_j": {
+                        "dmg_pts": 2,
+                        "posture_dmg_pts": 2
                     }
                 }
             ]

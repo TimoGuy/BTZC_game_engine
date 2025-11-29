@@ -73,13 +73,16 @@ set(MAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/_dev_animation_frame_action_editor_agent.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/anim_frame_action_controller.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/animator_driven_hitcapsule_set.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/animator_root_motion.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/character_movement.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/combat_stats.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/component_imgui_edit_functions.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/component_imgui_edit_functions.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/component_registry.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/component_registry.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/entity_metadata.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/follow_camera.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/health_stats.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/physics_object_settings.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/physics_object_settings.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/component/render_object_settings.h
@@ -91,6 +94,8 @@ set(MAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/_dev_animation_frame_action_editor.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/animator_driven_hitcapsule_sets_update.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/animator_driven_hitcapsule_sets_update.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/hitcapsule_attack_processing.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/hitcapsule_attack_processing.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/imgui_render_transform_hierarchy_window.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/imgui_render_transform_hierarchy_window.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/input_controlled_character_movement.cpp
@@ -103,6 +108,8 @@ set(MAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/process_render_object_lifetime.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/propagate_changed_transforms.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/propagate_changed_transforms.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/tick_sim_char_mvt_animator.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/tick_sim_char_mvt_animator.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/write_entity_transforms_from_physics.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/write_entity_transforms_from_physics.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/game_system_logic/system/write_render_transforms.cpp
@@ -135,6 +142,7 @@ set(MAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_object.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/raycast_helper.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/raycast_helper.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/animator_template_types.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/animator_template.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/animator_template.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/camera_read_ifc.h

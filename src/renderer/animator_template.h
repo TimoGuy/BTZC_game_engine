@@ -1,5 +1,9 @@
 #pragma once
 
+#include "animator_template_types.h"
+#include "btjson.h"
+
+#include <array>
 #include <string>
 #include <unordered_map>
 #include <utility>
@@ -19,17 +23,55 @@ struct Animator_template
         std::string anim_name;
         float_t     speed;
         bool        loop;
+
+        NLOHMANN_DEFINE_TYPE_INTRUSIVE(Animator_state,
+                                       state_name,
+                                       anim_name,
+                                       speed,
+                                       loop);
     };
     std::vector<Animator_state> animator_states;
 
-    struct Transition_state
+    struct Transition_intermediate_state  // @THINK: Is this going to be used?
     {
-        std::string                         trans_state_name;
-        std::pair<std::string, std::string> from_to_state;
-        std::string                         anim_name;
-        float_t                             speed;
+        std::string                                      trans_state_name;
+        std::pair<std::vector<std::string>, std::string> from_to_state;  // Many "from" states to one "to" state.
+        std::string                                      anim_name;
+        float_t                                          speed;
+
+        NLOHMANN_DEFINE_TYPE_INTRUSIVE(Transition_intermediate_state,
+                                       trans_state_name,
+                                       from_to_state,
+                                       anim_name,
+                                       speed);
     };
-    std::vector<Transition_state> transition_states;
+    std::vector<Transition_intermediate_state> transition_intermediate_states;
+
+    /// Variables to be used in state transition conditions.
+    std::vector<std::string> variables;
+
+    /// DO NOT INCLUDE IN SERIALIZATION.
+    std::vector<anim_tmpl_types::Animator_variable> variables_cooked;
+
+    struct State_transition
+    {
+        std::pair<std::vector<std::string>, std::string> from_to_state;  // Many "from" states to one "to" state.
+        std::string condition;
+
+        NLOHMANN_DEFINE_TYPE_INTRUSIVE(State_transition,
+                                       from_to_state,
+                                       condition);
+
+        /// DO NOT INCLUDE IN SERIALIZATION.
+        anim_tmpl_types::Animator_state_transition cooked;
+    };
+    std::vector<State_transition> state_transitions;
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(Animator_template,
+                                   animator_states,
+                                   transition_intermediate_states,
+                                   variables,
+                                   state_transitions);
 };
 
 class Animator_template_bank
