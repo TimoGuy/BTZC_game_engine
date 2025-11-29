@@ -840,6 +840,8 @@ while (running_game_loop)
 - [ ] Connect attack results to new animator.
     - [x] Report the attack results to the animator (somehow).
         - I just piggybacked off the `Character_mvt_animated_state` struct created in the last task!
+    - [x] Fix not getting the right reference for the `Character_mvt_animated_state`
+        - Ok so now I can say that I tested this. It works as far as it should.
 
     - [ ] Create knockback anims in blender.
         - [ ] Hurt.

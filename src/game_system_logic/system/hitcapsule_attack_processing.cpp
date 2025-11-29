@@ -8,6 +8,7 @@
 #include "game_system_logic/component/combat_stats.h"
 #include "game_system_logic/component/health_stats.h"
 #include "game_system_logic/component/render_object_settings.h"
+#include "game_system_logic/component/transform.h"
 #include "game_system_logic/entity_container.h"
 #include "hitbox_interactor/hitcapsule.h"
 #include "physics_engine/physics_engine.h"  // For `k_simulation_delta_time`.
@@ -131,8 +132,10 @@ void BT::system::hitcapsule_attack_processing(float_t delta_time)
             }
 
             // Try to apply correct receive anim.
-            if (auto char_mvt_anim_state{
-                    reg.try_get<component::Character_mvt_animated_state>(defender_ecs_entity) };
+            auto defender_parent_ecs_entity{ entity_container.find_entity(
+                reg.get<component::Transform_hierarchy>(defender_ecs_entity).parent_entity) };
+            if (auto char_mvt_anim_state{ reg.try_get<component::Character_mvt_animated_state>(
+                    defender_parent_ecs_entity) };
                 char_mvt_anim_state)
             {
                 if (is_parry_active)
