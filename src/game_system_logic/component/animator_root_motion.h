@@ -11,7 +11,7 @@ namespace BT
 namespace component
 {
 
-/// Tag component to be used for root motion.
+/// Component to store data from animator and AFA data for root motion.
 struct Animator_root_motion
 {   // Settings.
     float_t root_motion_multiplier{ 1.0f };
