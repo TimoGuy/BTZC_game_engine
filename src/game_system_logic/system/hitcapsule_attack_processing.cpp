@@ -4,6 +4,7 @@
 #include "btlogger.h"
 #include "entt/entity/fwd.hpp"
 #include "entt/entity/registry.hpp"
+#include "game_system_logic/component/character_movement.h"
 #include "game_system_logic/component/combat_stats.h"
 #include "game_system_logic/component/health_stats.h"
 #include "game_system_logic/component/render_object_settings.h"
@@ -127,6 +128,19 @@ void BT::system::hitcapsule_attack_processing(float_t delta_time)
             else if (is_guard_active)
             {
                 atk_res.defender.delta_hit_pts = 0;
+            }
+
+            // Try to apply correct receive anim.
+            if (auto char_mvt_anim_state{
+                    reg.try_get<component::Character_mvt_animated_state>(defender_ecs_entity) };
+                char_mvt_anim_state)
+            {
+                if (is_parry_active)
+                    char_mvt_anim_state->write_to_animator_data.on_parry_hurt = true;
+                else if (is_guard_active)
+                    char_mvt_anim_state->write_to_animator_data.on_guard_hurt = true;
+                else
+                    char_mvt_anim_state->write_to_animator_data.on_receive_hurt = true;
             }
         }
 

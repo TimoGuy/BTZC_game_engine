@@ -90,6 +90,9 @@ struct Character_mvt_animated_state
         bool is_grounded{ false };
         bool on_jump{ false };
         bool on_attack{ false };
+        bool on_parry_hurt{ false };
+        bool on_guard_hurt{ false };
+        bool on_receive_hurt{ false };
     } write_to_animator_data;
 
     struct State

@@ -62,6 +62,18 @@ void BT::system::tick_sim_char_mvt_animator()
                 animator->set_trigger_variable("on_attack");
             char_mvt_anim_state.write_to_animator_data.on_attack = false;
 
+            if (char_mvt_anim_state.write_to_animator_data.on_parry_hurt)
+                animator->set_trigger_variable("on_parry_hurt");
+            char_mvt_anim_state.write_to_animator_data.on_parry_hurt = false;
+
+            if (char_mvt_anim_state.write_to_animator_data.on_guard_hurt)
+                animator->set_trigger_variable("on_guard_hurt");
+            char_mvt_anim_state.write_to_animator_data.on_guard_hurt = false;
+
+            if (char_mvt_anim_state.write_to_animator_data.on_receive_hurt)
+                animator->set_trigger_variable("on_receive_hurt");
+            char_mvt_anim_state.write_to_animator_data.on_receive_hurt = false;
+
             // Update animator.
             animator->update(Model_animator::SIMULATION_PROFILE,
                              Physics_engine::k_simulation_delta_time);

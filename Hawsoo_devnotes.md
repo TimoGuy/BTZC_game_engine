@@ -838,12 +838,14 @@ while (running_game_loop)
 ## Have CPU character attack, and have there be guard, parry, hurt -type interaction.
 
 - [ ] Connect attack results to new animator.
-    - [ ] Report the attack results to the animator (somehow).
+    - [x] Report the attack results to the animator (somehow).
+        - I just piggybacked off the `Character_mvt_animated_state` struct created in the last task!
 
-    - [ ] Create knockback.
+    - [ ] Create knockback anims in blender.
         - [ ] Hurt.
         - [ ] Parry.
         - [ ] Guard.
+    - [ ] Add knockback anims into the .btanitor and .btafa
 
 
 - [ ] ~~REFACTOR: Delete the `calc_orig_pt_distance()` method in hitcapsule bc this info is really only needed when doing the actual collision and isn't needed most of the time.~~
