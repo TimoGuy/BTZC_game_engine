@@ -131,7 +131,7 @@ void BT::system::hitcapsule_attack_processing(float_t delta_time)
                 atk_res.defender.delta_hit_pts = 0;
             }
 
-            // Try to apply correct receive anim.
+            // Try to apply some kind of hurt anim.
             auto defender_parent_ecs_entity{ entity_container.find_entity(
                 reg.get<component::Transform_hierarchy>(defender_ecs_entity).parent_entity) };
             if (auto char_mvt_anim_state{ reg.try_get<component::Character_mvt_animated_state>(
