@@ -37,6 +37,24 @@
             "loop": false
         },
         {
+            "state_name": "st_hurt_parry",
+            "anim_name": "Hurt_parry_left",
+            "speed": 1.0,
+            "loop": false
+        },
+        {
+            "state_name": "st_hurt_guard",
+            "anim_name": "Hurt_parry_right",
+            "speed": 1.0,
+            "loop": false
+        },
+        {
+            "state_name": "st_hurt_receive",
+            "anim_name": "Hurt_receive",
+            "speed": 1.0,
+            "loop": false
+        },
+        {
             "state_name": "_DEBUG_STATE",
             "anim_name": "0_TPose",
             "speed": 1.0,
@@ -49,7 +67,10 @@
         "trig on_turnaround",
         "bool is_grounded",
         "trig on_jump",
-        "trig on_attack"
+        "trig on_attack",
+        "trig on_parry_hurt",
+        "trig on_guard_hurt",
+        "trig on_receive_hurt"
     ],
     "state_transitions": [
         {
@@ -90,6 +111,22 @@
         },
         {
             "from_to_state": [["st_attack_0"], "st_idle"],
+            "condition": "ON_ANIM_END"
+        },
+        {
+            "from_to_state": [["st_idle", "st_running", "st_running_turnaround", "st_jump", "st_fall", "st_attack_0"], "st_hurt_parry"],
+            "condition": "on_parry_hurt"
+        },
+        {
+            "from_to_state": [["st_idle", "st_running", "st_running_turnaround", "st_jump", "st_fall", "st_attack_0"], "st_hurt_guard"],
+            "condition": "on_guard_hurt"
+        },
+        {
+            "from_to_state": [["st_idle", "st_running", "st_running_turnaround", "st_jump", "st_fall", "st_attack_0"], "st_hurt_receive"],
+            "condition": "on_receive_hurt"
+        },
+        {
+            "from_to_state": [["st_hurt_parry", "st_hurt_guard", "st_hurt_receive"], "st_idle"],
             "condition": "ON_ANIM_END"
         }
     ]

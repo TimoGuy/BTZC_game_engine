@@ -5,7 +5,9 @@
 #include "../renderer/mesh.h"
 #include "../renderer/model_animator.h"
 #include "btjson.h"
+#include "btlogger.h"
 
+#include <cstdlib>
 #include <sstream>
 #include <string>
 #include <unordered_map>
@@ -151,7 +153,14 @@ void BT::anim_frame_action::Runtime_controllable_data::map_animator_to_control_r
 
     auto const& animator_states{ animator.get_animator_states() };
     auto const& data_control_timelines{ data_controls.data.anim_frame_action_timelines };
-    assert(animator_states.size() == data_control_timelines.size());
+
+    if (animator_states.size() != data_control_timelines.size())
+    {
+        BT_ERROR(
+            ".btanitor and .btafa num states check failed. Ensure that there are the same "
+            "number of .btanitor anim states as there are .btafa timelines. Aborting program.");
+        abort();
+    }
 
     anim_state_idx_to_timeline_idx_map.reserve(animator_states.size());
     for (size_t anim_state_idx = 0; anim_state_idx < animator_states.size(); anim_state_idx++)
@@ -163,7 +172,14 @@ void BT::anim_frame_action::Runtime_controllable_data::map_animator_to_control_r
                 break;
             }
 
-    assert(anim_state_idx_to_timeline_idx_map.size() == animator_states.size());
+    if (anim_state_idx_to_timeline_idx_map.size() != animator_states.size())
+    {
+        BT_ERROR(
+            ">=1 anim states in .btanitor could not find a mapping into the .btafa. Check that the "
+            ".btanitor and .btafa \"state_name\" props all match, bc >=1 aren\'t. Aborting "
+            "program.");
+        abort();
+    }
 }
 
 void BT::anim_frame_action::Runtime_controllable_data

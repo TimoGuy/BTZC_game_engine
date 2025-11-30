@@ -848,20 +848,32 @@ while (running_game_loop)
         - [x] Hurt_receive
         - [x] Hurt_receive_strong
     - [ ] Parry.
-        - [ ] Parry_left (when attack comes from left)
-        - [ ] Parry_right (when attack comes from right/up/down)
+        - [x] Parry_left (when attack comes from left)
+        - [x] Parry_right (when attack comes from right/up/down)
         - [ ] Parry_strong (drag sword in ground)
     - [ ] Guard.
         - [ ] Guard
-        - [ ] Guard_strong (reel/stumble back but stay on two feel)
+        - [ ] Guard_strong (reel/stumble back but stay on two feet)
 - [ ] Create other anims in blender.
     - [ ] Ready parry
         - [ ] From idle/walk/attack
         - [ ] From running
     - [ ] Hold guard (slightly more relaxed than the parry anim)
-        - [ ] Idle
+        - [x] Idle
         - [ ] Slow walk
+            - [x] Try a root motion speed.
+            - [ ] Figure out root motion speed.
+            - [ ] Create slow walk anim.
 - [ ] Add knockback anims into the .btanitor and .btafa
+    - [x] Hurt_receive
+
+- [x] CHECK: If anim doesn't exist when creating the btanitor, crash the program.
+- [x] CHECK: If .btafa anim state doesn't exist in .btanitor, crash the program.
+
+- [ ] When receiving hurt, have char face offender.
+- [ ] Change knockback anims to use -1.0 knockback distance, but have offender's AFA data send what length of knockback to defender.
+- [ ] Get strong attacks implemented (and have strong versions of knockbacks used)
+    - Perhaps by having some kind of AFA data point being like "is_strong_attack" that could indicate a strong attack being done?
 
 
 - [ ] ~~REFACTOR: Delete the `calc_orig_pt_distance()` method in hitcapsule bc this info is really only needed when doing the actual collision and isn't needed most of the time.~~

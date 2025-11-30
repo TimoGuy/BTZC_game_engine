@@ -178,6 +178,18 @@
                 }
             ],
             "state_name": "st_attack_0"
+        },
+        {
+            "regions": [],
+            "state_name": "st_hurt_parry"
+        },
+        {
+            "regions": [],
+            "state_name": "st_hurt_guard"
+        },
+        {
+            "regions": [],
+            "state_name": "st_hurt_receive"
         }
     ],
     "animated_model_name": "simple_combat_char",
@@ -226,6 +238,9 @@
         },
         {
             "name": "mvt_input_max_speed:ov:10"
+        },
+        {
+            "name": "is_guard_active:ov:true"
         }
     ],
     "hitcapsule_group_set_template": {
@@ -368,7 +383,7 @@
                         "radius": 0.10000000149011612
                     }
                 ],
-                "m_enabled": true,
+                "m_enabled": false,
                 "m_type": 0
             },
             {

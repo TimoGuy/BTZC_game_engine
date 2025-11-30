@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
+#include <cstdlib>
 
 
 BT::Model_joint_animation_frame::Joint_local_transform
@@ -381,6 +382,15 @@ size_t BT::Model_animator::get_model_animation_idx(std::string anim_name) const
             idx = i;
             break;
         }
+
+    if (idx == (size_t)-1)
+    {
+        BT_ERRORF(
+            "Could not find model animation \"%s\" inside animator copied set of animations from "
+            "the model. Aborting program.",
+            anim_name.c_str());
+        abort();
+    }
 
     return idx;
 }
