@@ -44,7 +44,7 @@
         },
         {
             "state_name": "st_hurt_guard",
-            "anim_name": "Hurt_parry_right",
+            "anim_name": "Hurt_guard",
             "speed": 1.0,
             "loop": false
         },

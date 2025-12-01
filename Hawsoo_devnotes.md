@@ -852,7 +852,7 @@ while (running_game_loop)
         - [x] Parry_right (when attack comes from right/up/down)
         - [ ] Parry_strong (drag sword in ground)
     - [ ] Guard.
-        - [ ] Guard
+        - [x] Guard
         - [ ] Guard_strong (reel/stumble back but stay on two feet)
 - [ ] Create other anims in blender.
     - [ ] Ready parry
