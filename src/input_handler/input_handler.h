@@ -43,6 +43,7 @@ public:
         Axis2  move;
         Axis2  look_delta;
         Toggle attack;
+        Toggle guard;
         Toggle interact;
         Toggle crouch;
         Toggle sprint;

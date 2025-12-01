@@ -855,17 +855,20 @@ while (running_game_loop)
         - [x] Guard
         - [ ] Guard_strong (reel/stumble back but stay on two feet)
 - [ ] Create other anims in blender.
-    - [ ] Ready parry
-        - [ ] From idle/walk/attack
-        - [ ] From running
+    - [x] Ready parry
+        - [x] From idle/walk/attack
+        - [x] From running
     - [ ] Hold guard (slightly more relaxed than the parry anim)
         - [x] Idle
         - [ ] Slow walk
             - [x] Try a root motion speed.
             - [ ] Figure out root motion speed.
             - [ ] Create slow walk anim.
-- [ ] Add knockback anims into the .btanitor and .btafa
+- [x] Add knockback anims into the .btanitor and .btafa
     - [x] Hurt_receive
+
+- [x] Add a bunch of animations to .btanitor and .btafa for guarding and readying parry.
+    - [x] Fix turn speed issues with guard-walk.
 
 - [x] CHECK: If anim doesn't exist when creating the btanitor, crash the program.
 - [x] CHECK: If .btafa anim state doesn't exist in .btanitor, crash the program.

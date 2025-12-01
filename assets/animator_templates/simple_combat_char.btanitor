@@ -55,6 +55,30 @@
             "loop": false
         },
         {
+            "state_name": "st_ready_parry",
+            "anim_name": "Ready_parry",
+            "speed": 1.0,
+            "loop": false
+        },
+        {
+            "state_name": "st_ready_parry_from_running",
+            "anim_name": "Ready_parry_from_running",
+            "speed": 1.0,
+            "loop": false
+        },
+        {
+            "state_name": "st_hold_guard_idle",
+            "anim_name": "Hold_guard",
+            "speed": 1.0,
+            "loop": true
+        },
+        {
+            "state_name": "st_hold_guard_walking",
+            "anim_name": "Hold_guard_walking",
+            "speed": 1.0,
+            "loop": true
+        },
+        {
             "state_name": "_DEBUG_STATE",
             "anim_name": "0_TPose",
             "speed": 1.0,
@@ -70,7 +94,8 @@
         "trig on_attack",
         "trig on_parry_hurt",
         "trig on_guard_hurt",
-        "trig on_receive_hurt"
+        "trig on_receive_hurt",
+        "bool is_guarding"
     ],
     "state_transitions": [
         {
@@ -128,6 +153,30 @@
         {
             "from_to_state": [["st_hurt_parry", "st_hurt_guard", "st_hurt_receive"], "st_idle"],
             "condition": "ON_ANIM_END"
+        },
+        {
+            "from_to_state": [["st_idle", "st_attack_0"], "st_ready_parry"],
+            "condition": "is_guarding eq true"
+        },
+        {
+            "from_to_state": [["st_running"], "st_ready_parry_from_running"],
+            "condition": "is_guarding eq true"
+        },
+        {
+            "from_to_state": [["st_ready_parry", "st_ready_parry_from_running"], "st_hold_guard_idle"],
+            "condition": "ON_ANIM_END"
+        },
+        {
+            "from_to_state": [["st_hold_guard_idle"], "st_hold_guard_walking"],
+            "condition": "is_moving eq true"
+        },
+        {
+            "from_to_state": [["st_hold_guard_walking"], "st_hold_guard_idle"],
+            "condition": "is_moving eq false"
+        },
+        {
+            "from_to_state": [["st_hold_guard_idle", "st_hold_guard_walking"], "st_idle"],
+            "condition": "is_guarding eq false"
         }
     ]
 }

@@ -195,6 +195,40 @@
         {
             "regions": [],
             "state_name": "st_hurt_receive"
+        },
+        {
+            "regions": [
+                {
+                    "ctrl_item_idx": 8,
+                    "end_frame": 12,
+                    "start_frame": 0
+                }
+            ],
+            "state_name": "st_ready_parry"
+        },
+        {
+            "regions": [
+                {
+                    "ctrl_item_idx": 8,
+                    "end_frame": 22,
+                    "start_frame": 0
+                }
+            ],
+            "state_name": "st_ready_parry_from_running"
+        },
+        {
+            "regions": [],
+            "state_name": "st_hold_guard_idle"
+        },
+        {
+            "regions": [
+                {
+                    "ctrl_item_idx": 8,
+                    "end_frame": 41,
+                    "start_frame": 0
+                }
+            ],
+            "state_name": "st_hold_guard_walking"
         }
     ],
     "animated_model_name": "simple_combat_char",

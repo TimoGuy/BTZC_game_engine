@@ -31,6 +31,7 @@ void fetch_wanted_afa_data(Entity_container const& entity_container,
                            entt::registry& reg,
                            component::Character_mvt_animated_state const& char_mvt_anim_state,
                            bool& out_can_move,
+                           bool& out_can_guard_exit,
                            bool& out_can_attack_exit)
 {   // @NOTE: BRUH I HATE HOW DIFFICULT IT IS TO ACCESS THE ANIMATOR DATA IT'S SO
     //        FREAKIN STUPID WHY DID I DESIGN THE SYSTEM LIKE THIS PLEEEEEAAAAASE CHANGE
@@ -53,6 +54,7 @@ void fetch_wanted_afa_data(Entity_container const& entity_container,
 
         // Fill in data.
         out_can_move        = afa_data.get_bool_data_handle(anim_frame_action::CTRL_DATA_LABEL_can_move).get_val();
+        out_can_guard_exit  = afa_data.get_bool_data_handle(anim_frame_action::CTRL_DATA_LABEL_can_guard_exit).get_val();
         out_can_attack_exit = afa_data.get_bool_data_handle(anim_frame_action::CTRL_DATA_LABEL_can_attack_exit).get_val();
     }
 
@@ -116,6 +118,7 @@ void BT::system::player_character_world_space_input()
         component::Created_render_object_reference* rend_obj_ref{ nullptr };
 
         bool can_move{ false };
+        bool can_guard_exit{ false };
         bool can_attack_exit{ false };
 
         if (char_mvt_anim_state)
@@ -123,6 +126,7 @@ void BT::system::player_character_world_space_input()
                                   reg,
                                   *char_mvt_anim_state,
                                   can_move,
+                                  can_guard_exit,
                                   can_attack_exit);
 
         // Get writing handle for world-space input.
@@ -153,6 +157,10 @@ void BT::system::player_character_world_space_input()
             attack_pressed)
             char_mvt_anim_state->write_to_animator_data.on_attack = true;
         char_mvt_anim_state->state.prev_attack_pressed = attack_pressed;
+
+        char_mvt_anim_state->write_to_animator_data.is_guarding = (camera.is_follow_orbit() &&
+                                                                   can_guard_exit &&
+                                                                   input_state.guard.val);
 
         // End of first iteration.
         is_first = false;

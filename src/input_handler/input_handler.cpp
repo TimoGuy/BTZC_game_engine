@@ -103,6 +103,7 @@ void BT::Input_handler::report_mouse_button_input_change(int32_t button_code, bo
             break;
 
         case BT_MOUSE_BUTTON_RIGHT:
+            m_state.guard.val         = pressed;
             m_state.ui_cancel.val     = pressed;
             m_state.le_rclick_cam.val = pressed;
             break;
