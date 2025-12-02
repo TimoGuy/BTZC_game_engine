@@ -862,8 +862,11 @@ while (running_game_loop)
         - [x] Idle
         - [ ] Slow walk
             - [x] Try a root motion speed.
-            - [ ] Figure out root motion speed.
+            - [x] Figure out root motion speed.
+                - I think the 3 m/s is a good speed.
             - [ ] Create slow walk anim.
+                - [x] Make a hilarious very wiggly walk anim.
+                - [ ] Make a better one later.
 - [x] Add knockback anims into the .btanitor and .btafa
     - [x] Hurt_receive
 
