@@ -873,8 +873,8 @@ while (running_game_loop)
 - [x] Add a bunch of animations to .btanitor and .btafa for guarding and readying parry.
     - [x] Fix turn speed issues with guard-walk.
 
-- [ ] Make deceleration on "ready_parry_from_running" not as fast.
-- [ ] Make transition from "ready_parry(_from_running)" to "guard_idle" quicker (the lowering the sword part).
+- [x] Make deceleration on "ready_parry_from_running" not as fast.
+- [x] Make transition from "ready_parry(_from_running)" to "guard_idle" quicker (the lowering the sword part).
 
 - [x] CHECK: If anim doesn't exist when creating the btanitor, crash the program.
 - [x] CHECK: If .btafa anim state doesn't exist in .btanitor, crash the program.
