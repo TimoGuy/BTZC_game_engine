@@ -136,20 +136,8 @@ void BT::system::hitcapsule_attack_processing(float_t delta_time)
             auto defender_parent_ecs_entity{ entity_container.find_entity(
                 reg.get<component::Transform_hierarchy>(defender_ecs_entity).parent_entity) };
 
-            // Try to apply some kind of hurt anim.
-            if (auto char_mvt_anim_state{ reg.try_get<component::Character_mvt_animated_state>(
-                    defender_parent_ecs_entity) };
-                char_mvt_anim_state)
-            {
-                if (is_parry_active)
-                    char_mvt_anim_state->write_to_animator_data.on_parry_hurt = true;
-                else if (is_guard_active)
-                    char_mvt_anim_state->write_to_animator_data.on_guard_hurt = true;
-                else
-                    char_mvt_anim_state->write_to_animator_data.on_receive_hurt = true;
-            }
-
             // Try to align defender to offender (facing towards or away).
+            bool turn_to_face_away{ false };
             if (auto char_mvt_state{
                     reg.try_get<component::Character_mvt_state>(defender_parent_ecs_entity) };
                 char_mvt_state)
@@ -174,10 +162,29 @@ void BT::system::hitcapsule_attack_processing(float_t delta_time)
                     target_facing_angle += glm_rad(180.0f);
                     while (target_facing_angle > glm_rad(180.0f)) target_facing_angle -= glm_rad(360.0f);
                     while (target_facing_angle <= glm_rad(-180.0f)) target_facing_angle += glm_rad(360.0f);
+
+                    // This is facing away case.
+                    turn_to_face_away = true;
                 }
 
                 // Apply.
                 char_mvt_state->set_facing_angle(target_facing_angle);
+            }
+
+            // Try to apply some kind of hurt anim.
+            if (auto char_mvt_anim_state{ reg.try_get<component::Character_mvt_animated_state>(
+                    defender_parent_ecs_entity) };
+                char_mvt_anim_state)
+            {
+                if (turn_to_face_away)
+                    // Parry/guard undoable when attacked from behind, so just do hurt-forward anim.
+                    char_mvt_anim_state->write_to_animator_data.on_receive_hurt_from_back = true;
+                else if (is_parry_active)
+                    char_mvt_anim_state->write_to_animator_data.on_parry_hurt = true;
+                else if (is_guard_active)
+                    char_mvt_anim_state->write_to_animator_data.on_guard_hurt = true;
+                else
+                    char_mvt_anim_state->write_to_animator_data.on_receive_hurt = true;
             }
         }
 
