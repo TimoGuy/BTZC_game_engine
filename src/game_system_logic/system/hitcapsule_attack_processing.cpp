@@ -1,6 +1,7 @@
 #include "hitcapsule_attack_processing.h"
 
 #include "animation_frame_action_tool/runtime_data.h"
+#include "btglm.h"
 #include "btlogger.h"
 #include "entt/entity/fwd.hpp"
 #include "entt/entity/registry.hpp"
@@ -131,9 +132,11 @@ void BT::system::hitcapsule_attack_processing(float_t delta_time)
                 atk_res.defender.delta_hit_pts = 0;
             }
 
-            // Try to apply some kind of hurt anim.
+            // Get parent of defender.
             auto defender_parent_ecs_entity{ entity_container.find_entity(
                 reg.get<component::Transform_hierarchy>(defender_ecs_entity).parent_entity) };
+
+            // Try to apply some kind of hurt anim.
             if (auto char_mvt_anim_state{ reg.try_get<component::Character_mvt_animated_state>(
                     defender_parent_ecs_entity) };
                 char_mvt_anim_state)
@@ -144,6 +147,37 @@ void BT::system::hitcapsule_attack_processing(float_t delta_time)
                     char_mvt_anim_state->write_to_animator_data.on_guard_hurt = true;
                 else
                     char_mvt_anim_state->write_to_animator_data.on_receive_hurt = true;
+            }
+
+            // Try to align defender to offender (facing towards or away).
+            if (auto char_mvt_state{
+                    reg.try_get<component::Character_mvt_state>(defender_parent_ecs_entity) };
+                char_mvt_state)
+            {
+                rvec3s delta_pos;
+                btglm_rvec3_sub(reg.get<component::Transform>(offender_ecs_entity).position.raw,
+                                reg.get<component::Transform>(defender_ecs_entity).position.raw,
+                                delta_pos.raw);
+
+                float_t target_facing_angle{ atan2f(delta_pos.x, delta_pos.z) };
+
+                auto delta_angle_1{ target_facing_angle - char_mvt_state->get_facing_angle() };
+                auto delta_angle_2{ delta_angle_1 + glm_rad(180.0f) };
+
+                while (delta_angle_1 > glm_rad(180.0f)) delta_angle_1 -= glm_rad(360.0f);
+                while (delta_angle_1 <= glm_rad(-180.0f)) delta_angle_1 += glm_rad(360.0f);
+                while (delta_angle_2 > glm_rad(180.0f)) delta_angle_2 -= glm_rad(360.0f);
+                while (delta_angle_2 <= glm_rad(-180.0f)) delta_angle_2 += glm_rad(360.0f);
+
+                if (std::abs(delta_angle_2) < std::abs(delta_angle_1))
+                {   // Delta angle 2 is more optimal.
+                    target_facing_angle += glm_rad(180.0f);
+                    while (target_facing_angle > glm_rad(180.0f)) target_facing_angle -= glm_rad(360.0f);
+                    while (target_facing_angle <= glm_rad(-180.0f)) target_facing_angle += glm_rad(360.0f);
+                }
+
+                // Apply.
+                char_mvt_state->set_facing_angle(target_facing_angle);
             }
         }
 

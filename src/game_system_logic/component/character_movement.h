@@ -62,6 +62,12 @@ struct Character_mvt_state
     } settings;
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(Character_mvt_state, settings);
+
+    /// Helper func that sets facing angle of this component.
+    void set_facing_angle(float_t angle_radians);
+
+    /// Helper func that gets facing angle of this component.
+    float_t get_facing_angle() const;
 };
 
 /// Stores the reference to the entity with the transform of the display representation. This is

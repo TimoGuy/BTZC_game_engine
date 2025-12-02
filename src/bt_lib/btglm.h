@@ -68,6 +68,13 @@ inline void btglm_rvec3_add(rvec3 const a, rvec3 const b, rvec3 dest)
     dest[2] = a[2] + b[2];
 }
 
+inline void btglm_rvec3_sub(rvec3 const a, rvec3 const b, rvec3 dest)
+{
+    dest[0] = a[0] - b[0];
+    dest[1] = a[1] - b[1];
+    dest[2] = a[2] - b[2];
+}
+
 inline void btglm_rvec3_scale_v3(rvec3 const v, vec3 const sca, rvec3 dest)
 {
     dest[0] = v[0] * sca[0];
