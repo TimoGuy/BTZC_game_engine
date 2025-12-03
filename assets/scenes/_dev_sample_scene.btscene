@@ -89,7 +89,7 @@
                     "members_j": {
                         "radius": 0.5,
                         "height": 2.0,
-                        "crouch_height": 1.0
+                        "crouch_height": 1.1
                     }
                 }
             ]
@@ -303,7 +303,7 @@
                     "members_j": {
                         "radius": 0.5,
                         "height": 2.0,
-                        "crouch_height": 1.0
+                        "crouch_height": 1.1
                     }
                 }
             ]

@@ -102,12 +102,17 @@ private:
     static inline bool               s_enable_walk_stairs               = true;
     static inline bool               s_enable_stick_to_floor            = true;
     static inline bool               s_enhanced_internal_edge_removal   = false;
-    static inline bool               s_create_inner_body                = false;
+    static inline bool               s_create_inner_body                = true;
     static inline bool               s_player_can_push_other_characters = true;
     static inline bool               s_other_characters_can_push_player = true;
 
+    static constexpr float_t         k_inner_shape_fraction = 0.9f;
+
     JPH::RefConst<JPH::Shape>        m_standing_shape;
     JPH::RefConst<JPH::Shape>        m_crouching_shape;
+
+    JPH::RefConst<JPH::Shape>        m_inner_standing_shape;
+    JPH::RefConst<JPH::Shape>        m_inner_crouching_shape;
 
     JPH::Ref<JPH::CharacterVirtual>  m_character;
     bool m_is_crouched;
