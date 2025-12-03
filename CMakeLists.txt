@@ -127,32 +127,34 @@ set(MAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/input_handler/input_handler.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/input_handler/input_handler.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_engine.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_engine.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_engine_impl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_engine_impl.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_engine_impl_custom_listeners.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_engine_impl_error_callbacks.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_engine_impl_layers.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_engine_impl_obj_vs_broad_phase_filter.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_engine_impl.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_engine_impl.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_engine.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_engine.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_object.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_object.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_object_impl_char_controller.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_object_impl_char_controller.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_object_impl_tri_mesh.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_object_impl_tri_mesh.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_object.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/physics_object.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/raycast_helper.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/physics_engine/raycast_helper.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/animator_template_types.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/animator_template.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/animator_template.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/camera_read_ifc.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/animator_template_types.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/camera.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/camera.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/camera_read_ifc.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/debug_render_job.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/debug_render_job.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/imgui_renderer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/imgui_renderer.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/material.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/material.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/material_impl_debug_lines.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/material_impl_debug_lines.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/material_impl_debug_picking.cpp
@@ -165,8 +167,6 @@ set(MAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/material_impl_opaque_texture_shaded.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/material_impl_post_process.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/material_impl_post_process.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/material.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/material.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/mesh.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/mesh.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/model_animator.cpp
@@ -174,10 +174,10 @@ set(MAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/render_layer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/render_object.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/render_object.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/renderer_impl_win64.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/renderer_impl_win64.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/renderer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/renderer.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/renderer_impl_win64.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/renderer_impl_win64.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/shader.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/shader.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer/texture.cpp
@@ -190,10 +190,10 @@ set(MAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/timer/timer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/timer/watchdog_timer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/timer/watchdog_timer.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/uuid/uuid_ifc.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/uuid/uuid_ifc.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/uuid/uuid.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/uuid/uuid.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/uuid/uuid_ifc.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/uuid/uuid_ifc.h
 )
 
 # Executable build.
