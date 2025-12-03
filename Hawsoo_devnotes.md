@@ -881,13 +881,13 @@ while (running_game_loop)
 
 > Mmmm so I do think that there's just no good way to move 
 
-- [ ] When receiving hurt, have char face offender.
+- [x] When receiving hurt, have char face offender.
     - Hopefully this will get the problem solved with defender going a diverging direction.
     - Maybe there needs to be an anim for getting hurt from behind?
         - Yeah, bc guard blocking doesn't work from behind so just this is needed.
         - And then if got hurt from behind, in this case too turn defender to face 180deg away from offender.
     - [x] Initial.
-    - [ ] Create getting hurt forward anim.
+    - [x] Create getting hurt forward anim.
         - Bc getting hurt back anim goes the wrong direction when played (w/ root motion).
 
 - [ ] Change knockback anims to use -1.0 knockback distance, but have offender's AFA data send what length of knockback to defender.

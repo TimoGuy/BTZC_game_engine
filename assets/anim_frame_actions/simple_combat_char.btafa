@@ -197,6 +197,10 @@
             "state_name": "st_hurt_receive"
         },
         {
+            "regions": [],
+            "state_name": "st_hurt_receive_from_back"
+        },
+        {
             "regions": [
                 {
                     "ctrl_item_idx": 8,

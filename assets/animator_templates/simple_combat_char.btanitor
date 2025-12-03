@@ -55,6 +55,12 @@
             "loop": false
         },
         {
+            "state_name": "st_hurt_receive_from_back",
+            "anim_name": "Hurt_receive_from_back",
+            "speed": 1.0,
+            "loop": false
+        },
+        {
             "state_name": "st_ready_parry",
             "anim_name": "Ready_parry",
             "speed": 1.0,
@@ -95,6 +101,7 @@
         "trig on_parry_hurt",
         "trig on_guard_hurt",
         "trig on_receive_hurt",
+        "trig on_receive_hurt_from_back",
         "bool is_guarding"
     ],
     "state_transitions": [
@@ -151,7 +158,11 @@
             "condition": "on_receive_hurt"
         },
         {
-            "from_to_state": [["st_hurt_parry", "st_hurt_guard", "st_hurt_receive"], "st_idle"],
+            "from_to_state": [["st_idle", "st_running", "st_running_turnaround", "st_jump", "st_fall", "st_attack_0"], "st_hurt_receive_from_back"],
+            "condition": "on_receive_hurt_from_back"
+        },
+        {
+            "from_to_state": [["st_hurt_parry", "st_hurt_guard", "st_hurt_receive", "st_hurt_receive_from_back"], "st_idle"],
             "condition": "ON_ANIM_END"
         },
         {

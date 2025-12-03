@@ -74,6 +74,10 @@ void BT::system::tick_sim_char_mvt_animator()
                 animator->set_trigger_variable("on_receive_hurt");
             char_mvt_anim_state.write_to_animator_data.on_receive_hurt = false;
 
+            if (char_mvt_anim_state.write_to_animator_data.on_receive_hurt_from_back)
+                animator->set_trigger_variable("on_receive_hurt_from_back");
+            char_mvt_anim_state.write_to_animator_data.on_receive_hurt_from_back = false;
+
             animator->set_bool_variable("is_guarding",
                                         char_mvt_anim_state.write_to_animator_data.is_guarding);
 

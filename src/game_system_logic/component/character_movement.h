@@ -99,6 +99,7 @@ struct Character_mvt_animated_state
         bool on_parry_hurt{ false };
         bool on_guard_hurt{ false };
         bool on_receive_hurt{ false };
+        bool on_receive_hurt_from_back{ false };
         bool is_guarding{ false };
     } write_to_animator_data;
 
