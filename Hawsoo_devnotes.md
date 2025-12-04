@@ -893,6 +893,9 @@ while (running_game_loop)
 - [x] Add shape-in-shape for character virtual controllers (all the ones currently) so that they collide with each other and can't just walk thru each other.
     - This helps a lot with reaction stuff bc now chars don't go thru each other.
 
+- [x] Adjust camera to make similar to KUSR.
+- [ ] Add lock on for camera.
+
 - [ ] Change knockback anims to use -1.0 knockback distance, but have offender's AFA data send what length of knockback to defender.
     - So it's kinda interesting. I played some sekiro and some kannagi usagi to see how the knockback stuff works there and it seems like it just doesn't happen when making contact with an enemy?
         - Or maybe it's when the player is in range of an enemy? Idk really.
