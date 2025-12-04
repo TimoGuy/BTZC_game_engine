@@ -894,12 +894,21 @@ while (running_game_loop)
     - This helps a lot with reaction stuff bc now chars don't go thru each other.
 
 - [x] Adjust camera to make similar to KUSR.
-- [ ] Add lock on for camera.
+- [x] Add lock on for camera.
+    - It doesn't look quite as good as I was hoping, but it's a good start. It works.
+        - Vertical stuff kinda sucks.
+        - Also, the player can still attack in different directions from the camera direction, which I want to prevent!!! (But more work is required for this to happen).
 
 - [ ] Change knockback anims to use -1.0 knockback distance, but have offender's AFA data send what length of knockback to defender.
     - So it's kinda interesting. I played some sekiro and some kannagi usagi to see how the knockback stuff works there and it seems like it just doesn't happen when making contact with an enemy?
         - Or maybe it's when the player is in range of an enemy? Idk really.
         - At the very least, I think having a basic shape-in-shape thing going on with the character controllers is needed. (adding task above)
+
+- [ ] Make attack only possible forwards when camera is locked on
+    - [ ] Create strafing anims.
+    - [ ] Blend between strafing anims with a blend tree.
+        - Have back moving one be slower since walking backwards.
+    - [ ] Face player forward all the time, even when moving (except for sprint moving if this is a thing).
 
 - [ ] Get strong attacks implemented (and have strong versions of knockbacks used)
     - Perhaps by having some kind of AFA data point being like "is_strong_attack" that could indicate a strong attack being done?

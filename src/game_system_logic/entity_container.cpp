@@ -60,6 +60,12 @@ void BT::Entity_container::destroy_entity(UUID uuid)
     assert(m_uuid_to_inner_entity_map.size() == m_inner_entity_to_uuid_map.size());
 }
 
+bool BT::Entity_container::entity_exists(UUID uuid) const
+{
+    auto it{ m_uuid_to_inner_entity_map.find(uuid) };
+    return (it != m_uuid_to_inner_entity_map.end());
+}
+
 entt::entity BT::Entity_container::find_entity(UUID uuid) const
 {
     entt::entity found_entity{ entt::null };

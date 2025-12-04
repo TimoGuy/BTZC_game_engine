@@ -20,6 +20,9 @@ public:
     /// Destroys the entity in the ECS with the ID `uuid`.
     void destroy_entity(UUID uuid);
 
+    /// Checks whether the UUID exists in the entity container.
+    bool entity_exists(UUID uuid) const;
+
     /// Gets the ECS inner version of the entity.
     entt::entity find_entity(UUID uuid) const;
 

@@ -92,7 +92,7 @@ struct Camera::Data
             float_t orbit_x_auto_turn_disable_time{ 0.5f };
             float_t orbit_x_auto_turn_speed{ 1.0f };
             float_t orbit_x_auto_turn_max_influence_magnitude{ 5.0f };  // @THOUGHT: Should this be based off the input instead of the effective velocity?
-            float_t cam_distance{ 2.0f };
+            float_t cam_distance{ 3.0f };  // @THINK: @TODO: Should this be in follow cam component instead?
             float_t cam_return_to_distance_speed{ 10.0f };
 
             // Internal state.
@@ -219,25 +219,42 @@ void BT::Camera::fetch_calculated_camera_matrices(mat4& out_projection,
     glm_mat4_copy(cache.projection_view, out_projection_view);
 }
 
-void BT::Camera::get_view_direction(vec3& out_view_direction)
+void BT::Camera::get_position(vec3& out_position) const
+{
+    glm_vec3_copy(m_data->camera.position, out_position);
+}
+
+void BT::Camera::get_view_direction(vec3& out_view_direction) const
 {
     glm_vec3_copy(m_data->camera.view_direction, out_view_direction);
 }
 
 // Camera frontend.
-bool BT::Camera::is_static_cam()
+bool BT::Camera::is_static_cam() const
 {
     return (m_data->frontend.state == Data::Frontend::FRONTEND_CAMERA_STATE_STATIC);
 }
 
-bool BT::Camera::is_capture_fly()
+bool BT::Camera::is_capture_fly() const
 {
     return (m_data->frontend.state == Data::Frontend::FRONTEND_CAMERA_STATE_CAPTURE_FLY);
 }
 
-bool BT::Camera::is_follow_orbit()
+bool BT::Camera::is_follow_orbit() const
 {
     return (m_data->frontend.state == Data::Frontend::FRONTEND_CAMERA_STATE_FOLLOW_ORBIT);
+}
+
+void BT::Camera::get_follow_orbit_follow_pos(vec3& out_follow_pos) const
+{
+    assert(is_follow_orbit());
+    glm_vec3_copy(m_data->frontend.follow_orbit.current_follow_pos, out_follow_pos);
+}
+
+void BT::Camera::set_follow_orbit_orbits(vec2 orbits)
+{
+    assert(is_follow_orbit());
+    glm_vec2_copy(orbits, m_data->frontend.follow_orbit.orbits);
 }
 
 void BT::Camera::update_frontend(Input_handler::State const& input_state,
@@ -288,17 +305,17 @@ void BT::Camera::update_frontend(Input_handler::State const& input_state,
     } while (prev_state != frontend.state);
 }
 
-bool BT::Camera::is_mouse_captured()
+bool BT::Camera::is_mouse_captured() const
 {
     return (is_capture_fly() || is_ortho_cam_dragging());
 }
 
-bool BT::Camera::is_ortho_cam()
+bool BT::Camera::is_ortho_cam() const
 {
     return (m_data->frontend.state == Data::Frontend::FRONTEND_CAMERA_STATE_ORTHO);
 }
 
-bool BT::Camera::is_ortho_cam_dragging()
+bool BT::Camera::is_ortho_cam_dragging() const
 {
     return (m_data->frontend.state == Data::Frontend::FRONTEND_CAMERA_STATE_ORTHO &&
             m_data->frontend.orthographic.is_dragging_cam);

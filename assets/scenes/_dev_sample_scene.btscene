@@ -135,7 +135,7 @@
                 {
                     "type_name": "component::Follow_camera_follow_ref",
                     "members_j": {
-                        "follow_offset_y": 1.65
+                        "follow_offset_y": 2.5
                     }
                 },
                 {

@@ -1,7 +1,6 @@
 #include "animation_frame_action_tool/runtime_data.h"
 #include "btzc_game_engine.h"
 #include "btglm.h"
-#include "game_system_logic/system/tick_sim_char_mvt_animator.h"
 #include "renderer/camera.h"
 #include "game_system_logic/entity_container.h"
 #include "game_system_logic/component/component_registry.h"
@@ -10,10 +9,12 @@
 #include "game_system_logic/system/hitcapsule_attack_processing.h"
 #include "game_system_logic/system/imgui_render_transform_hierarchy_window.h"
 #include "game_system_logic/system/input_controlled_character_movement.h"
+#include "game_system_logic/system/player_character_lock_onto_target.h"
 #include "game_system_logic/system/player_character_world_space_input.h"
 #include "game_system_logic/system/process_physics_object_lifetime.h"
 #include "game_system_logic/system/process_render_object_lifetime.h"
 #include "game_system_logic/system/propagate_changed_transforms.h"
+#include "game_system_logic/system/tick_sim_char_mvt_animator.h"
 #include "game_system_logic/system/write_entity_transforms_from_physics.h"
 #include "game_system_logic/system/write_render_transforms.h"
 #include "game_system_logic/world/scene_loader.h"
@@ -316,6 +317,8 @@ int32_t main()
             // Post-physics.
             BT::system::write_entity_transforms_from_physics();
             BT::system::propagate_changed_transforms();
+
+            BT::system::player_character_lock_onto_target();
 
             BT::system::animator_driven_hitcapsule_sets_update();
             BT::system::hitcapsule_attack_processing(BT::Physics_engine::k_simulation_delta_time);

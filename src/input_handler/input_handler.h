@@ -48,6 +48,7 @@ public:
         Toggle crouch;
         Toggle sprint;
         Toggle jump;
+        Toggle cam_lock_on;
         Toggle pause;
 
         // UI.

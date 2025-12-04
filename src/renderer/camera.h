@@ -32,16 +32,21 @@ public:
     void fetch_calculated_camera_matrices(mat4& out_projection,
                                           mat4& out_view,
                                           mat4& out_projection_view);
-    void get_view_direction(vec3& out_view_direction);
+    void get_position(vec3& out_position) const;
+    void get_view_direction(vec3& out_view_direction) const;
 
     // Camera frontend.
-    bool is_static_cam();
-    bool is_capture_fly();
-    bool is_follow_orbit();
+    bool is_static_cam() const;
+    bool is_capture_fly() const;
+
+    bool is_follow_orbit() const;
+    void get_follow_orbit_follow_pos(vec3& out_follow_pos) const;
+    void set_follow_orbit_orbits(vec2 orbits);
+
     void update_frontend(Input_handler::State const& input_state, float_t delta_time);
-    bool is_mouse_captured();
-    bool is_ortho_cam();
-    bool is_ortho_cam_dragging();
+    bool is_mouse_captured() const;
+    bool is_ortho_cam() const;
+    bool is_ortho_cam_dragging() const;
     std::string get_ortho_cam_dragging_tooltip_text() const;
 
     void request_cam_state_static();

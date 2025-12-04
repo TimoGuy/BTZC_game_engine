@@ -1,6 +1,7 @@
 #pragma once
 
 #include "btjson.h"
+#include "uuid/uuid.h"
 
 
 namespace BT
@@ -18,6 +19,11 @@ struct Follow_camera_follow_ref
         Follow_camera_follow_ref,
         follow_offset_y
     );
+
+    struct State
+    {
+        UUID locked_on_entity;
+    } state;
 };
 
 }  // namespace component
