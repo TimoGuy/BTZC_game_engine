@@ -913,7 +913,8 @@ while (running_game_loop)
         - Ok so it's a sometimes it's working and sometimes it's not????
         - It looks like it works if you never hit play mode for some reason???
             - As soon as you hit play mode once, then it stops working.
-        - ROOT CAUSE: Turns out it was editing a reference of a joint anim frame. After realizing that (alarm bells should've been running )
+        - ROOT CAUSE: Turns out it was editing a reference of a joint anim frame. After realizing that (alarm bells should've been ringing when I was doing a `const_cast` on a freaking reference!!)
+    - [x] Actually make the length of the knockback and stuff to 1.0
 
 - [ ] Make attack only possible forwards when camera is locked on
     - [ ] Create strafing anims.
