@@ -233,10 +233,14 @@ void BT::Model_joint_animation::get_joint_matrices_at_frame(
         //     m_frames[frame_idx_a].joint_transforms_in_order[i].interpolate_fast(
         //         m_frames[frame_idx_b].joint_transforms_in_order[i],
         //         interp_t) };
-        auto& local_joint_transform{                                                            // +
-            const_cast<Model_joint_animation_frame::Joint_local_transform&>(                    // +
-                m_frames[frame_idx].joint_transforms_in_order[i])                               // +
-        };                                                                                      // +
+
+        // @NOTE: Is a copy because as a reference, when the root motion deletion was           // +
+        //        happening, it was causing a destructive effect to the joint transforms        // +
+        //        whenever this function was used.                                              // +
+        //   Though honestly, bells should've been going off as soon as I const casted a        // +
+        //   const reference into a non-const reference  (^_^;)                                 // +
+        //     -Thea 2025/12/05                                                                 // +
+        auto local_joint_transform{ m_frames[frame_idx].joint_transforms_in_order[i] };         // +
 
         if (i == 0 && root_motion_zeroing)                                                      // +
         {   // Delete root motion (for XZ axes).                                                // +
