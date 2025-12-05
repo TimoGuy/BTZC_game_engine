@@ -615,10 +615,8 @@ void BT::Camera::update_frontend_follow_orbit(Input_handler::State const& input_
         // Calc auto turn value.
         static auto angle_diff_fn = [](float_t current, float_t target) {
             float_t diff{ target - current };
-            while (diff < -glm_rad(180.0f))
-                diff += glm_rad(360.0f);
-            while (diff > glm_rad(180.0f))
-                diff -= glm_rad(360.0f);
+            while (diff < -glm_rad(180.0f)) diff += glm_rad(360.0f);
+            while (diff > glm_rad(180.0f)) diff -= glm_rad(360.0f);
             return diff;
         };
         auto_turn_delta = fo.orbit_x_auto_turn_speed
