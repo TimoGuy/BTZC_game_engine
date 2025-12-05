@@ -195,19 +195,43 @@
             "state_name": "st_attack_0"
         },
         {
-            "regions": [],
+            "regions": [
+                {
+                    "ctrl_item_idx": 18,
+                    "end_frame": 17,
+                    "start_frame": 8
+                }
+            ],
             "state_name": "st_hurt_parry"
         },
         {
-            "regions": [],
+            "regions": [
+                {
+                    "ctrl_item_idx": 18,
+                    "end_frame": 31,
+                    "start_frame": 8
+                }
+            ],
             "state_name": "st_hurt_guard"
         },
         {
-            "regions": [],
+            "regions": [
+                {
+                    "ctrl_item_idx": 18,
+                    "end_frame": 21,
+                    "start_frame": 8
+                }
+            ],
             "state_name": "st_hurt_receive"
         },
         {
-            "regions": [],
+            "regions": [
+                {
+                    "ctrl_item_idx": 18,
+                    "end_frame": 21,
+                    "start_frame": 8
+                }
+            ],
             "state_name": "st_hurt_receive_from_back"
         },
         {
@@ -300,6 +324,9 @@
         },
         {
             "name": "attack_send_root_motion_multi:wr:4.0"
+        },
+        {
+            "name": "root_motion_multi:wr:1.0"
         }
     ],
     "hitcapsule_group_set_template": {

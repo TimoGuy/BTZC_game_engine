@@ -906,9 +906,13 @@ while (running_game_loop)
         - Or maybe it's when the player is in range of an enemy? Idk really.
         - At the very least, I think having a basic shape-in-shape thing going on with the character controllers is needed. (adding task above)
     - [x] Get the `afa_data.send_root_motion_multiplier` -> `afa_data.root_motion_multi` -> `component_root_motion.root_motion_multiplier` cycle in there.
-    - [ ] Fix the AFA editor view not showing the root motion (i.e. the anim stays put in the editor and this is not wanted)
-    - [ ] When hurt anims finish moving, reset the `root motion multiplier`.
+    - [x] When hurt anims finish moving, reset the `root motion multiplier`.
         - This needs to be done in the AFA timeline.
+        - I could do this by just not pressing play button.
+    - [ ] Fix the AFA editor view not showing the root motion (i.e. the anim stays put in the editor and this is not wanted)
+        - Ok so it's a sometimes it's working and sometimes it's not????
+        - It looks like it works if you never hit play mode for some reason???
+            - As soon as you hit play mode once, then it stops working.
 
 - [ ] Make attack only possible forwards when camera is locked on
     - [ ] Create strafing anims.
