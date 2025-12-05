@@ -92,7 +92,7 @@ struct Camera::Data
             float_t orbit_x_auto_turn_disable_time{ 0.5f };
             float_t orbit_x_auto_turn_speed{ 1.0f };
             float_t orbit_x_auto_turn_max_influence_magnitude{ 5.0f };  // @THOUGHT: Should this be based off the input instead of the effective velocity?
-            float_t cam_distance{ 3.0f };  // @THINK: @TODO: Should this be in follow cam component instead?
+            float_t cam_distance{ 2.0f };  // @THINK: @TODO: Should this be in follow cam component instead?
             float_t cam_return_to_distance_speed{ 10.0f };
 
             // Internal state.

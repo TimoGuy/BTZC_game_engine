@@ -135,7 +135,7 @@
                 {
                     "type_name": "component::Follow_camera_follow_ref",
                     "members_j": {
-                        "follow_offset_y": 2.5
+                        "follow_offset_y": 1.75
                     }
                 },
                 {
@@ -344,6 +344,12 @@
                     "members_j": {
                         "parent_entity": "019a9611-b980-7378-aea7-17deb7f1b3db",
                         "children_entities": []
+                    }
+                },
+                {
+                    "type_name": "component::Follow_camera_lockon_target",
+                    "members_j": {
+                        "follow_offset_y": 1.1
                     }
                 },
                 {

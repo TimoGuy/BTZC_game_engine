@@ -898,6 +898,8 @@ while (running_game_loop)
     - It doesn't look quite as good as I was hoping, but it's a good start. It works.
         - Vertical stuff kinda sucks.
         - Also, the player can still attack in different directions from the camera direction, which I want to prevent!!! (But more work is required for this to happen).
+    - [x] BANDAID: Makes a simple component that can be locked onto w a y_offset value too.
+    - [x] BANDAID: Rotate down the camera a bit (marked w/ `@HARDCODE`)
 
 - [ ] Change knockback anims to use -1.0 knockback distance, but have offender's AFA data send what length of knockback to defender.
     - So it's kinda interesting. I played some sekiro and some kannagi usagi to see how the knockback stuff works there and it seems like it just doesn't happen when making contact with an enemy?

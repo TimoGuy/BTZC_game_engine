@@ -26,5 +26,17 @@ struct Follow_camera_follow_ref
     } state;
 };
 
+/// For entity that can be locked on. Must have a `Transform` component attached to the same entity
+/// to be used.
+struct Follow_camera_lockon_target
+{
+    float_t follow_offset_y{ 0.0f };
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(
+        Follow_camera_lockon_target,
+        follow_offset_y
+    );
+};
+
 }  // namespace component
 }  // namespace BT

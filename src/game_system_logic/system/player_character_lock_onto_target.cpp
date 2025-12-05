@@ -4,7 +4,6 @@
 #include "btlogger.h"
 #include "cglm/vec2.h"
 #include "game_system_logic/component/follow_camera.h"
-#include "game_system_logic/component/health_stats.h"
 #include "game_system_logic/component/transform.h"
 #include "game_system_logic/entity_container.h"
 #include "game_system_logic/world/world_properties.h"
@@ -88,13 +87,13 @@ void BT::system::player_character_lock_onto_target()
             assert(glm_eq(glm_vec3_norm2(cam_facing_dir), 1.0f));
         }
 
-        for (auto&& [ecs_entity, transform, char_mvt_state] :
-             reg.view<component::Transform const, component::Health_stats_data const>(
+        for (auto&& [ecs_entity, transform, cam_lockon_target] :
+             reg.view<component::Transform const, component::Follow_camera_lockon_target const>(
                     entt::exclude<component::Follow_camera_follow_ref>)
                  .each())
         {   // Loop thru to find best entity to focus on.
             vec3 trans_pos{ static_cast<float_t>(transform.position.x),  // @TODO: Conform to `write_render_transforms.cpp`
-                            static_cast<float_t>(transform.position.y),
+                            static_cast<float_t>(transform.position.y) + cam_lockon_target.follow_offset_y,
                             static_cast<float_t>(transform.position.z) };
 
             vec3 facing_to_trans;
@@ -132,15 +131,19 @@ void BT::system::player_character_lock_onto_target()
 
         // @TODO: Conform to `write_render_transforms.cpp`
         locked_on_pos[0] = static_cast<float_t>(transform.position.x);
-        locked_on_pos[1] = static_cast<float_t>(transform.position.y) - 1.0f;  // @HARDCODE: @HACK: This just turns down the camera angle.  -Thea 2025/12/03
+        locked_on_pos[1] = static_cast<float_t>(transform.position.y);
         locked_on_pos[2] = static_cast<float_t>(transform.position.z);
     }
 
     vec3 delta_pos;
     glm_vec3_sub(locked_on_pos, follow_pos, delta_pos);
 
+    static float_t const k_x_angle_offset{ glm_rad(30.0f) };  // @HARDCODE: Also this is not a good solution.
+                                                              //   Ref: https://assetsio.gnwcdn.com/sekiro-owl-father.jpg?width=1600&height=900&fit=crop&quality=100&format=png&enable=upscale&auto=webp
+
     vec2 new_orbits;
     new_orbits[0] = std::atan2f(delta_pos[0], delta_pos[2]);
-    new_orbits[1] = -std::atan2f(delta_pos[1], glm_vec2_norm(vec2{ delta_pos[0], delta_pos[2] }));
+    new_orbits[1] = -std::atan2f(delta_pos[1], glm_vec2_norm(vec2{ delta_pos[0], delta_pos[2] })) +
+                    k_x_angle_offset;
     camera.set_follow_orbit_orbits(new_orbits);
 }
