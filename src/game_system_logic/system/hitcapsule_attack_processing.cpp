@@ -89,17 +89,38 @@ void BT::system::hitcapsule_attack_processing(float_t delta_time)
             atk_res.defender.delta_posture_pts -= defe_combat_stats.posture_dmg_def_pts;
         }
 
-        if (auto try_get_rend_obj_ref{
-                reg.try_get<component::Created_render_object_reference const>(
-                    defender_ecs_entity) };
-            try_get_rend_obj_ref != nullptr)
-        {   // Check for parry or guard.
+        auto defender_rend_obj_ref{ reg.try_get<component::Created_render_object_reference const>(
+            defender_ecs_entity) };
+        auto offender_rend_obj_ref{ reg.try_get<component::Created_render_object_reference const>(
+            offender_ecs_entity) };
+        if (defender_rend_obj_ref != nullptr && offender_rend_obj_ref != nullptr)
+        {   // Get sending root motion multiplier from offender.
+            float_t root_motion_multiplier;
+            {
+                auto& rend_obj{ *rend_obj_pool
+                                     .checkout_render_obj_by_key(
+                                         { offender_rend_obj_ref->render_obj_uuid_ref })
+                                     .front() };
+                auto& animator{ *rend_obj.get_model_animator() };
+
+                auto& afa_data_handle{ animator.get_anim_frame_action_data_handle() };
+                root_motion_multiplier =
+                    afa_data_handle
+                        .get_float_data_handle(
+                            anim_frame_action::CTRL_DATA_LABEL_attack_send_root_motion_multi)
+                        .get_val();
+
+                rend_obj_pool.return_render_objs({ &rend_obj });
+            }
+
+            // Check for parry or guard in defender.
+            // Also, write root motion multiplier from offender to defender.
             bool is_parry_active;
             bool is_guard_active;
             {
                 auto& rend_obj{ *rend_obj_pool
                                      .checkout_render_obj_by_key(
-                                         { try_get_rend_obj_ref->render_obj_uuid_ref })
+                                         { defender_rend_obj_ref->render_obj_uuid_ref })
                                      .front() };
                 auto& animator{ *rend_obj.get_model_animator() };
 
@@ -112,6 +133,11 @@ void BT::system::hitcapsule_attack_processing(float_t delta_time)
                     afa_data_handle
                         .get_bool_data_handle(anim_frame_action::CTRL_DATA_LABEL_is_guard_active)
                         .get_val();
+
+                // Write root motion multiplier from offender to AFA data.
+                afa_data_handle
+                    .get_float_data_handle(anim_frame_action::CTRL_DATA_LABEL_root_motion_multi)
+                    .write_val(root_motion_multiplier);
 
                 rend_obj_pool.return_render_objs({ &rend_obj });
             }

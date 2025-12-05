@@ -35,12 +35,14 @@ enum Controllable_data_label : std::uint32_t
 {
     #define BT_MODEL_ANIMATOR_CONTROLLABLE_DATA_LIST    \
         /* Floats */                                    \
-        X_float(model_opacity,       1.0f)              \
-        X_float(turn_speed,          0.0f)              \
-        X_float(mvt_input_max_speed, 0.0f)              \
-        X_float(mvt_input_accel,     0.0f)              \
-        X_float(mvt_input_decel,     0.0f)              \
-        X_float(gravity_magnitude,   1.0f)              \
+        X_float(model_opacity,                 1.0f)    \
+        X_float(turn_speed,                    0.0f)    \
+        X_float(mvt_input_max_speed,           0.0f)    \
+        X_float(mvt_input_accel,               0.0f)    \
+        X_float(mvt_input_decel,               0.0f)    \
+        X_float(root_motion_multi,             1.0f)    \
+        X_float(attack_send_root_motion_multi, 1.0f)    \
+        X_float(gravity_magnitude,             1.0f)    \
         /* Bools */                                     \
         X__bool(is_parry_active,            false)      \
         X__bool(is_guard_active,            false)      \

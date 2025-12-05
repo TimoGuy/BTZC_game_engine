@@ -13,8 +13,8 @@ namespace component
 
 /// Component to store data from animator and AFA data for root motion.
 struct Animator_root_motion
-{   // Settings.
-    float_t root_motion_multiplier{ 1.0f };
+{   // Settings and also captured.
+    float_t root_motion_multiplier{ 1.0f };  // @TODO: @THINK: Should this automatically set the AFA data when initialized that?
 
     // Captured values.
     vec3 delta_pos = GLM_VEC3_ZERO_INIT;

@@ -180,6 +180,16 @@
                     "ctrl_item_idx": 8,
                     "end_frame": 89,
                     "start_frame": 77
+                },
+                {
+                    "ctrl_item_idx": 16,
+                    "end_frame": 30,
+                    "start_frame": 15
+                },
+                {
+                    "ctrl_item_idx": 17,
+                    "end_frame": 76,
+                    "start_frame": 50
                 }
             ],
             "state_name": "st_attack_0"
@@ -284,6 +294,12 @@
         },
         {
             "name": "is_guard_active:ov:true"
+        },
+        {
+            "name": "attack_send_root_motion_multi:wr:2.0"
+        },
+        {
+            "name": "attack_send_root_motion_multi:wr:4.0"
         }
     ],
     "hitcapsule_group_set_template": {

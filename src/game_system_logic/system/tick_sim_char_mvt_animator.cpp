@@ -1,5 +1,6 @@
 #include "tick_sim_char_mvt_animator.h"
 
+#include "animation_frame_action_tool/runtime_data.h"
 #include "game_system_logic/component/animator_root_motion.h"
 #include "game_system_logic/component/character_movement.h"
 #include "game_system_logic/component/render_object_settings.h"
@@ -92,6 +93,14 @@ void BT::system::tick_sim_char_mvt_animator()
                     affecting_rend_obj_ecs_entity) };
                 auto& anim_afa_data_handle{ animator->get_anim_frame_action_data_handle() };
 
+                anim_root_motion.root_motion_multiplier =
+                    anim_afa_data_handle
+                        .get_float_data_handle(anim_frame_action::CTRL_DATA_LABEL_root_motion_multi)
+                        .get_val();
+
+                animator->get_anim_root_motion_delta_pos(Model_animator::SIMULATION_PROFILE,
+                                                         anim_root_motion.delta_pos);
+
                 anim_root_motion.turn_speed =
                     anim_afa_data_handle
                         .get_float_data_handle(anim_frame_action::CTRL_DATA_LABEL_turn_speed)
@@ -117,8 +126,6 @@ void BT::system::tick_sim_char_mvt_animator()
                     anim_afa_data_handle
                         .get_float_data_handle(anim_frame_action::CTRL_DATA_LABEL_mvt_input_decel)
                         .get_val();
-                animator->get_anim_root_motion_delta_pos(Model_animator::SIMULATION_PROFILE,
-                                                         anim_root_motion.delta_pos);
             }
 
             // Finish.
