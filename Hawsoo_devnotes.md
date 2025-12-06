@@ -920,7 +920,9 @@ while (running_game_loop)
     - [ ] Create strafing anims.
     - [ ] Blend between strafing anims with a blend tree.
         - Have back moving one be slower since walking backwards.
+        - I think just the 4 directions is fine? Maybe there just needs to be a thing in the animator that uses two AFA data as the horiz and vert mvt input, and then it will combine the animations?
     - [ ] Face player forward all the time, even when moving (except for sprint moving if this is a thing).
+        - FOR NOW: Just make sprinting not a thing.
 
 - [ ] Get strong attacks implemented (and have strong versions of knockbacks used)
     - Perhaps by having some kind of AFA data point being like "is_strong_attack" that could indicate a strong attack being done?
