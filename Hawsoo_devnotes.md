@@ -918,6 +918,11 @@ while (running_game_loop)
 
 - [ ] Make attack only possible forwards when camera is locked on
     - [ ] Create strafing anims.
+        - [x] Just do the root bones for trying speed w/ root motion.
+        - [ ] Create actual anims
+            - [ ] East
+            - [ ] West
+            - [ ] South
     - [ ] Blend between strafing anims with a blend tree.
         - Have back moving one be slower since walking backwards.
         - I think just the 4 directions is fine? Maybe there just needs to be a thing in the animator that uses two AFA data as the horiz and vert mvt input, and then it will combine the animations?
