@@ -29,7 +29,7 @@ void iter_and_asdfasdfasdf()
 
 void BT::system::character_broadcast_attack_msg_to_enemies()
 {
-    date_deadline(2026, 9, 4);  // @TODO: confirm that this system works!
+    date_deadline(2026, 9, 10);  // @TODO: confirm that this system works!
 
     auto& renderer{ service_finder::find_service<TXP::Renderer>() };
     auto& entity_container{ service_finder::find_service<Entity_container>() };

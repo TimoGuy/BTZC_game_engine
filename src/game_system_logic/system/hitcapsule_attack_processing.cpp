@@ -239,7 +239,7 @@ void process_attack_interaction(Entity_container& entity_container,
 
 void BT::system::hitcapsule_attack_processing(float_t delta_time)
 {
-    date_deadline(2026, 9, 4);  // @CHECK: does this work?? needs the debug drawing.
+    date_deadline(2026, 9, 10);  // @CHECK: does this work?? needs the debug drawing.
 
     static double_t s_global_attack_timer{ 0 };
 

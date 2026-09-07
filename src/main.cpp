@@ -66,12 +66,15 @@ int32_t main()
 
     // Setup renderer.
     TXP::Input::Input_handler input_handler;
+    TXP::UI_state ui_state;
+
     TXP::Renderer main_renderer{
         entity_container.get_ecs_registry(),
         "No Train No Game",
         BTZC_GAME_ENGINE_ASSET_TEXTURE_PATH,
         BTZC_GAME_ENGINE_ASSET_SHADER_PATH,
         BTZC_GAME_ENGINE_ASSET_MODEL_PATH,
+        BTZC_GAME_ENGINE_ASSET_UI_PATH,
         BTZC_GAME_ENGINE_ASSET_ANIM_FRAME_ACTIONS_PATH,
         BTZC_GAME_ENGINE_ASSET_ANIMATOR_TEMPLATES_PATH,
         [&world_properties, &main_scene_loader, &current_scene](bool flag) {
@@ -269,7 +272,7 @@ int32_t main()
                     world_properties.get_data_handle().is_simulation_running ||
                     dev_is_afa_editor_open);
 
-                main_renderer.render_one_frame(delta_time);
+                main_renderer.render_one_frame(delta_time, &ui_state);
             }
 
             // Performance measure.

@@ -11,7 +11,7 @@
 
 void BT::system::animator_driven_hitcapsule_sets_update()
 {
-    date_deadline(2026, 9, 4);  // @CHECK: does this work?? needs the debug drawing.
+    date_deadline(2026, 9, 10);  // @CHECK: does this work?? needs the debug drawing.
     // @TODO: this needs to not use the render transform bc it's not updated yet. this needs to use the physics transform bc it was just updated.
 
     auto& reg{ service_finder::find_service<Entity_container>().get_ecs_registry() };
