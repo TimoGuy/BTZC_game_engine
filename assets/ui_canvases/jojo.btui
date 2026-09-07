@@ -1,0 +1,16 @@
+{
+    "elements": [
+        {
+            "name": "btn_play_game",
+            "parent": "",
+            "transform": {
+                "x": 0.0,
+                "y": 0.0,
+                "w": 100.0,
+                "h": 100.0
+            },
+            "opacity": 1.0,
+            "image": "test_ktx_tex"
+        }
+    ]
+}

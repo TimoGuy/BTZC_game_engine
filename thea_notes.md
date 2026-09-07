@@ -167,6 +167,59 @@
 - [ ] ui pass so lines and stuff can be easily drawn onto the screen.
     - this could be used for debug stuff like for camera framing, or in the future will be used for actual, real UI (like focus positioning for locked on enemy which is needed)
     - [ ] create ui helpers like `draw_line(vec2 pt1, vec2 pt2)` that just create a rectangle transformed into a certain way, and `draw_point(vec2 pt, float_t radius)` which creates a dot.
+    - ahhhh, but im not confident that it's the best idea to have those ui drawing functions.
+        - unreal has canvases you make and then they just appear. i kinda like that. it's different from unity bc it doesn't rly exist in the real world but hey it's nice.
+    - okay, so having a level loading json scheme kinda like for .btscene files would be good! just have names be keys i think (bc i wanna be able to search via keys). So access it like:
+    ```cpp
+    TXP::UI_state ui_state;
+
+    // Add event to "jojo.btui"'s "btn_play_game" button.
+    // @NOTE: this works even if the canvas is not loaded, so generally adding events would be
+    //        something done in the beginning.
+    // @NOTE: events only trigger if the canvas is loaded and it is the front-most
+    //        canvas (`load_idx == 0`).
+    ui_state.canvas("jojo.btui").elem("btn_play_game").add_event(UI_EV_ON_LMB_PRESS, []() {
+        // Do stuff...
+    });
+
+    // Invalidates UI state for the button so that an animation can play.
+    // @NOTE: if the canvas isn't loaded (so the elem doesn't exist) then this call is ignored
+    //        and a warning message is printed.
+    ui_state.canvas("jojo.btui").elem("btn_play_game").set_width(123.0f);
+
+    // Loads a canvas onto the canvas stack (0 is the top-most/front-most).
+    // @NOTE: this errors if already loaded.
+    // @NOTE: loading isn't immediate (happens during the `ui_state.tick()` call).
+    ui_state.load_canvas_to_front("jojo.btui");
+
+    ui_state.unload_front_canvas();
+
+    // Loads a canvas outside the canvas stack (is_loaded == true and load_idx == 0
+    // and is_persistent == true).
+    ui_state.load_persistent_canvas("persistent_stuff.btui");
+
+    ui_state.unload_persistent_canvas("persistent_stuff.btui");
+
+    // Do stuff when a canvas is loaded.
+    if (ui_state.canvas("jojo.btui").is_loaded)
+    {
+        // Do stuff...
+    }
+
+    // Do stuff when a canvas is loaded and in the front.
+    // Hmmm, hopefully the implementer will know in her head which canvas is supposed to be
+    // persistent and stuff without needing the `is_persistent` flag. But it's there in case
+    // (and also to throw an error for using the wrong function).
+    if (ui_state.canvas("jojo.btui").is_loaded &&
+        ui_state.canvas("jojo.btui").load_idx == 0)
+    {
+        // Do stuff...
+    }
+
+    // This must be called once per frame (probably after all the ui_state changes, and
+    // right before ui_state draws).
+    ui_state.tick();
+    ```
 
 - [ ] camera system for locking onto enemy.
     - [ ] create camera framing debug images depending on player char mode.

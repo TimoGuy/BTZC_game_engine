@@ -116,6 +116,8 @@ endif()
 
 # Resource files inside ASSET_DIR.
 set(ASSET_DIR_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/assets/anim_frame_actions/simple_combat_char.btafa
+    ${CMAKE_CURRENT_SOURCE_DIR}/assets/animator_templates/simple_combat_char.btanitor
     ${CMAKE_CURRENT_SOURCE_DIR}/assets/models/Leever.glb
     ${CMAKE_CURRENT_SOURCE_DIR}/assets/models/SlimeGirl.glb
     ${CMAKE_CURRENT_SOURCE_DIR}/assets/models/box_0.5_2.mtl
@@ -132,6 +134,10 @@ set(ASSET_DIR_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/assets/models/stupid_polygon_grid.mtl
     ${CMAKE_CURRENT_SOURCE_DIR}/assets/models/unit_box.mtl
     ${CMAKE_CURRENT_SOURCE_DIR}/assets/models/unit_box.wobj
+    ${CMAKE_CURRENT_SOURCE_DIR}/assets/scenes/_dev_animation_editor_view OLD COPY.btscene
+    ${CMAKE_CURRENT_SOURCE_DIR}/assets/scenes/_dev_animation_editor_view.btscene
+    ${CMAKE_CURRENT_SOURCE_DIR}/assets/scenes/_dev_sample_scene OLD COPY.btscene
+    ${CMAKE_CURRENT_SOURCE_DIR}/assets/scenes/_dev_sample_scene.btscene
     ${CMAKE_CURRENT_SOURCE_DIR}/assets/shaders/__debug_color_grad_line.shader
     ${CMAKE_CURRENT_SOURCE_DIR}/assets/shaders/__debug_color_grad_line.shadrefl
     ${CMAKE_CURRENT_SOURCE_DIR}/assets/shaders/__debug_color_wireframe.shader
@@ -145,6 +151,7 @@ set(ASSET_DIR_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/assets/shaders/skinned_model.shader
     ${CMAKE_CURRENT_SOURCE_DIR}/assets/shaders/skinned_model.shadrefl
     ${CMAKE_CURRENT_SOURCE_DIR}/assets/textures/test_ktx_tex.ktx2
+    ${CMAKE_CURRENT_SOURCE_DIR}/assets/ui_canvases/jojo.btui
     ${CMAKE_CURRENT_SOURCE_DIR}/assets/unnamed.mtl
 )
 

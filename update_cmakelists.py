@@ -90,7 +90,11 @@ if __name__ == '__main__':
                              'glb',
                              'gltf',
                              'shader',
-                             'shadrefl']
+                             'shadrefl',
+                             'btanitor',
+                             'btafa',
+                             'btui',
+                             'btscene']
     update_file_entries(['./assets/',],
                         RES_SEARCH_EXTENSIONS,
                         'set(ASSET_DIR_FILES',
