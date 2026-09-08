@@ -266,6 +266,8 @@ int32_t main()
             BT::system::update_selected_entity_debug_render_transform();
 #endif // IMPLEMENT_THIS
 
+            ui_state.tick();
+
             if (iter_type < Iteration_type::TEARDOWN_ITERATION)
             {
                 main_renderer.set_allow_deformed_render_models(
